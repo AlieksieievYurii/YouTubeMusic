@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">YouTubeMusic</string>
+    <string name="label_saved_musics">Saved musics</string>
+    <string name="label_youtube_musics">YouTube Musics</string>
 </resources>
