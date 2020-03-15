@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.yurii.youtubemusic.R
 
-class YouTubeMusicsFragment : Fragment() {
+class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -17,6 +19,4 @@ class YouTubeMusicsFragment : Fragment() {
 
         return inflater.inflate(R.layout.fragment_you_tube_musics, container, false)
     }
-
-
 }
