@@ -32,7 +32,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
     }
 
     private fun selectPlayList() {
-        PlayListsDialogFragment(object : PlayListsDialogFragment.OnPlayLists {
+        val playListsDialogFragment = PlayListsDialogFragment(object : PlayListsDialogFragment.OnPlayLists {
             override fun getPlayLists(onResult: (playLists: List<Playlist>) -> Unit) {
                 YouTubeService.PlayLists.Builder(mCredential)
                     .onResult(onResult)
@@ -43,8 +43,11 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
                             Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
                     }.build().execute()
             }
-        }).showPlayLists(activity!!.supportFragmentManager)
+        })
+        playListsDialogFragment.onSelectPlaylist = {
+            //TODO Save selected PlayList
+        }
 
-
+        playListsDialogFragment.showPlayLists(activity!!.supportFragmentManager)
     }
 }

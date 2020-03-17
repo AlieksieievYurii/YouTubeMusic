@@ -10,7 +10,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.YouTubeService
 import com.yurii.youtubemusic.databinding.DialogPlayListsBinding
 import java.lang.IllegalStateException
 
@@ -20,6 +19,9 @@ class PlayListsDialogFragment(private val onPlayLists: OnPlayLists) : DialogFrag
     }
 
     private lateinit var binding: DialogPlayListsBinding
+    private lateinit var playLists: List<Playlist>
+    var onSelectPlaylist: ((Playlist) -> Unit)? = null
+
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
@@ -33,15 +35,20 @@ class PlayListsDialogFragment(private val onPlayLists: OnPlayLists) : DialogFrag
 
     private fun setPlayLists(playLists: List<Playlist>) {
         if (playLists.isNotEmpty()) {
-            val playListsAdapter = PlayListsAdapter(playLists)
-
+            this.playLists = playLists
             binding.rvPlayLists.apply {
                 setHasFixedSize(true)
                 layoutManager = LinearLayoutManager(activity)
-                adapter = playListsAdapter
+                adapter = PlayListsAdapter(playLists, View.OnClickListener { v ->
+                    if (v != null) {
+                        val itemPosition = binding.rvPlayLists.getChildLayoutPosition(v)
+                        dismiss()
+                        onSelectPlaylist?.invoke(playLists[itemPosition])
+                    }
+                })
                 visibility = View.VISIBLE
             }
-        }else
+        } else
             binding.hintListIsEmpty.visibility = View.VISIBLE
 
         binding.progressBar.visibility = View.GONE
