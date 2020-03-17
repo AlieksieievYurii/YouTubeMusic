@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="200dp">
+
+       <androidx.recyclerview.widget.RecyclerView
+           android:id="@+id/rv_play_lists"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:scrollbars="vertical"
+           android:visibility="gone"
+           android:layout_centerInParent="true"/>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            tools:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/hint_list_is_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/sym_action_email"
+                android:contentDescription="@string/content_description_empty_list_image" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_not_found_playlists"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+</layout>
