@@ -1,76 +1,50 @@
-package com.yurii.youtubemusic.fragments
+package com.yurii.youtubemusic.fragments.youtubemusic
 
-import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.api.client.extensions.android.http.AndroidHttp
+import androidx.databinding.DataBindingUtil
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
-import com.google.api.client.http.HttpTransport
-import com.google.api.client.json.JsonFactory
-import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.services.youtube.YouTube
-import com.yurii.youtubemusic.R
-import java.lang.Exception
-import com.yurii.youtubemusic.MainActivity
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
-import android.R
-
-
+import com.google.api.services.youtube.model.Playlist
+import com.yurii.youtubemusic.R
+import com.yurii.youtubemusic.YouTubeService
+import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
+import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
+import com.yurii.youtubemusic.fragments.authorization.AuthorizationFragment
 
 class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : Fragment() {
+    private lateinit var binding: FragmentYouTubeMusicsBinding
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
 
         (activity as AppCompatActivity).supportActionBar!!.title = "YouTube Musics"
 
-        return inflater.inflate(R.layout.fragment_you_tube_musics, container, false)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val task = MakeRequestTask(mCredential)
-        task.execute()
-    }
-
-    private inner class MakeRequestTask(private val mCredential: GoogleAccountCredential) :
-        AsyncTask<Void, Void, Void>() {
-
-        private var mService: YouTube
-
-        init {
-            val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
-            val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
-            mService = YouTube.Builder(
-                transport, jsonFactory, mCredential
-            )
-                .setApplicationName("YouTube Data API")
-                .build()
+        binding.btnSelectPlayList.setOnClickListener {
+            selectPlayList()
         }
+        return binding.root
+    }
 
-        override fun doInBackground(vararg params: Void?): Void? {
-            try {
-                getDataFromApi()
-            } catch (error: Exception) {
-
+    private fun selectPlayList() {
+        PlayListsDialogFragment(object : PlayListsDialogFragment.OnPlayLists {
+            override fun getPlayLists(onResult: (playLists: List<Playlist>) -> Unit) {
+                YouTubeService.PlayLists.Builder(mCredential)
+                    .onResult(onResult)
+                    .onError {
+                        if (it is UserRecoverableAuthIOException) {
+                            startActivityForResult(it.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
+                        } else
+                            Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
+                    }.build().execute()
             }
-        }
+        }).showPlayLists(activity!!.supportFragmentManager)
 
-        private fun getDataFromApi() {
-            val result: YouTube.Playlists.List =
-                mService.playlists().list("snippet,contentDetails")
-            result.mine = true
-            result.execute()
-            Log.e("TEST", result.toString())
-        }
 
     }
 }
