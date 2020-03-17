@@ -2,4 +2,9 @@
     <string name="app_name">YouTubeMusic</string>
     <string name="label_saved_musics">Saved musics</string>
     <string name="label_youtube_musics">YouTube Musics</string>
+    <string name="image_of_playlist">Image of playList</string>
+    <string name="thumbnails_of_playlist">Thumbnails of playList</string>
+    <string name="label_videos_count">%1$d videos</string>
+    <string name="label_not_found_playlists">Not found playLists</string>
+    <string name="content_description_empty_list_image">Empty list image</string>
 </resources>

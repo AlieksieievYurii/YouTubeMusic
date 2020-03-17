@@ -26,7 +26,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 
 class AuthorizationFragment : Fragment() {
-    private companion object {
+    companion object {
         const val REQUEST_ACCOUNT_PICKER = 1000
         const val REQUEST_AUTHORIZATION = 1001
         const val REQUEST_GOOGLE_PLAY_SERVICES = 1002
@@ -34,7 +34,7 @@ class AuthorizationFragment : Fragment() {
         const val PREF_ACCOUNT_NAME = "accountName"
     }
 
-    private val scopes = listOf(YouTubeScopes.YOUTUBE_READONLY)
+    private val scopes = listOf(YouTubeScopes.YOUTUBE)
 
     private lateinit var binding: FragmentAuthorizationBinding
     private lateinit var mCredential: GoogleAccountCredential
@@ -166,11 +166,6 @@ class AuthorizationFragment : Fragment() {
                         signIn()
                     }
                 }
-            }
-
-            REQUEST_AUTHORIZATION -> {
-                if (resultCode == RESULT_OK)
-                    signIn()
             }
         }
     }
