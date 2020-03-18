@@ -9,4 +9,5 @@
     <string name="content_description_empty_list_image">Empty list image</string>
     <string name="content_description_thumbnail_video">Thumbnail of video item</string>
     <string name="content_description_download_music">Download YouTube video as music</string>
+    <string name="select_playlist">Select playList</string>
 </resources>
