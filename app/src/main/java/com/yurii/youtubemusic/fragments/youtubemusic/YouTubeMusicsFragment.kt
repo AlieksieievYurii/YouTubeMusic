@@ -15,6 +15,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 import com.google.api.client.googleapis.util.Utils
 import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItem
+import com.yurii.youtubemusic.ErrorSnackBar
 import com.yurii.youtubemusic.Preferences
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.YouTubeService
@@ -43,10 +44,11 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
                 YouTubeService.PlayLists.Builder(mCredential)
                     .onResult(onResult)
                     .onError {
-                        if (it is UserRecoverableAuthIOException) {
-                            startActivityForResult(it.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
-                        } else
-                            Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
+                        ErrorSnackBar.show(binding.root, it.message!!)
+//                        if (it is UserRecoverableAuthIOException) {
+//                            startActivityForResult(it.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
+//                        } else
+//                            Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
                     }.build().execute()
             }
         })
@@ -100,7 +102,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
                 binding.videos.visibility = View.VISIBLE
             }
             .onError {
-                Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
+                ErrorSnackBar.show(binding.root, it.message!!)
             }.build().execute()
     }
 }
