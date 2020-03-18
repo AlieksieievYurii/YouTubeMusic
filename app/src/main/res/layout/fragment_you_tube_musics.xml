@@ -3,16 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".fragments.youtubemusic.YouTubeMusicsFragment">
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/layout_selection_playlist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -31,7 +28,27 @@
                     android:text="Select" />
             </LinearLayout>
 
-        </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/videos"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/layout_selection_playlist"
+                tools:listitem="@layout/video_item"
+                android:visibility="gone"/>
 
-    </FrameLayout>
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"/>
+
+            <Button
+                android:id="@+id/btn_select_play_list_first"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                android:text="@string/select_playlist"/>
+
+    </RelativeLayout>
 </layout>

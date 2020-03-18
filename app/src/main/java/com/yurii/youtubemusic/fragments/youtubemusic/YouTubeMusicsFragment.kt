@@ -8,15 +8,20 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
+import com.google.api.client.googleapis.util.Utils
 import com.google.api.services.youtube.model.Playlist
+import com.google.api.services.youtube.model.PlaylistItem
 import com.yurii.youtubemusic.Preferences
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.YouTubeService
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
 import com.yurii.youtubemusic.fragments.authorization.AuthorizationFragment
+import com.yurii.youtubemusic.videoslist.VideosListAdapter
 
 class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : Fragment() {
     private lateinit var binding: FragmentYouTubeMusicsBinding
@@ -46,9 +51,56 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
             }
         })
         playListsDialogFragment.onSelectPlaylist = {
+            if (Preferences.getSelectedPlayList(activity!!).isNullOrEmpty())
+                alterSelectionPlayListButton()
+
             Preferences.setSelectedPlayList(activity!!, it)
+            loadListOfVideo(it)
         }
 
         playListsDialogFragment.showPlayLists(activity!!.supportFragmentManager)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val playList = Preferences.getSelectedPlayList(activity!!)
+        playList?.let {
+            loadListOfVideo(it)
+        } ?: showOptionToSelectPlayList()
+    }
+
+    private fun alterSelectionPlayListButton(): Unit =
+        binding.let{
+            it.btnSelectPlayListFirst.visibility = View.GONE
+            it.layoutSelectionPlaylist.visibility = View.VISIBLE
+        }
+
+    private fun showOptionToSelectPlayList() {
+        binding.btnSelectPlayListFirst.setOnClickListener { selectPlayList() }
+
+        binding.apply {
+            btnSelectPlayListFirst.visibility = View.VISIBLE
+            progressBar.visibility = View.GONE
+            layoutSelectionPlaylist.visibility = View.GONE
+        }
+    }
+
+    private fun loadListOfVideo(playList: Playlist) {
+        binding.progressBar.visibility = View.VISIBLE
+        binding.videos.visibility = View.GONE
+        YouTubeService.PlayListVideos.Builder(mCredential)
+            .playListId(playList.id)
+            .onResult {
+                binding.videos.apply {
+                    setHasFixedSize(true)
+                    layoutManager = LinearLayoutManager(context)
+                    adapter = VideosListAdapter(it)
+                }
+                binding.progressBar.visibility = View.GONE
+                binding.videos.visibility = View.VISIBLE
+            }
+            .onError {
+                Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
+            }.build().execute()
     }
 }
