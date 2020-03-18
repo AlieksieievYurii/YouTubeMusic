@@ -11,8 +11,9 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.PlaylistItemBinding
 import java.lang.IllegalStateException
 
-class PlayListsAdapter(private val playLists: List<Playlist>) :
+class PlayListsAdapter(private val playLists: List<Playlist>, private val onClickListener: View.OnClickListener) :
     RecyclerView.Adapter<PlayListsAdapter.PlayListViewHolder>() {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlayListViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val playListItem = DataBindingUtil.inflate<PlaylistItemBinding>(
@@ -40,6 +41,8 @@ class PlayListsAdapter(private val playLists: List<Playlist>) :
             )
 
             Picasso.get().load(youTubePlayList.snippet.thumbnails.standard.url).into(it.image)
+
+            it.root.setOnClickListener(onClickListener)
         } ?: throw IllegalStateException("PlayList binding item cannot be null")
     }
 

@@ -11,6 +11,7 @@ import androidx.databinding.DataBindingUtil
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.youtube.model.Playlist
+import com.yurii.youtubemusic.Preferences
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.YouTubeService
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
@@ -32,7 +33,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
     }
 
     private fun selectPlayList() {
-        PlayListsDialogFragment(object : PlayListsDialogFragment.OnPlayLists {
+        val playListsDialogFragment = PlayListsDialogFragment(object : PlayListsDialogFragment.OnPlayLists {
             override fun getPlayLists(onResult: (playLists: List<Playlist>) -> Unit) {
                 YouTubeService.PlayLists.Builder(mCredential)
                     .onResult(onResult)
@@ -43,8 +44,11 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
                             Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
                     }.build().execute()
             }
-        }).showPlayLists(activity!!.supportFragmentManager)
+        })
+        playListsDialogFragment.onSelectPlaylist = {
+            Preferences.setSelectedPlayList(activity!!, it)
+        }
 
-
+        playListsDialogFragment.showPlayLists(activity!!.supportFragmentManager)
     }
 }
