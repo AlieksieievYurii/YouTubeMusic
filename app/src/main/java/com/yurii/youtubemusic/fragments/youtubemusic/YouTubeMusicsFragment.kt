@@ -45,10 +45,10 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
                     .onResult(onResult)
                     .onError {
                         ErrorSnackBar.show(binding.root, it.message!!)
-//                        if (it is UserRecoverableAuthIOException) {
-//                            startActivityForResult(it.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
-//                        } else
-//                            Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
+                        if (it is UserRecoverableAuthIOException) {
+                            startActivityForResult(it.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
+                        } else
+                            Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
                     }.build().execute()
             }
         })

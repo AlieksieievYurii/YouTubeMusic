@@ -7,12 +7,14 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.google.android.gms.common.ConnectionResult
@@ -22,15 +24,14 @@ import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.youtube.YouTubeScopes
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
-import pub.devrel.easypermissions.AfterPermissionGranted
-import pub.devrel.easypermissions.EasyPermissions
+import java.lang.IllegalStateException
 
 class AuthorizationFragment : Fragment() {
     companion object {
         const val REQUEST_ACCOUNT_PICKER = 1000
         const val REQUEST_AUTHORIZATION = 1001
         const val REQUEST_GOOGLE_PLAY_SERVICES = 1002
-        const val REQUEST_PERMISSION_GET_ACCOUNTS = 1003
+        const val REQUEST_PERMISSION_GET_ACCOUNTS_SING_IN = 1003
         const val PREF_ACCOUNT_NAME = "accountName"
     }
 
@@ -40,25 +41,18 @@ class AuthorizationFragment : Fragment() {
     private lateinit var mCredential: GoogleAccountCredential
     lateinit var signInCallBack: (() -> Unit)
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_authorization, container, false
-        )
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_authorization, container, false)
 
         (activity as AppCompatActivity).supportActionBar!!.title = "YouTube Musics"
+
         return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        mCredential = GoogleAccountCredential.usingOAuth2(context, scopes)
-            .setBackOff(ExponentialBackOff())
+        mCredential = GoogleAccountCredential.usingOAuth2(context, scopes).setBackOff(ExponentialBackOff())
 
         if (isSignedIn() && ::signInCallBack.isInitialized) {
             signInCallBack.invoke()
@@ -73,7 +67,7 @@ class AuthorizationFragment : Fragment() {
     }
 
     private fun isSignedIn(): Boolean {
-        return if (EasyPermissions.hasPermissions(context!!, Manifest.permission.GET_ACCOUNTS)) {
+        return if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
             val accountName: String? = activity!!.getPreferences(Context.MODE_PRIVATE)
                 .getString(PREF_ACCOUNT_NAME, null)
 
@@ -81,9 +75,8 @@ class AuthorizationFragment : Fragment() {
         } else false
     }
 
-    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
     private fun signIn() {
-        if (EasyPermissions.hasPermissions(context!!, Manifest.permission.GET_ACCOUNTS)) {
+        if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
             val accountName: String? = activity!!.getPreferences(Context.MODE_PRIVATE)
                 .getString(PREF_ACCOUNT_NAME, null)
 
@@ -94,14 +87,8 @@ class AuthorizationFragment : Fragment() {
                     signInCallBack.invoke()
             } else
                 startActivityForResult(mCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER)
-        } else {
-            EasyPermissions.requestPermissions(
-                this,
-                "This app needs to access your Google account (via Contacts).",
-                REQUEST_PERMISSION_GET_ACCOUNTS,
-                Manifest.permission.GET_ACCOUNTS
-            )
-        }
+        } else
+            requestPermissions(arrayOf(Manifest.permission.GET_ACCOUNTS), REQUEST_PERMISSION_GET_ACCOUNTS_SING_IN)
     }
 
     private fun acquireGooglePlayServices() {
@@ -135,7 +122,18 @@ class AuthorizationFragment : Fragment() {
             mCredential.selectedAccountName = accountName
             return mCredential
         }
-        throw Exception("Not found account name, Log in first")
+        throw IllegalStateException("Not found account name, Log in first")
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_PERMISSION_GET_ACCOUNTS_SING_IN -> {
+                if (permissions.first() == Manifest.permission.GET_ACCOUNTS && grantResults.first() == PackageManager.PERMISSION_GRANTED)
+                    signIn()
+            }
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -158,11 +156,11 @@ class AuthorizationFragment : Fragment() {
                 if (resultCode == RESULT_OK && data != null && data.extras != null) {
                     val accountName: String? = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
                     if (accountName != null) {
-                        val settings: SharedPreferences =
-                            activity!!.getPreferences(Context.MODE_PRIVATE)
-                        val editor: SharedPreferences.Editor = settings.edit()
-                        editor.putString(PREF_ACCOUNT_NAME, accountName)
-                        editor.apply()
+                        val settings: SharedPreferences = activity!!.getPreferences(Context.MODE_PRIVATE)
+                        with(settings.edit()) {
+                            putString(PREF_ACCOUNT_NAME, accountName)
+                            commit()
+                        }
                         signIn()
                     }
                 }
