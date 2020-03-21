@@ -3,7 +3,6 @@ package com.yurii.youtubemusic.services
 import android.app.Service
 import android.content.Intent
 import android.os.AsyncTask
-import android.os.Binder
 import android.os.IBinder
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.github.kiulian.downloader.OnYoutubeDownloadListener
@@ -15,7 +14,7 @@ import java.io.File
 import java.io.IOException
 
 
-class MusicDownloaderService : Service() {
+class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
     companion object {
         const val EXTRA_VIDEO_ITEM: String = "com.yurii.youtubemusic.download.item"
         const val DOWNLOADING_PROGRESS_ACTION: String = "com.yurii.youtubemusic.downloading.progress.action"
@@ -30,6 +29,7 @@ class MusicDownloaderService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        Instance.serviceInterface = this
         localBroadcastManager = LocalBroadcastManager.getInstance(applicationContext)
     }
 
@@ -79,9 +79,14 @@ class MusicDownloaderService : Service() {
         file.renameTo(newMusicFile)
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun isLoading(videoItem: VideoItem): Boolean = executionVideoItems.find { it == videoItem } != null
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Instance.serviceInterface = null
     }
+
+    override fun onBind(intent: Intent?): IBinder? = null
 
     private class FormattedVideoTask(private val onFinished: ((YoutubeVideo, AudioFormat) -> Unit)) : AsyncTask<VideoItem, Void, Void>() {
         override fun doInBackground(vararg downloadItem: VideoItem): Void? {
@@ -94,8 +99,7 @@ class MusicDownloaderService : Service() {
         }
     }
 
-    inner class ServiceBinder : Binder() {
-        fun isLoading(videoItem: VideoItem): Boolean = executionVideoItems.find { it == videoItem } != null
-
+    object Instance {
+        var serviceInterface: DownloaderInteroperableInterface? = null
     }
 }
