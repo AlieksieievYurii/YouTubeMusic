@@ -90,7 +90,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
                 binding.videos.apply {
                     setHasFixedSize(true)
                     layoutManager = LinearLayoutManager(context)
-                    adapter = VideosListAdapter(it, context)
+                    adapter = VideosListAdapter(it, MusicItemsHandler(context))
                 }
                 binding.progressBar.visibility = View.GONE
                 binding.videos.visibility = View.VISIBLE
