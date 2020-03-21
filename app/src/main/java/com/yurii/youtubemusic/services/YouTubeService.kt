@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.services
 
 import android.os.AsyncTask
 import com.google.api.client.extensions.android.http.AndroidHttp

@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.fragments.youtubemusic
+package com.yurii.youtubemusic.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -9,19 +9,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
-import com.google.api.client.googleapis.util.Utils
 import com.google.api.services.youtube.model.Playlist
-import com.google.api.services.youtube.model.PlaylistItem
-import com.yurii.youtubemusic.ErrorSnackBar
-import com.yurii.youtubemusic.Preferences
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.YouTubeService
+import com.yurii.youtubemusic.*
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
-import com.yurii.youtubemusic.fragments.authorization.AuthorizationFragment
+import com.yurii.youtubemusic.services.YouTubeService
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 
 class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : Fragment() {
@@ -68,7 +62,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
         val playList = Preferences.getSelectedPlayList(activity!!)
         playList?.let {
             loadListOfVideo(it)
-        } ?: showOptionToSelectPlayList()
+        } ?: showOptionToSelectPlayListFirstTime()
     }
 
     private fun alterSelectionPlayListButton(): Unit =
@@ -77,7 +71,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
             it.layoutSelectionPlaylist.visibility = View.VISIBLE
         }
 
-    private fun showOptionToSelectPlayList() {
+    private fun showOptionToSelectPlayListFirstTime() {
         binding.btnSelectPlayListFirst.setOnClickListener { selectPlayList() }
 
         binding.apply {
@@ -96,7 +90,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
                 binding.videos.apply {
                     setHasFixedSize(true)
                     layoutManager = LinearLayoutManager(context)
-                    adapter = VideosListAdapter(it)
+                    adapter = VideosListAdapter(it, context)
                 }
                 binding.progressBar.visibility = View.GONE
                 binding.videos.visibility = View.VISIBLE
