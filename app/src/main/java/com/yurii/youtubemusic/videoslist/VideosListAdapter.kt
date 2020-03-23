@@ -5,13 +5,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.google.api.services.youtube.model.PlaylistItem
 import com.squareup.picasso.Picasso
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.VideoItemBinding
+import com.yurii.youtubemusic.models.VideoItem
 import java.lang.IllegalStateException
 
-class VideosListAdapter(private val videos: List<PlaylistItem>) : RecyclerView.Adapter<VideosListAdapter.ViewHolder>() {
+interface VideoItemInterface {
+    fun onItemClickDownload(videoItem: VideoItem)
+    fun exists(videoItem: VideoItem): Boolean
+    fun isLoading(videoItem: VideoItem): Boolean
+}
+
+class VideosListAdapter(private val videos: List<VideoItem>, private val videoItemInterface: VideoItemInterface) :
+    RecyclerView.Adapter<VideosListAdapter.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val videoItem = DataBindingUtil.inflate<VideoItemBinding>(inflater, R.layout.video_item, parent, false)
@@ -22,14 +29,36 @@ class VideosListAdapter(private val videos: List<PlaylistItem>) : RecyclerView.A
     override fun getItemCount(): Int = videos.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val playListItem = videos[position]
+        val videoItem = videos[position]
         val binding = DataBindingUtil.getBinding<VideoItemBinding>(holder.videoItem)
-        binding?.let {
-            it.title.text = playListItem.snippet.title
-            //TODO channel title must be name of channel which owns current video
-            it.channelTitle.text = playListItem.snippet.channelTitle
-            Picasso.get().load(playListItem.snippet.thumbnails.default.url).into(it.thumbnail)
-        }?: throw IllegalStateException("PlayListItem binding item cannot be null")
+
+        binding?.let { videoItemView ->
+            videoItemView.title.text = videoItem.title
+            videoItemView.channelTitle.text = videoItem.authorChannelTitle
+            Picasso.get().load(videoItem.thumbnail).into(videoItemView.thumbnail)
+            if (!videoItemInterface.exists(videoItem)) {
+                binding.download.setOnClickListener {
+                    videoItemInterface.onItemClickDownload(videoItem)
+                    setLoadingState(videoItemView)
+                }
+                if (videoItemInterface.isLoading(videoItem))
+                    setLoadingState(videoItemView)
+                else
+                    setReadyToDownloadState(videoItemView)
+            } else videoItemView.download.visibility = View.GONE
+        } ?: throw IllegalStateException("PlayListItem binding item cannot be null")
+    }
+
+    private fun setReadyToDownloadState(binding: VideoItemBinding) {
+        binding.download.visibility = View.VISIBLE
+        binding.loading.visibility = View.GONE
+        binding.progressBar.visibility = View.GONE
+    }
+
+    private fun setLoadingState(binding: VideoItemBinding) {
+        binding.download.visibility = View.GONE
+        binding.loading.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.GONE
     }
 
     class ViewHolder(val videoItem: View) : RecyclerView.ViewHolder(videoItem)

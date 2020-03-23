@@ -9,9 +9,9 @@ import androidx.databinding.DataBindingUtil
 import com.google.android.material.navigation.NavigationView
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
-import com.yurii.youtubemusic.fragments.authorization.AuthorizationFragment
+import com.yurii.youtubemusic.fragments.AuthorizationFragment
 import com.yurii.youtubemusic.fragments.SavedMusicFragment
-import com.yurii.youtubemusic.fragments.youtubemusic.YouTubeMusicsFragment
+import com.yurii.youtubemusic.fragments.YouTubeMusicsFragment
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var mainActivity: ActivityMainBinding

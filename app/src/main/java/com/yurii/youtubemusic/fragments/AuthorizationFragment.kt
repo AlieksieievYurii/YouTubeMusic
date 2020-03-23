@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.fragments.authorization
+package com.yurii.youtubemusic.fragments
 
 import android.Manifest
 import android.accounts.AccountManager
@@ -86,9 +86,13 @@ class AuthorizationFragment : Fragment() {
                 if (::signInCallBack.isInitialized)
                     signInCallBack.invoke()
             } else
-                startActivityForResult(mCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER)
+                startActivityForResult(mCredential.newChooseAccountIntent(),
+                    REQUEST_ACCOUNT_PICKER
+                )
         } else
-            requestPermissions(arrayOf(Manifest.permission.GET_ACCOUNTS), REQUEST_PERMISSION_GET_ACCOUNTS_SING_IN)
+            requestPermissions(arrayOf(Manifest.permission.GET_ACCOUNTS),
+                REQUEST_PERMISSION_GET_ACCOUNTS_SING_IN
+            )
     }
 
     private fun acquireGooglePlayServices() {

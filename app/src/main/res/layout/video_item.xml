@@ -57,6 +57,27 @@
                     android:layout_marginEnd="15dp"
                     android:contentDescription="@string/content_description_download_music"
                     android:src="@drawable/ic_music_download" />
+
+                <ProgressBar
+                    android:id="@+id/loading"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="5dp"
+                    android:visibility="gone"
+                    android:layout_marginEnd="25dp"/>
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    android:indeterminate="false"
+                    tools:progress="45"
+                    android:visibility="gone"
+                    android:layout_below="@id/thumbnail"
+                    android:max="100"/>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 </layout>
