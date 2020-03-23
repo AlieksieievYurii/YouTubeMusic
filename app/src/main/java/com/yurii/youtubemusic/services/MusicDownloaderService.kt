@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.IBinder
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.github.kiulian.downloader.OnYoutubeDownloadListener
 import com.github.kiulian.downloader.YoutubeDownloader
@@ -20,7 +21,6 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
         const val DOWNLOADING_PROGRESS_ACTION: String = "com.yurii.youtubemusic.downloading.progress.action"
         const val DOWNLOADING_FINISHED_ACTION: String = "com.yurii.youtubemusic.downloading.finished.action"
         const val DOWNLOADING_FAILED_ACTION: String = "com.yurii.youtubemusic.downloading.failed.action"
-        const val EXTRA_VIDEO_ID: String = "com.yurii.youtubemusic.video.id"
         const val EXTRA_PROGRESS: String = "com.yurii.youtubemusic.video.progress"
     }
 
@@ -47,7 +47,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
             youtubeVideo.downloadAsync(audioFormat, outFolder, object : OnYoutubeDownloadListener {
                 override fun onDownloading(progress: Int) {
                     localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_PROGRESS_ACTION).also {
-                        it.putExtra(EXTRA_VIDEO_ID, videoItem.videoId)
+                        it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
                         it.putExtra(EXTRA_PROGRESS, progress)
                     })
                 }
@@ -58,7 +58,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
                     amendMusicName(file, videoItem)
 
                     localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_FINISHED_ACTION).also {
-                        it.putExtra(EXTRA_VIDEO_ID, videoItem.videoId)
+                        it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
                     })
                 }
 
@@ -79,7 +79,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
         file.renameTo(newMusicFile)
     }
 
-    override fun isLoading(videoItem: VideoItem): Boolean = executionVideoItems.find { it == videoItem } != null
+    override fun isLoading(videoItem: VideoItem): Boolean = executionVideoItems.find { it.videoId == videoItem.videoId } != null
 
     override fun onDestroy() {
         super.onDestroy()
