@@ -7,6 +7,7 @@ import android.view.View
 import com.google.android.material.snackbar.Snackbar
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.model.Playlist
+import java.io.File
 
 const val SHARED_PREFERENCES_SELECTED_PLAY_LIST: String = "com.yurii.youtubemusic.shared.preferences.selected.play.list"
 
@@ -38,6 +39,12 @@ class ErrorSnackBar private constructor() {
             snackBar.view.setBackgroundColor(Color.RED)
             snackBar.show()
         }
+    }
+}
+
+class DataStorage private constructor() {
+    companion object {
+        fun getMusicStorage(context: Context): File = File(context.filesDir, "Musics")
     }
 }
 
