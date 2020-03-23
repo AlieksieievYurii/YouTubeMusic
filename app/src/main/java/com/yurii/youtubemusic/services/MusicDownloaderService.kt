@@ -71,7 +71,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
 
     /**
     Change the name(title of the video) of the original [file]
-    to proper name like this -> 12424aqz.mp3 where prefix is YouTube video's id
+    to proper name like this -> 12424aqz.mp3 where prefix is YouTube video's id which is retained from [videoItem]
      **/
     private fun amendMusicName(file: File, videoItem: VideoItem) {
         val newMusicFile = file.resolveSibling("${videoItem.videoId}.mp3")

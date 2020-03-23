@@ -31,21 +31,35 @@ class VideoItemsHandler(private val recyclerView: RecyclerView) : VideoItemInter
             MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION -> {
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as? VideoItem
                 val progress = intent.getIntExtra(MusicDownloaderService.EXTRA_PROGRESS, 0)
-                videoItem?.let { findAndSetProgress(videoItem, progress) }
+                videoItem?.let {
+                    findVideoItemView(videoItem) {
+                        it.progressBar.apply {
+                            visibility = View.VISIBLE
+                            setProgress(progress)
+                        }
+                    }
+                }
+            }
+            MusicDownloaderService.DOWNLOADING_FINISHED_ACTION -> {
+                val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as? VideoItem
+                videoItem?.let {
+                    findVideoItemView(videoItem) {
+                        it.download.visibility = View.GONE
+                        it.progressBar.visibility = View.GONE
+                        it.loading.visibility = View.GONE
+                    }
+                }
             }
         }
     }
 
-    private fun findAndSetProgress(videoItem: VideoItem, progress: Int) {
+    private fun findVideoItemView(videoItem: VideoItem, onFound: ((VideoItemBinding) -> Unit)) {
         for (index: Int in 0 until recyclerView.childCount) {
             val position = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(index))
             if (videoItems!![position].videoId == videoItem.videoId) {
                 val videoItemView = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideosListAdapter.ViewHolder).videoItem
                 val binding = DataBindingUtil.getBinding<VideoItemBinding>(videoItemView)
-                binding?.progressBar?.apply {
-                    visibility = View.VISIBLE
-                    setProgress(progress)
-                }
+                binding?.let { onFound.invoke(it) }
             }
         }
     }
@@ -56,7 +70,10 @@ class VideoItemsHandler(private val recyclerView: RecyclerView) : VideoItemInter
     }
 
     fun onStart() {
-        LocalBroadcastManager.getInstance(context).registerReceiver(this, IntentFilter(MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION))
+        LocalBroadcastManager.getInstance(context).registerReceiver(this, IntentFilter().also {
+            it.addAction(MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION)
+            it.addAction(MusicDownloaderService.DOWNLOADING_FINISHED_ACTION)
+        })
     }
 
     fun onStop() {
