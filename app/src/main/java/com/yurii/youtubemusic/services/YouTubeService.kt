@@ -8,7 +8,7 @@ import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.Playlist
-import com.yurii.youtubemusic.models.VideoItem
+import com.google.api.services.youtube.model.PlaylistItem
 import java.lang.Exception
 import java.lang.IllegalStateException
 
@@ -97,7 +97,7 @@ class YouTubeService {
     class PlayListVideos private constructor(
         private val googleAccountCredential: GoogleAccountCredential?,
         private val playListId: String?,
-        private val onResult: ((List<VideoItem>) -> Unit)?,
+        private val onResult: ((List<PlaylistItem>) -> Unit)?,
         private val onError: ((error: Exception) -> Unit)?
     ) {
 
@@ -110,9 +110,9 @@ class YouTubeService {
 
         private class PlayListVideosTask(
             googleAccountCredential: GoogleAccountCredential?,
-            val onResult: ((List<VideoItem>) -> Unit)?,
+            val onResult: ((List<PlaylistItem>) -> Unit)?,
             val onError: ((error: Exception) -> Unit)?
-        ) : AsyncTask<String, Void, List<VideoItem>>() {
+        ) : AsyncTask<String, Void, List<PlaylistItem>>() {
 
             private val service: YouTube
             private var lastError: Exception? = null
@@ -125,7 +125,7 @@ class YouTubeService {
                     .build()
             }
 
-            override fun doInBackground(vararg params: String): List<VideoItem>? {
+            override fun doInBackground(vararg params: String): List<PlaylistItem>? {
                 return try {
                     getPlayListVideos(params.first())
                 } catch (error: Exception) {
@@ -135,30 +135,15 @@ class YouTubeService {
                 }
             }
 
-            private fun getPlayListVideos(playListId: String): List<VideoItem> {
-                val videoItems: MutableList<VideoItem> = arrayListOf()
+            private fun getPlayListVideos(playListId: String): List<PlaylistItem> =
                 //TODO Implement pagination
                 service.playlistItems().list("snippet")
                     .setPlaylistId(playListId)
                     .setMaxResults(50)
-                    .execute().items.forEach {
-                    videoItems.add(
-                        VideoItem(
-                            videoId = it.snippet.resourceId.videoId,
-                            title = it.snippet.title,
-                            //TODO channel title must be name of channel which owns current video
-                            authorChannelTitle = it.snippet.channelTitle,
-                            thumbnail = it.snippet.thumbnails.default.url
-                        )
-                    )
-                }
-                return videoItems
-            }
+                    .execute().items
 
 
-
-
-            override fun onPostExecute(result: List<VideoItem>?) {
+            override fun onPostExecute(result: List<PlaylistItem>?) {
                 result?.let {
                     onResult?.invoke(it)
                 }
@@ -173,7 +158,7 @@ class YouTubeService {
         data class Builder(
             var googleAccountCredential: GoogleAccountCredential? = null,
             var playListId: String? = null,
-            var onResult: ((List<VideoItem>) -> Unit)? = null,
+            var onResult: ((List<PlaylistItem>) -> Unit)? = null,
             var onError: ((error: Exception) -> Unit)? = null
         ) {
             fun googleAccountCredential(googleAccountCredential: GoogleAccountCredential) = apply {
@@ -184,7 +169,7 @@ class YouTubeService {
                 this.playListId = playListId
             }
 
-            fun onResult(onResult: ((List<VideoItem>) -> Unit)) = apply {
+            fun onResult(onResult: ((List<PlaylistItem>) -> Unit)) = apply {
                 this.onResult = onResult
             }
 

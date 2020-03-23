@@ -14,6 +14,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
+import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.YouTubeService
 import com.yurii.youtubemusic.utilities.Authorization
 import com.yurii.youtubemusic.utilities.ErrorSnackBar
@@ -85,7 +86,7 @@ class YouTubeMusicsFragment : Fragment() {
     }
 
     private fun alterSelectionPlayListButton(): Unit =
-        binding.let{
+        binding.let {
             it.btnSelectPlayListFirst.visibility = View.GONE
             it.layoutSelectionPlaylist.visibility = View.VISIBLE
         }
@@ -105,8 +106,20 @@ class YouTubeMusicsFragment : Fragment() {
         binding.videos.visibility = View.GONE
         YouTubeService.PlayListVideos.Builder(mCredential)
             .playListId(playList.id)
-            .onResult {
-                videoItemsHandler.setVideoItems(it)
+            .onResult { playListItems ->
+                val videoItems = mutableListOf<VideoItem>()
+                playListItems.forEach {
+                    videoItems.add(
+                        VideoItem(
+                            videoId = it.snippet.resourceId.videoId,
+                            title = it.snippet.title,
+                            //TODO channel title must be name of channel which owns current video
+                            authorChannelTitle = it.snippet.channelTitle,
+                            thumbnail = it.snippet.thumbnails.default.url
+                        )
+                    )
+                }
+                videoItemsHandler.setVideoItems(videoItems)
                 binding.progressBar.visibility = View.GONE
                 binding.videos.visibility = View.VISIBLE
             }
