@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -14,13 +15,16 @@ import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
 import com.yurii.youtubemusic.services.YouTubeService
+import com.yurii.youtubemusic.utilities.Authorization
 import com.yurii.youtubemusic.utilities.ErrorSnackBar
 import com.yurii.youtubemusic.utilities.Preferences
 import com.yurii.youtubemusic.utilities.VideoItemsHandler
+import java.lang.IllegalStateException
 
-class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : Fragment() {
+class YouTubeMusicsFragment : Fragment() {
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videoItemsHandler: VideoItemsHandler
+    private lateinit var mCredential: GoogleAccountCredential
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
@@ -32,6 +36,13 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
         }
         videoItemsHandler = VideoItemsHandler(binding.videos)
         return binding.root
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        Authorization.getGoogleCredentials(context)?.let {
+            mCredential = it
+        } ?: throw IllegalStateException("Cannot get Google account credentials")
     }
 
     private fun selectPlayList() {

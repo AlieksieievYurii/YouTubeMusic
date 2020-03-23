@@ -1,20 +1,15 @@
 package com.yurii.youtubemusic
 
-import android.Manifest
 import android.accounts.AccountManager
 import android.app.Activity.RESULT_OK
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.google.android.gms.common.ConnectionResult
@@ -23,15 +18,13 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.youtube.YouTubeScopes
 import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
-import java.lang.IllegalStateException
+import com.yurii.youtubemusic.utilities.Authorization
 
 class AuthorizationFragment : Fragment() {
     companion object {
         const val REQUEST_ACCOUNT_PICKER = 1000
         const val REQUEST_AUTHORIZATION = 1001
         const val REQUEST_GOOGLE_PLAY_SERVICES = 1002
-        const val REQUEST_PERMISSION_GET_ACCOUNTS_SING_IN = 1003
-        const val PREF_ACCOUNT_NAME = "accountName"
     }
 
     private val scopes = listOf(YouTubeScopes.YOUTUBE)
@@ -66,31 +59,21 @@ class AuthorizationFragment : Fragment() {
     }
 
     private fun isSignedIn(): Boolean {
-        return if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
-            val accountName: String? = activity!!.getPreferences(Context.MODE_PRIVATE)
-                .getString(PREF_ACCOUNT_NAME, null)
-
-            accountName != null
-        } else false
+        return Authorization.getGoogleCredentials(context!!) != null
     }
 
     private fun signIn() {
-        if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
-            val accountName: String? = activity!!.getPreferences(Context.MODE_PRIVATE)
-                .getString(PREF_ACCOUNT_NAME, null)
+        val accountName: String? = Authorization.getGoogleAccount(context!!)
 
-            if (accountName != null) {
-                mCredential.selectedAccountName = accountName
+        if (accountName != null) {
+            mCredential.selectedAccountName = accountName
 
-                if (::signInCallBack.isInitialized)
-                    signInCallBack.invoke()
-            } else
-                startActivityForResult(mCredential.newChooseAccountIntent(),
-                    REQUEST_ACCOUNT_PICKER
-                )
+            if (::signInCallBack.isInitialized)
+                signInCallBack.invoke()
         } else
-            requestPermissions(arrayOf(Manifest.permission.GET_ACCOUNTS),
-                REQUEST_PERMISSION_GET_ACCOUNTS_SING_IN
+            startActivityForResult(
+                mCredential.newChooseAccountIntent(),
+                REQUEST_ACCOUNT_PICKER
             )
     }
 
@@ -117,28 +100,6 @@ class AuthorizationFragment : Fragment() {
         return connectionStatusCode == ConnectionResult.SUCCESS
     }
 
-    fun getCredential(): GoogleAccountCredential {
-        val accountName: String? = activity!!.getPreferences(Context.MODE_PRIVATE)
-            .getString(PREF_ACCOUNT_NAME, null)
-
-        if (accountName != null) {
-            mCredential.selectedAccountName = accountName
-            return mCredential
-        }
-        throw IllegalStateException("Not found account name, Log in first")
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            REQUEST_PERMISSION_GET_ACCOUNTS_SING_IN -> {
-                if (permissions.first() == Manifest.permission.GET_ACCOUNTS && grantResults.first() == PackageManager.PERMISSION_GRANTED)
-                    signIn()
-            }
-        }
-
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -158,12 +119,8 @@ class AuthorizationFragment : Fragment() {
             REQUEST_ACCOUNT_PICKER -> {
                 if (resultCode == RESULT_OK && data != null && data.extras != null) {
                     val accountName: String? = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
-                    if (accountName != null) {
-                        val settings: SharedPreferences = activity!!.getPreferences(Context.MODE_PRIVATE)
-                        with(settings.edit()) {
-                            putString(PREF_ACCOUNT_NAME, accountName)
-                            commit()
-                        }
+                    accountName?.let {
+                        Authorization.setGoogleAccount(context!!, accountName)
                         signIn()
                     }
                 }

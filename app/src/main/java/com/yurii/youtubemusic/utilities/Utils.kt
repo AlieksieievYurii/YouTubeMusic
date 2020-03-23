@@ -2,14 +2,20 @@ package com.yurii.youtubemusic.utilities
 
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.util.ExponentialBackOff
+import com.google.api.services.youtube.YouTubeScopes
 import com.google.api.services.youtube.model.Playlist
 import java.io.File
 
+const val DEFAULT_SHARED_PREFERENCES_FILE: String = "com.yurii.youtubemusic.shared.preferences"
 const val SHARED_PREFERENCES_SELECTED_PLAY_LIST: String = "com.yurii.youtubemusic.shared.preferences.selected.play.list"
+const val PREF_ACCOUNT_NAME = "accountName"
 
 class Preferences private constructor() {
     companion object {
@@ -45,6 +51,36 @@ class ErrorSnackBar private constructor() {
 class DataStorage private constructor() {
     companion object {
         fun getMusicStorage(context: Context): File = File(context.filesDir, "Musics")
+    }
+}
+
+class Authorization private constructor() {
+    companion object {
+        private val scopes = listOf(YouTubeScopes.YOUTUBE)
+        fun getGoogleCredentials(context: Context): GoogleAccountCredential? {
+            val accountName: String? = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+                .getString(PREF_ACCOUNT_NAME, null)
+
+            accountName?.let {
+                return GoogleAccountCredential.usingOAuth2(context, scopes).setBackOff(ExponentialBackOff()).also {
+                    it.selectedAccountName = accountName
+                }
+            }
+            return null
+        }
+
+        fun getGoogleAccount(context: Context): String? {
+            val preferences: SharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+            return preferences.getString(PREF_ACCOUNT_NAME, null)
+        }
+
+        fun setGoogleAccount(context: Context, accountName: String) {
+            val preferences: SharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+            with(preferences.edit()) {
+                putString(PREF_ACCOUNT_NAME, accountName)
+                commit()
+            }
+        }
     }
 }
 
