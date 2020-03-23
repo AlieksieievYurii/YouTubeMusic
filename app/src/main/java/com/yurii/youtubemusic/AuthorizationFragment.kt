@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.fragments
+package com.yurii.youtubemusic
 
 import android.Manifest
 import android.accounts.AccountManager
@@ -22,7 +22,6 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.youtube.YouTubeScopes
-import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
 import java.lang.IllegalStateException
 

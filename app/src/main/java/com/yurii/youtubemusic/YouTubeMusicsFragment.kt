@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.fragments
+package com.yurii.youtubemusic
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -11,10 +11,12 @@ import androidx.databinding.DataBindingUtil
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.youtube.model.Playlist
-import com.yurii.youtubemusic.*
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
 import com.yurii.youtubemusic.services.YouTubeService
+import com.yurii.youtubemusic.utilities.ErrorSnackBar
+import com.yurii.youtubemusic.utilities.Preferences
+import com.yurii.youtubemusic.utilities.VideoItemsHandler
 
 class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : Fragment() {
     private lateinit var binding: FragmentYouTubeMusicsBinding

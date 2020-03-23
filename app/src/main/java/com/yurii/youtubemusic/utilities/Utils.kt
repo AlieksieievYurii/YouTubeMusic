@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.utilities
 
 import android.app.Activity
 import android.content.Context

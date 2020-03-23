@@ -9,7 +9,7 @@ import com.github.kiulian.downloader.OnYoutubeDownloadListener
 import com.github.kiulian.downloader.YoutubeDownloader
 import com.github.kiulian.downloader.model.YoutubeVideo
 import com.github.kiulian.downloader.model.formats.AudioFormat
-import com.yurii.youtubemusic.DataStorage
+import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.models.VideoItem
 import java.io.File
 import java.io.IOException
