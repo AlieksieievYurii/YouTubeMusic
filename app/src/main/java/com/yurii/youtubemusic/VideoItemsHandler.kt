@@ -31,7 +31,7 @@ class VideoItemsHandler(private val recyclerView: RecyclerView) : VideoItemInter
             MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION -> {
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as? VideoItem
                 val progress = intent.getIntExtra(MusicDownloaderService.EXTRA_PROGRESS, 0)
-                videoItem?.let {findAndSetProgress(videoItem, progress)}
+                videoItem?.let { findAndSetProgress(videoItem, progress) }
             }
         }
     }
@@ -72,7 +72,13 @@ class VideoItemsHandler(private val recyclerView: RecyclerView) : VideoItemInter
     }
 
     override fun exists(videoItem: VideoItem): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        DataStorage.getMusicStorage(context).walk().forEach {
+            Regex(".*(?=\\.)").find(it.name)?.let { regex ->
+                if (regex.value == videoItem.videoId)
+                    return true
+            }
+        }
+        return false
     }
 
     override fun isLoading(videoItem: VideoItem): Boolean {

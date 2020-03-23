@@ -31,18 +31,21 @@ class VideosListAdapter(private val videos: List<VideoItem>, private val videoIt
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val videoItem = videos[position]
         val binding = DataBindingUtil.getBinding<VideoItemBinding>(holder.videoItem)
+
         binding?.let { videoItemView ->
             videoItemView.title.text = videoItem.title
             videoItemView.channelTitle.text = videoItem.authorChannelTitle
             Picasso.get().load(videoItem.thumbnail).into(videoItemView.thumbnail)
-            binding.download.setOnClickListener {
-                videoItemInterface.onItemClickDownload(videoItem)
-                setLoadingState(videoItemView)
-            }
-            if (videoItemInterface.isLoading(videoItem))
-                setLoadingState(videoItemView)
-            else
-                setReadyToDownloadState(videoItemView)
+            if (!videoItemInterface.exists(videoItem)) {
+                binding.download.setOnClickListener {
+                    videoItemInterface.onItemClickDownload(videoItem)
+                    setLoadingState(videoItemView)
+                }
+                if (videoItemInterface.isLoading(videoItem))
+                    setLoadingState(videoItemView)
+                else
+                    setReadyToDownloadState(videoItemView)
+            } else videoItemView.download.visibility = View.GONE
         } ?: throw IllegalStateException("PlayListItem binding item cannot be null")
     }
 
