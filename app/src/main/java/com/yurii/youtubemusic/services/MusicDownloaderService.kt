@@ -4,12 +4,12 @@ import android.app.Service
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.IBinder
-import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.github.kiulian.downloader.OnYoutubeDownloadListener
 import com.github.kiulian.downloader.YoutubeDownloader
 import com.github.kiulian.downloader.model.YoutubeVideo
 import com.github.kiulian.downloader.model.formats.AudioFormat
+import com.yurii.youtubemusic.DataStorage
 import com.yurii.youtubemusic.models.VideoItem
 import java.io.File
 import java.io.IOException
@@ -42,9 +42,8 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
     }
 
     private fun startDownloading(videoItem: VideoItem, startId: Int) {
-        val outFolder = File(applicationContext.filesDir, "musics")
         FormattedVideoTask { youtubeVideo, audioFormat ->
-            youtubeVideo.downloadAsync(audioFormat, outFolder, object : OnYoutubeDownloadListener {
+            youtubeVideo.downloadAsync(audioFormat, DataStorage.getMusicStorage(applicationContext), object : OnYoutubeDownloadListener {
                 override fun onDownloading(progress: Int) {
                     localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_PROGRESS_ACTION).also {
                         it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
