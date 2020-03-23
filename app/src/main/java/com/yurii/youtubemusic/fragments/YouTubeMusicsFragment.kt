@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.youtube.model.Playlist
@@ -16,10 +15,10 @@ import com.yurii.youtubemusic.*
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
 import com.yurii.youtubemusic.services.YouTubeService
-import com.yurii.youtubemusic.videoslist.VideosListAdapter
 
 class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : Fragment() {
     private lateinit var binding: FragmentYouTubeMusicsBinding
+    private lateinit var videoItemsHandler: VideoItemsHandler
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
@@ -29,6 +28,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
         binding.btnSelectPlayList.setOnClickListener {
             selectPlayList()
         }
+        videoItemsHandler = VideoItemsHandler(binding.videos)
         return binding.root
     }
 
@@ -60,9 +60,15 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
     override fun onStart() {
         super.onStart()
         val playList = Preferences.getSelectedPlayList(activity!!)
+        videoItemsHandler.onStart()
         playList?.let {
             loadListOfVideo(it)
         } ?: showOptionToSelectPlayListFirstTime()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        videoItemsHandler.onStop()
     }
 
     private fun alterSelectionPlayListButton(): Unit =
@@ -87,11 +93,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
         YouTubeService.PlayListVideos.Builder(mCredential)
             .playListId(playList.id)
             .onResult {
-                binding.videos.apply {
-                    setHasFixedSize(true)
-                    layoutManager = LinearLayoutManager(context)
-                    adapter = VideosListAdapter(it, MusicItemsHandler(context))
-                }
+                videoItemsHandler.setVideoItems(it)
                 binding.progressBar.visibility = View.GONE
                 binding.videos.visibility = View.VISIBLE
             }
