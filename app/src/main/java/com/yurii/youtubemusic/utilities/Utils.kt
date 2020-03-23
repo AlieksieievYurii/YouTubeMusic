@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.utilities
 
-import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -19,16 +18,16 @@ const val PREF_ACCOUNT_NAME = "accountName"
 
 class Preferences private constructor() {
     companion object {
-        fun setSelectedPlayList(activity: Activity, playList: Playlist) {
-            val sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE)
+        fun setSelectedPlayList(context: Context, playList: Playlist) {
+            val sharedPreferences =  context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
             with(sharedPreferences.edit()) {
                 putString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, playList.toString())
                 apply()
             }
         }
 
-        fun getSelectedPlayList(activity: Activity): Playlist? {
-            val sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE)
+        fun getSelectedPlayList(context: Context): Playlist? {
+            val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE,Context.MODE_PRIVATE)
             val jsonRepresentation: String? = sharedPreferences.getString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, null)
             jsonRepresentation?.let {
                 val jsonFactory: com.google.api.client.json.JsonFactory = JacksonFactory.getDefaultInstance()

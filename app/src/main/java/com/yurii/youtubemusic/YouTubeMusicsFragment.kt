@@ -63,7 +63,7 @@ class YouTubeMusicsFragment : Fragment() {
             if (Preferences.getSelectedPlayList(activity!!).isNullOrEmpty())
                 alterSelectionPlayListButton()
 
-            Preferences.setSelectedPlayList(activity!!, it)
+            Preferences.setSelectedPlayList(context!!, it)
             loadListOfVideo(it)
         }
 
@@ -72,7 +72,7 @@ class YouTubeMusicsFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        val playList = Preferences.getSelectedPlayList(activity!!)
+        val playList = Preferences.getSelectedPlayList(context!!)
         videoItemsHandler.onStart()
         playList?.let {
             loadListOfVideo(it)
