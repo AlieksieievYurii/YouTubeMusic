@@ -7,11 +7,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.navigation.NavigationView
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
-import com.yurii.youtubemusic.fragments.AuthorizationFragment
-import com.yurii.youtubemusic.fragments.SavedMusicFragment
-import com.yurii.youtubemusic.fragments.YouTubeMusicsFragment
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var mainActivity: ActivityMainBinding
@@ -53,8 +49,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun openYouTubeMusic() {
-        val mCredential: GoogleAccountCredential = authorizationFragment.getCredential()
-        val youTubeMusicsFragment = YouTubeMusicsFragment(mCredential)
+        val youTubeMusicsFragment = YouTubeMusicsFragment()
         supportFragmentManager.beginTransaction().replace(
             R.id.frameLayout,
             youTubeMusicsFragment,

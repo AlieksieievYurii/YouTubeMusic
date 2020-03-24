@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.fragments
+package com.yurii.youtubemusic
 
 
 import android.os.Bundle

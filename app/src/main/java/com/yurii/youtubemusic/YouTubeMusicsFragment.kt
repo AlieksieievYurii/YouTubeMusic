@@ -1,5 +1,6 @@
-package com.yurii.youtubemusic.fragments
+package com.yurii.youtubemusic
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -11,14 +12,21 @@ import androidx.databinding.DataBindingUtil
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.youtube.model.Playlist
-import com.yurii.youtubemusic.*
+import com.google.api.services.youtube.model.PlaylistItem
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
+import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.YouTubeService
+import com.yurii.youtubemusic.utilities.Authorization
+import com.yurii.youtubemusic.utilities.ErrorSnackBar
+import com.yurii.youtubemusic.utilities.Preferences
+import com.yurii.youtubemusic.utilities.VideoItemsHandler
+import java.lang.IllegalStateException
 
-class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : Fragment() {
+class YouTubeMusicsFragment : Fragment() {
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videoItemsHandler: VideoItemsHandler
+    private lateinit var mCredential: GoogleAccountCredential
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
@@ -30,6 +38,13 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
         }
         videoItemsHandler = VideoItemsHandler(binding.videos)
         return binding.root
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        Authorization.getGoogleCredentials(context)?.let {
+            mCredential = it
+        } ?: throw IllegalStateException("Cannot get Google account credentials")
     }
 
     private fun selectPlayList() {
@@ -50,7 +65,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
             if (Preferences.getSelectedPlayList(activity!!).isNullOrEmpty())
                 alterSelectionPlayListButton()
 
-            Preferences.setSelectedPlayList(activity!!, it)
+            Preferences.setSelectedPlayList(context!!, it)
             loadListOfVideo(it)
         }
 
@@ -59,7 +74,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
 
     override fun onStart() {
         super.onStart()
-        val playList = Preferences.getSelectedPlayList(activity!!)
+        val playList = Preferences.getSelectedPlayList(context!!)
         videoItemsHandler.onStart()
         playList?.let {
             loadListOfVideo(it)
@@ -72,7 +87,7 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
     }
 
     private fun alterSelectionPlayListButton(): Unit =
-        binding.let{
+        binding.let {
             it.btnSelectPlayListFirst.visibility = View.GONE
             it.layoutSelectionPlaylist.visibility = View.VISIBLE
         }
@@ -92,8 +107,25 @@ class YouTubeMusicsFragment(private val mCredential: GoogleAccountCredential) : 
         binding.videos.visibility = View.GONE
         YouTubeService.PlayListVideos.Builder(mCredential)
             .playListId(playList.id)
-            .onResult {
-                videoItemsHandler.setVideoItems(it)
+            .onResult { loadDetails(it) }
+            .onError {
+                ErrorSnackBar.show(binding.root, it.message!!)
+            }.build().execute()
+    }
+
+    private fun loadDetails(videos: List<PlaylistItem>) {
+        val videoIds: List<String> = videos.map { it.snippet.resourceId.videoId }
+        YouTubeService.VideoDetails.Builder(mCredential)
+            .videoIds(videoIds)
+            .onResult { videoList ->
+                val videoItems = videoList.map {
+                    VideoItem(
+                        videoId = it.id,
+                        title = it.snippet.title,
+                        authorChannelTitle = it.snippet.channelTitle,
+                        thumbnail = it.snippet.thumbnails.default.url)
+                }
+                videoItemsHandler.setVideoItems(videoItems)
                 binding.progressBar.visibility = View.GONE
                 binding.videos.visibility = View.VISIBLE
             }
