@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.api.services.youtube.model.Playlist
 import com.squareup.picasso.Picasso
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.PlaylistItemBinding
+import com.yurii.youtubemusic.databinding.ItemPlaylistBinding
 import java.lang.IllegalStateException
 
 class PlayListsAdapter(private val playLists: List<Playlist>, private val onClickListener: View.OnClickListener) :
@@ -16,9 +16,9 @@ class PlayListsAdapter(private val playLists: List<Playlist>, private val onClic
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlayListViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val playListItem = DataBindingUtil.inflate<PlaylistItemBinding>(
+        val playListItem = DataBindingUtil.inflate<ItemPlaylistBinding>(
             inflater,
-            R.layout.playlist_item,
+            R.layout.item_playlist,
             parent,
             false
         )
@@ -29,7 +29,7 @@ class PlayListsAdapter(private val playLists: List<Playlist>, private val onClic
     override fun getItemCount(): Int = playLists.size
 
     override fun onBindViewHolder(holder: PlayListViewHolder, position: Int) {
-        val binding = DataBindingUtil.getBinding<PlaylistItemBinding>(holder.playListItem)
+        val binding = DataBindingUtil.getBinding<ItemPlaylistBinding>(holder.playListItem)
         binding?.let {
             val youTubePlayList = playLists[position]
 

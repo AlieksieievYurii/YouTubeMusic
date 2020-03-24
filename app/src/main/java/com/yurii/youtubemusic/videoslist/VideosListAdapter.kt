@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemLoadingBinding
-import com.yurii.youtubemusic.databinding.VideoItemBinding
+import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
 import java.lang.IllegalStateException
 
@@ -30,7 +30,7 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
-            VIEW_TYPE_NORMAL -> VideoViewHolder(DataBindingUtil.inflate<VideoItemBinding>(inflater, R.layout.video_item, parent, false).root)
+            VIEW_TYPE_NORMAL -> VideoViewHolder(DataBindingUtil.inflate<ItemVideoBinding>(inflater, R.layout.item_video, parent, false).root)
             VIEW_TYPE_LOADING -> LoadingViewHolder(DataBindingUtil.inflate<ItemLoadingBinding>(inflater, R.layout.item_loading, parent, false).root)
             else -> throw IllegalStateException("Illegal view type")
         }
@@ -71,7 +71,7 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) :
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         val videoItem = videos[position]
         if (getItemViewType(position) == VIEW_TYPE_NORMAL) {
-            val binding = DataBindingUtil.getBinding<VideoItemBinding>((holder as VideoViewHolder).videoItem)
+            val binding = DataBindingUtil.getBinding<ItemVideoBinding>((holder as VideoViewHolder).videoItem)
             binding?.let { videoItemView ->
                 videoItemView.title.text = videoItem.title
                 videoItemView.channelTitle.text = videoItem.authorChannelTitle
@@ -90,13 +90,13 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) :
         }
     }
 
-    private fun setReadyToDownloadState(binding: VideoItemBinding) {
+    private fun setReadyToDownloadState(binding: ItemVideoBinding) {
         binding.download.visibility = View.VISIBLE
         binding.loading.visibility = View.GONE
         binding.progressBar.visibility = View.GONE
     }
 
-    private fun setLoadingState(binding: VideoItemBinding) {
+    private fun setLoadingState(binding: ItemVideoBinding) {
         binding.download.visibility = View.GONE
         binding.loading.visibility = View.VISIBLE
         binding.progressBar.visibility = View.GONE

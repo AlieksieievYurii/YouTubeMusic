@@ -9,7 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.yurii.youtubemusic.databinding.VideoItemBinding
+import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.MusicDownloaderService
 import com.yurii.youtubemusic.videoslist.PaginationListener
@@ -78,7 +78,7 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
         }
     }
 
-    private fun findVideoItemView(videoItem: VideoItem, onFound: ((VideoItemBinding) -> Unit)) {
+    private fun findVideoItemView(videoItem: VideoItem, onFound: ((ItemVideoBinding) -> Unit)) {
         for (index: Int in 0 until recyclerView.childCount) {
             val position = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(index))
 
@@ -91,7 +91,7 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
 
             if (videoListAdapter.videos[position].videoId == videoItem.videoId) {
                 val videoItemView = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideosListAdapter.VideoViewHolder).videoItem
-                val binding = DataBindingUtil.getBinding<VideoItemBinding>(videoItemView)
+                val binding = DataBindingUtil.getBinding<ItemVideoBinding>(videoItemView)
                 binding?.let { onFound.invoke(it) }
             }
         }
