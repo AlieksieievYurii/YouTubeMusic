@@ -9,6 +9,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItem
+import com.google.api.services.youtube.model.Video
 import java.lang.Exception
 import java.lang.IllegalStateException
 
@@ -121,7 +122,7 @@ class YouTubeService {
                 val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
                 val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
                 service = YouTube.Builder(transport, jsonFactory, googleAccountCredential)
-                    .setApplicationName("YouTube Data API PlayLists")
+                    .setApplicationName("YouTube Data API PlayList items")
                     .build()
             }
 
@@ -178,6 +179,81 @@ class YouTubeService {
             }
 
             fun build() = PlayListVideos(googleAccountCredential, playListId, onResult, onError)
+        }
+    }
+
+    class VideoDetails private constructor(
+        private val googleAccountCredential: GoogleAccountCredential?,
+        private val videoIds: List<String>?,
+        private val onResult: ((List<Video>) -> Unit)?,
+        private val onError: ((error: Exception) -> Unit)?
+    ) {
+
+        fun execute() {
+            googleAccountCredential?.let {
+                mCredentials ->
+                videoIds?.let {
+                    VideoDetailsTask(mCredentials, onResult, onError).execute(*videoIds.toTypedArray())
+                } ?: throw IllegalStateException("Pass list of video ids")
+            } ?: throw IllegalStateException("Please set google account credential")
+        }
+
+        private class VideoDetailsTask(
+            private val googleAccountCredential: GoogleAccountCredential?,
+            private val onResult: ((List<Video>) -> Unit)?,
+            private val onError: ((error: Exception) -> Unit)?
+        ) : AsyncTask<String, Void, List<Video>>() {
+
+            private val service: YouTube
+            private var lastError: Exception? = null
+
+            init {
+                val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
+                val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
+                service = YouTube.Builder(transport, jsonFactory, googleAccountCredential)
+                    .setApplicationName("YouTube Data API Video details")
+                    .build()
+            }
+
+            override fun doInBackground(vararg params: String): List<Video> {
+                return service.videos().list("snippet,statistics").setId(params.joinToString()).execute().items
+            }
+
+            override fun onPostExecute(result: List<Video>) {
+                onResult?.invoke(result)
+
+            }
+
+            override fun onCancelled() {
+                if (lastError != null && onError != null)
+                    onError.invoke(lastError!!)
+            }
+
+        }
+
+        data class Builder(
+            var googleAccountCredential: GoogleAccountCredential? = null,
+            var videoIds: List<String>? = null,
+            var onResult: ((List<Video>) -> Unit)? = null,
+            var onError: ((error: Exception) -> Unit)? = null
+        ) {
+            fun googleAccountCredential(googleAccountCredential: GoogleAccountCredential) = apply {
+                this.googleAccountCredential = googleAccountCredential
+            }
+
+            fun videoIds(videoIds: List<String>?) = apply {
+                this.videoIds = videoIds
+            }
+
+            fun onResult(onResult: ((List<Video>) -> Unit)) = apply {
+                this.onResult = onResult
+            }
+
+            fun onError(onError: ((error: Exception) -> Unit)?) = apply {
+                this.onError = onError
+            }
+
+            fun build() = VideoDetails(googleAccountCredential, videoIds, onResult, onError)
         }
     }
 }

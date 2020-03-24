@@ -12,6 +12,7 @@ import androidx.databinding.DataBindingUtil
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.youtube.model.Playlist
+import com.google.api.services.youtube.model.PlaylistItem
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
 import com.yurii.youtubemusic.models.VideoItem
@@ -106,18 +107,23 @@ class YouTubeMusicsFragment : Fragment() {
         binding.videos.visibility = View.GONE
         YouTubeService.PlayListVideos.Builder(mCredential)
             .playListId(playList.id)
-            .onResult { playListItems ->
-                val videoItems = mutableListOf<VideoItem>()
-                playListItems.forEach {
-                    videoItems.add(
-                        VideoItem(
-                            videoId = it.snippet.resourceId.videoId,
-                            title = it.snippet.title,
-                            //TODO channel title must be name of channel which owns current video
-                            authorChannelTitle = it.snippet.channelTitle,
-                            thumbnail = it.snippet.thumbnails.default.url
-                        )
-                    )
+            .onResult { loadDetails(it) }
+            .onError {
+                ErrorSnackBar.show(binding.root, it.message!!)
+            }.build().execute()
+    }
+
+    private fun loadDetails(videos: List<PlaylistItem>) {
+        val videoIds: List<String> = videos.map { it.snippet.resourceId.videoId }
+        YouTubeService.VideoDetails.Builder(mCredential)
+            .videoIds(videoIds)
+            .onResult { videoList ->
+                val videoItems = videoList.map {
+                    VideoItem(
+                        videoId = it.id,
+                        title = it.snippet.title,
+                        authorChannelTitle = it.snippet.channelTitle,
+                        thumbnail = it.snippet.thumbnails.default.url)
                 }
                 videoItemsHandler.setVideoItems(videoItems)
                 binding.progressBar.visibility = View.GONE
