@@ -12,18 +12,43 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.databinding.VideoItemBinding
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.MusicDownloaderService
+import com.yurii.youtubemusic.videoslist.PaginationListener
 import com.yurii.youtubemusic.videoslist.VideoItemInterface
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 
-class VideoItemsHandler(private val recyclerView: RecyclerView) : VideoItemInterface, BroadcastReceiver() {
+interface Loader {
+    fun onLoadMoreVideoItems(pageToken: String?)
+}
+
+class VideoItemsHandler(private val recyclerView: RecyclerView, private val loader: Loader) : VideoItemInterface, BroadcastReceiver() {
     private val context: Context = recyclerView.context
-    private var videoItems: List<VideoItem>? = null
+    private var isLoadingNewVideoItems = true
+    private val videoListAdapter: VideosListAdapter = VideosListAdapter(this)
+    private var nextPageToken: String? = null
 
     init {
+        val layoutManager = LinearLayoutManager(context)
         recyclerView.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(context)
+            this.setHasFixedSize(true)
+            this.layoutManager = layoutManager
+            this.adapter = videoListAdapter
         }
+
+        recyclerView.addOnScrollListener(object : PaginationListener(layoutManager) {
+            override fun isLastPage(): Boolean {
+                return nextPageToken.isNullOrBlank()
+            }
+
+            override fun isLoading(): Boolean {
+                return isLoadingNewVideoItems
+            }
+
+            override fun loadMoreItems() {
+                isLoadingNewVideoItems = true
+                recyclerView.post { videoListAdapter.setLoadingState() }
+                loader.onLoadMoreVideoItems(nextPageToken)
+            }
+        })
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -56,17 +81,35 @@ class VideoItemsHandler(private val recyclerView: RecyclerView) : VideoItemInter
     private fun findVideoItemView(videoItem: VideoItem, onFound: ((VideoItemBinding) -> Unit)) {
         for (index: Int in 0 until recyclerView.childCount) {
             val position = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(index))
-            if (videoItems!![position].videoId == videoItem.videoId) {
-                val videoItemView = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideosListAdapter.ViewHolder).videoItem
+
+            if (position == RecyclerView.NO_POSITION)
+                continue
+
+            if (isLoadingNewVideoItems && videoListAdapter.videos.lastIndex == position)
+                // When new video items are loading, the last list item is empty Video item, because it is for "loading item"
+                continue
+
+            if (videoListAdapter.videos[position].videoId == videoItem.videoId) {
+                val videoItemView = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideosListAdapter.VideoViewHolder).videoItem
                 val binding = DataBindingUtil.getBinding<VideoItemBinding>(videoItemView)
                 binding?.let { onFound.invoke(it) }
             }
         }
     }
 
-    fun setVideoItems(videoItems: List<VideoItem>) {
-        this.videoItems = videoItems
-        recyclerView.adapter = VideosListAdapter(videoItems, this)
+    fun setNewVideoItems(videoItems: List<VideoItem>, nextPageToken: String?) {
+        videoListAdapter.setNewVideoItems(videoItems)
+        isLoadingNewVideoItems = false
+        this.nextPageToken = nextPageToken
+    }
+
+    fun addMoreVideoItems(videoItems: List<VideoItem>, nextPageToken: String?) {
+        if (isLoadingNewVideoItems) {
+            videoListAdapter.removeLoadingState()
+            isLoadingNewVideoItems = false
+        }
+        videoListAdapter.addVideoItems(videoItems)
+        this.nextPageToken = nextPageToken
     }
 
     fun onStart() {
