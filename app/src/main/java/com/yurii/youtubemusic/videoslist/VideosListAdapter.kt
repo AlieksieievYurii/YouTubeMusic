@@ -148,10 +148,8 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
             val totalItemCount = layoutManager.itemCount
             val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
-            if (!isLoading() && !isLastPage()) {
-                if (visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0) {
-                    loadMoreItems()
-                }
+            if (!isLoading() && !isLastPage() && visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0) {
+                loadMoreItems()
             }
         }
 
