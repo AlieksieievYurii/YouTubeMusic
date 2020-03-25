@@ -7,253 +7,121 @@ import com.google.api.client.http.HttpTransport
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
-import com.google.api.services.youtube.model.Playlist
-import com.google.api.services.youtube.model.PlaylistItem
-import com.google.api.services.youtube.model.Video
+import com.google.api.services.youtube.model.*
 import java.lang.Exception
-import java.lang.IllegalStateException
 
-class YouTubeService {
-    class PlayLists private constructor(
-        private val googleAccountCredential: GoogleAccountCredential?,
-        private val onResult: ((List<Playlist>) -> Unit)?,
-        private val onError: ((error: Exception) -> Unit)?
-    ) {
+typealias ResultCallBack<T> = (result: T, nextPageToken: String?) -> Unit
+typealias ErrorCallBack = (error: Exception) -> Unit
 
-        fun execute() {
-            googleAccountCredential?.let {
-                PlayListsTask(it, onResult, onError).execute()
-            } ?: throw IllegalStateException("Please set google account credential")
+class YouTubeService private constructor() {
+    class MyPlayLists(googleAccountCredential: GoogleAccountCredential) : AsyncTask<String, Void, PlaylistListResponse>()  {
+        private var onResult: ResultCallBack<List<Playlist>>? = null
+        private var onError: ErrorCallBack? = null
+        private val service: YouTube
+
+        init {
+            val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
+            val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
+            service = YouTube.Builder(transport, jsonFactory, googleAccountCredential).build()
         }
 
-        private class PlayListsTask(
-            googleAccountCredential: GoogleAccountCredential,
-            val onResult: ((List<Playlist>) -> Unit)?,
-            val onError: ((error: Exception) -> Unit)?
-        ) : AsyncTask<Void, Void, List<Playlist>>() {
+        fun setOnResult(onResult: ResultCallBack<List<Playlist>>) = apply { this.onResult = onResult }
+        fun setOnError(onError: ErrorCallBack) = apply { this.onError = onError }
 
-            private val service: YouTube
-            private var lastError: Exception? = null
-
-            init {
-                val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
-                val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
-                service = YouTube.Builder(transport, jsonFactory, googleAccountCredential)
-                    .setApplicationName("YouTube Data API PlayLists")
-                    .build()
-            }
-
-            override fun doInBackground(vararg params: Void?): List<Playlist>? {
-                return try {
-                    getPlayLists()
-                } catch (error: Exception) {
-                    lastError = error
-                    cancel(true)
-                    null
-                }
-            }
-
-            override fun onPostExecute(result: List<Playlist>?) {
-                result?.let {
-                    onResult?.invoke(it)
-                }
-            }
-
-            private fun getPlayLists(): List<Playlist> =
+        override fun doInBackground(vararg params: String): PlaylistListResponse? {
+            return try {
                 service.playlists().list("snippet,contentDetails")
                     .setMine(true)
-                    .setMaxResults(50)
-                    .execute().items
-            //TODO Implement mechanism which obtains all items if results size is more than 50
-
-            override fun onCancelled() {
-                if (lastError != null && onError != null)
-                    onError.invoke(lastError!!)
+                    .setPageToken(params[0]) // First parameter must be a page token
+                    .setMaxResults(15)
+                    .execute()
+            } catch (error: Exception) {
+                onError?.invoke(error)
+                cancel(true)
+                null
             }
-
         }
 
-        data class Builder(
-            var googleAccountCredential: GoogleAccountCredential? = null,
-            var onResult: ((List<Playlist>) -> Unit)? = null,
-            var onError: ((error: Exception) -> Unit)? = null
-        ) {
+        override fun onPostExecute(result: PlaylistListResponse?) {
+            result?.let { onResult?.invoke(it.items, it.nextPageToken) }
+        }
 
-            fun googleAccountCredential(googleAccountCredential: GoogleAccountCredential) = apply {
-                this.googleAccountCredential = googleAccountCredential
-            }
-
-            fun onResult(onResult: ((List<Playlist>) -> Unit)) = apply {
-                this.onResult = onResult
-            }
-
-            fun onError(onError: ((error: Exception) -> Unit)?) = apply {
-                this.onError = onError
-            }
-
-            fun build() = PlayLists(googleAccountCredential, onResult, onError)
+        fun execute(pageToken: String? = null) {
+            super.execute(pageToken)
         }
     }
 
-    class PlayListVideos private constructor(
-        private val googleAccountCredential: GoogleAccountCredential?,
-        private val playListId: String?,
-        private val onResult: ((List<PlaylistItem>) -> Unit)?,
-        private val onError: ((error: Exception) -> Unit)?
-    ) {
+    class PlayListItems(googleAccountCredential: GoogleAccountCredential) : AsyncTask<String, Void, PlaylistItemListResponse?>() {
+        private var onResult: ResultCallBack<List<PlaylistItem>>? = null
+        private var onError: ErrorCallBack? = null
+        private val service: YouTube
 
-        fun execute() {
-            googleAccountCredential?.let { credential: GoogleAccountCredential ->
-                playListId?.let { PlayListVideosTask(credential, onResult, onError).execute(it) }
-                    ?: throw  IllegalStateException("Please set playList id")
-            } ?: throw IllegalStateException("Please set google account credential")
+        init {
+            val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
+            val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
+            service = YouTube.Builder(transport, jsonFactory, googleAccountCredential).build()
         }
 
-        private class PlayListVideosTask(
-            googleAccountCredential: GoogleAccountCredential?,
-            val onResult: ((List<PlaylistItem>) -> Unit)?,
-            val onError: ((error: Exception) -> Unit)?
-        ) : AsyncTask<String, Void, List<PlaylistItem>>() {
+        fun setOnResult(onResult: ResultCallBack<List<PlaylistItem>>) = apply { this.onResult = onResult }
+        fun setOnError(onError: ErrorCallBack) = apply { this.onError = onError }
 
-            private val service: YouTube
-            private var lastError: Exception? = null
+        fun execute(playListId: String, pageToken: String? = null) {
+          super.execute(playListId, pageToken)
+        }
 
-            init {
-                val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
-                val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
-                service = YouTube.Builder(transport, jsonFactory, googleAccountCredential)
-                    .setApplicationName("YouTube Data API PlayList items")
-                    .build()
-            }
-
-            override fun doInBackground(vararg params: String): List<PlaylistItem>? {
-                return try {
-                    getPlayListVideos(params.first())
-                } catch (error: Exception) {
-                    lastError = error
-                    cancel(true)
-                    null
-                }
-            }
-
-            private fun getPlayListVideos(playListId: String): List<PlaylistItem> =
-                //TODO Implement pagination
+        override fun doInBackground(vararg params: String): PlaylistItemListResponse? {
+            return try {
                 service.playlistItems().list("snippet")
-                    .setPlaylistId(playListId)
-                    .setMaxResults(50)
-                    .execute().items
-
-
-            override fun onPostExecute(result: List<PlaylistItem>?) {
-                result?.let {
-                    onResult?.invoke(it)
-                }
-            }
-
-            override fun onCancelled() {
-                if (lastError != null && onError != null)
-                    onError.invoke(lastError!!)
+                    .setPlaylistId(params[0]) // First parameter must be a playlist id
+                    .setMaxResults(10)
+                    .setPageToken(params[1]) // Second parameter must be a page token
+                    .execute()
+            } catch (error: Exception) {
+                onError?.invoke(error)
+                cancel(true)
+                null
             }
         }
 
-        data class Builder(
-            var googleAccountCredential: GoogleAccountCredential? = null,
-            var playListId: String? = null,
-            var onResult: ((List<PlaylistItem>) -> Unit)? = null,
-            var onError: ((error: Exception) -> Unit)? = null
-        ) {
-            fun googleAccountCredential(googleAccountCredential: GoogleAccountCredential) = apply {
-                this.googleAccountCredential = googleAccountCredential
-            }
-
-            fun playListId(playListId: String) = apply {
-                this.playListId = playListId
-            }
-
-            fun onResult(onResult: ((List<PlaylistItem>) -> Unit)) = apply {
-                this.onResult = onResult
-            }
-
-            fun onError(onError: ((error: Exception) -> Unit)?) = apply {
-                this.onError = onError
-            }
-
-            fun build() = PlayListVideos(googleAccountCredential, playListId, onResult, onError)
+        override fun onPostExecute(result: PlaylistItemListResponse?) {
+            result?.let { onResult?.invoke(it.items, it.nextPageToken) }
         }
+
     }
 
-    class VideoDetails private constructor(
-        private val googleAccountCredential: GoogleAccountCredential?,
-        private val videoIds: List<String>?,
-        private val onResult: ((List<Video>) -> Unit)?,
-        private val onError: ((error: Exception) -> Unit)?
-    ) {
+    class VideoDetails(googleAccountCredential: GoogleAccountCredential) : AsyncTask<String, Void, VideoListResponse?>() {
+        private var onResult: ResultCallBack<List<Video>>? = null
+        private var onError: ErrorCallBack? = null
+        private val service: YouTube
 
-        fun execute() {
-            googleAccountCredential?.let {
-                mCredentials ->
-                videoIds?.let {
-                    VideoDetailsTask(mCredentials, onResult, onError).execute(*videoIds.toTypedArray())
-                } ?: throw IllegalStateException("Pass list of video ids")
-            } ?: throw IllegalStateException("Please set google account credential")
+        init {
+            val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
+            val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
+            service = YouTube.Builder(transport, jsonFactory, googleAccountCredential).build()
         }
 
-        private class VideoDetailsTask(
-            private val googleAccountCredential: GoogleAccountCredential?,
-            private val onResult: ((List<Video>) -> Unit)?,
-            private val onError: ((error: Exception) -> Unit)?
-        ) : AsyncTask<String, Void, List<Video>>() {
+        fun setOnResult(onResult: ResultCallBack<List<Video>>) = apply { this.onResult = onResult }
+        fun setOnError(onError: ErrorCallBack) = apply { this.onError = onError }
 
-            private val service: YouTube
-            private var lastError: Exception? = null
-
-            init {
-                val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
-                val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
-                service = YouTube.Builder(transport, jsonFactory, googleAccountCredential)
-                    .setApplicationName("YouTube Data API Video details")
-                    .build()
+        override fun doInBackground(vararg params: String?): VideoListResponse? {
+            return try {
+                service.videos().list("snippet,statistics")
+                    .setId(params[0]) // Must be video ids
+                    .setPageToken(params[1]) // Must be a page token
+                    .execute()
+            } catch (error: Exception) {
+                onError?.invoke(error)
+                cancel(true)
+                null
             }
-
-            override fun doInBackground(vararg params: String): List<Video> {
-                return service.videos().list("snippet,statistics").setId(params.joinToString()).execute().items
-            }
-
-            override fun onPostExecute(result: List<Video>) {
-                onResult?.invoke(result)
-
-            }
-
-            override fun onCancelled() {
-                if (lastError != null && onError != null)
-                    onError.invoke(lastError!!)
-            }
-
         }
 
-        data class Builder(
-            var googleAccountCredential: GoogleAccountCredential? = null,
-            var videoIds: List<String>? = null,
-            var onResult: ((List<Video>) -> Unit)? = null,
-            var onError: ((error: Exception) -> Unit)? = null
-        ) {
-            fun googleAccountCredential(googleAccountCredential: GoogleAccountCredential) = apply {
-                this.googleAccountCredential = googleAccountCredential
-            }
+        override fun onPostExecute(result: VideoListResponse?) {
+            result?.let { onResult?.invoke(it.items, it.nextPageToken) }
+        }
 
-            fun videoIds(videoIds: List<String>?) = apply {
-                this.videoIds = videoIds
-            }
-
-            fun onResult(onResult: ((List<Video>) -> Unit)) = apply {
-                this.onResult = onResult
-            }
-
-            fun onError(onError: ((error: Exception) -> Unit)?) = apply {
-                this.onError = onError
-            }
-
-            fun build() = VideoDetails(googleAccountCredential, videoIds, onResult, onError)
+        fun execute(ids: List<String>, pageToken: String? = null) {
+            super.execute(ids.joinToString(), pageToken)
         }
     }
 }

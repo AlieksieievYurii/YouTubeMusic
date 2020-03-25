@@ -15,15 +15,13 @@ import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItem
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
+import com.yurii.youtubemusic.dialogplaylists.PlayListsResultCallBack
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.YouTubeService
-import com.yurii.youtubemusic.utilities.Authorization
-import com.yurii.youtubemusic.utilities.ErrorSnackBar
-import com.yurii.youtubemusic.utilities.Preferences
-import com.yurii.youtubemusic.utilities.VideoItemsHandler
+import com.yurii.youtubemusic.utilities.*
 import java.lang.IllegalStateException
 
-class YouTubeMusicsFragment : Fragment() {
+class YouTubeMusicsFragment : Fragment(), Loader {
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videoItemsHandler: VideoItemsHandler
     private lateinit var mCredential: GoogleAccountCredential
@@ -36,7 +34,7 @@ class YouTubeMusicsFragment : Fragment() {
         binding.btnSelectPlayList.setOnClickListener {
             selectPlayList()
         }
-        videoItemsHandler = VideoItemsHandler(binding.videos)
+        videoItemsHandler = VideoItemsHandler(binding.videos, this)
         return binding.root
     }
 
@@ -49,16 +47,16 @@ class YouTubeMusicsFragment : Fragment() {
 
     private fun selectPlayList() {
         val playListsDialogFragment = PlayListsDialogFragment(object : PlayListsDialogFragment.OnPlayLists {
-            override fun getPlayLists(onResult: (playLists: List<Playlist>) -> Unit) {
-                YouTubeService.PlayLists.Builder(mCredential)
-                    .onResult(onResult)
-                    .onError {
-                        ErrorSnackBar.show(binding.root, it.message!!)
-                        if (it is UserRecoverableAuthIOException) {
-                            startActivityForResult(it.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
-                        } else
-                            Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
-                    }.build().execute()
+            override fun getPlayLists(onResult: PlayListsResultCallBack, nextTokenPage: String?) {
+                YouTubeService.MyPlayLists(mCredential).setOnResult { result, nextPageToken ->
+                    onResult.invoke(result, nextPageToken)
+                }.setOnError {
+                    ErrorSnackBar.show(binding.root, it.message!!)
+                    if (it is UserRecoverableAuthIOException) {
+                        startActivityForResult(it.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
+                    } else
+                        Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
+                }.execute(nextTokenPage)
             }
         })
         playListsDialogFragment.onSelectPlaylist = {
@@ -66,7 +64,7 @@ class YouTubeMusicsFragment : Fragment() {
                 alterSelectionPlayListButton()
 
             Preferences.setSelectedPlayList(context!!, it)
-            loadListOfVideo(it)
+            loadVideoItems(it)
         }
 
         playListsDialogFragment.showPlayLists(activity!!.supportFragmentManager)
@@ -77,7 +75,7 @@ class YouTubeMusicsFragment : Fragment() {
         val playList = Preferences.getSelectedPlayList(context!!)
         videoItemsHandler.onStart()
         playList?.let {
-            loadListOfVideo(it)
+            loadVideoItems(it)
         } ?: showOptionToSelectPlayListFirstTime()
     }
 
@@ -102,35 +100,50 @@ class YouTubeMusicsFragment : Fragment() {
         }
     }
 
-    private fun loadListOfVideo(playList: Playlist) {
-        binding.progressBar.visibility = View.VISIBLE
-        binding.videos.visibility = View.GONE
-        YouTubeService.PlayListVideos.Builder(mCredential)
-            .playListId(playList.id)
-            .onResult { loadDetails(it) }
-            .onError {
-                ErrorSnackBar.show(binding.root, it.message!!)
-            }.build().execute()
+    override fun onLoadMoreVideoItems(pageToken: String?) {
+        val playList = Preferences.getSelectedPlayList(context!!)
+        playList?.let {
+            loadVideoItems(it, pageToken, loadMore = true)
+        }
     }
 
-    private fun loadDetails(videos: List<PlaylistItem>) {
+    private fun loadVideoItems(playList: Playlist, pageToken: String? = null, loadMore: Boolean = false) {
+        if (!loadMore) {
+            binding.progressBar.visibility = View.VISIBLE
+            binding.videos.visibility = View.GONE
+        }
+
+        YouTubeService.PlayListItems(mCredential)
+            .setOnResult { onResult, nextPageToken ->
+                loadDetails(onResult, nextPageToken, loadMore)
+            }
+            .setOnError { ErrorSnackBar.show(binding.root, it.message!!) }
+            .execute(playList.id, pageToken = pageToken)
+    }
+
+    private fun loadDetails(videos: List<PlaylistItem>, nextPageToken: String?, loadMore: Boolean = false) {
         val videoIds: List<String> = videos.map { it.snippet.resourceId.videoId }
-        YouTubeService.VideoDetails.Builder(mCredential)
-            .videoIds(videoIds)
-            .onResult { videoList ->
-                val videoItems = videoList.map {
+
+        YouTubeService.VideoDetails(mCredential)
+            .setOnResult { result, _ ->
+                val videoItems = result.map {
                     VideoItem(
                         videoId = it.id,
                         title = it.snippet.title,
                         authorChannelTitle = it.snippet.channelTitle,
-                        thumbnail = it.snippet.thumbnails.default.url)
+                        thumbnail = it.snippet.thumbnails.default.url
+                    )
                 }
-                videoItemsHandler.setVideoItems(videoItems)
-                binding.progressBar.visibility = View.GONE
-                binding.videos.visibility = View.VISIBLE
+                if (loadMore)
+                    videoItemsHandler.addMoreVideoItems(videoItems, nextPageToken)
+                else {
+                    videoItemsHandler.setNewVideoItems(videoItems, nextPageToken)
+                    binding.progressBar.visibility = View.GONE
+                    binding.videos.visibility = View.VISIBLE
+                }
             }
-            .onError {
+            .setOnError {
                 ErrorSnackBar.show(binding.root, it.message!!)
-            }.build().execute()
+            }.execute(videoIds)
     }
 }
