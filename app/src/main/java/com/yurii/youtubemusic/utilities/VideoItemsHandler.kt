@@ -11,8 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.services.DownloaderInteroperableInterface
 import com.yurii.youtubemusic.services.MusicDownloaderService
-import com.yurii.youtubemusic.videoslist.PaginationListener
+
 import com.yurii.youtubemusic.videoslist.VideoItemInterface
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 
@@ -34,7 +35,7 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
             this.adapter = videoListAdapter
         }
 
-        recyclerView.addOnScrollListener(object : PaginationListener(layoutManager) {
+        recyclerView.addOnScrollListener(object : VideosListAdapter.PaginationListener(layoutManager) {
             override fun isLastPage(): Boolean {
                 return nextPageToken.isNullOrBlank()
             }
@@ -86,11 +87,11 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
                 continue
 
             if (isLoadingNewVideoItems && videoListAdapter.videos.lastIndex == position)
-                // When new video items are loading, the last list item is empty Video item, because it is for "loading item"
+            // When new video items are loading, the last list item is empty Video item, because it is for "loading item"
                 continue
 
             if (videoListAdapter.videos[position].videoId == videoItem.videoId) {
-                val videoItemView = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideosListAdapter.VideoViewHolder).videoItem
+                val videoItemView = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideosListAdapter.VideoViewHolder).videoItemView
                 val binding = DataBindingUtil.getBinding<ItemVideoBinding>(videoItemView)
                 binding?.let { onFound.invoke(it) }
             }
@@ -141,8 +142,11 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
         return false
     }
 
-    override fun isLoading(videoItem: VideoItem): Boolean {
-        MusicDownloaderService.Instance.serviceInterface?.let { return it.isLoading(videoItem) }
-        return false
-    }
+    override fun isLoading(videoItem: VideoItem): Boolean =
+        MusicDownloaderService.Instance.serviceInterface?.isLoading(videoItem) ?: false
+
+
+    override fun getCurrentProgress(videoItem: VideoItem): Int =
+        MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem) ?: DownloaderInteroperableInterface.NO_PROGRESS
+
 }

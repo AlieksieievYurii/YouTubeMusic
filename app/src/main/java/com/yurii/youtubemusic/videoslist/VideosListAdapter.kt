@@ -11,19 +11,20 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemLoadingBinding
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.services.DownloaderInteroperableInterface
 import java.lang.IllegalStateException
 
 interface VideoItemInterface {
     fun onItemClickDownload(videoItem: VideoItem)
     fun exists(videoItem: VideoItem): Boolean
     fun isLoading(videoItem: VideoItem): Boolean
+    fun getCurrentProgress(videoItem: VideoItem): Int
 }
 
 const val VIEW_TYPE_LOADING: Int = 0
 const val VIEW_TYPE_NORMAL: Int = 1
 
-class VideosListAdapter(private val videoItemInterface: VideoItemInterface) :
-    RecyclerView.Adapter<BaseViewHolder>() {
+class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<VideosListAdapter.BaseViewHolder>() {
     val videos: MutableList<VideoItem> = mutableListOf()
     private var isLoaderVisible: Boolean = false
 
@@ -71,62 +72,89 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) :
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         val videoItem = videos[position]
         if (getItemViewType(position) == VIEW_TYPE_NORMAL) {
-            val binding = DataBindingUtil.getBinding<ItemVideoBinding>((holder as VideoViewHolder).videoItem)
-            binding?.let { videoItemView ->
-                videoItemView.title.text = videoItem.title
-                videoItemView.channelTitle.text = videoItem.authorChannelTitle
-                Picasso.get().load(videoItem.thumbnail).into(videoItemView.thumbnail)
-                if (!videoItemInterface.exists(videoItem)) {
-                    binding.download.setOnClickListener {
+            val videoViewHolder = holder as VideoViewHolder
+            when {
+                videoItemInterface.exists(videoItem) -> videoViewHolder.bind(videoItem, VideoViewHolder.EXISTS)
+                videoItemInterface.isLoading(videoItem) -> {
+                    videoItem.downloadingProgress = videoItemInterface.getCurrentProgress(videoItem)
+                    videoViewHolder.bind(videoItem, VideoViewHolder.IS_LOADING)}
+                else -> videoViewHolder.let { viewHolder ->
+                    viewHolder.bind(videoItem, VideoViewHolder.DOWNLOAD)
+                    viewHolder.setOnDownloadClickListener(View.OnClickListener {
                         videoItemInterface.onItemClickDownload(videoItem)
-                        setLoadingState(videoItemView)
-                    }
-                    if (videoItemInterface.isLoading(videoItem))
-                        setLoadingState(videoItemView)
-                    else
-                        setReadyToDownloadState(videoItemView)
-                } else videoItemView.download.visibility = View.GONE
-            } ?: throw IllegalStateException("PlayListItem binding item cannot be null")
-        }
-    }
-
-    private fun setReadyToDownloadState(binding: ItemVideoBinding) {
-        binding.download.visibility = View.VISIBLE
-        binding.loading.visibility = View.GONE
-        binding.progressBar.visibility = View.GONE
-    }
-
-    private fun setLoadingState(binding: ItemVideoBinding) {
-        binding.download.visibility = View.GONE
-        binding.loading.visibility = View.VISIBLE
-        binding.progressBar.visibility = View.GONE
-    }
-
-    class VideoViewHolder(val videoItem: View) : BaseViewHolder(videoItem)
-    class LoadingViewHolder(loadingView: View) : BaseViewHolder(loadingView)
-}
-
-abstract class BaseViewHolder(val view: View) : RecyclerView.ViewHolder(view)
-
-abstract class PaginationListener(private val layoutManager: LinearLayoutManager) : RecyclerView.OnScrollListener() {
-
-    abstract fun isLastPage(): Boolean
-
-    abstract fun isLoading(): Boolean
-
-    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-        super.onScrolled(recyclerView, dx, dy)
-
-        val visibleItemCount = layoutManager.childCount
-        val totalItemCount = layoutManager.itemCount
-        val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
-        if (!isLoading() && !isLastPage()) {
-            if (visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0) {
-                loadMoreItems()
+                        viewHolder.bind(videoItem, VideoViewHolder.IS_LOADING)
+                    })
+                }
             }
         }
     }
 
-    abstract fun loadMoreItems()
+    class VideoViewHolder(val videoItemView: View) : BaseViewHolder(videoItemView) {
+        companion object {
+            const val DOWNLOAD: Int = -1
+            const val EXISTS: Int = 0
+            const val IS_LOADING: Int = 1
+        }
+
+        private val binding = DataBindingUtil.getBinding<ItemVideoBinding>(videoItemView)
+        fun bind(videoItem: VideoItem, mode: Int = DOWNLOAD) {
+            binding?.let {
+                it.title.text = videoItem.title
+                it.channelTitle.text = videoItem.authorChannelTitle
+                Picasso.get().load(videoItem.thumbnail).into(it.thumbnail)
+
+                when (mode) {
+                    EXISTS -> {
+                        it.download.visibility = View.GONE
+                        it.loading.visibility = View.GONE
+                        it.progressBar.visibility = View.GONE
+                    }
+                    IS_LOADING -> {
+                        it.download.visibility = View.GONE
+                        it.loading.visibility = View.VISIBLE
+                        it.progressBar.visibility = View.VISIBLE
+                        if (videoItem.downloadingProgress != DownloaderInteroperableInterface.NO_PROGRESS)
+                            binding.progressBar.progress = videoItem.downloadingProgress
+                    }
+                    DOWNLOAD -> {
+                        binding.download.visibility = View.VISIBLE
+                        binding.loading.visibility = View.GONE
+                        binding.progressBar.visibility = View.GONE
+                    }
+                }
+            }
+
+        }
+
+        fun setOnDownloadClickListener(onClickListener: View.OnClickListener) {
+            binding?.apply { download.setOnClickListener(onClickListener) }
+        }
+    }
+
+    class LoadingViewHolder(loadingView: View) : BaseViewHolder(loadingView)
+
+    abstract class BaseViewHolder(val view: View) : RecyclerView.ViewHolder(view)
+
+    abstract class PaginationListener(private val layoutManager: LinearLayoutManager) : RecyclerView.OnScrollListener() {
+
+        abstract fun isLastPage(): Boolean
+
+        abstract fun isLoading(): Boolean
+
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            val visibleItemCount = layoutManager.childCount
+            val totalItemCount = layoutManager.itemCount
+            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+            if (!isLoading() && !isLastPage()) {
+                if (visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0) {
+                    loadMoreItems()
+                }
+            }
+        }
+
+        abstract fun loadMoreItems()
+    }
 }
