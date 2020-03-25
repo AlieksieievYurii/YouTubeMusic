@@ -32,8 +32,8 @@ class YouTubeService private constructor() {
             return try {
                 service.playlists().list("snippet,contentDetails")
                     .setMine(true)
-                    .setPageToken(params[0]) // params[0] must be page token
-                    .setMaxResults(10)
+                    .setPageToken(params[0]) // First parameter must be a page token
+                    .setMaxResults(15)
                     .execute()
             } catch (error: Exception) {
                 onError?.invoke(error)
@@ -72,9 +72,9 @@ class YouTubeService private constructor() {
         override fun doInBackground(vararg params: String): PlaylistItemListResponse? {
             return try {
                 service.playlistItems().list("snippet")
-                    .setPlaylistId(params[0]) // first parameter must be playlist id
+                    .setPlaylistId(params[0]) // First parameter must be a playlist id
                     .setMaxResults(10)
-                    .setPageToken(params[1]) // second parameter must be page token
+                    .setPageToken(params[1]) // Second parameter must be a page token
                     .execute()
             } catch (error: Exception) {
                 onError?.invoke(error)
@@ -106,8 +106,8 @@ class YouTubeService private constructor() {
         override fun doInBackground(vararg params: String?): VideoListResponse? {
             return try {
                 service.videos().list("snippet,statistics")
-                    .setId(params[0]) // Must be ids
-                    .setPageToken(params[1]) // Must be page token
+                    .setId(params[0]) // Must be video ids
+                    .setPageToken(params[1]) // Must be a page token
                     .execute()
             } catch (error: Exception) {
                 onError?.invoke(error)
