@@ -14,6 +14,13 @@ import com.yurii.youtubemusic.models.VideoItem
 import java.io.File
 import java.io.IOException
 
+interface DownloaderInteroperableInterface {
+    companion object {
+        const val NO_PROGRESS: Int = -1
+    }
+    fun isLoading(videoItem: VideoItem): Boolean
+    fun getProgress(videoItem: VideoItem): Int
+}
 
 class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
     companion object {
@@ -45,6 +52,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
         FormattedVideoTask { youtubeVideo, audioFormat ->
             youtubeVideo.downloadAsync(audioFormat, DataStorage.getMusicStorage(applicationContext), object : OnYoutubeDownloadListener {
                 override fun onDownloading(progress: Int) {
+                    videoItem.downloadingProgress = progress
                     localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_PROGRESS_ACTION).also {
                         it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
                         it.putExtra(EXTRA_PROGRESS, progress)
@@ -79,6 +87,9 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
     }
 
     override fun isLoading(videoItem: VideoItem): Boolean = executionVideoItems.find { it.videoId == videoItem.videoId } != null
+
+    override fun getProgress(videoItem: VideoItem): Int =
+        executionVideoItems.find { it.videoId == videoItem.videoId }?.downloadingProgress ?: DownloaderInteroperableInterface.NO_PROGRESS
 
     override fun onDestroy() {
         super.onDestroy()
