@@ -35,7 +35,7 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
             this.adapter = videoListAdapter
         }
 
-        recyclerView.addOnScrollListener(object : VideosListAdapter.PaginationListener(layoutManager) {
+        recyclerView.addOnScrollListener(object : PaginationListener(layoutManager) {
             override fun isLastPage(): Boolean {
                 return nextPageToken.isNullOrBlank()
             }

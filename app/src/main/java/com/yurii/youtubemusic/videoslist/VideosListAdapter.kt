@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.yurii.youtubemusic.R
@@ -12,6 +11,10 @@ import com.yurii.youtubemusic.databinding.ItemLoadingBinding
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.DownloaderInteroperableInterface
+import com.yurii.youtubemusic.utilities.BaseViewHolder
+import com.yurii.youtubemusic.utilities.LoadingViewHolder
+import com.yurii.youtubemusic.utilities.VIEW_TYPE_LOADING
+import com.yurii.youtubemusic.utilities.VIEW_TYPE_NORMAL
 import java.lang.IllegalStateException
 
 interface VideoItemInterface {
@@ -21,10 +24,8 @@ interface VideoItemInterface {
     fun getCurrentProgress(videoItem: VideoItem): Int
 }
 
-const val VIEW_TYPE_LOADING: Int = 0
-const val VIEW_TYPE_NORMAL: Int = 1
 
-class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<VideosListAdapter.BaseViewHolder>() {
+class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
     val videos: MutableList<VideoItem> = mutableListOf()
     private var isLoaderVisible: Boolean = false
 
@@ -129,30 +130,5 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
         fun setOnDownloadClickListener(onClickListener: View.OnClickListener) {
             binding?.apply { download.setOnClickListener(onClickListener) }
         }
-    }
-
-    class LoadingViewHolder(loadingView: View) : BaseViewHolder(loadingView)
-
-    abstract class BaseViewHolder(val view: View) : RecyclerView.ViewHolder(view)
-
-    abstract class PaginationListener(private val layoutManager: LinearLayoutManager) : RecyclerView.OnScrollListener() {
-
-        abstract fun isLastPage(): Boolean
-
-        abstract fun isLoading(): Boolean
-
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-
-            val visibleItemCount = layoutManager.childCount
-            val totalItemCount = layoutManager.itemCount
-            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
-            if (!isLoading() && !isLastPage() && visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0) {
-                loadMoreItems()
-            }
-        }
-
-        abstract fun loadMoreItems()
     }
 }
