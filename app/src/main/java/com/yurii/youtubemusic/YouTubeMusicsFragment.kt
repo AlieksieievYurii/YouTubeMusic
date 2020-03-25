@@ -15,6 +15,7 @@ import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItem
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
+import com.yurii.youtubemusic.dialogplaylists.PlayListsResultCallBack
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.YouTubeService
 import com.yurii.youtubemusic.utilities.*
@@ -46,16 +47,16 @@ class YouTubeMusicsFragment : Fragment(), Loader {
 
     private fun selectPlayList() {
         val playListsDialogFragment = PlayListsDialogFragment(object : PlayListsDialogFragment.OnPlayLists {
-            override fun getPlayLists(onResult: (playLists: List<Playlist>) -> Unit) {
+            override fun getPlayLists(onResult: PlayListsResultCallBack, nextTokenPage: String?) {
                 YouTubeService.MyPlayLists(mCredential).setOnResult { result, nextPageToken ->
-                    onResult.invoke(result)
+                    onResult.invoke(result, nextPageToken)
                 }.setOnError {
                     ErrorSnackBar.show(binding.root, it.message!!)
                     if (it is UserRecoverableAuthIOException) {
                         startActivityForResult(it.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
                     } else
                         Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
-                }.execute()
+                }.execute(nextTokenPage)
             }
         })
         playListsDialogFragment.onSelectPlaylist = {
