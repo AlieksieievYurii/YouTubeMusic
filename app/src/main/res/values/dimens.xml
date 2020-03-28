@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="defMargin">5dp</dimen>
+    <dimen name="smallMargin">3dp</dimen>
+
+    <dimen name="defCornerRadius">5dp</dimen>
+
+    <dimen name="defPadding">5dp</dimen>
+</resources>
