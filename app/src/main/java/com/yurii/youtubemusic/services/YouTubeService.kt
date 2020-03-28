@@ -105,7 +105,7 @@ class YouTubeService private constructor() {
 
         override fun doInBackground(vararg params: String?): VideoListResponse? {
             return try {
-                service.videos().list("snippet,statistics")
+                service.videos().list("snippet,statistics,contentDetails")
                     .setId(params[0]) // Must be video ids
                     .setPageToken(params[1]) // Must be a page token
                     .execute()
