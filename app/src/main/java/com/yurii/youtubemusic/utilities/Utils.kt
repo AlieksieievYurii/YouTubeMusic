@@ -12,6 +12,8 @@ import com.google.api.services.youtube.YouTubeScopes
 import com.google.api.services.youtube.model.Playlist
 import org.threeten.bp.Duration
 import java.io.File
+import java.math.BigInteger
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 const val DEFAULT_SHARED_PREFERENCES_FILE: String = "com.yurii.youtubemusic.shared.preferences"
@@ -95,6 +97,36 @@ fun parseDurationToHumanView(text: String): String {
     val secondsString = if (seconds < 10) "0$seconds" else seconds.toString()
 
     return if (hours > 0) "$hours:$minutes:$secondsString" else "$minutes:$secondsString"
+}
+
+fun bigIntegerToShortCutSuffix(value: BigInteger): String {
+    return longToShortCutSuffix(value.toLong())
+}
+
+fun longToShortCutSuffix(value: Long): String {
+    val suffixes: TreeMap<Long, Char> = TreeMap()
+    suffixes[1_000L] = 'K'
+    suffixes[1_000_000L] = 'M'
+    suffixes[1_000_000_000L] = 'B'
+    suffixes[1_000_000_000_000L] = 'T'
+    suffixes[1_000_000_000_000_000L] = 'P'
+
+    if (value == java.lang.Long.MIN_VALUE) return longToShortCutSuffix(java.lang.Long.MIN_VALUE + 1)
+    if (value < 0) return "-${longToShortCutSuffix(-value)}"
+    if (value < 1000) return value.toString()
+
+    val e = suffixes.floorEntry(value)
+    val divideBy: Long = e!!.key
+    val suffix: Char = e.value
+
+    val truncated: Long = value / (divideBy / 10)
+    val hasDecimal: Boolean = truncated < 100 && truncated / 10.0 != (truncated / 10).toDouble()
+    return if (hasDecimal) "${truncated / 10.0}$suffix" else "${truncated / 10}$suffix"
+}
+
+fun calculateLikeBarValue(likeCount: BigInteger, disLikeCount: BigInteger): Int {
+    val sum = likeCount.plus(disLikeCount)
+    return if (sum.compareTo(BigInteger.ZERO) == 0) 50 else likeCount.multiply(BigInteger("100")).divide(sum).toInt()
 }
 
 
