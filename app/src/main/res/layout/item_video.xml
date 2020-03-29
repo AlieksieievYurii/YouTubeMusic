@@ -95,7 +95,7 @@
                     android:layout_below="@id/channel_title"
                     android:layout_marginStart="@dimen/defMargin"
                     android:layout_toEndOf="@id/thumbnail"
-                    android:text="@{@string/label_views_count(videoItem.viewCount)}"
+                    android:text="@{@string/label_views_count(UtilsKt.bigIntegerToShortCutSuffix(videoItem.viewCount))}"
                     tools:text="135K views" />
 
                 <ImageButton
@@ -120,8 +120,8 @@
                     android:layout_centerVertical="true"
                     android:layout_marginTop="@dimen/defMargin"
                     android:layout_marginEnd="25dp"
-                    tools:visibility="gone"
-                    android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}" />
+                    android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
+                    tools:visibility="gone" />
 
                 <ProgressBar
                     android:id="@+id/progress_bar"
@@ -133,23 +133,41 @@
                     android:max="100"
                     android:progress="@{videoItem.downloadingProgress}"
                     android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
-                    tools:visibility="gone"
-                    tools:progress="45" />
+                    tools:progress="45"
+                    tools:visibility="visible" />
             </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/details_part_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone">
+                android:paddingStart="@dimen/mediumPadding"
+                android:paddingEnd="@dimen/mediumPadding"
+                android:visibility="visible">
+
+                <FrameLayout
+                    android:id="@+id/layout_thumbs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/mediumMargin"
+                    android:layout_alignParentEnd="true">
+
+                    <include
+                        layout="@layout/layout_thumbs"
+                        app:dislikesCount="@{videoItem.disLikeCount}"
+                        app:likesCount="@{videoItem.likeCount}" />
+
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/tv_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
-                    android:text="@{videoItem.description}" />
+                    android:layout_below="@id/layout_thumbs"
+                    android:text="@{videoItem.description}"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:visibility="@{videoItem.description.empty ? View.GONE : View.VISIBLE}"
+                    tools:text="Video's description | Video's description" />
             </RelativeLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
