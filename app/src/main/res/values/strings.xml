@@ -5,10 +5,12 @@
     <string name="image_of_playlist">Image of playList</string>
     <string name="thumbnails_of_playlist">Thumbnails of playList</string>
     <string name="label_videos_count">%d videos</string>
-    <string name="label_views_count">%d views</string>
+    <string name="label_views_count">%s views</string>
     <string name="label_not_found_playlists">Not found playLists</string>
     <string name="content_description_empty_list_image">Empty list image</string>
     <string name="content_description_thumbnail_video">Thumbnail of video item</string>
     <string name="content_description_download_music">Download YouTube video as music</string>
     <string name="select_playlist">Select playList</string>
+    <string name="content_description_likes">Likes</string>
+    <string name="content_description_dislikes">Dislikes</string>
 </resources>
