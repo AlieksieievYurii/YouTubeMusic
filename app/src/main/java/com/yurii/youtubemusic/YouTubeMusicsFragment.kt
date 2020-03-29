@@ -133,6 +133,8 @@ class YouTubeMusicsFragment : Fragment(), Loader {
                         description = it.snippet.description,
                         duration = it.contentDetails.duration,
                         viewCount = it.statistics.viewCount,
+                        likeCount = it.statistics.likeCount,
+                        disLikeCount = it.statistics.dislikeCount,
                         authorChannelTitle = it.snippet.channelTitle,
                         thumbnail = it.snippet.thumbnails.default.url
                     )
