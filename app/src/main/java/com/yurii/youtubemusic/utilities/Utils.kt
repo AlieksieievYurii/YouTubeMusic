@@ -85,19 +85,17 @@ class Authorization private constructor() {
     }
 }
 
-class DateTime private constructor() {
-    companion object {
-        fun parseToHumanView(text: String): String {
-            val millis = Duration.parse(text).toMillis()
-            val hours = TimeUnit.MILLISECONDS.toHours(millis)
-            val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1)
-            val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1)
 
-            val secondsString = if (seconds < 10) "0$seconds" else seconds.toString()
+fun parseDurationToHumanView(text: String): String {
+    val millis = Duration.parse(text).toMillis()
+    val hours = TimeUnit.MILLISECONDS.toHours(millis)
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1)
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1)
 
-            return if (hours > 0) "$hours:$minutes:$secondsString" else "$minutes:$secondsString"
-        }
-    }
+    val secondsString = if (seconds < 10) "0$seconds" else seconds.toString()
+
+    return if (hours > 0) "$hours:$minutes:$secondsString" else "$minutes:$secondsString"
 }
+
 
 
