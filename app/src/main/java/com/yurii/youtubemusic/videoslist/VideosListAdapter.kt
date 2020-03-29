@@ -5,14 +5,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemLoadingBinding
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.DownloaderInteroperableInterface
 import com.yurii.youtubemusic.utilities.*
 import java.lang.IllegalStateException
+
+enum class ItemState {
+    DOWNLOAD, EXISTS, IS_LOADING
+}
 
 interface VideoItemInterface {
     fun onItemClickDownload(videoItem: VideoItem)
@@ -39,7 +41,7 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             VIEW_TYPE_NORMAL ->
-                VideoViewHolder(DataBindingUtil.inflate<ItemVideoBinding>(inflater, R.layout.item_video, parent, false).root) {
+                VideoViewHolder(DataBindingUtil.inflate(inflater, R.layout.item_video, parent, false)) {
                     notifyDataSetChanged()
                 }
             VIEW_TYPE_LOADING ->
@@ -86,91 +88,57 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
         if (getItemViewType(position) == VIEW_TYPE_NORMAL) {
             val videoViewHolder = holder as VideoViewHolder
             when {
-                videoItemInterface.exists(videoItem) -> videoViewHolder.bind(videoItem, position, mode = VideoViewHolder.EXISTS)
+                videoItemInterface.exists(videoItem) -> videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS)
                 videoItemInterface.isLoading(videoItem) -> {
                     videoItem.downloadingProgress = videoItemInterface.getCurrentProgress(videoItem)
-                    videoViewHolder.bind(videoItem, position, mode = VideoViewHolder.IS_LOADING)
+                    videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
                 }
                 else -> videoViewHolder.let { viewHolder ->
-                    viewHolder.bind(videoItem, position, mode = VideoViewHolder.DOWNLOAD)
+                    viewHolder.bind(videoItem, position, state = ItemState.DOWNLOAD)
                     viewHolder.setOnDownloadClickListener(View.OnClickListener {
                         videoItemInterface.onItemClickDownload(videoItem)
-                        viewHolder.bind(videoItem, position, mode = VideoViewHolder.IS_LOADING)
+                        viewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
                     })
                 }
             }
         }
     }
 
-    class VideoViewHolder(val videoItemView: View, private val onItemChange: ((position: Int) -> Unit)) : BaseViewHolder(videoItemView) {
-        companion object {
-            const val DOWNLOAD: Int = -1
-            const val EXISTS: Int = 0
-            const val IS_LOADING: Int = 1
-        }
-
-        private val binding = DataBindingUtil.getBinding<ItemVideoBinding>(videoItemView)
+    class VideoViewHolder(val videoItemVideoBinding: ItemVideoBinding, private val onItemChange: ((position: Int) -> Unit)) :
+        BaseViewHolder(videoItemVideoBinding.root) {
         private var isExpanded = false
 
-        fun bind(videoItem: VideoItem, position: Int, mode: Int = DOWNLOAD) {
-            binding?.let {
-                it.title.text = videoItem.title
-                it.channelTitle.text = videoItem.authorChannelTitle
-                it.tvDuration.text = DateTime.parseToHumanView(videoItem.duration!!)
-                it.tvAmountViews.text = "${videoItem.viewCount.toString()} views"
-                Picasso.get().load(videoItem.thumbnail).into(it.thumbnail)
-                when (mode) {
-                    EXISTS -> {
-                        it.download.visibility = View.GONE
-                        it.loading.visibility = View.GONE
-                        it.progressBar.visibility = View.GONE
-                    }
-                    IS_LOADING -> {
-                        it.download.visibility = View.GONE
-                        it.loading.visibility = View.VISIBLE
-                        it.progressBar.visibility = View.VISIBLE
-                        if (videoItem.downloadingProgress != DownloaderInteroperableInterface.NO_PROGRESS)
-                            binding.progressBar.progress = videoItem.downloadingProgress
-                    }
-                    DOWNLOAD -> {
-                        binding.download.visibility = View.VISIBLE
-                        binding.loading.visibility = View.GONE
-                        binding.progressBar.visibility = View.GONE
-                    }
-                }
+        fun bind(videoItem: VideoItem, position: Int, state: ItemState = ItemState.DOWNLOAD) {
+            videoItemVideoBinding.apply {
+                this.videoItem = videoItem
+                this.state = state
 
                 if (position == expandedPosition)
-                    expandDetails(videoItem).also { isExpanded = true }
+                    expandDetails().also { isExpanded = true }
                 else
                     collapseDetails().also { isExpanded = false }
 
-                binding.root.setOnClickListener {
+                this.root.setOnClickListener {
                     expandedPosition = if (isExpanded) NO_POSITION else position
                     if (expandedPosition == NO_POSITION)
                         collapseDetails().also { isExpanded = false; onItemChange.invoke(position) }
                     else
-                        expandDetails(videoItem).also { isExpanded = true; onItemChange.invoke(position) }
+                        expandDetails().also { isExpanded = true; onItemChange.invoke(position) }
                 }
-            }
+            }.executePendingBindings()
         }
 
 
-        private fun expandDetails(videoItem: VideoItem) {
-            binding?.let {
-                it.root.animate()
-                it.detailsPartLayout.visibility = View.VISIBLE
-                it.tvDescription.text = videoItem.description
-            }
+        private fun expandDetails() {
+            videoItemVideoBinding.detailsPartLayout.visibility = View.VISIBLE
         }
 
         private fun collapseDetails() {
-            binding?.let {
-                it.detailsPartLayout.visibility = View.GONE
-            }
+            videoItemVideoBinding.detailsPartLayout.visibility = View.GONE
         }
 
         fun setOnDownloadClickListener(onClickListener: View.OnClickListener) {
-            binding?.apply { download.setOnClickListener(onClickListener) }
+            videoItemVideoBinding.download.setOnClickListener(onClickListener)
         }
     }
 }
