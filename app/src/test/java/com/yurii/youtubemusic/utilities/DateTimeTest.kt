@@ -6,12 +6,12 @@ import org.junit.Test
 class DateTimeTestParsingISO8601TimeFormat {
 
     @Test
-    fun `Test minutes soconds with zero`() {
+    fun `Test minutes seconds with zero`() {
         val isoFormat = "PT9M3S"
         val minutes = 9
         val seconds = 3
 
-        assertEquals("$minutes:0$seconds", DateTime.parseToHumanView(isoFormat))
+        assertEquals("$minutes:0$seconds", parseDurationToHumanView(isoFormat))
     }
 
     @Test
@@ -21,7 +21,7 @@ class DateTimeTestParsingISO8601TimeFormat {
         val minutes = 0
         val seconds = 37
 
-        assertEquals("$hours:$minutes:$seconds", DateTime.parseToHumanView(isoFormat))
+        assertEquals("$hours:$minutes:$seconds", parseDurationToHumanView(isoFormat))
     }
 
     @Test
@@ -30,7 +30,7 @@ class DateTimeTestParsingISO8601TimeFormat {
         val minutes = 0
         val seconds = 30
 
-        assertEquals("$minutes:$seconds", DateTime.parseToHumanView(isoFormat))
+        assertEquals("$minutes:$seconds", parseDurationToHumanView(isoFormat))
     }
 
     @Test
@@ -39,6 +39,6 @@ class DateTimeTestParsingISO8601TimeFormat {
         val minutes = 4
         val seconds = 35
 
-        assertEquals("$minutes:$seconds", DateTime.parseToHumanView(isoFormat))
+        assertEquals("$minutes:$seconds", parseDurationToHumanView(isoFormat))
     }
 }
