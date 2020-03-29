@@ -104,7 +104,7 @@ class YouTubeMusicsFragment : Fragment(), Loader {
         val playList = Preferences.getSelectedPlayList(context!!)
         playList?.let {
             loadVideoItems(it, pageToken, loadMore = true)
-        }
+        } ?: throw IllegalStateException("Cannot load more, because there is not selected a playlist")
     }
 
     private fun loadVideoItems(playList: Playlist, pageToken: String? = null, loadMore: Boolean = false) {
@@ -130,6 +130,11 @@ class YouTubeMusicsFragment : Fragment(), Loader {
                     VideoItem(
                         videoId = it.id,
                         title = it.snippet.title,
+                        description = it.snippet.description,
+                        duration = it.contentDetails.duration,
+                        viewCount = it.statistics.viewCount,
+                        likeCount = it.statistics.likeCount,
+                        disLikeCount = it.statistics.dislikeCount,
                         authorChannelTitle = it.snippet.channelTitle,
                         thumbnail = it.snippet.thumbnails.default.url
                     )

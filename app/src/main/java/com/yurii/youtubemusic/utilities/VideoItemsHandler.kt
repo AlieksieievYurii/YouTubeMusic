@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.view.View
-import androidx.databinding.DataBindingUtil
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,6 +11,7 @@ import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.DownloaderInteroperableInterface
 import com.yurii.youtubemusic.services.MusicDownloaderService
+import com.yurii.youtubemusic.videoslist.ItemState
 
 import com.yurii.youtubemusic.videoslist.VideoItemInterface
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
@@ -59,10 +58,7 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
                 val progress = intent.getIntExtra(MusicDownloaderService.EXTRA_PROGRESS, 0)
                 videoItem?.let {
                     findVideoItemView(videoItem) {
-                        it.progressBar.apply {
-                            visibility = View.VISIBLE
-                            setProgress(progress)
-                        }
+                        it.progressBar.progress = progress
                     }
                 }
             }
@@ -70,9 +66,8 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as? VideoItem
                 videoItem?.let {
                     findVideoItemView(videoItem) {
-                        it.download.visibility = View.GONE
-                        it.progressBar.visibility = View.GONE
-                        it.loading.visibility = View.GONE
+                        it.state = ItemState.EXISTS
+                        it.executePendingBindings()
                     }
                 }
             }
@@ -87,13 +82,13 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
                 continue
 
             if (isLoadingNewVideoItems && videoListAdapter.videos.lastIndex == position)
-            // When new video items are loading, the last list item is empty Video item, because it is for "loading item"
+            // When new video items are loading, the last list's item is empty Video item, because it is for "loading item"
                 continue
 
             if (videoListAdapter.videos[position].videoId == videoItem.videoId) {
-                val videoItemView = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideosListAdapter.VideoViewHolder).videoItemView
-                val binding = DataBindingUtil.getBinding<ItemVideoBinding>(videoItemView)
-                binding?.let { onFound.invoke(it) }
+                val binding =
+                    (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideosListAdapter.VideoViewHolder).videoItemVideoBinding
+                onFound.invoke(binding)
             }
         }
     }

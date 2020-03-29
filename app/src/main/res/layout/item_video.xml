@@ -1,51 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-        <androidx.cardview.widget.CardView
+    <data>
+
+        <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
+
+        <import type="com.yurii.youtubemusic.videoslist.ItemState" />
+
+        <import type="android.view.View" />
+
+        <variable
+            name="state"
+            type="com.yurii.youtubemusic.videoslist.ItemState" />
+
+        <variable
+            name="videoItem"
+            type="com.yurii.youtubemusic.models.VideoItem" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        card_view:cardCornerRadius="@dimen/defCornerRadius"
+        card_view:cardUseCompatPadding="true">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            card_view:cardCornerRadius="4dp"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            card_view:cardUseCompatPadding="true"
-            android:focusable="true">
+            android:orientation="vertical">
 
             <RelativeLayout
+                android:id="@+id/main_part_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="5dp">
+                android:padding="@dimen/defPadding">
 
                 <ImageView
                     android:id="@+id/thumbnail"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
                     android:contentDescription="@string/content_description_thumbnail_video"
+                    app:imageUrl="@{videoItem.thumbnail}"
                     tools:src="@android:drawable/ic_delete" />
+
+                <TextView
+                    android:id="@+id/tv_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignEnd="@id/thumbnail"
+                    android:layout_alignBottom="@id/thumbnail"
+                    android:layout_marginEnd="@dimen/smallMargin"
+                    android:layout_marginBottom="@dimen/smallMargin"
+                    android:background="@drawable/rectangle"
+                    android:text="@{UtilsKt.parseDurationToHumanView(videoItem.duration)}"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    tools:text="0:30" />
 
                 <TextView
                     android:id="@+id/title"
                     style="@style/TextAppearance.AppCompat.Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
+                    android:layout_marginStart="@dimen/defMargin"
                     android:layout_toStartOf="@id/download"
                     android:layout_toEndOf="@id/thumbnail"
                     android:ellipsize="end"
                     android:maxLines="2"
+                    android:text="@{videoItem.title}"
                     android:textSize="14sp"
-                    tools:text="Just mocked title of YouTube video" />
+                    tools:text="Just mocked title of YouTube video. Also it is so long long" />
 
                 <TextView
                     android:id="@+id/channel_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/thumbnail"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_below="@id/title"
+                    android:layout_marginStart="@dimen/defMargin"
+                    android:layout_marginTop="2dp"
                     android:layout_toEndOf="@id/thumbnail"
+                    android:text="@{videoItem.authorChannelTitle}"
                     tools:text="PornoHubChannel" />
+
+                <TextView
+                    android:id="@+id/tv_amount_views"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/channel_title"
+                    android:layout_marginStart="@dimen/defMargin"
+                    android:layout_toEndOf="@id/thumbnail"
+                    android:text="@{@string/label_views_count(UtilsKt.bigIntegerToShortCutSuffix(videoItem.viewCount))}"
+                    tools:text="135K views" />
 
                 <ImageButton
                     android:id="@+id/download"
@@ -55,8 +106,11 @@
                     android:layout_centerVertical="true"
                     android:layout_marginTop="5dp"
                     android:layout_marginEnd="15dp"
+                    android:backgroundTintMode="add"
                     android:contentDescription="@string/content_description_download_music"
-                    android:src="@drawable/ic_music_download" />
+                    android:padding="0dp"
+                    android:src="@drawable/ic_download_v2"
+                    android:visibility="@{state == ItemState.DOWNLOAD ? View.VISIBLE : View.GONE}" />
 
                 <ProgressBar
                     android:id="@+id/loading"
@@ -64,20 +118,57 @@
                     android:layout_height="60dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="5dp"
-                    android:visibility="gone"
-                    android:layout_marginEnd="25dp"/>
+                    android:layout_marginTop="@dimen/defMargin"
+                    android:layout_marginEnd="25dp"
+                    android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
+                    tools:visibility="gone" />
 
                 <ProgressBar
                     android:id="@+id/progress_bar"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                    android:indeterminate="false"
-                    tools:progress="45"
-                    android:visibility="gone"
                     android:layout_below="@id/thumbnail"
-                    android:max="100"/>
+                    android:indeterminate="false"
+                    android:max="100"
+                    android:progress="@{videoItem.downloadingProgress}"
+                    android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
+                    tools:progress="45"
+                    tools:visibility="visible" />
             </RelativeLayout>
-        </androidx.cardview.widget.CardView>
+
+            <RelativeLayout
+                android:id="@+id/details_part_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/mediumPadding"
+                android:paddingEnd="@dimen/mediumPadding"
+                android:visibility="visible">
+
+                <FrameLayout
+                    android:id="@+id/layout_thumbs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/mediumMargin"
+                    android:layout_alignParentEnd="true">
+
+                    <include
+                        layout="@layout/layout_thumbs"
+                        app:dislikesCount="@{videoItem.disLikeCount}"
+                        app:likesCount="@{videoItem.likeCount}" />
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/layout_thumbs"
+                    android:text="@{videoItem.description}"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:visibility="@{videoItem.description.empty ? View.GONE : View.VISIBLE}"
+                    tools:text="Video's description | Video's description" />
+            </RelativeLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </layout>
