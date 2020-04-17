@@ -3,13 +3,13 @@ package com.yurii.youtubemusic
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.core.view.GravityCompat
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
-import com.google.android.material.navigation.NavigationView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
+import com.yurii.youtubemusic.utilities.BottomNavigationBehavior
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private lateinit var mainActivity: ActivityMainBinding
     private lateinit var authorizationFragment: AuthorizationFragment
 
@@ -17,36 +17,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         mainActivity = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        setupNavigationMenu()
+        setupBottomNavigationMenu()
 
         authorizationFragment = AuthorizationFragment()
 
         // Set first item(Saved Musics) in the menu as default
-        onNavigationItemSelected(mainActivity.navigationView.menu.getItem(0))
+        openSavedMusicFragment()
     }
 
-    private fun setupNavigationMenu() {
+    private fun setupBottomNavigationMenu() {
         setSupportActionBar(mainActivity.contentMain.toolbar)
-
-        val toggle = ActionBarDrawerToggle(
-            this,
-            mainActivity.drawerLayout,
-            mainActivity.contentMain.toolbar,
-            0,
-            0
-        )
-
-        mainActivity.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-        mainActivity.navigationView.setNavigationItemSelectedListener(this)
+        val mLayoutParams = mainActivity.bottomNavigationView.layoutParams as CoordinatorLayout.LayoutParams
+        mLayoutParams.behavior = BottomNavigationBehavior()
+        mainActivity.bottomNavigationView.setOnNavigationItemSelectedListener(this)
     }
 
-    override fun onBackPressed() {
-        if (mainActivity.drawerLayout.isDrawerOpen(GravityCompat.START))
-            mainActivity.drawerLayout.closeDrawer(GravityCompat.START)
-        else
-            super.onBackPressed()
-    }
 
     private fun openYouTubeMusic() {
         val youTubeMusicsFragment = YouTubeMusicsFragment()
@@ -80,9 +65,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        item.isChecked = true
-        mainActivity.drawerLayout.closeDrawers()
-
         return when (item.itemId) {
             R.id.item_saved_music -> {
                 openSavedMusicFragment(); true
