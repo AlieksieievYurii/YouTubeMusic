@@ -9,4 +9,7 @@
 
     <color name="gray">#3C3F41</color>
     <color name="lightGray">#CCCCCC</color>
+
+    <color name="bgBottomNavigation">#fe485a</color>
+
 </resources>

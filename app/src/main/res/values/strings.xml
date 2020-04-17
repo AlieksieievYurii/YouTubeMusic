@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">YouTubeMusic</string>
-    <string name="label_saved_musics">Saved musics</string>
-    <string name="label_youtube_musics">YouTube Musics</string>
+    <string name="label_saved_musics">Saved</string>
+    <string name="label_youtube_musics">YouTube</string>
     <string name="image_of_playlist">Image of playList</string>
     <string name="thumbnails_of_playlist">Thumbnails of playList</string>
     <string name="label_videos_count">%d videos</string>
