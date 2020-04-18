@@ -3,11 +3,9 @@ package com.yurii.youtubemusic
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
-import com.yurii.youtubemusic.utilities.BottomNavigationBehavior
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private lateinit var mainActivity: ActivityMainBinding
@@ -27,8 +25,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     private fun setupBottomNavigationMenu() {
         setSupportActionBar(mainActivity.contentMain.toolbar)
-        val mLayoutParams = mainActivity.bottomNavigationView.layoutParams as CoordinatorLayout.LayoutParams
-        mLayoutParams.behavior = BottomNavigationBehavior()
         mainActivity.bottomNavigationView.setOnNavigationItemSelectedListener(this)
     }
 
