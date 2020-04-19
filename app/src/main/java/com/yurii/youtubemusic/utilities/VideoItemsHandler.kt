@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.widget.AbsListView
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -50,6 +51,8 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
             }
         })
     }
+
+    fun setOnScrollListener(scrollListener: RecyclerView.OnScrollListener) = recyclerView.addOnScrollListener(scrollListener)
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {

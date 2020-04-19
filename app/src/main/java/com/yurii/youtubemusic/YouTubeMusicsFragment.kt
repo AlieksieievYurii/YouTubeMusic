@@ -2,13 +2,16 @@ package com.yurii.youtubemusic
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.RecyclerView
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.youtube.model.Playlist
@@ -20,6 +23,12 @@ import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import java.lang.IllegalStateException
+import kotlin.math.max
+import kotlin.math.min
+import android.opengl.ETC1.getWidth
+import android.view.animation.TranslateAnimation
+
+
 
 class YouTubeMusicsFragment : Fragment(), Loader {
     private lateinit var binding: FragmentYouTubeMusicsBinding
@@ -35,6 +44,19 @@ class YouTubeMusicsFragment : Fragment(), Loader {
             selectPlayList()
         }
         videoItemsHandler = VideoItemsHandler(binding.videos, this)
+        videoItemsHandler.setOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//               binding.layoutSelectionPlaylist.pivotY =
+//                    min(0f, max(-binding.layoutSelectionPlaylist.height.toFloat(), binding.layoutSelectionPlaylist.translationY - dy))
+//                if (dy < -binding.layoutSelectionPlaylist.height)
+//                    binding.layoutSelectionPlaylist.visibility = View.VISIBLE
+//                else if (dy > binding.layoutSelectionPlaylist.height)
+//                    binding.layoutSelectionPlaylist.visibility = View.GONE
+
+                //TODO Implement hiding SelectionPlayListLayout on scroll
+            }
+        })
+
         return binding.root
     }
 
@@ -59,11 +81,13 @@ class YouTubeMusicsFragment : Fragment(), Loader {
                 }.execute(nextTokenPage)
             }
         })
+
         playListsDialogFragment.onSelectPlaylist = {
             if (Preferences.getSelectedPlayList(activity!!).isNullOrEmpty())
                 alterSelectionPlayListButton()
 
             Preferences.setSelectedPlayList(context!!, it)
+            binding.tvPlayListName.text = it.snippet.title
             loadVideoItems(it)
         }
 
@@ -75,6 +99,7 @@ class YouTubeMusicsFragment : Fragment(), Loader {
         val playList = Preferences.getSelectedPlayList(context!!)
         videoItemsHandler.onStart()
         playList?.let {
+            binding.tvPlayListName.text = it.snippet.title
             loadVideoItems(it)
         } ?: showOptionToSelectPlayListFirstTime()
     }

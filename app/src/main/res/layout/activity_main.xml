@@ -24,6 +24,7 @@
             app:itemBackground="@color/bgBottomNavigation"
             app:itemIconTint="@android:color/white"
             app:itemTextColor="@android:color/white"
+            app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
             app:menu="@menu/navigation_menu" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
