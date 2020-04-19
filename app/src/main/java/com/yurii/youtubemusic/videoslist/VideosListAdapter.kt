@@ -18,6 +18,7 @@ enum class ItemState {
 
 interface VideoItemInterface {
     fun onItemClickDownload(videoItem: VideoItem)
+    fun remove(videoItem: VideoItem)
     fun exists(videoItem: VideoItem): Boolean
     fun isLoading(videoItem: VideoItem): Boolean
     fun getCurrentProgress(videoItem: VideoItem): Int
@@ -87,24 +88,23 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
         val videoItem = videos[position]
         if (getItemViewType(position) == VIEW_TYPE_NORMAL) {
             val videoViewHolder = holder as VideoViewHolder
+            videoViewHolder.setOnRemoveClickListener(View.OnClickListener {
+                videoItemInterface.remove(videoItem)
+                videoViewHolder.bind(videoItem, position)
+            })
+
+            videoViewHolder.setOnDownloadClickListener(View.OnClickListener {
+                videoItemInterface.onItemClickDownload(videoItem)
+                videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
+            })
+
             when {
-                videoItemInterface.exists(videoItem) -> videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS)
+                videoItemInterface.exists(videoItem) -> { videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS) }
                 videoItemInterface.isLoading(videoItem) -> {
                     videoItem.downloadingProgress = videoItemInterface.getCurrentProgress(videoItem)
                     videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
                 }
-                else -> videoViewHolder.let { viewHolder ->
-                    viewHolder.bind(videoItem, position, state = ItemState.DOWNLOAD)
-
-                    viewHolder.setOnDownloadClickListener(View.OnClickListener {
-                        videoItemInterface.onItemClickDownload(videoItem)
-                        viewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
-                    })
-
-                    viewHolder.setOnRemoveClickListener(View.OnClickListener {
-
-                    })
-                }
+                else -> { videoViewHolder.bind(videoItem, position, state = ItemState.DOWNLOAD) }
             }
         }
     }
@@ -136,10 +136,12 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
 
         private fun expandDetails() {
             videoItemVideoBinding.detailsPartLayout.visibility = View.VISIBLE
+            // TODO Need to add some expanding animation
         }
 
         private fun collapseDetails() {
             videoItemVideoBinding.detailsPartLayout.visibility = View.GONE
+            // TODO Need to add some collapsing animation
         }
 
         fun setOnDownloadClickListener(onClickListener: View.OnClickListener) {
