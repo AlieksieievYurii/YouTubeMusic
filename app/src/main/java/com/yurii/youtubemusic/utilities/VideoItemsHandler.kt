@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.widget.AbsListView
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +15,9 @@ import com.yurii.youtubemusic.videoslist.ItemState
 
 import com.yurii.youtubemusic.videoslist.VideoItemInterface
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
+import java.io.File
+import java.lang.RuntimeException
+import java.nio.file.Paths
 
 interface Loader {
     fun onLoadMoreVideoItems(pageToken: String?)
@@ -147,4 +149,9 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
     override fun getCurrentProgress(videoItem: VideoItem): Int =
         MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem) ?: DownloaderInteroperableInterface.NO_PROGRESS
 
+    override fun remove(videoItem: VideoItem) {
+        val file = File(DataStorage.getMusicStorage(context), "${videoItem.videoId}.mp3")
+        if(!file.delete())
+            throw RuntimeException("Cannot remove the music file $file")
+    }
 }
