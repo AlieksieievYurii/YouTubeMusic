@@ -95,9 +95,14 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
                 }
                 else -> videoViewHolder.let { viewHolder ->
                     viewHolder.bind(videoItem, position, state = ItemState.DOWNLOAD)
+
                     viewHolder.setOnDownloadClickListener(View.OnClickListener {
                         videoItemInterface.onItemClickDownload(videoItem)
                         viewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
+                    })
+
+                    viewHolder.setOnRemoveClickListener(View.OnClickListener {
+
                     })
                 }
             }
@@ -139,6 +144,10 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
 
         fun setOnDownloadClickListener(onClickListener: View.OnClickListener) {
             videoItemVideoBinding.download.setOnClickListener(onClickListener)
+        }
+
+        fun setOnRemoveClickListener(onClickListener: View.OnClickListener) {
+            videoItemVideoBinding.remove.setOnClickListener(onClickListener)
         }
     }
 }
