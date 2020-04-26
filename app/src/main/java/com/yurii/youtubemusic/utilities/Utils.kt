@@ -10,6 +10,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.youtube.YouTubeScopes
 import com.google.api.services.youtube.model.Playlist
+import com.yurii.youtubemusic.models.VideoItem
 import org.threeten.bp.Duration
 import java.io.File
 import java.math.BigInteger
@@ -54,6 +55,7 @@ class ErrorSnackBar private constructor() {
 class DataStorage private constructor() {
     companion object {
         fun getMusicStorage(context: Context): File = File(context.filesDir, "Musics")
+        fun getMusic(context: Context, videoItem: VideoItem): File = File(getMusicStorage(context), "${videoItem.videoId}.mp3")
     }
 }
 
