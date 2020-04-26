@@ -18,6 +18,7 @@ interface DownloaderInteroperableInterface {
     companion object {
         const val NO_PROGRESS: Int = -1
     }
+
     fun isLoading(videoItem: VideoItem): Boolean
     fun getProgress(videoItem: VideoItem): Int
 }
@@ -62,7 +63,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
                 override fun onFinished(file: File) {
                     stopSelf(startId)
                     executionVideoItems.remove(videoItem)
-                    amendMusicName(file, videoItem)
+                    setCorrectFileName(file, videoItem)
 
                     localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_FINISHED_ACTION).also {
                         it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
@@ -81,7 +82,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface {
     Change the name(title of the video) of the original [file]
     to proper name like this -> 12424aqz.mp3 where prefix is YouTube video's id which is retained from [videoItem]
      **/
-    private fun amendMusicName(file: File, videoItem: VideoItem) {
+    private fun setCorrectFileName(file: File, videoItem: VideoItem) {
         val newMusicFile = file.resolveSibling("${videoItem.videoId}.mp3")
         file.renameTo(newMusicFile)
     }

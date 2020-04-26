@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -12,12 +13,9 @@ import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.DownloaderInteroperableInterface
 import com.yurii.youtubemusic.services.MusicDownloaderService
 import com.yurii.youtubemusic.videoslist.ItemState
-
 import com.yurii.youtubemusic.videoslist.VideoItemInterface
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
-import java.io.File
 import java.lang.RuntimeException
-import java.nio.file.Paths
 
 interface Loader {
     fun onLoadMoreVideoItems(pageToken: String?)
@@ -70,6 +68,9 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
             MusicDownloaderService.DOWNLOADING_FINISHED_ACTION -> {
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as? VideoItem
                 videoItem?.let {
+
+                    addTag(videoItem)
+
                     findVideoItemView(videoItem) {
                         it.state = ItemState.EXISTS
                         it.executePendingBindings()
@@ -77,6 +78,12 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
                 }
             }
         }
+    }
+
+    private fun addTag(videoItem: VideoItem) {
+        val file = DataStorage.getMusic(context, videoItem)
+        val tag = Tag(title = videoItem.title, authorChannel = videoItem.authorChannelTitle)
+        TaggerV1(file).writeTag(tag)
     }
 
     private fun findVideoItemView(videoItem: VideoItem, onFound: ((ItemVideoBinding) -> Unit)) {
@@ -150,8 +157,8 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
         MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem) ?: DownloaderInteroperableInterface.NO_PROGRESS
 
     override fun remove(videoItem: VideoItem) {
-        val file = File(DataStorage.getMusicStorage(context), "${videoItem.videoId}.mp3")
-        if(!file.delete())
+        val file = DataStorage.getMusic(context, videoItem)
+        if (!file.delete())
             throw RuntimeException("Cannot remove the music file $file")
     }
 }
