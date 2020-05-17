@@ -121,7 +121,7 @@ class YouTubeService private constructor() {
         }
 
         fun execute(ids: List<String>, pageToken: String? = null) {
-            super.execute(ids.joinToString(), pageToken)
+            super.execute(ids.joinToString(","), pageToken)
         }
     }
 }
