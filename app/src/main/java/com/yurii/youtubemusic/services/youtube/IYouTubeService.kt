@@ -23,5 +23,5 @@ interface IYouTubeService {
     fun setCredentials(credential: GoogleAccountCredential)
     fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null): ICanceler
     fun loadPlayListItems(playlistId: String, observer: YouTubeObserver<PlaylistItemListResponse>, nextPageToken: String? = null): ICanceler
-    fun loadVideosDetails(ids: List<String>, observer: YouTubeObserver<VideoListResponse>, nextPageToken: String? = null): ICanceler
+    fun loadVideosDetails(ids: List<String>, observer: YouTubeObserver<VideoListResponse>): ICanceler
 }
