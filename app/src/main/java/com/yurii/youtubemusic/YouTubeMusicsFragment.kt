@@ -27,15 +27,25 @@ import kotlin.math.max
 import kotlin.math.min
 import android.opengl.ETC1.getWidth
 import android.view.animation.TranslateAnimation
-
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeMusicViewModel
+import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeViewModelFactory
 
 
 class YouTubeMusicsFragment : Fragment(), Loader {
+    private lateinit var viewModel: YouTubeMusicViewModel
+
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videoItemsHandler: VideoItemsHandler
     private lateinit var mCredential: GoogleAccountCredential
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        viewModel = ViewModelProvider(
+            this,
+            YouTubeViewModelFactory(activity!!.application, com.yurii.youtubemusic.services.youtube.YouTubeService())
+        ).get(YouTubeMusicViewModel::class.java)
+
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
 
         (activity as AppCompatActivity).supportActionBar!!.title = "YouTube Musics"
@@ -55,6 +65,15 @@ class YouTubeMusicsFragment : Fragment(), Loader {
 
                 //TODO Implement hiding SelectionPlayListLayout on scroll
             }
+        })
+
+        viewModel.selectedPlaylist.observe(this, Observer {
+            if (it != null) {
+                Log.i("ViewModel", "SetPlayList")
+                binding.tvPlayListName.text = it.snippet.title
+                loadVideoItems(it)
+            }else
+                showOptionToSelectPlayListFirstTime()
         })
 
         return binding.root
@@ -96,12 +115,7 @@ class YouTubeMusicsFragment : Fragment(), Loader {
 
     override fun onStart() {
         super.onStart()
-        val playList = Preferences.getSelectedPlayList(context!!)
         videoItemsHandler.onStart()
-        playList?.let {
-            binding.tvPlayListName.text = it.snippet.title
-            loadVideoItems(it)
-        } ?: showOptionToSelectPlayListFirstTime()
     }
 
     override fun onStop() {
