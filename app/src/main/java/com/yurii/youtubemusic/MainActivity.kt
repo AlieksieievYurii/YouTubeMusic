@@ -1,5 +1,4 @@
 package com.yurii.youtubemusic
-
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
@@ -11,6 +10,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     private lateinit var mainActivity: ActivityMainBinding
     private lateinit var authorizationFragment: AuthorizationFragment
 
+    private var activeBottomMenuItem: Int = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainActivity = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -19,8 +20,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
         authorizationFragment = AuthorizationFragment()
 
-        // Set first item(Saved Musics) in the menu as default
-        openSavedMusicFragment()
+        if (savedInstanceState == null)
+            openSavedMusicFragment()
     }
 
     private fun setupBottomNavigationMenu() {
@@ -61,7 +62,12 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+        if (item.itemId == activeBottomMenuItem)
+            return false
+
+        activeBottomMenuItem = item.itemId
+
+        return when (activeBottomMenuItem) {
             R.id.item_saved_music -> {
                 openSavedMusicFragment(); true
             }

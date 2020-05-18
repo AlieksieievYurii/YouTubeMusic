@@ -42,7 +42,7 @@ class YouTubeMusicsFragment : Fragment(), Loader {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewModel = ViewModelProvider(
-            this,
+            activity!!,
             YouTubeViewModelFactory(activity!!.application, com.yurii.youtubemusic.services.youtube.YouTubeService())
         ).get(YouTubeMusicViewModel::class.java)
 
