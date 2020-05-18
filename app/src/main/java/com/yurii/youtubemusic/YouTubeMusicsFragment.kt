@@ -2,12 +2,10 @@ package com.yurii.youtubemusic
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -18,19 +16,18 @@ import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItem
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
-import com.yurii.youtubemusic.dialogplaylists.PlayListsResultCallBack
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import java.lang.IllegalStateException
-import kotlin.math.max
-import kotlin.math.min
-import android.opengl.ETC1.getWidth
-import android.view.animation.TranslateAnimation
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.api.services.youtube.model.PlaylistListResponse
+import com.yurii.youtubemusic.dialogplaylists.PlayListDialogInterface
+import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeMusicViewModel
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeViewModelFactory
+import java.lang.Exception
 
 
 class YouTubeMusicsFragment : Fragment(), Loader {
@@ -69,7 +66,6 @@ class YouTubeMusicsFragment : Fragment(), Loader {
 
         viewModel.selectedPlaylist.observe(this, Observer {
             if (it != null) {
-                Log.i("ViewModel", "SetPlayList")
                 binding.tvPlayListName.text = it.snippet.title
                 loadVideoItems(it)
             }else
@@ -87,30 +83,25 @@ class YouTubeMusicsFragment : Fragment(), Loader {
     }
 
     private fun selectPlayList() {
-        val playListsDialogFragment = PlayListsDialogFragment(object : PlayListsDialogFragment.OnPlayLists {
-            override fun getPlayLists(onResult: PlayListsResultCallBack, nextTokenPage: String?) {
-                YouTubeService.MyPlayLists(mCredential).setOnResult { result, nextPageToken ->
-                    onResult.invoke(result, nextPageToken)
-                }.setOnError {
-                    ErrorSnackBar.show(binding.root, it.message!!)
-                    if (it is UserRecoverableAuthIOException) {
-                        startActivityForResult(it.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
-                    } else
-                        Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
-                }.execute(nextTokenPage)
+        PlayListsDialogFragment().showPlayLists(activity!!.supportFragmentManager, object : PlayListDialogInterface {
+            override fun loadPlayLists(onLoad: (resp: PlaylistListResponse) -> Unit, nextPageToken: String?) {
+                viewModel.loadPlayLists(object : YouTubeObserver<PlaylistListResponse> {
+                    override fun onResult(result: PlaylistListResponse) = onLoad.invoke(result)
+
+                    override fun onError(error: Exception) {
+                        ErrorSnackBar.show(binding.root, error.message!!)
+                        if (error is UserRecoverableAuthIOException) {
+                            startActivityForResult(error.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
+                        } else
+                            Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show()
+                    }
+                }, nextPageToken)
+            }
+
+            override fun onSelectPlaylist(selectedPlaylist: Playlist) {
+                viewModel.setNewPlayList(selectedPlaylist)
             }
         })
-
-        playListsDialogFragment.onSelectPlaylist = {
-            if (Preferences.getSelectedPlayList(activity!!).isNullOrEmpty())
-                alterSelectionPlayListButton()
-
-            Preferences.setSelectedPlayList(context!!, it)
-            binding.tvPlayListName.text = it.snippet.title
-            loadVideoItems(it)
-        }
-
-        playListsDialogFragment.showPlayLists(activity!!.supportFragmentManager)
     }
 
     override fun onStart() {

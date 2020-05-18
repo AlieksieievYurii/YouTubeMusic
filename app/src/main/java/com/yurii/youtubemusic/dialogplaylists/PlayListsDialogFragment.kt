@@ -9,29 +9,29 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.api.services.youtube.model.Playlist
+import com.google.api.services.youtube.model.PlaylistListResponse
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.DialogPlayListsBinding
 import com.yurii.youtubemusic.utilities.PaginationListener
 import java.lang.IllegalStateException
 
-typealias PlayListsResultCallBack = (playLists: List<Playlist>, nextPageToken: String?) -> Unit
+interface PlayListDialogInterface {
+    fun loadPlayLists(onLoad: (resp: PlaylistListResponse) -> Unit, nextPageToken: String?)
+    fun onSelectPlaylist(selectedPlaylist: Playlist)
+}
 
-class PlayListsDialogFragment(private val onPlayLists: OnPlayLists) : DialogFragment(), View.OnClickListener {
-    interface OnPlayLists {
-        fun getPlayLists(onResult: PlayListsResultCallBack, nextTokenPage: String? = null)
-    }
-
+class PlayListsDialogFragment : DialogFragment(), View.OnClickListener {
     private lateinit var binding: DialogPlayListsBinding
-    var onSelectPlaylist: ((Playlist) -> Unit)? = null
     private var nextPageToken: String? = null
     private var isLoadingNewVideoItems = true
+    private lateinit var playListDialogInterface: PlayListDialogInterface
 
     private val playListsAdapter = PlayListsAdapter(this)
 
     override fun onClick(v: View) {
         val itemPosition = binding.rvPlayLists.getChildLayoutPosition(v)
         dismiss()
-        onSelectPlaylist?.invoke(playListsAdapter.playLists[itemPosition])
+        playListDialogInterface.onSelectPlaylist(playListsAdapter.playLists[itemPosition])
     }
 
 
@@ -55,12 +55,12 @@ class PlayListsDialogFragment(private val onPlayLists: OnPlayLists) : DialogFrag
             override fun loadMoreItems() {
                 isLoadingNewVideoItems = true
                 binding.rvPlayLists.post { playListsAdapter.setLoadingState() }
-                onPlayLists.getPlayLists({ playLists, nextPageToken ->
+                playListDialogInterface.loadPlayLists({ playListResponse ->
                     isLoadingNewVideoItems = false
                     playListsAdapter.removeLoadingState()
-                    playListsAdapter.addPlayLists(playLists)
-                    this@PlayListsDialogFragment.nextPageToken = nextPageToken
-                }, this@PlayListsDialogFragment.nextPageToken)
+                    playListsAdapter.addPlayLists(playListResponse.items)
+                    this@PlayListsDialogFragment.nextPageToken = playListResponse.nextPageToken
+                }, nextPageToken)
             }
         })
 
@@ -73,16 +73,18 @@ class PlayListsDialogFragment(private val onPlayLists: OnPlayLists) : DialogFrag
         return binding.root
     }
 
-    fun showPlayLists(fragmentManager: FragmentManager) {
+    fun showPlayLists(fragmentManager: FragmentManager, playListDialogInterface: PlayListDialogInterface) {
         super.show(fragmentManager, "PlayLists")
-        onPlayLists.getPlayLists({ playLists, nextPageToken ->
+        this.playListDialogInterface = playListDialogInterface
+
+        playListDialogInterface.loadPlayLists({ playListResponse ->
             isLoadingNewVideoItems = false
-            if (playLists.isEmpty()) {
+            if (playListResponse.items.isEmpty()) {
                 binding.progressBar.visibility = View.GONE
                 binding.hintListIsEmpty.visibility = View.VISIBLE
             } else {
-                playListsAdapter.addPlayLists(playLists)
-                this.nextPageToken = nextPageToken
+                playListsAdapter.addPlayLists(playListResponse.items)
+                this.nextPageToken = playListResponse.nextPageToken
                 binding.progressBar.visibility = View.GONE
                 binding.rvPlayLists.visibility = View.VISIBLE
             }
