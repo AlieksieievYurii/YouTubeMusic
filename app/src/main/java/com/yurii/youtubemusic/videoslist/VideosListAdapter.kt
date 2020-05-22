@@ -19,7 +19,7 @@ enum class ItemState {
 interface VideoItemInterface {
     fun onItemClickDownload(videoItem: VideoItem)
     fun remove(videoItem: VideoItem)
-    fun exists(videoItem: VideoItem): Boolean
+    fun isExisted(videoItem: VideoItem): Boolean
     fun isLoading(videoItem: VideoItem): Boolean
     fun getCurrentProgress(videoItem: VideoItem): Int
 }
@@ -99,7 +99,7 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
             })
 
             when {
-                videoItemInterface.exists(videoItem) -> { videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS) }
+                videoItemInterface.isExisted(videoItem) -> { videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS) }
                 videoItemInterface.isLoading(videoItem) -> {
                     videoItem.downloadingProgress = videoItemInterface.getCurrentProgress(videoItem)
                     videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)

@@ -144,7 +144,7 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
         })
     }
 
-    override fun exists(videoItem: VideoItem): Boolean {
+    override fun isExisted(videoItem: VideoItem): Boolean {
         DataStorage.getMusicStorage(context).walk().forEach {
             Regex(".*(?=\\.)").find(it.name)?.let { regex ->
                 if (regex.value == videoItem.videoId)
