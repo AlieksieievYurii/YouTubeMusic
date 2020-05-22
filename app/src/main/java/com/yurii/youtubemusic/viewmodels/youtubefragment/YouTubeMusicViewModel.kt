@@ -39,6 +39,7 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
     private var mVideoLoadingCanceler: ICanceler? = null
     private val mVideos: MutableList<VideoItem> = mutableListOf()
     private var mNextPageToken: String? = null
+    val allDownloadedMusics: MutableList<String> = mutableListOf()
 
     var mVideosLoader: VideosLoader? = null
     var mVideoItemChange: VideoItemChange? = null
@@ -47,6 +48,12 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
         Authorization.getGoogleCredentials(mContext)?.let {
             mYouTubeService.setCredentials(it)
         } ?: throw IllegalStateException("Cannot get Google account credentials")
+
+        DataStorage.getMusicStorage(mContext).walk().forEach {
+            Regex(".*(?=\\.)").find(it.name)?.let { regex ->
+                allDownloadedMusics.add(regex.value)
+            }
+        }
 
         _selectedPlayList.value = Preferences.getSelectedPlayList(mContext)
         if (_selectedPlayList.value != null)
@@ -64,6 +71,7 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as? VideoItem
                 videoItem?.let {
                     addTag(videoItem)
+                    allDownloadedMusics.add(videoItem.videoId!!)
                     mVideoItemChange?.onDownloadingFinished(videoItem)
                 }
             }
@@ -109,6 +117,8 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
             }
         }, nextPageToken)
     }
+
+    fun isExist(videoItem: VideoItem) = allDownloadedMusics.contains(videoItem.videoId)
 
     fun getCurrentVideos() = mVideos
     fun isVideoPageLast() = mNextPageToken.isNullOrEmpty()
