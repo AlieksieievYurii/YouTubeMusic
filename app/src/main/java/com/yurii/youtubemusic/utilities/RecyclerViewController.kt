@@ -18,15 +18,14 @@ import com.yurii.youtubemusic.videoslist.VideosListAdapter
 import java.lang.RuntimeException
 
 interface Loader {
-    fun onLoadMoreVideoItems(pageToken: String?)
+    fun onLoadMoreVideoItems()
 }
 
 class VideoItemsHandler(private val recyclerView: RecyclerView, private val loader: Loader) : VideoItemInterface, BroadcastReceiver() {
     private val context: Context = recyclerView.context
     private var isLoadingNewVideoItems = true
     private val videoListAdapter: VideosListAdapter = VideosListAdapter(this)
-    private var nextPageToken: String? = null
-
+    private var isLast: Boolean = false
     init {
         val layoutManager = LinearLayoutManager(context)
         recyclerView.apply {
@@ -37,7 +36,7 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
 
         recyclerView.addOnScrollListener(object : PaginationListener(layoutManager) {
             override fun isLastPage(): Boolean {
-                return nextPageToken.isNullOrBlank()
+                return isLast
             }
 
             override fun isLoading(): Boolean {
@@ -47,12 +46,14 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
             override fun loadMoreItems() {
                 isLoadingNewVideoItems = true
                 recyclerView.post { videoListAdapter.setLoadingState() }
-                loader.onLoadMoreVideoItems(nextPageToken)
+                loader.onLoadMoreVideoItems()
             }
         })
     }
 
     fun setOnScrollListener(scrollListener: RecyclerView.OnScrollListener) = recyclerView.addOnScrollListener(scrollListener)
+
+    fun isVideosEmpty() = videoListAdapter.videos.isEmpty()
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
@@ -105,19 +106,23 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
         }
     }
 
-    fun setNewVideoItems(videoItems: List<VideoItem>, nextPageToken: String?) {
-        videoListAdapter.setNewVideoItems(videoItems)
-        isLoadingNewVideoItems = false
-        this.nextPageToken = nextPageToken
+    fun removeAllVideos() {
+        videoListAdapter.videos.clear()
     }
 
-    fun addMoreVideoItems(videoItems: List<VideoItem>, nextPageToken: String?) {
+    fun setNewVideoItems(videoItems: List<VideoItem>, isLast: Boolean) {
+        this.isLast = isLast
+        videoListAdapter.setNewVideoItems(videoItems)
+        isLoadingNewVideoItems = false
+    }
+
+    fun addMoreVideoItems(videoItems: List<VideoItem>, isLast: Boolean) {
+        this.isLast = isLast
         if (isLoadingNewVideoItems) {
             videoListAdapter.removeLoadingState()
             isLoadingNewVideoItems = false
         }
         videoListAdapter.addVideoItems(videoItems)
-        this.nextPageToken = nextPageToken
     }
 
     fun onStart() {

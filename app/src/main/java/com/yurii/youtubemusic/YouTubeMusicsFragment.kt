@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic
 
-import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,22 +8,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.RecyclerView
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.youtube.model.Playlist
-import com.google.api.services.youtube.model.PlaylistItem
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
-import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.YouTubeService
 import com.yurii.youtubemusic.utilities.*
-import java.lang.IllegalStateException
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.yurii.youtubemusic.dialogplaylists.PlayListDialogInterface
+import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
+import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeMusicViewModel
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeViewModelFactory
 import java.lang.Exception
@@ -35,7 +30,6 @@ class YouTubeMusicsFragment : Fragment(), Loader {
 
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videoItemsHandler: VideoItemsHandler
-    private lateinit var mCredential: GoogleAccountCredential
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewModel = ViewModelProvider(
@@ -47,39 +41,41 @@ class YouTubeMusicsFragment : Fragment(), Loader {
 
         (activity as AppCompatActivity).supportActionBar!!.title = "YouTube Musics"
 
-        binding.btnSelectPlayList.setOnClickListener {
-            selectPlayList()
-        }
+        binding.btnSelectPlayList.setOnClickListener { selectPlayList() }
+
         videoItemsHandler = VideoItemsHandler(binding.videos, this)
-        videoItemsHandler.setOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-//               binding.layoutSelectionPlaylist.pivotY =
-//                    min(0f, max(-binding.layoutSelectionPlaylist.height.toFloat(), binding.layoutSelectionPlaylist.translationY - dy))
-//                if (dy < -binding.layoutSelectionPlaylist.height)
-//                    binding.layoutSelectionPlaylist.visibility = View.VISIBLE
-//                else if (dy > binding.layoutSelectionPlaylist.height)
-//                    binding.layoutSelectionPlaylist.visibility = View.GONE
 
-                //TODO Implement hiding SelectionPlayListLayout on scroll
-            }
-        })
-
-        viewModel.selectedPlaylist.observe(this, Observer {
-            if (it != null) {
-                binding.tvPlayListName.text = it.snippet.title
-                loadVideoItems(it)
-            }else
+        viewModel.selectedPlaylist.observe(this, Observer { playList ->
+            if (playList != null)
+                binding.tvPlayListName.text = playList.snippet.title
+            else
                 showOptionToSelectPlayListFirstTime()
         })
 
-        return binding.root
-    }
+        val currentVideos = viewModel.getCurrentVideos()
+        if (currentVideos.isNotEmpty()) {
+            videoItemsHandler.setNewVideoItems(currentVideos, viewModel.isLast())
+            binding.progressBar.visibility = View.GONE
+            binding.videos.visibility = View.VISIBLE
+        }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        Authorization.getGoogleCredentials(context)?.let {
-            mCredential = it
-        } ?: throw IllegalStateException("Cannot get Google account credentials")
+        viewModel.videosLoader = object : VideosLoader {
+            override fun onResult(newVideos: List<VideoItem>, isLast: Boolean) {
+                if (videoItemsHandler.isVideosEmpty()) {
+                    videoItemsHandler.setNewVideoItems(newVideos, isLast)
+                    binding.progressBar.visibility = View.GONE
+                    binding.videos.visibility = View.VISIBLE
+                } else
+                    videoItemsHandler.addMoreVideoItems(newVideos, isLast)
+            }
+
+            override fun onError(error: Exception) {
+                ErrorSnackBar.show(binding.root, error.message!!)
+            }
+
+        }
+
+        return binding.root
     }
 
     private fun selectPlayList() {
@@ -130,55 +126,8 @@ class YouTubeMusicsFragment : Fragment(), Loader {
         }
     }
 
-    override fun onLoadMoreVideoItems(pageToken: String?) {
-        val playList = Preferences.getSelectedPlayList(context!!)
-        playList?.let {
-            loadVideoItems(it, pageToken, loadMore = true)
-        } ?: throw IllegalStateException("Cannot load more, because there is not selected a playlist")
+    override fun onLoadMoreVideoItems() {
+        viewModel.loadMoreVideos()
     }
 
-    private fun loadVideoItems(playList: Playlist, pageToken: String? = null, loadMore: Boolean = false) {
-        if (!loadMore) {
-            binding.progressBar.visibility = View.VISIBLE
-            binding.videos.visibility = View.GONE
-        }
-
-        YouTubeService.PlayListItems(mCredential)
-            .setOnResult { onResult, nextPageToken ->
-                loadDetails(onResult, nextPageToken, loadMore)
-            }
-            .setOnError { ErrorSnackBar.show(binding.root, it.message!!) }
-            .execute(playList.id, pageToken = pageToken)
-    }
-
-    private fun loadDetails(videos: List<PlaylistItem>, nextPageToken: String?, loadMore: Boolean = false) {
-        val videoIds: List<String> = videos.map { it.snippet.resourceId.videoId }
-
-        YouTubeService.VideoDetails(mCredential)
-            .setOnResult { result, _ ->
-                val videoItems = result.map {
-                    VideoItem(
-                        videoId = it.id,
-                        title = it.snippet.title,
-                        description = it.snippet.description,
-                        duration = it.contentDetails.duration,
-                        viewCount = it.statistics.viewCount,
-                        likeCount = it.statistics.likeCount,
-                        disLikeCount = it.statistics.dislikeCount,
-                        authorChannelTitle = it.snippet.channelTitle,
-                        thumbnail = it.snippet.thumbnails.default.url
-                    )
-                }
-                if (loadMore)
-                    videoItemsHandler.addMoreVideoItems(videoItems, nextPageToken)
-                else {
-                    videoItemsHandler.setNewVideoItems(videoItems, nextPageToken)
-                    binding.progressBar.visibility = View.GONE
-                    binding.videos.visibility = View.VISIBLE
-                }
-            }
-            .setOnError {
-                ErrorSnackBar.show(binding.root, it.message!!)
-            }.execute(videoIds)
-    }
 }

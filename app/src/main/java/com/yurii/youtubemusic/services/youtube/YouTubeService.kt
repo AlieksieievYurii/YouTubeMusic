@@ -86,18 +86,22 @@ class Async<T>(
     private val onResult: (T) -> Unit,
     private val onError: (Exception) -> Unit
 ) : AsyncTask<Void, Void, T>() {
+    private var lastError: Exception? = null
     override fun doInBackground(vararg params: Void?): T? {
         return try {
             target.invoke()
         } catch (error: Exception) {
-            onError.invoke(error)
+            lastError = error
             null
         }
     }
 
     override fun onPostExecute(result: T?) {
         super.onPostExecute(result)
-        result?.let { onResult.invoke(it) }
+        if (lastError != null)
+            onError.invoke(lastError!!)
+        else
+            result?.let { onResult.invoke(it) }
     }
 
 }
