@@ -162,8 +162,5 @@ class VideoItemsHandler(private val recyclerView: RecyclerView, private val load
         MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem) ?: DownloaderInteroperableInterface.NO_PROGRESS
 
     override fun remove(videoItem: VideoItem) {
-        val file = DataStorage.getMusic(context, videoItem)
-        if (!file.delete())
-            throw RuntimeException("Cannot remove the music file $file")
     }
 }

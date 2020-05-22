@@ -20,6 +20,7 @@ import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import java.lang.Exception
 import java.lang.IllegalStateException
+import java.lang.RuntimeException
 
 interface VideosLoader {
     fun onResult(newVideos: List<VideoItem>)
@@ -39,7 +40,7 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
     private var mVideoLoadingCanceler: ICanceler? = null
     private val mVideos: MutableList<VideoItem> = mutableListOf()
     private var mNextPageToken: String? = null
-    val allDownloadedMusics: MutableList<String> = mutableListOf()
+    private val allDownloadedMusics: MutableList<String> = mutableListOf()
 
     var mVideosLoader: VideosLoader? = null
     var mVideoItemChange: VideoItemChange? = null
@@ -119,6 +120,13 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun isExist(videoItem: VideoItem) = allDownloadedMusics.contains(videoItem.videoId)
+
+    fun removeVideoItem(videoItem: VideoItem) {
+        val file = DataStorage.getMusic(mContext, videoItem)
+        allDownloadedMusics.remove(videoItem.videoId)
+        if (!file.delete())
+            throw RuntimeException("Cannot remove the music file $file")
+    }
 
     fun getCurrentVideos() = mVideos
     fun isVideoPageLast() = mNextPageToken.isNullOrEmpty()

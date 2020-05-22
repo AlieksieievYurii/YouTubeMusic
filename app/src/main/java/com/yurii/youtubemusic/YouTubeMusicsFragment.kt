@@ -220,7 +220,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
     override fun remove(videoItem: VideoItem) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        mViewModel.removeVideoItem(videoItem)
     }
 
     override fun isExisted(videoItem: VideoItem): Boolean = mViewModel.isExist(videoItem)
