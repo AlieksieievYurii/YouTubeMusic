@@ -70,7 +70,7 @@ class PlayListsAdapter(private val onClickListener: View.OnClickListener) : Recy
         val binding = DataBindingUtil.getBinding<ItemPlaylistBinding>(playListItem)
         fun bind(playListItem: Playlist, currentPlayList: Playlist?) {
             binding?.let {
-                if (playListItem == currentPlayList)
+                if (playListItem.id == currentPlayList?.id)
                     it.root.setBackgroundColor(Color.GRAY)
                 else
                     it.root.setBackgroundColor(Color.WHITE)

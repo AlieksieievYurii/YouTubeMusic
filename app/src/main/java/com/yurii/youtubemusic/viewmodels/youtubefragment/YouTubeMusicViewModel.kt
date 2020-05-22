@@ -21,6 +21,10 @@ import com.yurii.youtubemusic.utilities.*
 import java.lang.Exception
 import java.lang.IllegalStateException
 import java.lang.RuntimeException
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 interface VideosLoader {
     fun onResult(newVideos: List<VideoItem>)
@@ -120,6 +124,16 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun isExist(videoItem: VideoItem) = allDownloadedMusics.contains(videoItem.videoId)
+
+    fun isVideoItemLoading(videoItem: VideoItem): Boolean = MusicDownloaderService.Instance.serviceInterface?.isLoading(videoItem) ?: false
+
+    fun getCurrentProgress(videoItem: VideoItem) = MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem)
+
+    fun startDownloadingMusic(videoItem: VideoItem) {
+        mContext.startService(Intent(mContext, MusicDownloaderService::class.java).also {
+            it.putExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM, videoItem)
+        })
+    }
 
     fun removeVideoItem(videoItem: VideoItem) {
         val file = DataStorage.getMusic(mContext, videoItem)

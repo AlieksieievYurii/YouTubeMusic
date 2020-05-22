@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -51,6 +50,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mViewModel = ViewModelProvider(activity!!, YouTubeViewModelFactory(activity!!.application)).get(YouTubeMusicViewModel::class.java)
+        mViewModel.mVideoItemChange = this
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
         (activity as AppCompatActivity).supportActionBar!!.title = "YouTube Musics"
         initRecyclerView()
@@ -145,7 +145,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
         for (index: Int in 0 until mRecyclerView.childCount) {
             val position = mRecyclerView.getChildAdapterPosition(mRecyclerView.getChildAt(index))
 
-            if (position == RecyclerView.NO_POSITION)
+            if (position == RecyclerView.NO_POSITION || mVideosListAdapter.videos.isEmpty())
                 continue
 
             if (isLoadingNewVideoItems && mVideosListAdapter.videos.lastIndex == position)
@@ -216,7 +216,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
 
     override fun onItemClickDownload(videoItem: VideoItem) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+       mViewModel.startDownloadingMusic(videoItem)
     }
 
     override fun remove(videoItem: VideoItem) {
@@ -226,11 +226,11 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     override fun isExisted(videoItem: VideoItem): Boolean = mViewModel.isExist(videoItem)
 
     override fun isLoading(videoItem: VideoItem): Boolean {
-        return false
+        return mViewModel.isVideoItemLoading(videoItem)
     }
 
-    override fun getCurrentProgress(videoItem: VideoItem): Int {
-        return 50
+    override fun getCurrentProgress(videoItem: VideoItem): Int? {
+        return mViewModel.getCurrentProgress(videoItem)
     }
 
 }
