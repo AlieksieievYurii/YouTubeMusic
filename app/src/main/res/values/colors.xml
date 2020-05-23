@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#1179bf</color>
+    <color name="colorPrimaryDark">#004e8e</color>
+    <color name="colorAccent">#1179bf</color>
 
     <color name="black">#000000</color>
     <color name="blackTransparent">#81000000</color>
 
     <color name="gray">#3C3F41</color>
     <color name="lightGray">#CCCCCC</color>
-
-    <color name="bgBottomNavigation">#fe485a</color>
 
 </resources>
