@@ -156,7 +156,8 @@ private class VideoItemTask(
 ) : Runnable {
     var currentProgress: Int = 0
     lateinit var currentThread: Thread
-    private var youTubeDownloader = YoutubeDownloader()
+    val myParser = MyParser()
+    private var youTubeDownloader = YoutubeDownloader(myParser)
     override fun run() {
         currentThread = Thread.currentThread()
         var video: YoutubeVideo?
