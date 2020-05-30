@@ -21,10 +21,6 @@ import com.yurii.youtubemusic.utilities.*
 import java.lang.Exception
 import java.lang.IllegalStateException
 import java.lang.RuntimeException
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 
 interface VideosLoader {
     fun onResult(newVideos: List<VideoItem>)
@@ -55,8 +51,8 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
         } ?: throw IllegalStateException("Cannot get Google account credentials")
 
         DataStorage.getMusicStorage(mContext).walk().forEach {
-            Regex(".*(?=\\.)").find(it.name)?.let { regex ->
-                allDownloadedMusics.add(regex.value)
+            Regex("(.+?)(\\.mp3\$)").find(it.name)?.groups?.get(1)?.value?.let { value ->
+                allDownloadedMusics.add(value)
             }
         }
 
@@ -134,6 +130,8 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
             it.putExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM, videoItem)
         })
     }
+
+    fun stopDownloading(videoItem: VideoItem) = MusicDownloaderService.Instance.serviceInterface?.cancel(videoItem)
 
     fun removeVideoItem(videoItem: VideoItem) {
         val file = DataStorage.getMusic(mContext, videoItem)

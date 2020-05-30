@@ -22,6 +22,7 @@ interface VideoItemInterface {
     fun isExisted(videoItem: VideoItem): Boolean
     fun isLoading(videoItem: VideoItem): Boolean
     fun getCurrentProgress(videoItem: VideoItem): Int?
+    fun cancelDownloading(videoItem: VideoItem)
 }
 
 
@@ -98,6 +99,11 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
                 videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
             })
 
+            videoViewHolder.setOnCancelClickListener(View.OnClickListener {
+                videoItemInterface.cancelDownloading(videoItem)
+                videoViewHolder.bind(videoItem, position)
+            })
+
             when {
                 videoItemInterface.isExisted(videoItem) -> { videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS) }
                 videoItemInterface.isLoading(videoItem) -> {
@@ -150,6 +156,10 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
 
         fun setOnRemoveClickListener(onClickListener: View.OnClickListener) {
             videoItemVideoBinding.remove.setOnClickListener(onClickListener)
+        }
+
+        fun setOnCancelClickListener(onClickListener: View.OnClickListener) {
+            videoItemVideoBinding.cancelButton.setOnClickListener(onClickListener)
         }
     }
 }
