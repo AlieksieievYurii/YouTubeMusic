@@ -233,4 +233,8 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
         return mViewModel.getCurrentProgress(videoItem)
     }
 
+    override fun cancelDownloading(videoItem: VideoItem) {
+        mViewModel.stopDownloading(videoItem)
+    }
+
 }

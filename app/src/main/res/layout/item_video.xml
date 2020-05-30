@@ -125,16 +125,33 @@
                         android:backgroundTintMode="add"
                         android:contentDescription="@string/content_description_remove_music"
                         android:padding="0dp"
-                        android:src="@drawable/ic_highlight_off_24dp"
+                        android:src="@drawable/ic_delete_24dp"
                         android:visibility="@{state == ItemState.EXISTS ? View.VISIBLE : View.GONE}"
-                        tools:visibility="gone"/>
-
-                    <ProgressBar
-                        android:id="@+id/loading"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
                         tools:visibility="visible"/>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
+                        tools:visibility="gone">
+                        <ProgressBar
+                            android:id="@+id/loading"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_centerInParent="true"/>
+                        <ImageButton
+                            android:id="@+id/cancel_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTintMode="add"
+                            android:layout_centerInParent="true"
+                            android:background="@android:color/transparent"
+                            android:contentDescription="@string/content_description_remove_music"
+                            android:padding="0dp"
+                            android:src="@drawable/ic_cancel_24dp" />
+                    </RelativeLayout>
+
+
                 </LinearLayout>
 
 

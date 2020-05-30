@@ -30,13 +30,13 @@ interface DownloaderInteroperableInterface {
     fun cancel(videoItem: VideoItem)
 }
 
-interface ExecutionChanges {
+interface ExecutionUpdate {
     fun onProgress(videoItem: VideoItem, progress: Int)
     fun onFinished(videoItem: VideoItem, outFile: File, startId: Int)
     fun onError(videoItem: VideoItem, exception: Exception, startId: Int)
 }
 
-class MusicDownloaderService : Service(), DownloaderInteroperableInterface, ExecutionChanges {
+class MusicDownloaderService : Service(), DownloaderInteroperableInterface, ExecutionUpdate {
     companion object {
         const val EXTRA_VIDEO_ITEM: String = "com.yurii.youtubemusic.download.item"
         const val DOWNLOADING_PROGRESS_ACTION: String = "com.yurii.youtubemusic.downloading.currentProgress.action"
@@ -102,6 +102,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface, Exec
     override fun cancel(videoItem: VideoItem) {
         executionVideoItems.find { it.videoItem == videoItem }?.let {
             ThreadPool.cancel(it)
+            executionVideoItems.remove(it)
         } ?: throw IllegalStateException("Cannot cancel the task because it does not exist")
     }
 
@@ -128,8 +129,8 @@ private object ThreadPool {
     private var NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors()
     private val decodeWorkQueue: BlockingQueue<Runnable> = LinkedBlockingQueue<Runnable>()
     private val decodeThreadPool: ThreadPoolExecutor = ThreadPoolExecutor(
-        NUMBER_OF_CORES,       // Initial pool size
-        NUMBER_OF_CORES,       // Max pool size
+        NUMBER_OF_CORES,
+        NUMBER_OF_CORES,
         KEEP_ALIVE_TIME,
         KEEP_ALIVE_TIME_UNIT,
         decodeWorkQueue
@@ -140,8 +141,9 @@ private object ThreadPool {
     }
 
     fun cancel(task: VideoItemTask) {
+        decodeThreadPool.remove(task)
         synchronized(this) {
-            task.currentThread.interrupt()
+            task.currentThread?.interrupt()
         }
     }
 
@@ -152,11 +154,12 @@ private class VideoItemTask(
     val videoItem: VideoItem,
     private val outDir: File,
     private val startId: Int,
-    private val executionChanges: ExecutionChanges
+    private val executionUpdate: ExecutionUpdate
 ) : Runnable {
     var currentProgress: Int = 0
-    lateinit var currentThread: Thread
-    private var youTubeDownloader = YoutubeDownloader()
+    var currentThread: Thread? = null
+    val myParser = MyParser()
+    private var youTubeDownloader = YoutubeDownloader(myParser)
     override fun run() {
         currentThread = Thread.currentThread()
         var video: YoutubeVideo?
@@ -164,7 +167,7 @@ private class VideoItemTask(
         do {
             video = youTubeDownloader.getVideo(videoItem.videoId)
             audioFormats = video.audioFormats()
-        }while (audioFormats.isNullOrEmpty())
+        } while (audioFormats.isNullOrEmpty())
 
         val audioFormat = audioFormats.last()
         download(video!!, audioFormat)
@@ -177,37 +180,36 @@ private class VideoItemTask(
 
         val outputFile = getOutputFile()
         val url = URL(audioFormat.url())
-
         try {
             BufferedInputStream(url.openStream()).use { bis ->
-                try {
-                    BufferedOutputStream(FileOutputStream(outputFile)).use { bos ->
-                        var total = 0.0
-                        val buffer = ByteArray(4096)
-                        var progress = 0
-                        var count: Int
-                        while (bis.read(buffer, 0, 4096).also { count = it } != -1) {
-                            if (Thread.interrupted()) return
-                            bos.write(buffer, 0, count)
-                            total += count.toDouble()
-                            val newProgress = ((total / audioFormat.contentLength()!!) * 100).toInt()
-                            if (newProgress > progress) {
-                                progress = newProgress
-                                executionChanges.onProgress(videoItem, progress)
-                                this.currentProgress = progress
-                            }
+                BufferedOutputStream(FileOutputStream(outputFile)).use { bos ->
+                    var total = 0.0
+                    val buffer = ByteArray(4096)
+                    var progress = 0
+                    var count: Int
+                    while (bis.read(buffer, 0, 4096).also { count = it } != -1) {
+                        if (Thread.interrupted()) {
+                            bos.close()
+                            bis.close()
+                            outputFile.delete()
+                            return
                         }
-
-                        executionChanges.onFinished(videoItem, outputFile, startId)
+                        bos.write(buffer, 0, count)
+                        total += count.toDouble()
+                        val newProgress = ((total / audioFormat.contentLength()!!) * 100).toInt()
+                        if (newProgress > progress) {
+                            progress = newProgress
+                            executionUpdate.onProgress(videoItem, progress)
+                            this.currentProgress = progress
+                        }
                     }
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                    executionChanges.onError(videoItem, e, startId)
                 }
+                check(outputFile.renameTo(File("${outputFile.parent}/${videoItem.videoId}.mp3"))) { "Cannot rename the file after complete downloading" }
+                executionUpdate.onFinished(videoItem, outputFile, startId)
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             e.printStackTrace()
-            executionChanges.onError(videoItem, e, startId)
+            executionUpdate.onError(videoItem, e, startId)
         }
 
     }
@@ -219,9 +221,18 @@ private class VideoItemTask(
                 throw IOException("Could not create output directory: $outDir")
         }
 
-        val fileName = "${videoItem.videoId}.mp3"
+        var id = 0
 
-        return File(outDir, fileName)
+        while (true) {
+            val fileName = "${videoItem.videoId}" + if (id != 0) ".downloading($id)" else ".downloading"
+            val file = File(outDir, fileName)
+            if (file.exists()) {
+                id++
+                continue
+            }
+
+            return file
+        }
     }
 
 }
