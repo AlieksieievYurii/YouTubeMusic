@@ -12,7 +12,8 @@ import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.MusicDownloaderService
+import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
+import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.services.youtube.ICanceler
 import com.yurii.youtubemusic.services.youtube.IYouTubeService
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
@@ -28,7 +29,7 @@ interface VideosLoader {
 }
 
 interface VideoItemChange {
-    fun onChangeProgress(videoItem: VideoItem, progress: Int)
+    fun onChangeProgress(videoItem: VideoItem, progress: Progress)
     fun onDownloadingFinished(videoItem: VideoItem)
 }
 
@@ -64,17 +65,16 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
     fun onReceive(intent: Intent) {
         when (intent.action) {
             MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION -> {
-                val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as? VideoItem
-                val progress = intent.getIntExtra(MusicDownloaderService.EXTRA_PROGRESS, 0)
-                videoItem?.let { mVideoItemChange?.onChangeProgress(videoItem, progress) }
+                val videoItem: VideoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
+                val progress: Progress = intent.getSerializableExtra(MusicDownloaderService.EXTRA_PROGRESS) as Progress
+                mVideoItemChange?.onChangeProgress(videoItem, progress)
             }
             MusicDownloaderService.DOWNLOADING_FINISHED_ACTION -> {
-                val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as? VideoItem
-                videoItem?.let {
+                val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
+                allDownloadedMusics.add(videoItem.also {
                     addTag(videoItem)
-                    allDownloadedMusics.add(videoItem.videoId!!)
                     mVideoItemChange?.onDownloadingFinished(videoItem)
-                }
+                }.videoId!!)
             }
         }
     }
