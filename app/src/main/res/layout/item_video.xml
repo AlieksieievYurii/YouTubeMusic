@@ -19,6 +19,10 @@
         <variable
             name="videoItem"
             type="com.yurii.youtubemusic.models.VideoItem" />
+
+        <variable
+            name="progress"
+            type="com.yurii.youtubemusic.services.downloader.Progress" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -47,7 +51,7 @@
                     android:layout_height="90dp"
                     android:contentDescription="@string/content_description_thumbnail_video"
                     app:imageUrl="@{videoItem.thumbnail}"
-                    tools:src="@android:drawable/ic_delete" />
+                    tools:src="@tools:sample/backgrounds/scenic" />
 
                 <TextView
                     android:id="@+id/tv_duration"
@@ -75,7 +79,7 @@
                     android:maxLines="2"
                     android:text="@{videoItem.title}"
                     android:textSize="14sp"
-                    tools:text="Just mocked title of YouTube video. Also it is so long long" />
+                    tools:text="@tools:sample/lorem/random" />
 
                 <TextView
                     android:id="@+id/channel_title"
@@ -84,9 +88,12 @@
                     android:layout_below="@id/title"
                     android:layout_marginStart="@dimen/defMargin"
                     android:layout_marginTop="2dp"
+                    android:layout_toStartOf="@id/layout_options"
                     android:layout_toEndOf="@id/thumbnail"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     android:text="@{videoItem.authorChannelTitle}"
-                    tools:text="PornoHubChannel" />
+                    tools:text="@tools:sample/lorem/random" />
 
                 <TextView
                     android:id="@+id/tv_amount_views"
@@ -102,9 +109,12 @@
                     android:id="@+id/layout_options"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/thumbnail"
+                    android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="@dimen/mediumMargin"
+                    android:gravity="center"
                     android:orientation="vertical">
 
                     <ImageButton
@@ -114,9 +124,9 @@
                         android:backgroundTintMode="add"
                         android:contentDescription="@string/content_description_download_music"
                         android:padding="0dp"
-                        android:src="@drawable/ic_download_v2"
+                        android:src="@drawable/ic_download_50dp"
                         android:visibility="@{state == ItemState.DOWNLOAD ? View.VISIBLE : View.GONE}"
-                        tools:visibility="gone"/>
+                        tools:visibility="visible" />
 
                     <ImageButton
                         android:id="@+id/remove"
@@ -125,35 +135,45 @@
                         android:backgroundTintMode="add"
                         android:contentDescription="@string/content_description_remove_music"
                         android:padding="0dp"
-                        android:src="@drawable/ic_delete_24dp"
+                        android:src="@drawable/ic_delete_50dp"
                         android:visibility="@{state == ItemState.EXISTS ? View.VISIBLE : View.GONE}"
-                        tools:visibility="visible"/>
+                        tools:visibility="gone" />
 
                     <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
                         tools:visibility="gone">
+
                         <ProgressBar
                             android:id="@+id/loading"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:layout_centerInParent="true"/>
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:layout_centerInParent="true" />
+
                         <ImageButton
                             android:id="@+id/cancel_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:backgroundTintMode="add"
                             android:layout_centerInParent="true"
                             android:background="@android:color/transparent"
+                            android:backgroundTintMode="add"
                             android:contentDescription="@string/content_description_remove_music"
                             android:padding="0dp"
-                            android:src="@drawable/ic_cancel_24dp" />
+                            android:src="@drawable/ic_cancel_50dp" />
+
+                        <TextView
+                            android:id="@+id/size_progress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/loading"
+                            android:text="@{@string/label_size_progress(progress.currentSizeInMb, progress.totalSizeInMb)}"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="12sp"
+                            tools:text="1.2 / 5.2 M" />
                     </RelativeLayout>
 
-
                 </LinearLayout>
-
 
                 <ProgressBar
                     android:id="@+id/progress_bar"
@@ -163,7 +183,7 @@
                     android:layout_below="@id/thumbnail"
                     android:indeterminate="false"
                     android:max="100"
-                    android:progress="@{videoItem.downloadingProgress}"
+                    android:progress="@{progress.progress}"
                     android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
                     tools:progress="45"
                     tools:visibility="visible" />
@@ -199,7 +219,7 @@
                     android:text="@{videoItem.description}"
                     android:textAppearance="@style/TextAppearance.AppCompat.Caption"
                     android:visibility="@{videoItem.description.empty ? View.GONE : View.VISIBLE}"
-                    tools:text="Video's description | Video's description" />
+                    tools:text="@tools:sample/lorem/random" />
             </RelativeLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
