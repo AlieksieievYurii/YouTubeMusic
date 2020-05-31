@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.services
+package com.yurii.youtubemusic.services.downloader
 
 import android.app.Service
 import android.content.Intent
@@ -20,8 +20,6 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-data class Progress(val progress: Int, val currentSize: Int, val totalSize: Int) : Serializable
-
 interface DownloaderInteroperableInterface {
     fun isLoading(videoItem: VideoItem): Boolean
     fun getProgress(videoItem: VideoItem): Progress?
@@ -34,15 +32,14 @@ interface ExecutionUpdate {
     fun onError(videoItem: VideoItem, exception: Exception, startId: Int)
 }
 
-class MusicDownloaderService : Service(), DownloaderInteroperableInterface, ExecutionUpdate {
+class MusicDownloaderService : Service(), DownloaderInteroperableInterface,
+    ExecutionUpdate {
     companion object {
         const val EXTRA_VIDEO_ITEM: String = "com.yurii.youtubemusic.download.item"
         const val DOWNLOADING_PROGRESS_ACTION: String = "com.yurii.youtubemusic.downloading.currentProgress.action"
         const val DOWNLOADING_FINISHED_ACTION: String = "com.yurii.youtubemusic.downloading.finished.action"
         const val DOWNLOADING_FAILED_ACTION: String = "com.yurii.youtubemusic.downloading.failed.action"
         const val EXTRA_PROGRESS: String = "com.yurii.youtubemusic.video.currentProgress"
-        const val EXTRA_CURRENT_SIZE: String = "com.yurii.youtubemusic.video.currentSize"
-        const val EXTRA_TOTAL_SIZE: String = "com.yurii.youtubemusic.video.totalSize"
         const val EXTRA_ERROR: String = "com.yurii.youtubemusic.video.error"
 
         const val TAG = "YouTubeMusicDownloader"
@@ -199,7 +196,11 @@ private class VideoItemTask(
                         val newProgress = ((total / totalSize) * 100).toInt()
                         if (newProgress > progress) {
                             progress = newProgress
-                            this.progress = Progress(progress = progress, currentSize = total.toInt(), totalSize = totalSize.toInt()).also {
+                            this.progress = Progress(
+                                progress = progress,
+                                currentSize = total.toInt(),
+                                totalSize = totalSize.toInt()
+                            ).also {
                                 executionUpdate.onProgress(videoItem, it)
                             }
                         }
