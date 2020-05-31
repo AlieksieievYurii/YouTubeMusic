@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.services;
+package com.yurii.youtubemusic.services.downloader;
 
 /*-
  * #
