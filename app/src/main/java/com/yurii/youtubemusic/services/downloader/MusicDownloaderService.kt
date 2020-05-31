@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.services
+package com.yurii.youtubemusic.services.downloader
 
 import android.app.Service
 import android.content.Intent
@@ -21,22 +21,19 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 interface DownloaderInteroperableInterface {
-    companion object {
-        const val NO_PROGRESS: Int = -1
-    }
-
     fun isLoading(videoItem: VideoItem): Boolean
-    fun getProgress(videoItem: VideoItem): Int
+    fun getProgress(videoItem: VideoItem): Progress?
     fun cancel(videoItem: VideoItem)
 }
 
 interface ExecutionUpdate {
-    fun onProgress(videoItem: VideoItem, progress: Int)
+    fun onProgress(videoItem: VideoItem, progress: Progress)
     fun onFinished(videoItem: VideoItem, outFile: File, startId: Int)
     fun onError(videoItem: VideoItem, exception: Exception, startId: Int)
 }
 
-class MusicDownloaderService : Service(), DownloaderInteroperableInterface, ExecutionUpdate {
+class MusicDownloaderService : Service(), DownloaderInteroperableInterface,
+    ExecutionUpdate {
     companion object {
         const val EXTRA_VIDEO_ITEM: String = "com.yurii.youtubemusic.download.item"
         const val DOWNLOADING_PROGRESS_ACTION: String = "com.yurii.youtubemusic.downloading.currentProgress.action"
@@ -75,7 +72,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface, Exec
         ThreadPool.execute(task)
     }
 
-    override fun onProgress(videoItem: VideoItem, progress: Int) {
+    override fun onProgress(videoItem: VideoItem, progress: Progress) {
         Log.i(TAG, "Progress: ${videoItem.videoId}. Progress: $progress")
         localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_PROGRESS_ACTION).also {
             it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
@@ -108,8 +105,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface, Exec
 
     override fun isLoading(videoItem: VideoItem): Boolean = executionVideoItems.find { it.videoItem == videoItem } != null
 
-    override fun getProgress(videoItem: VideoItem): Int =
-        executionVideoItems.find { it.videoItem == videoItem }?.currentProgress ?: DownloaderInteroperableInterface.NO_PROGRESS
+    override fun getProgress(videoItem: VideoItem): Progress? = executionVideoItems.find { it.videoItem == videoItem }?.progress
 
     override fun onDestroy() {
         super.onDestroy()
@@ -156,7 +152,7 @@ private class VideoItemTask(
     private val startId: Int,
     private val executionUpdate: ExecutionUpdate
 ) : Runnable {
-    var currentProgress: Int = 0
+    var progress: Progress? = null
     var currentThread: Thread? = null
     val myParser = MyParser()
     private var youTubeDownloader = YoutubeDownloader(myParser)
@@ -185,6 +181,7 @@ private class VideoItemTask(
                 BufferedOutputStream(FileOutputStream(outputFile)).use { bos ->
                     var total = 0.0
                     val buffer = ByteArray(4096)
+                    val totalSize = audioFormat.contentLength()!!
                     var progress = 0
                     var count: Int
                     while (bis.read(buffer, 0, 4096).also { count = it } != -1) {
@@ -196,11 +193,16 @@ private class VideoItemTask(
                         }
                         bos.write(buffer, 0, count)
                         total += count.toDouble()
-                        val newProgress = ((total / audioFormat.contentLength()!!) * 100).toInt()
+                        val newProgress = ((total / totalSize) * 100).toInt()
                         if (newProgress > progress) {
                             progress = newProgress
-                            executionUpdate.onProgress(videoItem, progress)
-                            this.currentProgress = progress
+                            this.progress = Progress(
+                                progress = progress,
+                                currentSize = total.toInt(),
+                                totalSize = totalSize.toInt()
+                            ).also {
+                                executionUpdate.onProgress(videoItem, it)
+                            }
                         }
                     }
                 }

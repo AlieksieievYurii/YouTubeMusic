@@ -9,6 +9,7 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemLoadingBinding
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.utilities.*
 import java.lang.IllegalStateException
 
@@ -21,7 +22,7 @@ interface VideoItemInterface {
     fun remove(videoItem: VideoItem)
     fun isExisted(videoItem: VideoItem): Boolean
     fun isLoading(videoItem: VideoItem): Boolean
-    fun getCurrentProgress(videoItem: VideoItem): Int?
+    fun getCurrentProgress(videoItem: VideoItem): Progress?
     fun cancelDownloading(videoItem: VideoItem)
 }
 
@@ -105,12 +106,16 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
             })
 
             when {
-                videoItemInterface.isExisted(videoItem) -> { videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS) }
+                videoItemInterface.isExisted(videoItem) -> videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS)
                 videoItemInterface.isLoading(videoItem) -> {
-                    videoItem.downloadingProgress = videoItemInterface.getCurrentProgress(videoItem) ?: 0
-                    videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
+                    videoViewHolder.bind(
+                        videoItem,
+                        position,
+                        progress = videoItemInterface.getCurrentProgress(videoItem),
+                        state = ItemState.IS_LOADING
+                    )
                 }
-                else -> { videoViewHolder.bind(videoItem, position, state = ItemState.DOWNLOAD) }
+                else -> videoViewHolder.bind(videoItem, position, state = ItemState.DOWNLOAD)
             }
         }
     }
@@ -119,10 +124,11 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
         BaseViewHolder(videoItemVideoBinding.root) {
         private var isExpanded = false
 
-        fun bind(videoItem: VideoItem, position: Int, state: ItemState = ItemState.DOWNLOAD) {
+        fun bind(videoItem: VideoItem, position: Int, progress: Progress? = null, state: ItemState = ItemState.DOWNLOAD) {
             videoItemVideoBinding.apply {
                 this.videoItem = videoItem
                 this.state = state
+                this.progress = progress
 
                 if (position == expandedPosition)
                     expandDetails().also { isExpanded = true }

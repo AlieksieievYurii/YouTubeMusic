@@ -26,7 +26,8 @@ import com.google.api.services.youtube.model.PlaylistListResponse
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListDialogInterface
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.MusicDownloaderService
+import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
+import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.videoslist.ItemState
 import com.yurii.youtubemusic.videoslist.VideoItemInterface
@@ -67,7 +68,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
         val currentVideos = mViewModel.getCurrentVideos()
         if (currentVideos.isNotEmpty()) {
-           setNewVideoItems(currentVideos)
+            setNewVideoItems(currentVideos)
             mBinding.progressBar.visibility = View.GONE
             mBinding.videos.visibility = View.VISIBLE
         }
@@ -112,27 +113,30 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
     private fun selectPlayList() {
-        PlayListsDialogFragment().showPlayLists(activity!!.supportFragmentManager, mViewModel.selectedPlaylist.value, object : PlayListDialogInterface {
-            override fun loadPlayLists(onLoad: (resp: PlaylistListResponse) -> Unit, nextPageToken: String?) {
-                mViewModel.loadPlayLists(object : YouTubeObserver<PlaylistListResponse> {
-                    override fun onResult(result: PlaylistListResponse) = onLoad.invoke(result)
+        PlayListsDialogFragment().showPlayLists(
+            activity!!.supportFragmentManager,
+            mViewModel.selectedPlaylist.value,
+            object : PlayListDialogInterface {
+                override fun loadPlayLists(onLoad: (resp: PlaylistListResponse) -> Unit, nextPageToken: String?) {
+                    mViewModel.loadPlayLists(object : YouTubeObserver<PlaylistListResponse> {
+                        override fun onResult(result: PlaylistListResponse) = onLoad.invoke(result)
 
-                    override fun onError(error: Exception) {
-                        ErrorSnackBar.show(mBinding.root, error.message!!)
-                        if (error is UserRecoverableAuthIOException) {
-                            startActivityForResult(error.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
-                        } else
-                            Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show()
-                    }
-                }, nextPageToken)
-            }
+                        override fun onError(error: Exception) {
+                            ErrorSnackBar.show(mBinding.root, error.message!!)
+                            if (error is UserRecoverableAuthIOException) {
+                                startActivityForResult(error.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
+                            } else
+                                Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show()
+                        }
+                    }, nextPageToken)
+                }
 
-            override fun onSelectPlaylist(selectedPlaylist: Playlist) {
-                removeExitingVideos()
-                mViewModel.setNewPlayList(selectedPlaylist)
-                alterSelectionPlayListButton()
-            }
-        })
+                override fun onSelectPlaylist(selectedPlaylist: Playlist) {
+                    removeExitingVideos()
+                    mViewModel.setNewPlayList(selectedPlaylist)
+                    alterSelectionPlayListButton()
+                }
+            })
     }
 
     private fun removeExitingVideos() {
@@ -159,9 +163,9 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
         }
     }
 
-    override fun onChangeProgress(videoItem: VideoItem, progress: Int) {
+    override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
         findVideoItemView(videoItem) {
-            it.progressBar.progress = progress
+            it.progress = progress
         }
     }
 
@@ -215,23 +219,15 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
 
-    override fun onItemClickDownload(videoItem: VideoItem) {
-       mViewModel.startDownloadingMusic(videoItem)
-    }
+    override fun onItemClickDownload(videoItem: VideoItem) = mViewModel.startDownloadingMusic(videoItem)
 
-    override fun remove(videoItem: VideoItem) {
-        mViewModel.removeVideoItem(videoItem)
-    }
+    override fun remove(videoItem: VideoItem) = mViewModel.removeVideoItem(videoItem)
 
     override fun isExisted(videoItem: VideoItem): Boolean = mViewModel.isExist(videoItem)
 
-    override fun isLoading(videoItem: VideoItem): Boolean {
-        return mViewModel.isVideoItemLoading(videoItem)
-    }
+    override fun isLoading(videoItem: VideoItem): Boolean = mViewModel.isVideoItemLoading(videoItem)
 
-    override fun getCurrentProgress(videoItem: VideoItem): Int? {
-        return mViewModel.getCurrentProgress(videoItem)
-    }
+    override fun getCurrentProgress(videoItem: VideoItem): Progress? = mViewModel.getCurrentProgress(videoItem)
 
     override fun cancelDownloading(videoItem: VideoItem) {
         mViewModel.stopDownloading(videoItem)
