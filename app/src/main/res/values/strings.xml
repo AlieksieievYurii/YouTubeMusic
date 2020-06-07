@@ -20,4 +20,5 @@
     <string name="content_description_sing_in_illustration">Sign in illustration</string>
     <string name="label_first_playlist">Great job! Now you should select your first playlist to download musics from videos</string>
     <string name="label_empty_playlist">This playlist does not have any videos. Please add first video to the playlist</string>
+    <string name="content_description_first_playlist">Selection first playlist illustration</string>
 </resources>
