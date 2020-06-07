@@ -6,7 +6,7 @@
     <string name="thumbnails_of_playlist">Thumbnails of playList</string>
     <string name="label_videos_count">%d videos</string>
     <string name="label_views_count">%s views</string>
-    <string name="label_not_found_playlists">Not found playLists</string>
+    <string name="label_not_found_play_lists">It seems you haven\'t yet created a playlist. Please create a playlist and add your first video</string>
     <string name="content_description_empty_list_image">Empty list image</string>
     <string name="content_description_thumbnail_video">Thumbnail of video item</string>
     <string name="content_description_download_music">Download YouTube video as music</string>
