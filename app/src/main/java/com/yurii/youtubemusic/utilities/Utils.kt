@@ -1,14 +1,10 @@
 package com.yurii.youtubemusic.utilities
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.client.util.ExponentialBackOff
-import com.google.api.services.youtube.YouTubeScopes
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.models.VideoItem
 import org.threeten.bp.Duration
@@ -19,7 +15,6 @@ import java.util.concurrent.TimeUnit
 
 const val DEFAULT_SHARED_PREFERENCES_FILE: String = "com.yurii.youtubemusic.shared.preferences"
 const val SHARED_PREFERENCES_SELECTED_PLAY_LIST: String = "com.yurii.youtubemusic.shared.preferences.selected.play.list"
-const val PREF_ACCOUNT_NAME = "accountName"
 
 class Preferences private constructor() {
     companion object {
@@ -58,37 +53,6 @@ class DataStorage private constructor() {
         fun getMusic(context: Context, videoItem: VideoItem): File = File(getMusicStorage(context), "${videoItem.videoId}.mp3")
     }
 }
-
-class Authorization private constructor() {
-    companion object {
-        private val scopes = listOf(YouTubeScopes.YOUTUBE)
-        fun getGoogleCredentials(context: Context): GoogleAccountCredential? {
-            val accountName: String? = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-                .getString(PREF_ACCOUNT_NAME, null)
-
-            accountName?.let {
-                return GoogleAccountCredential.usingOAuth2(context, scopes).setBackOff(ExponentialBackOff()).also {
-                    it.selectedAccountName = accountName
-                }
-            }
-            return null
-        }
-
-        fun getGoogleAccount(context: Context): String? {
-            val preferences: SharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-            return preferences.getString(PREF_ACCOUNT_NAME, null)
-        }
-
-        fun setGoogleAccount(context: Context, accountName: String) {
-            val preferences: SharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-            with(preferences.edit()) {
-                putString(PREF_ACCOUNT_NAME, accountName)
-                commit()
-            }
-        }
-    }
-}
-
 
 fun parseDurationToHumanView(text: String): String {
     val millis = Duration.parse(text).toMillis()
