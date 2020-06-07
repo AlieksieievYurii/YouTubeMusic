@@ -9,10 +9,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
@@ -22,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListDialogInterface
@@ -37,6 +36,7 @@ import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeMusicViewModel
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeViewModelFactory
 import java.lang.Exception
+import java.lang.IllegalArgumentException
 
 
 class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
@@ -50,7 +50,12 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        mViewModel = ViewModelProvider(activity!!, YouTubeViewModelFactory(activity!!.application)).get(YouTubeMusicViewModel::class.java)
+        val googleSignInAccount =
+            this.arguments?.getParcelable<GoogleSignInAccount>(GOOGLE_SIGN_IN) ?: throw IllegalArgumentException("GoogleSignIn is required!")
+
+        mViewModel = ViewModelProvider(activity!!, YouTubeViewModelFactory(activity!!.application, googleSignInAccount))
+            .get(YouTubeMusicViewModel::class.java)
+
         mViewModel.mVideoItemChange = this
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
         (activity as AppCompatActivity).supportActionBar!!.title = "YouTube Musics"
@@ -123,10 +128,6 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
                         override fun onError(error: Exception) {
                             ErrorSnackBar.show(mBinding.root, error.message!!)
-                            if (error is UserRecoverableAuthIOException) {
-                                startActivityForResult(error.intent, AuthorizationFragment.REQUEST_AUTHORIZATION)
-                            } else
-                                Toast.makeText(context, error.toString(), Toast.LENGTH_LONG).show()
                         }
                     }, nextPageToken)
                 }
@@ -231,6 +232,10 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
     override fun cancelDownloading(videoItem: VideoItem) {
         mViewModel.stopDownloading(videoItem)
+    }
+
+    companion object {
+        const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
     }
 
 }
