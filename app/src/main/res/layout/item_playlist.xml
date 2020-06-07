@@ -2,40 +2,47 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
-        android:orientation="vertical"
-        android:padding="6dp">
+        android:foreground="?android:attr/selectableItemBackground">
 
-        <ImageView
-            android:id="@+id/image"
-            android:layout_width="70dp"
-            android:layout_height="50dp"
-            android:layout_marginEnd="5dp"
-            android:contentDescription="@string/thumbnails_of_playlist"
-            android:src="@android:drawable/ic_media_play" />
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@id/image"
-            android:layout_toEndOf="@id/image"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="Title of play list" />
+            android:orientation="vertical"
+            android:padding="2dp">
 
-        <TextView
-            android:id="@+id/videos_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/title"
-            android:layout_toEndOf="@id/image"
-            tools:text="13 videos" />
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="70dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="5dp"
+                android:contentDescription="@string/thumbnails_of_playlist"
+                tools:src="@tools:sample/backgrounds/scenic" />
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/image"
+                android:layout_toEndOf="@id/image"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="@tools:sample/lorem/random" />
+
+            <TextView
+                android:id="@+id/videos_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/title"
+                android:layout_toEndOf="@id/image"
+                tools:text="13 videos" />
+
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
 </layout>
