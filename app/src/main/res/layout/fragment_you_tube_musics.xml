@@ -30,7 +30,7 @@
                 android:maxLines="1"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 android:textColor="@android:color/white"
-                tools:text="Test playlist long long long long name" />
+                tools:text="@tools:sample/lorem/random" />
 
             <Button
                 android:id="@+id/btn_select_play_list"
@@ -51,6 +51,7 @@
             android:layout_below="@id/layout_selection_playlist"
             android:fitsSystemWindows="true"
             android:visibility="visible"
+            tools:visibility="gone"
             tools:listitem="@layout/item_video" />
 
 
@@ -61,13 +62,40 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true" />
 
+        <LinearLayout
+            android:id="@+id/layout_selection_first_playlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:src="@drawable/ic_first_selection_illustration"
+                android:contentDescription="@string/content_description_first_playlist" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp"
+                android:text="@string/label_first_playlist"/>
+
         <Button
             android:id="@+id/btn_select_play_list_first"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/select_playlist"
-            android:visibility="gone" />
+            android:layout_marginTop="@dimen/mediumMargin"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/colorPrimary"
+            android:text="@string/select_playlist" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 
