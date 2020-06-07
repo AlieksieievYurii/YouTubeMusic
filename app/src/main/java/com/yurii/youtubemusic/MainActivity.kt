@@ -3,12 +3,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.databinding.DataBindingUtil
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private lateinit var mainActivity: ActivityMainBinding
-    private lateinit var authorizationFragment: AuthorizationFragment
 
     private var activeBottomMenuItem: Int = -1
 
@@ -17,8 +17,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         mainActivity = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         setupBottomNavigationMenu()
-
-        authorizationFragment = AuthorizationFragment()
 
         if (savedInstanceState == null)
             openSavedMusicFragment()
@@ -30,8 +28,12 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     }
 
 
-    private fun openYouTubeMusic() {
+    private fun openYouTubeMusic(googleSignInAccount: GoogleSignInAccount) {
         val youTubeMusicsFragment = YouTubeMusicsFragment()
+        youTubeMusicsFragment.arguments = Bundle().apply {
+            this.putParcelable(YouTubeMusicsFragment.GOOGLE_SIGN_IN, googleSignInAccount)
+        }
+
         supportFragmentManager.beginTransaction().replace(
             R.id.frameLayout,
             youTubeMusicsFragment,
@@ -49,16 +51,16 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     }
 
     private fun openAuthorizationFragment() {
+        val authorizationFragment = AuthorizationFragment()
 
         authorizationFragment.signInCallBack = {
-            openYouTubeMusic()
+            openYouTubeMusic(it)
         }
 
         supportFragmentManager.beginTransaction().replace(
             R.id.frameLayout,
             authorizationFragment,
-            authorizationFragment.javaClass.simpleName
-        ).commit()
+            authorizationFragment.javaClass.simpleName).commit()
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -69,10 +71,17 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
         return when (activeBottomMenuItem) {
             R.id.item_saved_music -> {
-                openSavedMusicFragment(); true
+                openSavedMusicFragment()
+                true
             }
             R.id.item_you_tube_music -> {
-                openAuthorizationFragment(); true
+                val account = AuthorizationFragment.getLastSignedInAccount(this)
+                if (account != null)
+                    openYouTubeMusic(account)
+                else
+                    openAuthorizationFragment()
+
+                true
             }
             else -> false
         }
