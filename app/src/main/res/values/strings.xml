@@ -18,4 +18,6 @@
     <string name="content_description_remove_music">Remove a downloaded music</string>
     <string name="label_sing_in">To download musics from your YouTube playlist, you need to sign in with Google</string>
     <string name="content_description_sing_in_illustration">Sign in illustration</string>
+    <string name="label_first_playlist">Great job! Now you should select your first playlist to download musics from videos</string>
+    <string name="content_description_first_playlist">Selection first playlist illustration</string>
 </resources>

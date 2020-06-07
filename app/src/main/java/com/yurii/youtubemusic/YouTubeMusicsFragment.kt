@@ -205,7 +205,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
     private fun alterSelectionPlayListButton(): Unit =
         mBinding.let {
-            it.btnSelectPlayListFirst.visibility = View.GONE
+            it.layoutSelectionFirstPlaylist.visibility = View.GONE
             it.layoutSelectionPlaylist.visibility = View.VISIBLE
         }
 
@@ -213,7 +213,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
         mBinding.btnSelectPlayListFirst.setOnClickListener { selectPlayList() }
 
         mBinding.apply {
-            btnSelectPlayListFirst.visibility = View.VISIBLE
+            layoutSelectionFirstPlaylist.visibility = View.VISIBLE
             progressBar.visibility = View.GONE
             layoutSelectionPlaylist.visibility = View.GONE
         }
