@@ -82,7 +82,7 @@ class PlayListsAdapter(private val onClickListener: View.OnClickListener) : Recy
                     playListItem.contentDetails.itemCount
                 )
 
-                Picasso.get().load(playListItem.snippet.thumbnails.standard.url).into(it.image)
+                Picasso.get().load(playListItem.snippet.thumbnails.default.url).into(it.image)
             }
         }
 

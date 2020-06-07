@@ -80,7 +80,9 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
         mViewModel.mVideosLoader = object : VideosLoader {
             override fun onResult(newVideos: List<VideoItem>) {
-                if (mVideosListAdapter.videos.isEmpty()) {
+                if (mVideosListAdapter.videos.isEmpty() && newVideos.isEmpty())
+                    showEmptyPlaylistLabel()
+                else if (mVideosListAdapter.videos.isEmpty()) {
                     setNewVideoItems(newVideos)
                     mBinding.progressBar.visibility = View.GONE
                     mBinding.videos.visibility = View.VISIBLE
@@ -182,6 +184,13 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
         isLoadingNewVideoItems = false
     }
 
+    private fun showEmptyPlaylistLabel() {
+        mBinding.apply {
+            labelEmptyPlaylist.visibility = View.VISIBLE
+            progressBar.visibility = View.GONE
+        }
+    }
+
     private fun addMoreVideoItems(videoItems: List<VideoItem>) {
         if (isLoadingNewVideoItems) {
             mVideosListAdapter.removeLoadingState()
@@ -207,6 +216,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
         mBinding.let {
             it.layoutSelectionFirstPlaylist.visibility = View.GONE
             it.layoutSelectionPlaylist.visibility = View.VISIBLE
+            it.labelEmptyPlaylist.visibility = View.GONE
         }
 
     private fun showOptionToSelectPlayListFirstTime() {
