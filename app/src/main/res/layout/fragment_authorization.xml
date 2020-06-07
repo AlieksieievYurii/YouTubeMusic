@@ -5,13 +5,36 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="100dp"
         android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/tv_description"
+            android:src="@drawable/ic_login_illustration"
+            android:contentDescription="@string/content_description_sing_in_illustration" />
+
+        <TextView
+            android:id="@+id/tv_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_sing_in"
+            android:textAlignment="center"
+            android:layout_centerInParent="true"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
+            android:layout_marginBottom="20dp"/>
 
         <com.google.android.gms.common.SignInButton
             android:id="@+id/sign_in_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_below="@id/tv_description"
+            android:layout_marginTop="@dimen/mediumMargin"
+            android:layout_centerHorizontal="true"
             app:buttonSize="wide" />
 
     </RelativeLayout>

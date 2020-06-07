@@ -7,6 +7,9 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.services.youtube.YouTubeScopes
 import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
@@ -20,7 +23,6 @@ import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import java.lang.Exception
-import java.lang.IllegalStateException
 import java.lang.RuntimeException
 
 interface VideosLoader {
@@ -33,7 +35,7 @@ interface VideoItemChange {
     fun onDownloadingFinished(videoItem: VideoItem)
 }
 
-class YouTubeMusicViewModel(application: Application) : AndroidViewModel(application) {
+class YouTubeMusicViewModel(application: Application, private val googleSignInAccount: GoogleSignInAccount) : AndroidViewModel(application) {
     private val mYouTubeService: IYouTubeService = YouTubeService()
     private val mContext: Context = getApplication<Application>().baseContext
     private val _selectedPlayList: MutableLiveData<Playlist?> = MutableLiveData()
@@ -47,9 +49,11 @@ class YouTubeMusicViewModel(application: Application) : AndroidViewModel(applica
     var mVideoItemChange: VideoItemChange? = null
 
     init {
-        Authorization.getGoogleCredentials(mContext)?.let {
-            mYouTubeService.setCredentials(it)
-        } ?: throw IllegalStateException("Cannot get Google account credentials")
+        val credential = GoogleAccountCredential.usingOAuth2(application.baseContext, listOf(YouTubeScopes.YOUTUBE)).apply {
+            selectedAccount = googleSignInAccount.account
+        }
+
+        mYouTubeService.setCredentials(credential)
 
         DataStorage.getMusicStorage(mContext).walk().forEach {
             Regex("(.+?)(\\.mp3\$)").find(it.name)?.groups?.get(1)?.value?.let { value ->
