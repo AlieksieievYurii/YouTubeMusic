@@ -47,51 +47,62 @@
             android:id="@+id/videos"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_centerInParent="true"
             android:layout_below="@id/layout_selection_playlist"
+            android:layout_centerInParent="true"
             android:fitsSystemWindows="true"
             android:visibility="visible"
-            tools:visibility="gone"
-            tools:listitem="@layout/item_video" />
+            tools:listitem="@layout/item_video"
+            tools:visibility="gone" />
 
+        <TextView
+            android:id="@+id/label_empty_playlist"
+            style="@style/DescriptionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:drawableTop="@drawable/ic_empty_playlist"
+            android:text="@string/label_empty_playlist"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
 
         <ProgressBar
             android:id="@+id/progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
+            android:layout_centerInParent="true"
+            tools:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/layout_selection_first_playlist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="gone"
-            tools:visibility="visible"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="gone">
 
             <ImageView
                 android:layout_width="300dp"
                 android:layout_height="300dp"
-                android:src="@drawable/ic_first_selection_illustration"
-                android:contentDescription="@string/content_description_first_playlist" />
+                android:contentDescription="@string/content_description_first_playlist"
+                android:src="@drawable/ic_first_selection_illustration" />
 
             <TextView
+                style="@style/DescriptionText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/DescriptionText"
-                android:text="@string/label_first_playlist"/>
+                android:text="@string/label_first_playlist" />
 
-        <Button
-            android:id="@+id/btn_select_play_list_first"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/mediumMargin"
-            android:textColor="@android:color/white"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="@string/select_playlist" />
+            <Button
+                android:id="@+id/btn_select_play_list_first"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/mediumMargin"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/select_playlist"
+                android:textColor="@android:color/white" />
 
         </LinearLayout>
 
