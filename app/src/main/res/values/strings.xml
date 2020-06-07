@@ -16,4 +16,6 @@
     <string name="content_description_dislikes">Dislikes</string>
     <string name="select">Select</string>
     <string name="content_description_remove_music">Remove a downloaded music</string>
+    <string name="label_sing_in">To download musics from your YouTube playlist, you need to sign in with Google</string>
+    <string name="content_description_sing_in_illustration">Sign in illustration</string>
 </resources>
