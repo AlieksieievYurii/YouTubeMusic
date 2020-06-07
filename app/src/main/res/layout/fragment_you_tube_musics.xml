@@ -81,9 +81,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:paddingStart="40dp"
-                android:paddingEnd="40dp"
+                style="@style/DescriptionText"
                 android:text="@string/label_first_playlist"/>
 
         <Button

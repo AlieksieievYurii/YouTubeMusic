@@ -5,9 +5,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="100dp"
-        android:orientation="vertical">
+        android:layout_marginTop="100dp">
 
         <ImageView
             android:layout_width="300dp"
@@ -22,10 +20,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/label_sing_in"
-            android:textAlignment="center"
+            style="@style/DescriptionText"
             android:layout_centerInParent="true"
-            android:paddingStart="40dp"
-            android:paddingEnd="40dp"
             android:layout_marginBottom="20dp"/>
 
         <com.google.android.gms.common.SignInButton
@@ -33,7 +29,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_description"
-            android:layout_marginTop="@dimen/mediumMargin"
             android:layout_centerHorizontal="true"
             app:buttonSize="wide" />
 
