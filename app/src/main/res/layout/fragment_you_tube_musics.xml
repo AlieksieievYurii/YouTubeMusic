@@ -28,6 +28,7 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:textSize="12sp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 android:textColor="@android:color/white"
                 tools:text="@tools:sample/lorem/random" />
@@ -38,6 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/mediumMargin"
+                android:minHeight="0dp"
                 android:text="@string/select"
                 android:textColor="@android:color/white" />
         </LinearLayout>
