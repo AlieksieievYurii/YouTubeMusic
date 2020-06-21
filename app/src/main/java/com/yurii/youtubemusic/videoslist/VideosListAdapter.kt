@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic.videoslist
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,21 +28,17 @@ interface VideoItemInterface {
 }
 
 
-class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
+class VideosListAdapter(context: Context, private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
     companion object {
         private const val NO_POSITION = -1
         private var expandedPosition = NO_POSITION
     }
 
-    init {
-        expandedPosition = NO_POSITION
-    }
-
     val videos: MutableList<VideoItem> = mutableListOf()
     private var isLoaderVisible: Boolean = false
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             VIEW_TYPE_NORMAL ->
                 VideoViewHolder(DataBindingUtil.inflate(inflater, R.layout.item_video, parent, false)) {
@@ -87,36 +84,37 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
     override fun getItemCount(): Int = videos.size
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
+        if (getItemViewType(position) == VIEW_TYPE_LOADING)
+            return
+
         val videoItem = videos[position]
-        if (getItemViewType(position) == VIEW_TYPE_NORMAL) {
-            val videoViewHolder = holder as VideoViewHolder
-            videoViewHolder.setOnRemoveClickListener(View.OnClickListener {
-                videoItemInterface.remove(videoItem)
-                videoViewHolder.bind(videoItem, position)
-            })
+        val videoViewHolder = holder as VideoViewHolder
+        videoViewHolder.setOnRemoveClickListener(View.OnClickListener {
+            videoItemInterface.remove(videoItem)
+            videoViewHolder.bind(videoItem, position)
+        })
 
-            videoViewHolder.setOnDownloadClickListener(View.OnClickListener {
-                videoItemInterface.onItemClickDownload(videoItem)
-                videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
-            })
+        videoViewHolder.setOnDownloadClickListener(View.OnClickListener {
+            videoItemInterface.onItemClickDownload(videoItem)
+            videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
+        })
 
-            videoViewHolder.setOnCancelClickListener(View.OnClickListener {
-                videoItemInterface.cancelDownloading(videoItem)
-                videoViewHolder.bind(videoItem, position)
-            })
+        videoViewHolder.setOnCancelClickListener(View.OnClickListener {
+            videoItemInterface.cancelDownloading(videoItem)
+            videoViewHolder.bind(videoItem, position)
+        })
 
-            when {
-                videoItemInterface.isExisted(videoItem) -> videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS)
-                videoItemInterface.isLoading(videoItem) -> {
-                    videoViewHolder.bind(
-                        videoItem,
-                        position,
-                        progress = videoItemInterface.getCurrentProgress(videoItem),
-                        state = ItemState.IS_LOADING
-                    )
-                }
-                else -> videoViewHolder.bind(videoItem, position, state = ItemState.DOWNLOAD)
+        when {
+            videoItemInterface.isExisted(videoItem) -> videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS)
+            videoItemInterface.isLoading(videoItem) -> {
+                videoViewHolder.bind(
+                    videoItem,
+                    position,
+                    progress = videoItemInterface.getCurrentProgress(videoItem),
+                    state = ItemState.IS_LOADING
+                )
             }
+            else -> videoViewHolder.bind(videoItem, position, state = ItemState.DOWNLOAD)
         }
     }
 
