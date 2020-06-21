@@ -44,7 +44,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     private lateinit var mBinding: FragmentYouTubeMusicsBinding
     private lateinit var mRecyclerView: RecyclerView
     private var isLoadingNewVideoItems = true
-    private val mVideosListAdapter: VideosListAdapter = VideosListAdapter(this)
+    private lateinit var mVideosListAdapter: VideosListAdapter
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) = mViewModel.onReceive(intent)
     }
@@ -99,6 +99,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
     private fun initRecyclerView() {
+        mVideosListAdapter = VideosListAdapter(context!!, this)
         mRecyclerView = mBinding.videos
 
         val layoutManager = LinearLayoutManager(context)
