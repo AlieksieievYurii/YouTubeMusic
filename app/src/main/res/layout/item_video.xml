@@ -35,6 +35,7 @@
         card_view:cardUseCompatPadding="true">
 
         <LinearLayout
+            android:id="@+id/card_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -190,7 +191,7 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/details_part_layout"
+                android:id="@+id/expandable_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingStart="@dimen/mediumPadding"
