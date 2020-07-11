@@ -118,9 +118,8 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         }
     }
 
-    public fun setOnClickStateListener(onClickListener: OnClickListener) {
+    fun setOnClickStateListener(onClickListener: OnClickListener) {
         this.onClickListener = onClickListener
-        setOnClickListener {  }
     }
 
 
@@ -129,13 +128,20 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         mProgressAnimator.start()
     }
 
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_CANCEL) {
+            mIsHover = false
+        }
+
+        return super.dispatchTouchEvent(event)
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> mIsHover = true
             MotionEvent.ACTION_UP -> mIsHover = false
             MotionEvent.ACTION_MOVE -> mIsHover = mViewHolder.contains(event.x.toInt(), event.y.toInt())
-
         }
 
         return mGestureClickListener.onTouchEvent(event) || super.onTouchEvent(event)
