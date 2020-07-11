@@ -1,4 +1,5 @@
 package com.yurii.youtubemusic
+
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
@@ -34,20 +35,28 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             this.putParcelable(YouTubeMusicsFragment.GOOGLE_SIGN_IN, googleSignInAccount)
         }
 
-        supportFragmentManager.beginTransaction().replace(
+        supportFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left).replace(
             R.id.frameLayout,
             youTubeMusicsFragment,
             youTubeMusicsFragment.javaClass.simpleName
         ).commit()
     }
 
-    private fun openSavedMusicFragment() {
+    private fun openSavedMusicFragment(animation: Boolean = false) {
         val savedMusicFragment = SavedMusicFragment()
-        supportFragmentManager.beginTransaction().replace(
-            R.id.frameLayout,
-            savedMusicFragment,
-            savedMusicFragment.javaClass.simpleName
-        ).commit()
+
+        supportFragmentManager.beginTransaction().apply {
+            if (animation)
+                this.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right)
+
+            this.replace(
+                R.id.frameLayout,
+                savedMusicFragment,
+                savedMusicFragment.javaClass.simpleName
+            )
+            this.commit()
+        }
+
     }
 
     private fun openAuthorizationFragment() {
@@ -60,7 +69,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         supportFragmentManager.beginTransaction().replace(
             R.id.frameLayout,
             authorizationFragment,
-            authorizationFragment.javaClass.simpleName).commit()
+            authorizationFragment.javaClass.simpleName
+        ).commit()
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -71,7 +81,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
         return when (activeBottomMenuItem) {
             R.id.item_saved_music -> {
-                openSavedMusicFragment()
+                openSavedMusicFragment(animation = true)
                 true
             }
             R.id.item_you_tube_music -> {

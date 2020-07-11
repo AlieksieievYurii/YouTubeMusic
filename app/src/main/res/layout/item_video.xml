@@ -13,10 +13,6 @@
         <import type="android.view.View" />
 
         <variable
-            name="state"
-            type="com.yurii.youtubemusic.videoslist.ItemState" />
-
-        <variable
             name="videoItem"
             type="com.yurii.youtubemusic.models.VideoItem" />
 
@@ -31,10 +27,13 @@
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
+        android:layout_marginStart="@dimen/mediumMargin"
+        android:layout_marginEnd="@dimen/mediumMargin"
         card_view:cardCornerRadius="@dimen/defCornerRadius"
         card_view:cardUseCompatPadding="true">
 
         <LinearLayout
+            android:id="@+id/card_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -42,7 +41,7 @@
             <RelativeLayout
                 android:id="@+id/main_part_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:padding="@dimen/defPadding">
 
                 <ImageView
@@ -73,7 +72,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/defMargin"
-                    android:layout_toStartOf="@id/layout_options"
+                    android:layout_toStartOf="@id/options"
                     android:layout_toEndOf="@id/thumbnail"
                     android:ellipsize="end"
                     android:maxLines="2"
@@ -88,7 +87,7 @@
                     android:layout_below="@id/title"
                     android:layout_marginStart="@dimen/defMargin"
                     android:layout_marginTop="2dp"
-                    android:layout_toStartOf="@id/layout_options"
+                    android:layout_toStartOf="@id/options"
                     android:layout_toEndOf="@id/thumbnail"
                     android:ellipsize="end"
                     android:maxLines="1"
@@ -105,92 +104,42 @@
                     android:text="@{@string/label_views_count(UtilsKt.bigIntegerToShortCutSuffix(videoItem.viewCount))}"
                     tools:text="135K views" />
 
-                <LinearLayout
-                    android:id="@+id/layout_options"
+                <RelativeLayout
+                    android:id="@+id/options"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/thumbnail"
+                    android:layout_height="match_parent"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="@dimen/mediumMargin"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    android:layout_alignBottom="@id/thumbnail">
 
-                    <ImageButton
-                        android:id="@+id/download"
+                    <com.yurii.youtubemusic.ui.DownloadButton
+                        android:id="@+id/btn_download"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_centerInParent="true"
+                        android:layout_marginEnd="@dimen/mediumMargin"
+                        app:progress="@{progress.progress}"
+                        app:backgroundColor="@color/colorAccent"
+                        app:state="download" />
+
+                    <TextView
+                        android:id="@+id/size_progress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:backgroundTintMode="add"
-                        android:contentDescription="@string/content_description_download_music"
-                        android:padding="0dp"
-                        android:src="@drawable/ic_download_50dp"
-                        android:visibility="@{state == ItemState.DOWNLOAD ? View.VISIBLE : View.GONE}"
-                        tools:visibility="visible" />
+                        android:layout_below="@id/btn_download"
+                        android:layout_centerHorizontal="true"
+                        android:text="@{@string/label_size_progress(progress.currentSizeInMb, progress.totalSizeInMb)}"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="10sp"
+                        android:visibility="@{progress != null ? View.VISIBLE : View.INVISIBLE}"
+                        tools:text="10.2 / 50.2 M"
+                        tools:ignore="SmallSp" />
 
-                    <ImageButton
-                        android:id="@+id/remove"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTintMode="add"
-                        android:contentDescription="@string/content_description_remove_music"
-                        android:padding="0dp"
-                        android:src="@drawable/ic_delete_50dp"
-                        android:visibility="@{state == ItemState.EXISTS ? View.VISIBLE : View.GONE}"
-                        tools:visibility="gone" />
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
-                        tools:visibility="gone">
-
-                        <ProgressBar
-                            android:id="@+id/loading"
-                            android:layout_width="60dp"
-                            android:layout_height="60dp"
-                            android:layout_centerInParent="true" />
-
-                        <ImageButton
-                            android:id="@+id/cancel_button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:background="@android:color/transparent"
-                            android:backgroundTintMode="add"
-                            android:contentDescription="@string/content_description_remove_music"
-                            android:padding="0dp"
-                            android:src="@drawable/ic_cancel_50dp" />
-
-                        <TextView
-                            android:id="@+id/size_progress"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/loading"
-                            android:text="@{@string/label_size_progress(progress.currentSizeInMb, progress.totalSizeInMb)}"
-                            android:textColor="@color/colorPrimaryDark"
-                            android:textSize="12sp"
-                            tools:text="1.2 / 5.2 M" />
-                    </RelativeLayout>
-
-                </LinearLayout>
-
-                <ProgressBar
-                    android:id="@+id/progress_bar"
-                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/thumbnail"
-                    android:indeterminate="false"
-                    android:max="100"
-                    android:progress="@{progress.progress}"
-                    android:visibility="@{state == ItemState.IS_LOADING ? View.VISIBLE : View.GONE}"
-                    tools:progress="45"
-                    tools:visibility="visible" />
+                </RelativeLayout>
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/details_part_layout"
+                android:id="@+id/expandable_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingStart="@dimen/mediumPadding"

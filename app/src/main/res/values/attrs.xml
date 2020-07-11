@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DownloadButton">
+        <attr name="backgroundColor" format="color"/>
+        <attr name="progressColor" format="color"/>
+        <attr name="iconColor" format="color"/>
+        <attr name="state" format="enum">
+            <enum name="download" value="0"/>
+            <enum name="downloading" value="1"/>
+            <enum name="downloaded" value="2"/>
+        </attr>
+        <attr name="progress" format="integer"/>
+    </declare-styleable>
+</resources>

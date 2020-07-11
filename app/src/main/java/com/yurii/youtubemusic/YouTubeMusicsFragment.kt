@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.api.services.youtube.model.PlaylistListResponse
-import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.dialogplaylists.PlayListDialogInterface
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
@@ -44,7 +43,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     private lateinit var mBinding: FragmentYouTubeMusicsBinding
     private lateinit var mRecyclerView: RecyclerView
     private var isLoadingNewVideoItems = true
-    private val mVideosListAdapter: VideosListAdapter = VideosListAdapter(this)
+    private lateinit var mVideosListAdapter: VideosListAdapter
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) = mViewModel.onReceive(intent)
     }
@@ -99,6 +98,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
     private fun initRecyclerView() {
+        mVideosListAdapter = VideosListAdapter(context!!, this)
         mRecyclerView = mBinding.videos
 
         val layoutManager = LinearLayoutManager(context)
@@ -148,34 +148,16 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
         mBinding.videos.visibility = View.GONE
     }
 
-    private fun findVideoItemView(videoItem: VideoItem, onFound: ((ItemVideoBinding) -> Unit)) {
-        for (index: Int in 0 until mRecyclerView.childCount) {
-            val position = mRecyclerView.getChildAdapterPosition(mRecyclerView.getChildAt(index))
-
-            if (position == RecyclerView.NO_POSITION || mVideosListAdapter.videos.isEmpty())
-                continue
-
-            if (isLoadingNewVideoItems && mVideosListAdapter.videos.lastIndex == position)
-            // When new video items are loading, the last list's item is empty Video item, because it is for "loading item"
-                continue
-
-            if (mVideosListAdapter.videos[position].videoId == videoItem.videoId) {
-                val viewHolder = (mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(index)) as VideosListAdapter.VideoViewHolder)
-                onFound.invoke(viewHolder.videoItemVideoBinding)
-            }
-        }
-    }
-
     override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
-        findVideoItemView(videoItem) {
-            it.progress = progress
+        mVideosListAdapter.findVideoItemView(videoItem) {
+            it.setProgress( progress)
         }
     }
 
     override fun onDownloadingFinished(videoItem: VideoItem) {
-        findVideoItemView(videoItem) {
-            it.state = ItemState.EXISTS
-            it.executePendingBindings()
+        mVideosListAdapter.findVideoItemView(videoItem) {
+            it.setState(state = ItemState.DOWNLOADED)
+            it.setProgress(null)
         }
     }
 

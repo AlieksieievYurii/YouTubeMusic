@@ -1,8 +1,13 @@
 package com.yurii.youtubemusic.videoslist
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.core.animation.doOnEnd
+import androidx.core.animation.doOnStart
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
@@ -10,11 +15,13 @@ import com.yurii.youtubemusic.databinding.ItemLoadingBinding
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.Progress
+import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.utilities.*
+import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
 enum class ItemState {
-    DOWNLOAD, EXISTS, IS_LOADING
+    DOWNLOAD, DOWNLOADED, DOWNLOADING
 }
 
 interface VideoItemInterface {
@@ -27,30 +34,31 @@ interface VideoItemInterface {
 }
 
 
-class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
+class VideosListAdapter(context: Context, private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
     companion object {
         private const val NO_POSITION = -1
-        private var expandedPosition = NO_POSITION
-    }
-
-    init {
-        expandedPosition = NO_POSITION
     }
 
     val videos: MutableList<VideoItem> = mutableListOf()
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
+    private lateinit var recyclerView: RecyclerView
     private var isLoaderVisible: Boolean = false
+    private var expandedPosition = NO_POSITION
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             VIEW_TYPE_NORMAL ->
-                VideoViewHolder(DataBindingUtil.inflate(inflater, R.layout.item_video, parent, false)) {
-                    notifyDataSetChanged()
-                }
+                VideoViewHolder(DataBindingUtil.inflate(inflater, R.layout.item_video, parent, false))
             VIEW_TYPE_LOADING ->
                 LoadingViewHolder(DataBindingUtil.inflate<ItemLoadingBinding>(inflater, R.layout.item_loading, parent, false).root)
             else -> throw IllegalStateException("Illegal view type")
         }
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
     }
 
     override fun getItemViewType(position: Int): Int = if (isLoaderVisible)
@@ -84,88 +92,138 @@ class VideosListAdapter(private val videoItemInterface: VideoItemInterface) : Re
         notifyDataSetChanged()
     }
 
-    override fun getItemCount(): Int = videos.size
+    fun findVideoItemView(videoItem: VideoItem, onFound: ((VideoViewHolder) -> Unit)) {
+        for (index: Int in 0 until recyclerView.childCount) {
+            val position = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(index))
 
-    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
-        val videoItem = videos[position]
-        if (getItemViewType(position) == VIEW_TYPE_NORMAL) {
-            val videoViewHolder = holder as VideoViewHolder
-            videoViewHolder.setOnRemoveClickListener(View.OnClickListener {
-                videoItemInterface.remove(videoItem)
-                videoViewHolder.bind(videoItem, position)
-            })
+            if (position == RecyclerView.NO_POSITION || videos.isEmpty())
+                continue
 
-            videoViewHolder.setOnDownloadClickListener(View.OnClickListener {
-                videoItemInterface.onItemClickDownload(videoItem)
-                videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
-            })
+            if (isLoaderVisible && videos.lastIndex == position)
+            // When new video items are loading, the last list's item is empty Video item, because it is for "loading item"
+                continue
 
-            videoViewHolder.setOnCancelClickListener(View.OnClickListener {
-                videoItemInterface.cancelDownloading(videoItem)
-                videoViewHolder.bind(videoItem, position)
-            })
-
-            when {
-                videoItemInterface.isExisted(videoItem) -> videoViewHolder.bind(videoItem, position, state = ItemState.EXISTS)
-                videoItemInterface.isLoading(videoItem) -> {
-                    videoViewHolder.bind(
-                        videoItem,
-                        position,
-                        progress = videoItemInterface.getCurrentProgress(videoItem),
-                        state = ItemState.IS_LOADING
-                    )
-                }
-                else -> videoViewHolder.bind(videoItem, position, state = ItemState.DOWNLOAD)
+            if (videos[position].videoId == videoItem.videoId) {
+                val viewHolder = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideoViewHolder)
+                onFound.invoke(viewHolder)
             }
         }
     }
 
-    class VideoViewHolder(val videoItemVideoBinding: ItemVideoBinding, private val onItemChange: ((position: Int) -> Unit)) :
-        BaseViewHolder(videoItemVideoBinding.root) {
-        private var isExpanded = false
+    override fun getItemCount(): Int = videos.size
 
-        fun bind(videoItem: VideoItem, position: Int, progress: Progress? = null, state: ItemState = ItemState.DOWNLOAD) {
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
+        if (getItemViewType(position) == VIEW_TYPE_LOADING)
+            return
+
+        val videoItem = videos[position]
+        val videoViewHolder = holder as VideoViewHolder
+
+        expandItem(videoViewHolder, position == expandedPosition, animate = false)
+
+        videoViewHolder.cardContainer.setOnClickListener {
+            when (expandedPosition) {
+                NO_POSITION -> {
+                    expandedPosition = position
+                    expandItem(videoViewHolder, expand = true, animate = true)
+                }
+                position -> {
+                    expandedPosition = NO_POSITION
+                    expandItem(videoViewHolder, expand = false, animate = true)
+                }
+                else -> {
+                    val expandedItem = recyclerView.findViewHolderForLayoutPosition(expandedPosition) as? VideoViewHolder
+                    if (expandedItem != null)
+                        expandItem(expandedItem, expand = false, animate = true)
+
+                    expandItem(videoViewHolder, expand = true, animate = true)
+                    expandedPosition = position
+                }
+            }
+        }
+        videoViewHolder.downloadButton.setOnClickStateListener(object : DownloadButton.OnClickListener {
+            override fun onClick(view: View, callState: Int): Int = when (callState) {
+                DownloadButton.CALL_DOWNLOAD -> {
+                    videoItemInterface.onItemClickDownload(videoItem)
+                    videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADING)
+
+                    DownloadButton.STATE_DOWNLOADING
+                }
+
+                DownloadButton.CALL_DELETE -> {
+                    videoItemInterface.remove(videoItem)
+                    videoViewHolder.setData(videoItem)
+
+                    DownloadButton.STATE_DOWNLOAD
+                }
+
+                DownloadButton.CALL_CANCEL -> {
+                    videoItemInterface.cancelDownloading(videoItem)
+                    videoViewHolder.setData(videoItem)
+
+                    DownloadButton.STATE_DOWNLOAD
+                }
+                else -> throw IllegalArgumentException("Unknown called state!")
+            }
+        })
+
+        when {
+            videoItemInterface.isExisted(videoItem) -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADED)
+            videoItemInterface.isLoading(videoItem) -> {
+                videoViewHolder.setData(
+                    videoItem,
+                    progress = videoItemInterface.getCurrentProgress(videoItem),
+                    state = ItemState.DOWNLOADING
+                )
+            }
+            else -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOAD)
+        }
+    }
+
+    private fun expandItem(view: VideoViewHolder, expand: Boolean, animate: Boolean) {
+        view.expandableLayout.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val expandedItemHeight: Int = view.expandableLayout.measuredHeight
+
+        if (animate) {
+            val animator = getValueAnimator(expand, 200L, AccelerateDecelerateInterpolator()) { setExpandedProgress(view, expandedItemHeight, it) }
+
+            if (expand) animator.doOnStart { view.expandableLayout.isVisible = true }
+            else animator.doOnEnd { view.expandableLayout.isVisible = false }
+
+            animator.start()
+
+        } else setExpandedProgress(view, expandedItemHeight, if (expand) 1f else 0f)
+    }
+
+    private fun setExpandedProgress(view: VideoViewHolder, expandedHeight: Int, progress: Float) {
+        view.expandableLayout.layoutParams.height = if (progress == 1f) ViewGroup.LayoutParams.WRAP_CONTENT else (expandedHeight * progress).toInt()
+        view.expandableLayout.requestLayout()
+    }
+
+    class VideoViewHolder(private val videoItemVideoBinding: ItemVideoBinding) : BaseViewHolder(videoItemVideoBinding.root) {
+        val cardContainer: View = videoItemVideoBinding.cardContainer
+        val expandableLayout: View = videoItemVideoBinding.expandableLayout
+        val downloadButton: DownloadButton = videoItemVideoBinding.btnDownload
+
+        fun setProgress(progress: Progress?) {
+            videoItemVideoBinding.progress = progress
+        }
+
+        fun setState(state: ItemState) {
+            downloadButton.state = when (state) {
+                ItemState.DOWNLOAD -> DownloadButton.STATE_DOWNLOAD
+                ItemState.DOWNLOADING -> DownloadButton.STATE_DOWNLOADING
+                ItemState.DOWNLOADED -> DownloadButton.STATE_DOWNLOADED
+            }
+        }
+
+        fun setData(videoItem: VideoItem, progress: Progress? = null, state: ItemState = ItemState.DOWNLOAD) {
+            setState(state)
+
             videoItemVideoBinding.apply {
                 this.videoItem = videoItem
-                this.state = state
                 this.progress = progress
-
-                if (position == expandedPosition)
-                    expandDetails().also { isExpanded = true }
-                else
-                    collapseDetails().also { isExpanded = false }
-
-                this.root.setOnClickListener {
-                    expandedPosition = if (isExpanded) NO_POSITION else position
-                    if (expandedPosition == NO_POSITION)
-                        collapseDetails().also { isExpanded = false; onItemChange.invoke(position) }
-                    else
-                        expandDetails().also { isExpanded = true; onItemChange.invoke(position) }
-                }
             }.executePendingBindings()
-        }
-
-
-        private fun expandDetails() {
-            videoItemVideoBinding.detailsPartLayout.visibility = View.VISIBLE
-            // TODO Need to add some expanding animation
-        }
-
-        private fun collapseDetails() {
-            videoItemVideoBinding.detailsPartLayout.visibility = View.GONE
-            // TODO Need to add some collapsing animation
-        }
-
-        fun setOnDownloadClickListener(onClickListener: View.OnClickListener) {
-            videoItemVideoBinding.download.setOnClickListener(onClickListener)
-        }
-
-        fun setOnRemoveClickListener(onClickListener: View.OnClickListener) {
-            videoItemVideoBinding.remove.setOnClickListener(onClickListener)
-        }
-
-        fun setOnCancelClickListener(onClickListener: View.OnClickListener) {
-            videoItemVideoBinding.cancelButton.setOnClickListener(onClickListener)
         }
     }
 }
