@@ -92,7 +92,7 @@ class VideosListAdapter(context: Context, private val videoItemInterface: VideoI
         notifyDataSetChanged()
     }
 
-    fun findVideoItemView(videoItem: VideoItem, onFound: ((ItemVideoBinding) -> Unit)) {
+    fun findVideoItemView(videoItem: VideoItem, onFound: ((VideoViewHolder) -> Unit)) {
         for (index: Int in 0 until recyclerView.childCount) {
             val position = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(index))
 
@@ -105,7 +105,7 @@ class VideosListAdapter(context: Context, private val videoItemInterface: VideoI
 
             if (videos[position].videoId == videoItem.videoId) {
                 val viewHolder = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideoViewHolder)
-                onFound.invoke(viewHolder.videoItemVideoBinding)
+                onFound.invoke(viewHolder)
             }
         }
     }
@@ -200,15 +200,30 @@ class VideosListAdapter(context: Context, private val videoItemInterface: VideoI
         view.expandableLayout.requestLayout()
     }
 
-    class VideoViewHolder(val videoItemVideoBinding: ItemVideoBinding) : BaseViewHolder(videoItemVideoBinding.root) {
+    class VideoViewHolder(private val videoItemVideoBinding: ItemVideoBinding) : BaseViewHolder(videoItemVideoBinding.root) {
         val cardContainer: View = videoItemVideoBinding.cardContainer
         val expandableLayout: View = videoItemVideoBinding.expandableLayout
         val downloadButton: DownloadButton = videoItemVideoBinding.btnDownload
-        fun setData(videoItem: VideoItem, progress: Progress? = null, state: ItemState = ItemState.DOWNLOAD) =
+
+        fun setProgress(progress: Progress?) {
+            videoItemVideoBinding.progress = progress
+        }
+
+        fun setState(state: ItemState) {
+            downloadButton.state = when (state) {
+                ItemState.DOWNLOAD -> DownloadButton.STATE_DOWNLOAD
+                ItemState.DOWNLOADING -> DownloadButton.STATE_DOWNLOADING
+                ItemState.DOWNLOADED -> DownloadButton.STATE_DOWNLOADED
+            }
+        }
+
+        fun setData(videoItem: VideoItem, progress: Progress? = null, state: ItemState = ItemState.DOWNLOAD) {
+            setState(state)
+
             videoItemVideoBinding.apply {
                 this.videoItem = videoItem
-                this.state = state
                 this.progress = progress
             }.executePendingBindings()
+        }
     }
 }

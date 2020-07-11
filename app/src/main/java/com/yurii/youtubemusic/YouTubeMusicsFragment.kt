@@ -150,14 +150,14 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
     override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
         mVideosListAdapter.findVideoItemView(videoItem) {
-            it.progress = progress
+            it.setProgress( progress)
         }
     }
 
     override fun onDownloadingFinished(videoItem: VideoItem) {
         mVideosListAdapter.findVideoItemView(videoItem) {
-            it.state = ItemState.DOWNLOADED
-            it.executePendingBindings()
+            it.setState(state = ItemState.DOWNLOADED)
+            it.setProgress(null)
         }
     }
 
