@@ -1,14 +1,12 @@
 package com.yurii.youtubemusic.videoslist
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
-import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -17,11 +15,13 @@ import com.yurii.youtubemusic.databinding.ItemLoadingBinding
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.Progress
+import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.utilities.*
+import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
 enum class ItemState {
-    DOWNLOAD, EXISTS, IS_LOADING
+    DOWNLOAD, DOWNLOADED, DOWNLOADING
 }
 
 interface VideoItemInterface {
@@ -92,6 +92,24 @@ class VideosListAdapter(context: Context, private val videoItemInterface: VideoI
         notifyDataSetChanged()
     }
 
+    fun findVideoItemView(videoItem: VideoItem, onFound: ((ItemVideoBinding) -> Unit)) {
+        for (index: Int in 0 until recyclerView.childCount) {
+            val position = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(index))
+
+            if (position == RecyclerView.NO_POSITION || videos.isEmpty())
+                continue
+
+            if (isLoaderVisible && videos.lastIndex == position)
+            // When new video items are loading, the last list's item is empty Video item, because it is for "loading item"
+                continue
+
+            if (videos[position].videoId == videoItem.videoId) {
+                val viewHolder = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideoViewHolder)
+                onFound.invoke(viewHolder.videoItemVideoBinding)
+            }
+        }
+    }
+
     override fun getItemCount(): Int = videos.size
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
@@ -122,30 +140,40 @@ class VideosListAdapter(context: Context, private val videoItemInterface: VideoI
                     expandedPosition = position
                 }
             }
-         }
+        }
+        videoViewHolder.downloadButton.setOnClickStateListener(object : DownloadButton.OnClickListener {
+            override fun onClick(view: View, callState: Int): Int = when (callState) {
+                DownloadButton.CALL_DOWNLOAD -> {
+                    videoItemInterface.onItemClickDownload(videoItem)
+                    videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADING)
 
-//        videoViewHolder.setOnRemoveClickListener(View.OnClickListener {
-//            videoItemInterface.remove(videoItem)
-//            videoViewHolder.bind(videoItem, position)
-//        })
-//
-//        videoViewHolder.setOnDownloadClickListener(View.OnClickListener {
-//            videoItemInterface.onItemClickDownload(videoItem)
-//            videoViewHolder.bind(videoItem, position, state = ItemState.IS_LOADING)
-//        })
-//
-//        videoViewHolder.setOnCancelClickListener(View.OnClickListener {
-//            videoItemInterface.cancelDownloading(videoItem)
-//            videoViewHolder.bind(videoItem, position)
-//        })
+                    DownloadButton.STATE_DOWNLOADING
+                }
+
+                DownloadButton.CALL_DELETE -> {
+                    videoItemInterface.remove(videoItem)
+                    videoViewHolder.setData(videoItem)
+
+                    DownloadButton.STATE_DOWNLOAD
+                }
+
+                DownloadButton.CALL_CANCEL -> {
+                    videoItemInterface.cancelDownloading(videoItem)
+                    videoViewHolder.setData(videoItem)
+
+                    DownloadButton.STATE_DOWNLOAD
+                }
+                else -> throw IllegalArgumentException("Unknown called state!")
+            }
+        })
 
         when {
-            videoItemInterface.isExisted(videoItem) -> videoViewHolder.setData(videoItem, state = ItemState.EXISTS)
+            videoItemInterface.isExisted(videoItem) -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADED)
             videoItemInterface.isLoading(videoItem) -> {
                 videoViewHolder.setData(
                     videoItem,
                     progress = videoItemInterface.getCurrentProgress(videoItem),
-                    state = ItemState.IS_LOADING
+                    state = ItemState.DOWNLOADING
                 )
             }
             else -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOAD)
@@ -175,6 +203,7 @@ class VideosListAdapter(context: Context, private val videoItemInterface: VideoI
     class VideoViewHolder(val videoItemVideoBinding: ItemVideoBinding) : BaseViewHolder(videoItemVideoBinding.root) {
         val cardContainer: View = videoItemVideoBinding.cardContainer
         val expandableLayout: View = videoItemVideoBinding.expandableLayout
+        val downloadButton: DownloadButton = videoItemVideoBinding.btnDownload
         fun setData(videoItem: VideoItem, progress: Progress? = null, state: ItemState = ItemState.DOWNLOAD) =
             videoItemVideoBinding.apply {
                 this.videoItem = videoItem
