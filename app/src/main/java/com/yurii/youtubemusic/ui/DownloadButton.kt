@@ -34,6 +34,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         const val DEFAULT_PROGRESS_COLOR = Color.WHITE
         const val DEFAULT_ICON_COLOR = Color.WHITE
 
+        const val STATE_NONE: Int = -1
         const val STATE_DOWNLOAD: Int = 0
         const val STATE_DOWNLOADING: Int = 1
         const val STATE_DOWNLOADED: Int = 2
@@ -91,14 +92,18 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     private val mGestureClickListener = GestureDetectorCompat(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent?) = true
         override fun onSingleTapUp(e: MotionEvent?): Boolean {
-            state = onClickListener?.onClick(
+            val newState: Int = onClickListener?.onClick(
                 this@DownloadButton, callState = when (state) {
                     STATE_DOWNLOAD -> CALL_DOWNLOAD
                     STATE_DOWNLOADING -> CALL_CANCEL
                     STATE_DOWNLOADED -> CALL_DELETE
                     else -> throw IllegalStateException("Unknown button's state")
                 }
-            ) ?: state
+            ) ?: STATE_NONE
+
+            if (newState != STATE_NONE)
+                state = newState
+
             return true
         }
     })

@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
-import com.yurii.youtubemusic.dialogplaylists.PlayListsDialogFragment
+import com.yurii.youtubemusic.playlists.PlayListsDialogFragment
 import com.yurii.youtubemusic.utilities.*
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -22,10 +22,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.api.services.youtube.model.PlaylistListResponse
-import com.yurii.youtubemusic.dialogplaylists.PlayListDialogInterface
+import com.yurii.youtubemusic.playlists.PlayListsDialogInterface
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.Progress
+import com.yurii.youtubemusic.services.youtube.ICanceler
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.videoslist.ItemState
 import com.yurii.youtubemusic.videoslist.VideoItemInterface
@@ -120,26 +121,25 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
     private fun selectPlayList() {
-        PlayListsDialogFragment().showPlayLists(
-            activity!!.supportFragmentManager,
-            mViewModel.selectedPlaylist.value,
-            object : PlayListDialogInterface {
-                override fun loadPlayLists(onLoad: (resp: PlaylistListResponse) -> Unit, nextPageToken: String?) {
-                    mViewModel.loadPlayLists(object : YouTubeObserver<PlaylistListResponse> {
-                        override fun onResult(result: PlaylistListResponse) = onLoad.invoke(result)
+        val selectionPlayListDialog = PlayListsDialogFragment.createDialog(object : PlayListsDialogInterface {
+            override fun loadPlayLists(onLoad: (resp: PlaylistListResponse) -> Unit, nextPageToken: String?): ICanceler {
+                return mViewModel.loadPlayLists(object : YouTubeObserver<PlaylistListResponse> {
+                    override fun onResult(result: PlaylistListResponse) = onLoad.invoke(result)
 
-                        override fun onError(error: Exception) {
-                            ErrorSnackBar.show(mBinding.root, error.message!!)
-                        }
-                    }, nextPageToken)
-                }
+                    override fun onError(error: Exception) {
+                        ErrorSnackBar.show(mBinding.root, error.message!!)
+                    }
+                }, nextPageToken)
+            }
 
-                override fun onSelectPlaylist(selectedPlaylist: Playlist) {
-                    removeExitingVideos()
-                    mViewModel.setNewPlayList(selectedPlaylist)
-                    alterSelectionPlayListButton()
-                }
-            })
+            override fun onSelectPlaylist(selectedPlaylist: Playlist) {
+                removeExitingVideos()
+                mViewModel.setNewPlayList(selectedPlaylist)
+                alterSelectionPlayListButton()
+            }
+        }, mViewModel.selectedPlaylist.value)
+
+        selectionPlayListDialog.show(activity!!.supportFragmentManager, "SelectionPlayListFragment")
     }
 
     private fun removeExitingVideos() {
@@ -150,7 +150,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
     override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
         mVideosListAdapter.findVideoItemView(videoItem) {
-            it.setProgress( progress)
+            it.setProgress(progress)
         }
     }
 

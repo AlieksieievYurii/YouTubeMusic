@@ -34,7 +34,7 @@ interface VideoItemInterface {
 }
 
 
-class VideosListAdapter(context: Context, private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
+class VideosListAdapter(private val context: Context, private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
     companion object {
         private const val NO_POSITION = -1
     }
@@ -154,7 +154,7 @@ class VideosListAdapter(context: Context, private val videoItemInterface: VideoI
                     videoItemInterface.remove(videoItem)
                     videoViewHolder.setData(videoItem)
 
-                    DownloadButton.STATE_DOWNLOAD
+                    DownloadButton.STATE_NONE
                 }
 
                 DownloadButton.CALL_CANCEL -> {

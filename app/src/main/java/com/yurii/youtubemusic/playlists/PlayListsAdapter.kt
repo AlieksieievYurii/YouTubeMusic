@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.dialogplaylists
+package com.yurii.youtubemusic.playlists
 
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.api.services.youtube.model.Playlist
-import com.squareup.picasso.Picasso
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemLoadingBinding
 import com.yurii.youtubemusic.databinding.ItemPlaylistBinding
@@ -17,16 +16,14 @@ import com.yurii.youtubemusic.utilities.VIEW_TYPE_LOADING
 import com.yurii.youtubemusic.utilities.VIEW_TYPE_NORMAL
 import java.lang.IllegalStateException
 
-class PlayListsAdapter(private val onClickListener: View.OnClickListener) : RecyclerView.Adapter<BaseViewHolder>() {
-    val playLists: MutableList<Playlist> = mutableListOf()
+interface OnClickPlayListListener {
+    fun onClickPlayList(playlist: Playlist)
+}
+
+class PlayListsAdapter(private val onClickPlayListListener: OnClickPlayListListener, private var currentPlaylist: Playlist? = null) :
+    RecyclerView.Adapter<BaseViewHolder>() {
     private var isLoaderVisible: Boolean = false
-
-    var currentPlaylist: Playlist? = null
-
-    override fun getItemViewType(position: Int): Int = if (isLoaderVisible)
-        if (position == playLists.lastIndex) VIEW_TYPE_LOADING else VIEW_TYPE_NORMAL
-    else
-        VIEW_TYPE_NORMAL
+    private val playLists: MutableList<Playlist> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -36,6 +33,11 @@ class PlayListsAdapter(private val onClickListener: View.OnClickListener) : Recy
             else -> throw IllegalStateException("Illegal view type")
         }
     }
+
+    override fun getItemViewType(position: Int): Int = if (isLoaderVisible)
+        if (position == playLists.lastIndex) VIEW_TYPE_LOADING else VIEW_TYPE_NORMAL
+    else
+        VIEW_TYPE_NORMAL
 
     fun setLoadingState() {
         isLoaderVisible = true
@@ -59,35 +61,25 @@ class PlayListsAdapter(private val onClickListener: View.OnClickListener) : Recy
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         if (getItemViewType(position) == VIEW_TYPE_NORMAL) {
-            (holder as PlayListViewHolder).apply {
-                bind(playLists[position], currentPlaylist)
-                setOnClickListener(onClickListener)
-            }
+            val playlist = playLists[position]
+            (holder as PlayListViewHolder).bind(playlist, onClickPlayListListener, isAlreadySelected = currentPlaylist?.id == playlist.id)
         }
     }
 
     class PlayListViewHolder(playListItem: View) : BaseViewHolder(playListItem) {
         val binding = DataBindingUtil.getBinding<ItemPlaylistBinding>(playListItem)
-        fun bind(playListItem: Playlist, currentPlayList: Playlist?) {
-            binding?.let {
-                if (playListItem.id == currentPlayList?.id)
-                    it.root.setBackgroundColor(Color.GRAY)
+        fun bind(playList: Playlist, onClickPlayListListener: OnClickPlayListListener, isAlreadySelected: Boolean) {
+            binding?.apply {
+                this.playlist = playList
+                if (isAlreadySelected)
+                    root.setBackgroundColor(Color.GRAY)
                 else
-                    it.root.setBackgroundColor(Color.WHITE)
-
-                it.title.text = playListItem.snippet.title
-
-                it.videosCount.text = it.root.context.resources.getString(
-                    R.string.label_videos_count,
-                    playListItem.contentDetails.itemCount
-                )
-
-                Picasso.get().load(playListItem.snippet.thumbnails.default.url).into(it.image)
+                    root.setBackgroundColor(Color.WHITE)
+                root.setOnClickListener {
+                    onClickPlayListListener.onClickPlayList(playList)
+                }
+                executePendingBindings()
             }
-        }
-
-        fun setOnClickListener(onClickListener: View.OnClickListener) {
-            binding?.root?.setOnClickListener(onClickListener)
         }
     }
 }

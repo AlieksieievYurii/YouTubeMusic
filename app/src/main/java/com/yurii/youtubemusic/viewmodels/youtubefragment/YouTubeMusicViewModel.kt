@@ -89,9 +89,9 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
         TaggerV1(file).writeTag(tag)
     }
 
-    fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null) {
+    fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null): ICanceler {
         Log.i(LOG_TAG, "Start loading playLists with next page token $nextPageToken")
-        mYouTubeService.loadPlayLists(observer, nextPageToken)
+        return mYouTubeService.loadPlayLists(observer, nextPageToken)
     }
 
     fun setNewPlayList(playlist: Playlist) {

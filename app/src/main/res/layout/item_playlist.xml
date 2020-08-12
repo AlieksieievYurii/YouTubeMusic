@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="playlist"
+            type="com.google.api.services.youtube.model.Playlist" />
+
+    </data>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        card_view:cardElevation="0dp"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground">
+        android:foreground="?android:attr/selectableItemBackground"
+        card_view:cardElevation="0dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -23,6 +32,7 @@
                 android:layout_height="50dp"
                 android:layout_marginEnd="5dp"
                 android:contentDescription="@string/thumbnails_of_playlist"
+                app:imageUrl="@{playlist.snippet.thumbnails.getDefault().url}"
                 tools:src="@tools:sample/backgrounds/scenic" />
 
             <TextView
@@ -33,6 +43,7 @@
                 android:layout_toEndOf="@id/image"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:text="@{playlist.snippet.title}"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 tools:text="@tools:sample/lorem/random" />
@@ -43,6 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/title"
                 android:layout_toEndOf="@id/image"
+                android:text="@{@string/label_videos_count(playlist.contentDetails.itemCount)}"
                 tools:text="13 videos" />
 
         </RelativeLayout>
