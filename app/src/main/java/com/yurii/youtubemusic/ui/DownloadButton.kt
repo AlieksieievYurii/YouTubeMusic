@@ -20,27 +20,12 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     interface OnClickListener {
         /**
          * The method will be involved if the click event has occurred.
-         * Must return next button's state. [STATE_DOWNLOAD], [STATE_DOWNLOADING], [STATE_DOWNLOADED]
-         * @param callState: occurred state:
-         * [CALL_DOWNLOAD] - user clicked the button to perform downloading
-         * [CALL_CANCEL] - user clicked the button to perform cancellation the download
-         * [CALL_DELETE] - user clicked the button to perform deleting
+         * @param currentState: the current state of the button:
+         * [STATE_DOWNLOAD] - user has clicked the button to perform downloading
+         * [STATE_DOWNLOADING] - user has clicked the button to perform cancellation the downloading
+         * [STATE_DOWNLOADED] - user has clicked the button to perform deleting
          */
-        fun onClick(view: View, callState: Int): Int
-    }
-
-    companion object {
-        const val DEFAULT_BACKGROUND_COLOR = Color.GRAY
-        const val DEFAULT_PROGRESS_COLOR = Color.WHITE
-        const val DEFAULT_ICON_COLOR = Color.WHITE
-
-        const val STATE_DOWNLOAD: Int = 0
-        const val STATE_DOWNLOADING: Int = 1
-        const val STATE_DOWNLOADED: Int = 2
-
-        const val CALL_DOWNLOAD: Int = 10
-        const val CALL_CANCEL: Int = 11
-        const val CALL_DELETE: Int = 12
+        fun onClick(view: View, currentState: Int)
     }
 
     private var mSize: Int = toPx(50)
@@ -91,14 +76,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     private val mGestureClickListener = GestureDetectorCompat(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent?) = true
         override fun onSingleTapUp(e: MotionEvent?): Boolean {
-            state = onClickListener?.onClick(
-                this@DownloadButton, callState = when (state) {
-                    STATE_DOWNLOAD -> CALL_DOWNLOAD
-                    STATE_DOWNLOADING -> CALL_CANCEL
-                    STATE_DOWNLOADED -> CALL_DELETE
-                    else -> throw IllegalStateException("Unknown button's state")
-                }
-            ) ?: state
+            invokeClickListenerCallBack()
             return true
         }
     })
@@ -106,6 +84,11 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     init {
         setUpAttributes(attributeSet)
     }
+
+    private fun invokeClickListenerCallBack() {
+        onClickListener?.onClick(this, state)
+    }
+
 
     private val mProgressAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
         duration = 3000
@@ -180,18 +163,19 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         super.onDraw(canvas)
         drawCircle(canvas)
 
-
         when (state) {
             STATE_DOWNLOAD -> drawDownloadIcon(canvas)
-            STATE_DOWNLOADING -> {
-                drawProgress(canvas)
-                drawCancelIcon(canvas)
-            }
+            STATE_DOWNLOADING -> drawCancelIconWithProgress(canvas)
             STATE_DOWNLOADED -> drawDeleteIcon(canvas)
         }
 
         if (mIsHover)
             drawHoverEffect(canvas)
+    }
+
+    private fun drawCancelIconWithProgress(canvas: Canvas) {
+        drawProgress(canvas)
+        drawCancelIcon(canvas)
     }
 
     private fun drawCancelIcon(canvas: Canvas) {
@@ -296,5 +280,15 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         mPaint.style = Paint.Style.FILL
         mPaint.color = mBackgroundColor
         canvas.drawArc(mViewHolder.toRectF(), 0f, 360f, true, mPaint)
+    }
+
+    companion object {
+        const val DEFAULT_BACKGROUND_COLOR = Color.GRAY
+        const val DEFAULT_PROGRESS_COLOR = Color.WHITE
+        const val DEFAULT_ICON_COLOR = Color.WHITE
+
+        const val STATE_DOWNLOAD: Int = 0
+        const val STATE_DOWNLOADING: Int = 1
+        const val STATE_DOWNLOADED: Int = 2
     }
 }

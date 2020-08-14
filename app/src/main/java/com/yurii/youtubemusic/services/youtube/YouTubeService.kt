@@ -12,14 +12,10 @@ import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
 import java.lang.Exception
 
-class YouTubeService : IYouTubeService {
+class YouTubeService(credential: GoogleAccountCredential) : IYouTubeService {
     private val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
     private val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
-    private lateinit var service: YouTube
-
-    override fun setCredentials(credential: GoogleAccountCredential) {
-        service = YouTube.Builder(transport, jsonFactory, credential).build()
-    }
+    private var service: YouTube = YouTube.Builder(transport, jsonFactory, credential).build()
 
     override fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String?): ICanceler {
         val task = Async<PlaylistListResponse>({
