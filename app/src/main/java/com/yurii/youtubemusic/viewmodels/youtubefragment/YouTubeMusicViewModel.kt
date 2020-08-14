@@ -37,7 +37,7 @@ interface VideoItemChange {
 }
 
 class YouTubeMusicViewModel(application: Application, private val googleSignInAccount: GoogleSignInAccount) : AndroidViewModel(application) {
-    private val youTubeService: IYouTubeService = YouTubeService()
+    private val youTubeService: IYouTubeService
     private val context: Context = getApplication<Application>().baseContext
     private val _selectedPlayList: MutableLiveData<Playlist?> = MutableLiveData()
     val selectedPlaylist: LiveData<Playlist?> get() = _selectedPlayList
@@ -50,11 +50,10 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
     var videoItemChange: VideoItemChange? = null
 
     init {
-        val credential = GoogleAccountCredential.usingOAuth2(application.baseContext, listOf(YouTubeScopes.YOUTUBE)).apply {
-            selectedAccount = googleSignInAccount.account
+        val credential = GoogleAccountCredential.usingOAuth2(context, listOf(YouTubeScopes.YOUTUBE)).also {
+            it.selectedAccount = googleSignInAccount.account
         }
-
-        youTubeService.setCredentials(credential)
+        youTubeService = YouTubeService(credential)
 
         DataStorage.getMusicStorage(context).walk().forEach {
             Regex("(.+?)(\\.mp3\$)").find(it.name)?.groups?.get(1)?.value?.let { value ->
@@ -155,7 +154,7 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
             playlistItemListResponse.items.map { it.snippet.resourceId.videoId },
             object : YouTubeObserver<VideoListResponse> {
                 override fun onResult(result: VideoListResponse) {
-                    val videoItems = result.items.map {VideoItem.createFrom(it)}
+                    val videoItems = result.items.map { VideoItem.createFrom(it) }
                     videos.addAll(videoItems)
                     videosLoader?.onResult(videoItems)
                     videoLoadingCanceler = null

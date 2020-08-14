@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.services.youtube
 
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.services.youtube.model.*
 import java.lang.Exception
 
@@ -20,7 +19,6 @@ interface YouTubeObserver<T> {
  * Interface for implementation of YouTube service
  */
 interface IYouTubeService {
-    fun setCredentials(credential: GoogleAccountCredential)
     fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null): ICanceler
     fun loadPlayListItems(playlistId: String, observer: YouTubeObserver<PlaylistItemListResponse>, nextPageToken: String? = null): ICanceler
     fun loadVideosDetails(ids: List<String>, observer: YouTubeObserver<VideoListResponse>): ICanceler
