@@ -33,8 +33,16 @@ interface VideoItemInterface {
     fun getCurrentProgress(videoItem: VideoItem): Progress?
 }
 
+interface ConfirmDeletion {
+    fun requestConfirmDeletion(onConfirm: () -> Unit)
+}
 
-class VideosListAdapter(context: Context, private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
+
+class VideosListAdapter(
+    context: Context,
+    private val videoItemInterface: VideoItemInterface,
+    private val confirmDeletion: ConfirmDeletion
+) : RecyclerView.Adapter<BaseViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val videos: MutableList<VideoItem> = mutableListOf()
     private var isLoaderVisible: Boolean = false
@@ -173,27 +181,37 @@ class VideosListAdapter(context: Context, private val videoItemInterface: VideoI
         videoViewHolder.downloadButton.setOnClickStateListener(object : DownloadButton.OnClickListener {
             override fun onClick(view: View, currentState: Int) {
                 when (currentState) {
-                    DownloadButton.STATE_DOWNLOAD -> {
-                        videoItemInterface.download(videoItem)
-                        videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADING)
-                        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOADING
+                    DownloadButton.STATE_DOWNLOAD -> onDownloadVideoItem(videoViewHolder, videoItem)
+
+                    DownloadButton.STATE_DOWNLOADED -> confirmDeletion.requestConfirmDeletion {
+                        onDeleteAlreadyDownloadedMusic(videoViewHolder, videoItem)
                     }
 
-                    DownloadButton.STATE_DOWNLOADED -> {
-                        videoItemInterface.remove(videoItem)
-                        videoViewHolder.setData(videoItem)
-                        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOAD
-                    }
+                    DownloadButton.STATE_DOWNLOADING -> onCancelDownload(videoViewHolder, videoItem)
 
-                    DownloadButton.STATE_DOWNLOADING -> {
-                        videoItemInterface.cancelDownload(videoItem)
-                        videoViewHolder.setData(videoItem)
-                        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOAD
-                    }
                     else -> throw IllegalArgumentException("Unknown called state!")
                 }
             }
         })
+    }
+
+
+    private fun onDownloadVideoItem(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
+        videoItemInterface.download(videoItem)
+        videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADING)
+        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOADING
+    }
+
+    private fun onDeleteAlreadyDownloadedMusic(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
+        videoItemInterface.remove(videoItem)
+        videoViewHolder.setData(videoItem)
+        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOAD
+    }
+
+    private fun onCancelDownload(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
+        videoItemInterface.cancelDownload(videoItem)
+        videoViewHolder.setData(videoItem)
+        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOAD
     }
 
     private fun setVideoItemState(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {

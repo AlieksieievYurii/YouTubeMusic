@@ -27,6 +27,8 @@ import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.services.youtube.ICanceler
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
+import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
+import com.yurii.youtubemusic.videoslist.ConfirmDeletion
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
@@ -36,7 +38,7 @@ import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader {
+class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
     private lateinit var viewModel: YouTubeMusicViewModel
     private lateinit var mBinding: FragmentYouTubeMusicsBinding
     private var isLoadingNewVideoItems = true
@@ -83,7 +85,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader {
     }
 
     private fun initRecyclerView() {
-        mVideosListAdapter = VideosListAdapter(context!!, viewModel.VideoItemProvider())
+        mVideosListAdapter = VideosListAdapter(context!!, viewModel.VideoItemProvider(), this)
         val recyclerView = mBinding.videos
 
         val layoutManager = LinearLayoutManager(context)
@@ -230,6 +232,8 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader {
     override fun onError(error: Exception) {
         ErrorSnackBar.show(mBinding.root, error.message!!)
     }
+
+    override fun requestConfirmDeletion(onConfirm: () -> Unit) = ConfirmDeletionDialog(onConfirm).show(fragmentManager!!, "fe")
 
     companion object {
         const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
