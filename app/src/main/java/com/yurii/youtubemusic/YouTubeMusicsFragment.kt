@@ -28,8 +28,6 @@ import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.services.youtube.ICanceler
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
-import com.yurii.youtubemusic.videoslist.ItemState
-import com.yurii.youtubemusic.videoslist.VideoItemInterface
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
@@ -39,7 +37,7 @@ import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
+class YouTubeMusicsFragment : Fragment(), VideoItemChange {
     private lateinit var mViewModel: YouTubeMusicViewModel
     private lateinit var mBinding: FragmentYouTubeMusicsBinding
     private lateinit var mRecyclerView: RecyclerView
@@ -50,8 +48,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val googleSignInAccount =
-            this.arguments?.getParcelable<GoogleSignInAccount>(GOOGLE_SIGN_IN) ?: throw IllegalArgumentException("GoogleSignIn is required!")
+        val googleSignInAccount = this.arguments?.getParcelable<GoogleSignInAccount>(GOOGLE_SIGN_IN) ?: throw IllegalArgumentException("GoogleSignIn is required!")
 
         mViewModel = ViewModelProvider(activity!!, YouTubeViewModelFactory(activity!!.application, googleSignInAccount))
             .get(YouTubeMusicViewModel::class.java)
@@ -80,9 +77,9 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
 
         mViewModel.mVideosLoader = object : VideosLoader {
             override fun onResult(newVideos: List<VideoItem>) {
-                if (mVideosListAdapter.videos.isEmpty() && newVideos.isEmpty())
+                if (mVideosListAdapter.isListOfVideoItemsEmpty() && newVideos.isEmpty())
                     showEmptyPlaylistLabel()
-                else if (mVideosListAdapter.videos.isEmpty()) {
+                else if (mVideosListAdapter.isListOfVideoItemsEmpty()) {
                     setNewVideoItems(newVideos)
                     mBinding.progressBar.visibility = View.GONE
                     mBinding.videos.visibility = View.VISIBLE
@@ -99,7 +96,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
     private fun initRecyclerView() {
-        mVideosListAdapter = VideosListAdapter(context!!, this)
+        mVideosListAdapter = VideosListAdapter(context!!, mViewModel.VideoItemProvider())
         mRecyclerView = mBinding.videos
 
         val layoutManager = LinearLayoutManager(context)
@@ -143,22 +140,17 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
     }
 
     private fun removeExitingVideos() {
-        mVideosListAdapter.videos.clear()
+        mVideosListAdapter.removeAllVideoItem()
         mBinding.progressBar.visibility = View.VISIBLE
         mBinding.videos.visibility = View.GONE
     }
 
     override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
-        mVideosListAdapter.findVideoItemView(videoItem) {
-            it.setProgress(progress)
-        }
+        mVideosListAdapter.setProgress(videoItem, progress)
     }
 
     override fun onDownloadingFinished(videoItem: VideoItem) {
-        mVideosListAdapter.findVideoItemView(videoItem) {
-            it.setState(state = ItemState.DOWNLOADED)
-            it.setProgress(null)
-        }
+        mVideosListAdapter.setFinishedState(videoItem)
     }
 
     private fun setNewVideoItems(videoItems: List<VideoItem>) {
@@ -209,21 +201,6 @@ class YouTubeMusicsFragment : Fragment(), VideoItemInterface, VideoItemChange {
             progressBar.visibility = View.GONE
             layoutSelectionPlaylist.visibility = View.GONE
         }
-    }
-
-
-    override fun onItemClickDownload(videoItem: VideoItem) = mViewModel.startDownloadingMusic(videoItem)
-
-    override fun remove(videoItem: VideoItem) = mViewModel.removeVideoItem(videoItem)
-
-    override fun isExisted(videoItem: VideoItem): Boolean = mViewModel.isExist(videoItem)
-
-    override fun isLoading(videoItem: VideoItem): Boolean = mViewModel.isVideoItemLoading(videoItem)
-
-    override fun getCurrentProgress(videoItem: VideoItem): Progress? = mViewModel.getCurrentProgress(videoItem)
-
-    override fun cancelDownloading(videoItem: VideoItem) {
-        mViewModel.stopDownloading(videoItem)
     }
 
     companion object {

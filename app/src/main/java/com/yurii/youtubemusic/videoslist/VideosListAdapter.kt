@@ -25,47 +25,21 @@ enum class ItemState {
 }
 
 interface VideoItemInterface {
-    fun onItemClickDownload(videoItem: VideoItem)
+    fun download(videoItem: VideoItem)
+    fun cancelDownload(videoItem: VideoItem)
     fun remove(videoItem: VideoItem)
-    fun isExisted(videoItem: VideoItem): Boolean
+    fun exists(videoItem: VideoItem): Boolean
     fun isLoading(videoItem: VideoItem): Boolean
     fun getCurrentProgress(videoItem: VideoItem): Progress?
-    fun cancelDownloading(videoItem: VideoItem)
 }
 
 
-class VideosListAdapter(private val context: Context, private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
-    companion object {
-        private const val NO_POSITION = -1
-    }
-
-    val videos: MutableList<VideoItem> = mutableListOf()
+class VideosListAdapter(context: Context, private val videoItemInterface: VideoItemInterface) : RecyclerView.Adapter<BaseViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
-    private lateinit var recyclerView: RecyclerView
+    private val videos: MutableList<VideoItem> = mutableListOf()
     private var isLoaderVisible: Boolean = false
     private var expandedPosition = NO_POSITION
-
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
-        return when (viewType) {
-            VIEW_TYPE_NORMAL ->
-                VideoViewHolder(DataBindingUtil.inflate(inflater, R.layout.item_video, parent, false))
-            VIEW_TYPE_LOADING ->
-                LoadingViewHolder(DataBindingUtil.inflate<ItemLoadingBinding>(inflater, R.layout.item_loading, parent, false).root)
-            else -> throw IllegalStateException("Illegal view type")
-        }
-    }
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        this.recyclerView = recyclerView
-    }
-
-    override fun getItemViewType(position: Int): Int = if (isLoaderVisible)
-        if (position == videos.lastIndex) VIEW_TYPE_LOADING else VIEW_TYPE_NORMAL
-    else
-        VIEW_TYPE_NORMAL
-
+    private lateinit var recyclerView: RecyclerView
 
     fun setLoadingState() {
         isLoaderVisible = true
@@ -92,7 +66,26 @@ class VideosListAdapter(private val context: Context, private val videoItemInter
         notifyDataSetChanged()
     }
 
-    fun findVideoItemView(videoItem: VideoItem, onFound: ((VideoViewHolder) -> Unit)) {
+    fun removeAllVideoItem() {
+        videos.clear()
+    }
+
+    fun isListOfVideoItemsEmpty(): Boolean = videos.isEmpty()
+
+    fun setProgress(videoItem: VideoItem, progress: Progress) {
+        findVideoItemView(videoItem) {
+            it.setProgress(progress)
+        }
+    }
+
+    fun setFinishedState(videoItem: VideoItem) {
+        findVideoItemView(videoItem) {
+            it.setState(state = ItemState.DOWNLOADED)
+            it.setProgress(null)
+        }
+    }
+
+    private fun findVideoItemView(videoItem: VideoItem, onFound: ((VideoViewHolder) -> Unit)) {
         for (index: Int in 0 until recyclerView.childCount) {
             val position = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(index))
 
@@ -104,23 +97,56 @@ class VideosListAdapter(private val context: Context, private val videoItemInter
                 continue
 
             if (videos[position].videoId == videoItem.videoId) {
-                val viewHolder = (recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideoViewHolder)
+                val viewHolder = recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as VideoViewHolder
                 onFound.invoke(viewHolder)
             }
         }
     }
 
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
+        return when (viewType) {
+            VIEW_TYPE_NORMAL -> VideoViewHolder(DataBindingUtil.inflate(inflater, R.layout.item_video, parent, false))
+            VIEW_TYPE_LOADING -> LoadingViewHolder(DataBindingUtil.inflate<ItemLoadingBinding>(inflater, R.layout.item_loading, parent, false).root)
+            else -> throw IllegalStateException("Illegal view type")
+        }
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (isLoaderVisible && position == videos.lastIndex)
+            VIEW_TYPE_LOADING
+        else
+            VIEW_TYPE_NORMAL
+    }
+
     override fun getItemCount(): Int = videos.size
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
-        if (getItemViewType(position) == VIEW_TYPE_LOADING)
+        if (isViewItemLoadingType(position))
             return
 
         val videoItem = videos[position]
         val videoViewHolder = holder as VideoViewHolder
 
-        expandItem(videoViewHolder, position == expandedPosition, animate = false)
+        setExpandOrCollapse(videoViewHolder, position)
+        setItemClickListener(videoViewHolder, position)
+        setButtonClickListener(videoViewHolder, videoItem)
+        setVideoItemState(videoViewHolder, videoItem)
+    }
 
+    private fun isViewItemLoadingType(position: Int): Boolean = getItemViewType(position) == VIEW_TYPE_LOADING
+
+    private fun setExpandOrCollapse(videoViewHolder: VideoViewHolder, position: Int) {
+        val isExpanded: Boolean = position == expandedPosition
+        expandItem(videoViewHolder, isExpanded, animate = false)
+    }
+
+    private fun setItemClickListener(videoViewHolder: VideoViewHolder, position: Int) {
         videoViewHolder.cardContainer.setOnClickListener {
             when (expandedPosition) {
                 NO_POSITION -> {
@@ -141,44 +167,45 @@ class VideosListAdapter(private val context: Context, private val videoItemInter
                 }
             }
         }
+    }
+
+    private fun setButtonClickListener(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
         videoViewHolder.downloadButton.setOnClickStateListener(object : DownloadButton.OnClickListener {
-            override fun onClick(view: View, callState: Int): Int = when (callState) {
-                DownloadButton.CALL_DOWNLOAD -> {
-                    videoItemInterface.onItemClickDownload(videoItem)
-                    videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADING)
+            override fun onClick(view: View, currentState: Int) {
+                when (currentState) {
+                    DownloadButton.STATE_DOWNLOAD -> {
+                        videoItemInterface.download(videoItem)
+                        videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADING)
+                        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOADING
+                    }
 
-                    DownloadButton.STATE_DOWNLOADING
+                    DownloadButton.STATE_DOWNLOADED -> {
+                        videoItemInterface.remove(videoItem)
+                        videoViewHolder.setData(videoItem)
+                        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOAD
+                    }
+
+                    DownloadButton.STATE_DOWNLOADING -> {
+                        videoItemInterface.cancelDownload(videoItem)
+                        videoViewHolder.setData(videoItem)
+                        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOAD
+                    }
+                    else -> throw IllegalArgumentException("Unknown called state!")
                 }
-
-                DownloadButton.CALL_DELETE -> {
-                    videoItemInterface.remove(videoItem)
-                    videoViewHolder.setData(videoItem)
-
-                    DownloadButton.STATE_NONE
-                }
-
-                DownloadButton.CALL_CANCEL -> {
-                    videoItemInterface.cancelDownloading(videoItem)
-                    videoViewHolder.setData(videoItem)
-
-                    DownloadButton.STATE_DOWNLOAD
-                }
-                else -> throw IllegalArgumentException("Unknown called state!")
             }
         })
+    }
 
+    private fun setVideoItemState(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
         when {
-            videoItemInterface.isExisted(videoItem) -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADED)
+            videoItemInterface.exists(videoItem) -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADED)
             videoItemInterface.isLoading(videoItem) -> {
-                videoViewHolder.setData(
-                    videoItem,
-                    progress = videoItemInterface.getCurrentProgress(videoItem),
-                    state = ItemState.DOWNLOADING
-                )
+                videoViewHolder.setData(videoItem, progress = videoItemInterface.getCurrentProgress(videoItem), state = ItemState.DOWNLOADING)
             }
             else -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOAD)
         }
     }
+
 
     private fun expandItem(view: VideoViewHolder, expand: Boolean, animate: Boolean) {
         view.expandableLayout.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -225,5 +252,9 @@ class VideosListAdapter(private val context: Context, private val videoItemInter
                 this.progress = progress
             }.executePendingBindings()
         }
+    }
+
+    companion object {
+        private const val NO_POSITION = -1
     }
 }

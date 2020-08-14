@@ -22,6 +22,7 @@ import com.yurii.youtubemusic.services.youtube.IYouTubeService
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
+import com.yurii.youtubemusic.videoslist.VideoItemInterface
 import java.lang.Exception
 import java.lang.RuntimeException
 
@@ -123,19 +124,21 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
         }, nextPageToken)
     }
 
-    fun isExist(videoItem: VideoItem) = allDownloadedMusics.contains(videoItem.videoId)
+    fun exists(videoItem: VideoItem) = allDownloadedMusics.contains(videoItem.videoId)
 
     fun isVideoItemLoading(videoItem: VideoItem): Boolean = MusicDownloaderService.Instance.serviceInterface?.isLoading(videoItem) ?: false
 
     fun getCurrentProgress(videoItem: VideoItem) = MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem)
 
-    fun startDownloadingMusic(videoItem: VideoItem) {
+    fun startDownloadMusic(videoItem: VideoItem) {
         mContext.startService(Intent(mContext, MusicDownloaderService::class.java).also {
             it.putExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM, videoItem)
         })
     }
 
-    fun stopDownloading(videoItem: VideoItem) = MusicDownloaderService.Instance.serviceInterface?.cancel(videoItem)
+    fun stopDownloading(videoItem: VideoItem) {
+        MusicDownloaderService.Instance.serviceInterface?.cancel(videoItem)
+    }
 
     fun removeVideoItem(videoItem: VideoItem) {
         val file = DataStorage.getMusic(mContext, videoItem)
@@ -174,6 +177,22 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
                     mVideosLoader?.onError(error)
                 }
             })
+    }
+
+
+    inner class VideoItemProvider : VideoItemInterface {
+        override fun download(videoItem: VideoItem) = this@YouTubeMusicViewModel.startDownloadMusic(videoItem)
+
+
+        override fun cancelDownload(videoItem: VideoItem) = this@YouTubeMusicViewModel.stopDownloading(videoItem)
+
+        override fun remove(videoItem: VideoItem) = this@YouTubeMusicViewModel.removeVideoItem(videoItem)
+
+        override fun exists(videoItem: VideoItem): Boolean = this@YouTubeMusicViewModel.exists(videoItem)
+
+        override fun isLoading(videoItem: VideoItem): Boolean = this@YouTubeMusicViewModel.isVideoItemLoading(videoItem)
+
+        override fun getCurrentProgress(videoItem: VideoItem): Progress? = this@YouTubeMusicViewModel.getCurrentProgress(videoItem)
     }
 
     companion object {
