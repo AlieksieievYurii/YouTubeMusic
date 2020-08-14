@@ -37,32 +37,32 @@ interface VideoItemChange {
 }
 
 class YouTubeMusicViewModel(application: Application, private val googleSignInAccount: GoogleSignInAccount) : AndroidViewModel(application) {
-    private val mYouTubeService: IYouTubeService = YouTubeService()
-    private val mContext: Context = getApplication<Application>().baseContext
+    private val youTubeService: IYouTubeService = YouTubeService()
+    private val context: Context = getApplication<Application>().baseContext
     private val _selectedPlayList: MutableLiveData<Playlist?> = MutableLiveData()
     val selectedPlaylist: LiveData<Playlist?> get() = _selectedPlayList
-    private var mVideoLoadingCanceler: ICanceler? = null
-    private val mVideos: MutableList<VideoItem> = mutableListOf()
-    private var mNextPageToken: String? = null
+    private var videoLoadingCanceler: ICanceler? = null
+    private val videos: MutableList<VideoItem> = mutableListOf()
+    private var nextPageToken: String? = null
     private val allDownloadedMusics: MutableList<String> = mutableListOf()
 
-    var mVideosLoader: VideosLoader? = null
-    var mVideoItemChange: VideoItemChange? = null
+    var videosLoader: VideosLoader? = null
+    var videoItemChange: VideoItemChange? = null
 
     init {
         val credential = GoogleAccountCredential.usingOAuth2(application.baseContext, listOf(YouTubeScopes.YOUTUBE)).apply {
             selectedAccount = googleSignInAccount.account
         }
 
-        mYouTubeService.setCredentials(credential)
+        youTubeService.setCredentials(credential)
 
-        DataStorage.getMusicStorage(mContext).walk().forEach {
+        DataStorage.getMusicStorage(context).walk().forEach {
             Regex("(.+?)(\\.mp3\$)").find(it.name)?.groups?.get(1)?.value?.let { value ->
                 allDownloadedMusics.add(value)
             }
         }
 
-        _selectedPlayList.value = Preferences.getSelectedPlayList(mContext)
+        _selectedPlayList.value = Preferences.getSelectedPlayList(context)
         if (_selectedPlayList.value != null)
             loadVideos(null)
     }
@@ -72,54 +72,54 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
             MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION -> {
                 val videoItem: VideoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
                 val progress: Progress = intent.getSerializableExtra(MusicDownloaderService.EXTRA_PROGRESS) as Progress
-                mVideoItemChange?.onChangeProgress(videoItem, progress)
+                videoItemChange?.onChangeProgress(videoItem, progress)
             }
             MusicDownloaderService.DOWNLOADING_FINISHED_ACTION -> {
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
                 allDownloadedMusics.add(videoItem.also {
                     addTag(videoItem)
-                    mVideoItemChange?.onDownloadingFinished(videoItem)
+                    videoItemChange?.onDownloadingFinished(videoItem)
                 }.videoId!!)
             }
         }
     }
 
     private fun addTag(videoItem: VideoItem) {
-        val file = DataStorage.getMusic(mContext, videoItem)
+        val file = DataStorage.getMusic(context, videoItem)
         val tag = Tag(title = videoItem.title, authorChannel = videoItem.authorChannelTitle)
         TaggerV1(file).writeTag(tag)
     }
 
     fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null): ICanceler {
         Log.i(LOG_TAG, "Start loading playLists with next page token $nextPageToken")
-        return mYouTubeService.loadPlayLists(observer, nextPageToken)
+        return youTubeService.loadPlayLists(observer, nextPageToken)
     }
 
     fun setNewPlayList(playlist: Playlist) {
         if (playlist != _selectedPlayList.value) {
-            Preferences.setSelectedPlayList(mContext, playlist)
+            Preferences.setSelectedPlayList(context, playlist)
             _selectedPlayList.value = playlist
-            mVideos.clear()
-            mNextPageToken = null
-            loadVideos(mNextPageToken)
+            videos.clear()
+            nextPageToken = null
+            loadVideos(nextPageToken)
         }
     }
 
     fun loadMoreVideos() {
-        loadVideos(mNextPageToken)
+        loadVideos(nextPageToken)
     }
 
     private fun loadVideos(nextPageToken: String?) {
-        mVideoLoadingCanceler?.cancel()
+        videoLoadingCanceler?.cancel()
 
-        mVideoLoadingCanceler = mYouTubeService.loadPlayListItems(_selectedPlayList.value!!.id, object : YouTubeObserver<PlaylistItemListResponse> {
+        videoLoadingCanceler = youTubeService.loadPlayListItems(_selectedPlayList.value!!.id, object : YouTubeObserver<PlaylistItemListResponse> {
             override fun onResult(result: PlaylistItemListResponse) {
-                this@YouTubeMusicViewModel.mNextPageToken = result.nextPageToken
+                this@YouTubeMusicViewModel.nextPageToken = result.nextPageToken
                 retrieveVideos(result)
             }
 
             override fun onError(error: Exception) {
-                mVideosLoader?.onError(error)
+                videosLoader?.onError(error)
             }
         }, nextPageToken)
     }
@@ -131,7 +131,7 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
     fun getCurrentProgress(videoItem: VideoItem) = MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem)
 
     fun startDownloadMusic(videoItem: VideoItem) {
-        mContext.startService(Intent(mContext, MusicDownloaderService::class.java).also {
+        context.startService(Intent(context, MusicDownloaderService::class.java).also {
             it.putExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM, videoItem)
         })
     }
@@ -141,28 +141,28 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
     }
 
     fun removeVideoItem(videoItem: VideoItem) {
-        val file = DataStorage.getMusic(mContext, videoItem)
+        val file = DataStorage.getMusic(context, videoItem)
         allDownloadedMusics.remove(videoItem.videoId)
         if (!file.delete())
             throw RuntimeException("Cannot remove the music file $file")
     }
 
-    fun getCurrentVideos() = mVideos
-    fun isVideoPageLast() = mNextPageToken.isNullOrEmpty()
+    fun getCurrentVideos() = videos
+    fun isVideoPageLast() = nextPageToken.isNullOrEmpty()
 
     private fun retrieveVideos(playlistItemListResponse: PlaylistItemListResponse) {
-        mYouTubeService.loadVideosDetails(
+        youTubeService.loadVideosDetails(
             playlistItemListResponse.items.map { it.snippet.resourceId.videoId },
             object : YouTubeObserver<VideoListResponse> {
                 override fun onResult(result: VideoListResponse) {
                     val videoItems = result.items.map {VideoItem.createFrom(it)}
-                    mVideos.addAll(videoItems)
-                    mVideosLoader?.onResult(videoItems)
-                    mVideoLoadingCanceler = null
+                    videos.addAll(videoItems)
+                    videosLoader?.onResult(videoItems)
+                    videoLoadingCanceler = null
                 }
 
                 override fun onError(error: Exception) {
-                    mVideosLoader?.onError(error)
+                    videosLoader?.onError(error)
                 }
             })
     }

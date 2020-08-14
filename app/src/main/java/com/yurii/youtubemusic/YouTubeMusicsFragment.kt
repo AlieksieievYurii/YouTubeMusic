@@ -40,15 +40,15 @@ import java.lang.IllegalArgumentException
 
 class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
     private lateinit var viewModel: YouTubeMusicViewModel
-    private lateinit var mBinding: FragmentYouTubeMusicsBinding
+    private lateinit var binding: FragmentYouTubeMusicsBinding
     private var isLoadingNewVideoItems = true
-    private lateinit var mVideosListAdapter: VideosListAdapter
-    private val mBroadcastReceiver = object : BroadcastReceiver() {
+    private lateinit var videosListAdapter: VideosListAdapter
+    private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) = viewModel.onReceive(intent)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
 
         setActionBar()
         initViewModel()
@@ -56,7 +56,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
         setSelectPlayListListener()
         showCurrentVideoItemsIfExist()
 
-        return mBinding.root
+        return binding.root
     }
 
     private fun setActionBar() {
@@ -67,8 +67,8 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
         val googleSignInAccount = getGoogleSignInAccount()
         val viewModelFactory = YouTubeViewModelFactory(activity!!.application, googleSignInAccount)
         viewModel = ViewModelProvider(activity!!, viewModelFactory).get(YouTubeMusicViewModel::class.java)
-        viewModel.mVideoItemChange = this
-        viewModel.mVideosLoader = this
+        viewModel.videoItemChange = this
+        viewModel.videosLoader = this
 
         viewModel.selectedPlaylist.observe(this, Observer { playList ->
             if (playList != null)
@@ -85,14 +85,14 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
     }
 
     private fun initRecyclerView() {
-        mVideosListAdapter = VideosListAdapter(context!!, viewModel.VideoItemProvider(), this)
-        val recyclerView = mBinding.videos
+        videosListAdapter = VideosListAdapter(context!!, viewModel.VideoItemProvider(), this)
+        val recyclerView = binding.videos
 
         val layoutManager = LinearLayoutManager(context)
         recyclerView.apply {
             this.setHasFixedSize(true)
             this.layoutManager = layoutManager
-            this.adapter = mVideosListAdapter
+            this.adapter = videosListAdapter
         }
 
         recyclerView.addOnScrollListener(object : PaginationListener(layoutManager) {
@@ -100,14 +100,14 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
             override fun isLoading(): Boolean = isLoadingNewVideoItems
             override fun loadMoreItems() {
                 isLoadingNewVideoItems = true
-                recyclerView.post { mVideosListAdapter.setLoadingState() }
+                recyclerView.post { videosListAdapter.setLoadingState() }
                 viewModel.loadMoreVideos()
             }
         })
     }
 
     private fun setSelectPlayListListener() {
-        mBinding.btnSelectPlayList.setOnClickListener {
+        binding.btnSelectPlayList.setOnClickListener {
             selectPlayList()
         }
     }
@@ -121,8 +121,8 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
     }
 
     private fun showLoadedVideos() {
-        mBinding.progressBar.visibility = View.GONE
-        mBinding.videos.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.GONE
+        binding.videos.visibility = View.VISIBLE
     }
 
     private fun selectPlayList() {
@@ -132,7 +132,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
                     override fun onResult(result: PlaylistListResponse) = onLoad.invoke(result)
 
                     override fun onError(error: Exception) {
-                        ErrorSnackBar.show(mBinding.root, error.message!!)
+                        ErrorSnackBar.show(binding.root, error.message!!)
                     }
                 }, nextPageToken)
             }
@@ -148,30 +148,30 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
     }
 
     private fun removeExitingVideos() {
-        mVideosListAdapter.removeAllVideoItem()
+        videosListAdapter.removeAllVideoItem()
         showLoadingProgress()
     }
 
     private fun showLoadingProgress() {
-        mBinding.progressBar.visibility = View.VISIBLE
-        mBinding.videos.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
+        binding.videos.visibility = View.GONE
     }
 
     override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
-        mVideosListAdapter.setProgress(videoItem, progress)
+        videosListAdapter.setProgress(videoItem, progress)
     }
 
     override fun onDownloadingFinished(videoItem: VideoItem) {
-        mVideosListAdapter.setFinishedState(videoItem)
+        videosListAdapter.setFinishedState(videoItem)
     }
 
     private fun setNewVideoItems(videoItems: List<VideoItem>) {
-        mVideosListAdapter.setNewVideoItems(videoItems)
+        videosListAdapter.setNewVideoItems(videoItems)
         isLoadingNewVideoItems = false
     }
 
     private fun showEmptyPlaylistLabel() {
-        mBinding.apply {
+        binding.apply {
             labelEmptyPlaylist.visibility = View.VISIBLE
             progressBar.visibility = View.GONE
         }
@@ -179,15 +179,15 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
 
     private fun addMoreVideoItems(videoItems: List<VideoItem>) {
         if (isLoadingNewVideoItems) {
-            mVideosListAdapter.removeLoadingState()
+            videosListAdapter.removeLoadingState()
             isLoadingNewVideoItems = false
         }
-        mVideosListAdapter.addVideoItems(videoItems)
+        videosListAdapter.addVideoItems(videoItems)
     }
 
     override fun onStart() {
         super.onStart()
-        LocalBroadcastManager.getInstance(activity!!).registerReceiver(mBroadcastReceiver, IntentFilter().also {
+        LocalBroadcastManager.getInstance(activity!!).registerReceiver(broadcastReceiver, IntentFilter().also {
             it.addAction(MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION)
             it.addAction(MusicDownloaderService.DOWNLOADING_FINISHED_ACTION)
         })
@@ -195,20 +195,20 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
 
     override fun onStop() {
         super.onStop()
-        LocalBroadcastManager.getInstance(activity!!).unregisterReceiver(mBroadcastReceiver)
+        LocalBroadcastManager.getInstance(activity!!).unregisterReceiver(broadcastReceiver)
     }
 
     private fun alterSelectionPlayListButton(): Unit =
-        mBinding.let {
+        binding.let {
             it.layoutSelectionFirstPlaylist.visibility = View.GONE
             it.layoutSelectionPlaylist.visibility = View.VISIBLE
             it.labelEmptyPlaylist.visibility = View.GONE
         }
 
     private fun showOptionToSelectPlayListFirstTime() {
-        mBinding.btnSelectPlayListFirst.setOnClickListener { selectPlayList() }
+        binding.btnSelectPlayListFirst.setOnClickListener { selectPlayList() }
 
-        mBinding.apply {
+        binding.apply {
             layoutSelectionFirstPlaylist.visibility = View.VISIBLE
             progressBar.visibility = View.GONE
             layoutSelectionPlaylist.visibility = View.GONE
@@ -216,13 +216,13 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
     }
 
     private fun setPlayListTitle(playList: Playlist) {
-        mBinding.tvPlayListName.text = playList.snippet.title
+        binding.tvPlayListName.text = playList.snippet.title
     }
 
     override fun onResult(newVideos: List<VideoItem>) {
-        if (mVideosListAdapter.isVideosEmpty() && newVideos.isEmpty())
+        if (videosListAdapter.isVideosEmpty() && newVideos.isEmpty())
             showEmptyPlaylistLabel()
-        else if (mVideosListAdapter.isVideosEmpty()) {
+        else if (videosListAdapter.isVideosEmpty()) {
             setNewVideoItems(newVideos)
             showLoadedVideos()
         } else
@@ -230,7 +230,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
     }
 
     override fun onError(error: Exception) {
-        ErrorSnackBar.show(mBinding.root, error.message!!)
+        ErrorSnackBar.show(binding.root, error.message!!)
     }
 
     override fun requestConfirmDeletion(onConfirm: () -> Unit) = ConfirmDeletionDialog(onConfirm).show(fragmentManager!!, "fe")
