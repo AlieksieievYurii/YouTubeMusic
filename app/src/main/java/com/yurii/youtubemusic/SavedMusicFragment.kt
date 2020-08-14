@@ -6,9 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.DownloadButton
 
 /**
@@ -29,13 +26,14 @@ class SavedMusicFragment : Fragment() {
 
         val btnDownload = view.findViewById<DownloadButton>(R.id.btn_download)
         btnDownload.setOnClickStateListener(object : DownloadButton.OnClickListener {
-            override fun onClick(view: View, callState: Int): Int {
-                return when (callState) {
-                    DownloadButton.CALL_DOWNLOAD -> DownloadButton.STATE_DOWNLOADING
-                    DownloadButton.CALL_CANCEL -> DownloadButton.STATE_DOWNLOADED
-                    DownloadButton.CALL_DELETE -> DownloadButton.STATE_DOWNLOAD
-                    else -> 0
+            override fun onClick(view: View, currentState: Int) {
+                val newState = when (currentState) {
+                    DownloadButton.STATE_DOWNLOAD -> DownloadButton.STATE_DOWNLOADING
+                    DownloadButton.STATE_DOWNLOADING -> DownloadButton.STATE_DOWNLOADED
+                    DownloadButton.STATE_DOWNLOADED -> DownloadButton.STATE_DOWNLOAD
+                    else -> throw IllegalStateException("Unknown button's state")
                 }
+                btnDownload.state = newState
             }
 
         })
