@@ -155,19 +155,7 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
             playlistItemListResponse.items.map { it.snippet.resourceId.videoId },
             object : YouTubeObserver<VideoListResponse> {
                 override fun onResult(result: VideoListResponse) {
-                    val videoItems = result.items.map {
-                        VideoItem(
-                            videoId = it.id,
-                            title = it.snippet.title,
-                            description = it.snippet.description,
-                            duration = it.contentDetails.duration,
-                            viewCount = it.statistics.viewCount,
-                            likeCount = it.statistics.likeCount,
-                            disLikeCount = it.statistics.dislikeCount,
-                            authorChannelTitle = it.snippet.channelTitle,
-                            thumbnail = it.snippet.thumbnails.default.url
-                        )
-                    }
+                    val videoItems = result.items.map {VideoItem.createFrom(it)}
                     mVideos.addAll(videoItems)
                     mVideosLoader?.onResult(videoItems)
                     mVideoLoadingCanceler = null
@@ -182,7 +170,6 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
 
     inner class VideoItemProvider : VideoItemInterface {
         override fun download(videoItem: VideoItem) = this@YouTubeMusicViewModel.startDownloadMusic(videoItem)
-
 
         override fun cancelDownload(videoItem: VideoItem) = this@YouTubeMusicViewModel.stopDownloading(videoItem)
 
