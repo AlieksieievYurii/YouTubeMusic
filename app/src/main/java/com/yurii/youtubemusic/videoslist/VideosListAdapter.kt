@@ -70,7 +70,7 @@ class VideosListAdapter(context: Context, private val videoItemInterface: VideoI
         videos.clear()
     }
 
-    fun isListOfVideoItemsEmpty(): Boolean = videos.isEmpty()
+    fun isVideosEmpty(): Boolean = videos.isEmpty()
 
     fun setProgress(videoItem: VideoItem, progress: Progress) {
         findVideoItemView(videoItem) {
