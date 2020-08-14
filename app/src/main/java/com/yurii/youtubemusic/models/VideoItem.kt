@@ -5,15 +5,15 @@ import java.io.Serializable
 import java.math.BigInteger
 
 data class VideoItem(
-    val videoId: String? = null,
-    val title: String? = null,
-    val authorChannelTitle: String? = null,
-    val description: String? = null,
-    val duration: String? = null,
-    val viewCount: BigInteger? = null,
-    val likeCount: BigInteger? = null,
-    val disLikeCount: BigInteger? = null,
-    val thumbnail: String? = null
+    val videoId: String,
+    val title: String,
+    val authorChannelTitle: String,
+    val description: String,
+    val duration: String,
+    val viewCount: BigInteger,
+    val likeCount: BigInteger,
+    val disLikeCount: BigInteger,
+    val thumbnail: String
 ) : Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -27,7 +27,7 @@ data class VideoItem(
     }
 
     override fun hashCode(): Int {
-        return videoId?.hashCode() ?: 0
+        return videoId.hashCode()
     }
 
     companion object {
@@ -43,5 +43,8 @@ data class VideoItem(
                 authorChannelTitle = video.snippet.channelTitle,
                 thumbnail = video.snippet.thumbnails.default.url
             )
+
+        fun createMock(): VideoItem =
+            VideoItem("", "", "", "", "", BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO, "")
     }
 }

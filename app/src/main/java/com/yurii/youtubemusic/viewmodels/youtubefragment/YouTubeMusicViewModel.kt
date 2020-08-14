@@ -23,6 +23,7 @@ import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.videoslist.VideoItemInterface
+import java.io.File
 import java.lang.Exception
 import java.lang.RuntimeException
 
@@ -44,7 +45,7 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
     private var videoLoadingCanceler: ICanceler? = null
     private val videos: MutableList<VideoItem> = mutableListOf()
     private var nextPageToken: String? = null
-    private val allDownloadedMusics: MutableList<String> = mutableListOf()
+    private val musicFolderStorage: File = DataStorage.getMusicStorage(context)
 
     var videosLoader: VideosLoader? = null
     var videoItemChange: VideoItemChange? = null
@@ -55,15 +56,10 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
         }
         youTubeService = YouTubeService(credential)
 
-        DataStorage.getMusicStorage(context).walk().forEach {
-            Regex("(.+?)(\\.mp3\$)").find(it.name)?.groups?.get(1)?.value?.let { value ->
-                allDownloadedMusics.add(value)
-            }
+         Preferences.getSelectedPlayList(context)?.run {
+            _selectedPlayList.value = this
+             loadVideos(null)
         }
-
-        _selectedPlayList.value = Preferences.getSelectedPlayList(context)
-        if (_selectedPlayList.value != null)
-            loadVideos(null)
     }
 
     fun onReceive(intent: Intent) {
@@ -75,10 +71,10 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
             }
             MusicDownloaderService.DOWNLOADING_FINISHED_ACTION -> {
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
-                allDownloadedMusics.add(videoItem.also {
+                videoItem.also {
                     addTag(videoItem)
                     videoItemChange?.onDownloadingFinished(videoItem)
-                }.videoId!!)
+                }
             }
         }
     }
@@ -123,7 +119,8 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
         }, nextPageToken)
     }
 
-    fun exists(videoItem: VideoItem) = allDownloadedMusics.contains(videoItem.videoId)
+    //TODO I think .mp3 should be removed from all files
+    fun exists(videoItem: VideoItem): Boolean = File(musicFolderStorage, "${videoItem.videoId}.mp3").exists()
 
     fun isVideoItemLoading(videoItem: VideoItem): Boolean = MusicDownloaderService.Instance.serviceInterface?.isLoading(videoItem) ?: false
 
@@ -141,7 +138,6 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
 
     fun removeVideoItem(videoItem: VideoItem) {
         val file = DataStorage.getMusic(context, videoItem)
-        allDownloadedMusics.remove(videoItem.videoId)
         if (!file.delete())
             throw RuntimeException("Cannot remove the music file $file")
     }

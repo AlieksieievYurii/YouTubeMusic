@@ -51,7 +51,7 @@ class VideosListAdapter(
 
     fun setLoadingState() {
         isLoaderVisible = true
-        videos.add(VideoItem())
+        videos.add(VideoItem.createMock())
         notifyItemInserted(videos.lastIndex)
     }
 
