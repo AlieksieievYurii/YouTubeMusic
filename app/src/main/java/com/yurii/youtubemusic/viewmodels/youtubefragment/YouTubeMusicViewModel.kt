@@ -8,12 +8,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
-import com.google.api.services.youtube.YouTubeScopes
 import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
+import com.yurii.youtubemusic.GoogleAccount
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.Progress
@@ -51,15 +50,18 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
     var videoItemChange: VideoItemChange? = null
 
     init {
-        val credential = GoogleAccountCredential.usingOAuth2(context, listOf(YouTubeScopes.YOUTUBE)).also {
-            it.selectedAccount = googleSignInAccount.account
-        }
+        val credential = GoogleAccount.getGoogleAccountCredential(googleSignInAccount, context)
         youTubeService = YouTubeService(credential)
 
-         Preferences.getSelectedPlayList(context)?.run {
-            _selectedPlayList.value = this
-             loadVideos(null)
-        }
+        loadVideosIfAlreadySelectedPlaylist()
+    }
+
+    private fun loadVideosIfAlreadySelectedPlaylist() {
+        val currentSelectedPlaylist = Preferences.getSelectedPlayList(context)
+        _selectedPlayList.value = currentSelectedPlaylist
+
+        if (currentSelectedPlaylist != null)
+            loadVideos(null)
     }
 
     fun onReceive(intent: Intent) {

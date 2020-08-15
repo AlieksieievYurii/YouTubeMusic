@@ -9,6 +9,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.services.youtube.YouTubeScopes
 import java.lang.Exception
 
@@ -34,6 +35,12 @@ object GoogleAccount {
             return account
         else
             throw DoesNotHaveRequiredScopes()
+    }
+
+    fun getGoogleAccountCredential(googleSignInAccount: GoogleSignInAccount, context: Context): GoogleAccountCredential {
+        return GoogleAccountCredential.usingOAuth2(context, SCOPES.map { it.scopeUri }).also {
+            it.selectedAccount = googleSignInAccount.account
+        }
     }
 
 
