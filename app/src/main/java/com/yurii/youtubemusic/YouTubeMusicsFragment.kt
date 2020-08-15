@@ -42,7 +42,7 @@ import java.lang.IllegalArgumentException
 
 const val TITLE = "YouTube Musics"
 
-class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
+class YouTubeMusicsFragment private constructor() : Fragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
     private lateinit var viewModel: YouTubeMusicViewModel
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private var isLoadingNewVideoItems = true
@@ -260,7 +260,16 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
     override fun requestConfirmDeletion(onConfirm: () -> Unit) = ConfirmDeletionDialog(onConfirm).show(fragmentManager!!, "fe")
 
     companion object {
-        const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
+        private const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
+
+        fun createInstance(googleSignInAccount: GoogleSignInAccount): YouTubeMusicsFragment {
+            val youTubeMusicsFragment = YouTubeMusicsFragment()
+            youTubeMusicsFragment.arguments = Bundle().apply {
+                this.putParcelable(GOOGLE_SIGN_IN, googleSignInAccount)
+            }
+
+            return youTubeMusicsFragment
+        }
     }
 
 }
