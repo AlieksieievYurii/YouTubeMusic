@@ -29,10 +29,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
 
     private fun openYouTubeMusic(googleSignInAccount: GoogleSignInAccount) {
-        val youTubeMusicsFragment = YouTubeMusicsFragment()
-        youTubeMusicsFragment.arguments = Bundle().apply {
-            this.putParcelable(YouTubeMusicsFragment.GOOGLE_SIGN_IN, googleSignInAccount)
-        }
+        val youTubeMusicsFragment = YouTubeMusicsFragment.createInstance(googleSignInAccount)
 
         supportFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left).replace(
             R.id.frameLayout,
@@ -59,9 +56,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     }
 
     private fun openAuthorizationFragment() {
-        val authorizationFragment = AuthorizationFragment()
-
-        authorizationFragment.signInCallBack = {
+        val authorizationFragment = AuthorizationFragment.createInstance {
             openYouTubeMusic(it)
         }
 
@@ -70,6 +65,17 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             authorizationFragment,
             authorizationFragment.javaClass.simpleName
         ).commit()
+    }
+
+    private fun openYouTubeMusicIfUserSignedIn() {
+        try {
+            val account = GoogleAccount.getLastSignedInAccount(this)
+            openYouTubeMusic(account)
+        } catch (e: IsNotSignedIn) {
+            openAuthorizationFragment()
+        } catch (e: DoesNotHaveRequiredScopes) {
+            openAuthorizationFragment()
+        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -84,12 +90,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 true
             }
             R.id.item_you_tube_music -> {
-                val account = AuthorizationFragment.getLastSignedInAccount(this)
-                if (account != null)
-                    openYouTubeMusic(account)
-                else
-                    openAuthorizationFragment()
-
+                openYouTubeMusicIfUserSignedIn()
                 true
             }
             else -> false
