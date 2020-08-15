@@ -25,4 +25,5 @@
     <string name="dialog_confirm_deletion_title">Delete music</string>
     <string name="dialog_delete">DELETE</string>
     <string name="dialog_cancel">CANCEL</string>
+    <string name="label_log_out">Log out</string>
 </resources>

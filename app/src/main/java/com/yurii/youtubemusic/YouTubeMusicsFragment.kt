@@ -9,7 +9,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
@@ -34,9 +36,11 @@ import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeMusicViewModel
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeViewModelFactory
+import kotlinx.android.synthetic.main.content_main.*
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 
+const val TITLE = "YouTube Musics"
 
 class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
     private lateinit var viewModel: YouTubeMusicViewModel
@@ -50,7 +54,7 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
 
-        setActionBar()
+        initActionBar()
         initViewModel()
         initRecyclerView()
         setSelectPlayListListener()
@@ -59,8 +63,24 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
         return binding.root
     }
 
-    private fun setActionBar() {
-        (activity as AppCompatActivity).supportActionBar!!.title = "YouTube Musics"
+    private fun initActionBar() {
+        val toolbar = (activity as AppCompatActivity).toolbar
+        toolbar.title = TITLE
+        initToolBarMenu(toolbar)
+    }
+
+    private fun initToolBarMenu(toolbar: Toolbar) {
+        toolbar.menu.clear()
+        toolbar.inflateMenu(R.menu.youtube_music_fragment_menu)
+        toolbar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.item_log_out -> {
+                    onLogOut()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun initViewModel() {
@@ -82,6 +102,10 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
     private fun getGoogleSignInAccount(): GoogleSignInAccount {
         return this.arguments?.getParcelable(GOOGLE_SIGN_IN)
             ?: throw IllegalArgumentException("GoogleSignIn is required!")
+    }
+
+    private fun onLogOut() {
+        Toast.makeText(context,  "Log out has been called", Toast.LENGTH_LONG).show()
     }
 
     private fun initRecyclerView() {

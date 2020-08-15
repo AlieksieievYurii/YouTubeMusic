@@ -10,13 +10,13 @@ import com.yurii.youtubemusic.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private lateinit var mainActivity: ActivityMainBinding
-
     private var activeBottomMenuItem: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainActivity = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        setSupportActionBar(mainActivity.contentMain.toolbar)
         setupBottomNavigationMenu()
 
         if (savedInstanceState == null)
@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     }
 
     private fun setupBottomNavigationMenu() {
-        setSupportActionBar(mainActivity.contentMain.toolbar)
         mainActivity.bottomNavigationView.setOnNavigationItemSelectedListener(this)
     }
 
