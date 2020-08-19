@@ -18,10 +18,10 @@ const val SHARED_PREFERENCES_SELECTED_PLAY_LIST: String = "com.yurii.youtubemusi
 
 class Preferences private constructor() {
     companion object {
-        fun setSelectedPlayList(context: Context, playList: Playlist) {
+        fun setSelectedPlayList(context: Context, playList: Playlist?) {
             val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
             with(sharedPreferences.edit()) {
-                putString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, playList.toString())
+                putString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, playList?.toString())
                 apply()
             }
         }
