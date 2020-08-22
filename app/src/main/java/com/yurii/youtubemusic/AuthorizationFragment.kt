@@ -10,13 +10,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
+import kotlinx.android.synthetic.main.content_main.*
 
 class AuthorizationFragment private constructor() : Fragment() {
     private lateinit var binding: FragmentAuthorizationBinding
-    private lateinit var signInCallBack: (account: GoogleSignInAccount) -> Unit
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_authorization, container, false)
@@ -35,14 +36,16 @@ class AuthorizationFragment private constructor() : Fragment() {
     }
 
     private fun initActionBar() {
-        (activity as AppCompatActivity).supportActionBar!!.title = "YouTube Musics"
+        val toolbar = (activity as AppCompatActivity).toolbar
+        toolbar.title = "YouTube Musics"
+        toolbar.menu.clear()
     }
 
 
     private fun handleSignInResult(result: Intent) {
         try {
             val account = GoogleAccount.obtainAccountFromIntent(result)
-            signInCallBack.invoke(account)
+            sendBroadCastThatUserHasSignedIn(account)
         } catch (error: ApiException) {
             Toast.makeText(context, "${error.message}, code:${error.statusCode}", Toast.LENGTH_LONG).show()
             binding.signInButton.isEnabled = true
@@ -50,6 +53,10 @@ class AuthorizationFragment private constructor() : Fragment() {
             Toast.makeText(context, "${error.message}", Toast.LENGTH_LONG).show()
             binding.signInButton.isEnabled = true
         }
+    }
+
+    private fun sendBroadCastThatUserHasSignedIn(account: GoogleSignInAccount) {
+        LocalBroadcastManager.getInstance(context!!).sendBroadcast(MainActivity.createSignInIntent(account))
     }
 
     private fun handleDeclinedSignIn() {
@@ -70,10 +77,6 @@ class AuthorizationFragment private constructor() : Fragment() {
     }
 
     companion object {
-        fun createInstance(onSignIn: (account: GoogleSignInAccount) -> Unit): AuthorizationFragment {
-            val authorizationFragment = AuthorizationFragment()
-            authorizationFragment.signInCallBack = onSignIn
-            return authorizationFragment
-        }
+        fun createInstance(): AuthorizationFragment = AuthorizationFragment()
     }
 }
