@@ -14,12 +14,12 @@ import kotlinx.android.synthetic.main.content_main.*
 /**
  * A simple [Fragment] subclass.
  */
-class SavedMusicFragment : Fragment() {
+class SavedMusicFragment private constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val toolbar = (activity as AppCompatActivity).toolbar
         toolbar.menu.clear()
         // Inflate the layout for this fragment
@@ -44,5 +44,8 @@ class SavedMusicFragment : Fragment() {
         })
     }
 
+    companion object {
+        fun createInstance(): SavedMusicFragment = SavedMusicFragment()
+    }
 
 }
