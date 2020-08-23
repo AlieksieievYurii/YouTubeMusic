@@ -37,7 +37,7 @@ object GoogleAccount {
             throw DoesNotHaveRequiredScopes()
     }
 
-    fun getGoogleAccountCredential(googleSignInAccount: GoogleSignInAccount, context: Context): GoogleAccountCredential {
+    fun getGoogleAccountCredentialUsingOAuth2(googleSignInAccount: GoogleSignInAccount, context: Context): GoogleAccountCredential {
         return GoogleAccountCredential.usingOAuth2(context, SCOPES.map { it.scopeUri }).also {
             it.selectedAccount = googleSignInAccount.account
         }
@@ -47,6 +47,13 @@ object GoogleAccount {
     fun startSignInActivity(fragment: Fragment) {
         val client = getClient(fragment.context!!)
         fragment.startActivityForResult(client.signInIntent, REQUEST_SIGN_IN)
+    }
+
+    fun signOut(context: Context) {
+        val client = getClient(context)
+        client.signOut().addOnCompleteListener {
+            client.revokeAccess()
+        }
     }
 
     @Throws(IsNotSignedIn::class, DoesNotHaveRequiredScopes::class)

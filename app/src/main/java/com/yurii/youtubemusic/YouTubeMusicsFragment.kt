@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
@@ -51,14 +50,13 @@ class YouTubeMusicsFragment private constructor() : Fragment(), VideoItemChange,
         override fun onReceive(context: Context?, intent: Intent) = viewModel.onReceive(intent)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
 
         initActionBar()
         initViewModel()
         initRecyclerView()
         setSelectPlayListListener()
-        showCurrentVideoItemsIfExist()
 
         return binding.root
     }
@@ -75,7 +73,7 @@ class YouTubeMusicsFragment private constructor() : Fragment(), VideoItemChange,
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.item_log_out -> {
-                    onLogOut()
+                    onSignOut()
                     true
                 }
                 else -> false
@@ -86,17 +84,15 @@ class YouTubeMusicsFragment private constructor() : Fragment(), VideoItemChange,
     private fun initViewModel() {
         val googleSignInAccount = getGoogleSignInAccount()
         val viewModelFactory = YouTubeViewModelFactory(activity!!.application, googleSignInAccount)
-        viewModel = ViewModelProvider(activity!!, viewModelFactory).get(YouTubeMusicViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(YouTubeMusicViewModel::class.java)
         viewModel.videoItemChange = this
         viewModel.videosLoader = this
-
         viewModel.selectedPlaylist.observe(this, Observer { playList ->
             if (playList != null)
                 setPlayListTitle(playList)
             else
                 showOptionToSelectPlayListFirstTime()
         })
-
     }
 
     private fun getGoogleSignInAccount(): GoogleSignInAccount {
@@ -104,8 +100,9 @@ class YouTubeMusicsFragment private constructor() : Fragment(), VideoItemChange,
             ?: throw IllegalArgumentException("GoogleSignIn is required!")
     }
 
-    private fun onLogOut() {
-        Toast.makeText(context,  "Log out has been called", Toast.LENGTH_LONG).show()
+    private fun onSignOut() {
+        LocalBroadcastManager.getInstance(context!!).sendBroadcast(MainActivity.createSignOutIntent())
+        viewModel.signOut()
     }
 
     private fun initRecyclerView() {
@@ -133,14 +130,6 @@ class YouTubeMusicsFragment private constructor() : Fragment(), VideoItemChange,
     private fun setSelectPlayListListener() {
         binding.btnSelectPlayList.setOnClickListener {
             selectPlayList()
-        }
-    }
-
-    private fun showCurrentVideoItemsIfExist() {
-        val currentVideos = viewModel.getCurrentVideos()
-        if (currentVideos.isNotEmpty()) {
-            setNewVideoItems(currentVideos)
-            showLoadedVideos()
         }
     }
 
@@ -257,7 +246,7 @@ class YouTubeMusicsFragment private constructor() : Fragment(), VideoItemChange,
         ErrorSnackBar.show(binding.root, error.message!!)
     }
 
-    override fun requestConfirmDeletion(onConfirm: () -> Unit) = ConfirmDeletionDialog(onConfirm).show(fragmentManager!!, "fe")
+    override fun requestConfirmDeletion(onConfirm: () -> Unit) = ConfirmDeletionDialog(onConfirm).show(fragmentManager!!, "RequestToDeleteFile")
 
     companion object {
         private const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
