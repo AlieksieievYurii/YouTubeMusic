@@ -113,6 +113,7 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
 
     private fun replaceActivityFragmentWithAuthorizationFragment(authorizationFragment: Fragment) {
         fragmentManager.beginTransaction().also { fragmentTransaction ->
+            fragmentTransaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left)
             hideActiveFragmentIfExist(fragmentTransaction)
             fragmentTransaction.show(authorizationFragment)
         }.commit()
@@ -139,10 +140,7 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
     private fun createAuthorizationFragment(): Fragment {
         val authorizationFragment = AuthorizationFragment.createInstance()
         fragmentManager.beginTransaction().run {
-            add(
-                R.id.frameLayout, authorizationFragment,
-                TAG_AUTHORIZATION_FRAGMENT
-            )
+            add(R.id.frameLayout, authorizationFragment, TAG_AUTHORIZATION_FRAGMENT)
             hide(authorizationFragment)
         }.commit()
 
