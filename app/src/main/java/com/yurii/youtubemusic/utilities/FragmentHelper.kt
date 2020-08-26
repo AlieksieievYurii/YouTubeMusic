@@ -4,27 +4,20 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.yurii.youtubemusic.AuthorizationFragment
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.SavedMusicFragment
-import com.yurii.youtubemusic.YouTubeMusicsFragment
+import com.yurii.youtubemusic.*
 import java.lang.Exception
 
 
 class FragmentHelper(private val fragmentManager: FragmentManager) {
-    private var activeFragment: Fragment? = null
-
-    fun showDefaultFragment() {
-        showSavedMusicFragment(animated = false)
-    }
+    private var activeFragment: TabFragment? = null
 
     fun showSavedMusicFragment(animated: Boolean = true) {
-        val savedMusicFragment: Fragment = getOrCreateSavedMusicFragment()
+        val savedMusicFragment: TabFragment = getOrCreateSavedMusicFragment()
         replaceActivityFragmentWithSavedMusicFragment(savedMusicFragment, animated)
     }
 
     fun showAuthorizationFragment() {
-        val authorizationFragment = getOrCreateAuthorizationFragment()
+        val authorizationFragment: TabFragment = getOrCreateAuthorizationFragment()
         replaceActivityFragmentWithAuthorizationFragment(authorizationFragment)
     }
 
@@ -32,7 +25,7 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
         findAuthorizationFragment()?.also { fragment ->
             fragmentManager.beginTransaction()
                 .remove(fragment)
-                .commit()
+                .commitNow()
         }
     }
 
@@ -41,19 +34,15 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
 
         val youTubeMusicsFragment: Fragment = YouTubeMusicsFragment.createInstance(googleSignInAccount)
         fragmentManager.beginTransaction().run {
-            add(
-                R.id.frameLayout, youTubeMusicsFragment,
-                TAG_YOUTUBE_MUSIC_FRAGMENT
-            )
+            add(R.id.frameLayout, youTubeMusicsFragment, TAG_YOUTUBE_MUSIC_FRAGMENT)
             hide(youTubeMusicsFragment)
-        }.commit()
-        fragmentManager.executePendingTransactions()
+        }.commitNow()
     }
 
     fun isNotYouTubeMusicFragmentInitialized(): Boolean = findYouTubeMusicFragment() == null
 
     fun showYouTubeMusicFragment() {
-        val youTubeMusicsFragment: Fragment? = findYouTubeMusicFragment()
+        val youTubeMusicsFragment: TabFragment? = findYouTubeMusicFragment()
         checkNotNull(youTubeMusicsFragment) { "YouTubeMusicFragment is not initialized!" }
         replaceActivityFragmentWithYouTubeMusicFragment(youTubeMusicsFragment)
     }
@@ -62,30 +51,27 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
         findYouTubeMusicFragment()?.also { fragment ->
             fragmentManager.beginTransaction()
                 .remove(fragment)
-                .commit()
+                .commitNow()
         }
     }
 
-    private fun getOrCreateSavedMusicFragment(): Fragment {
-        val savedMusicFragment: Fragment? = fragmentManager.findFragmentByTag(TAG_SAVED_MUSIC_FRAGMENT)
+    private fun getOrCreateSavedMusicFragment(): TabFragment {
+        val savedMusicFragment: TabFragment? = fragmentManager.findFragmentByTag(TAG_SAVED_MUSIC_FRAGMENT) as? TabFragment
         return savedMusicFragment ?: createSavedMusicFragment()
     }
 
-    private fun createSavedMusicFragment(): Fragment {
-        val savedMusicFragment = SavedMusicFragment.createInstance()
+    private fun createSavedMusicFragment(): TabFragment {
+        val savedMusicFragment: TabFragment = SavedMusicFragment.createInstance()
 
         fragmentManager.beginTransaction().run {
-            add(
-                R.id.frameLayout, savedMusicFragment,
-                TAG_SAVED_MUSIC_FRAGMENT
-            )
+            add(R.id.frameLayout, savedMusicFragment, TAG_SAVED_MUSIC_FRAGMENT)
             hide(savedMusicFragment)
-        }.commit()
+        }.commitNow()
 
         return savedMusicFragment
     }
 
-    private fun replaceActivityFragmentWithSavedMusicFragment(fragment: Fragment, animated: Boolean) {
+    private fun replaceActivityFragmentWithSavedMusicFragment(fragment: TabFragment, animated: Boolean) {
         fragmentManager.beginTransaction().also { fragmentTransaction ->
             if (animated)
                 fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right)
@@ -93,6 +79,7 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
             hideActiveFragmentIfExist(fragmentTransaction)
             fragmentTransaction.show(fragment)
         }.commit()
+
 
         activeFragment = fragment
     }
@@ -104,14 +91,16 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
     }
 
     private fun hideActiveFragmentIfExist(fragmentTransaction: FragmentTransaction) {
-        activeFragment?.run { fragmentTransaction.hide(this) }
+        activeFragment?.run {
+            fragmentTransaction.hide(this)
+        }
     }
 
-    private fun findYouTubeMusicFragment(): Fragment? = fragmentManager.findFragmentByTag(TAG_YOUTUBE_MUSIC_FRAGMENT)
+    private fun findYouTubeMusicFragment(): TabFragment? = fragmentManager.findFragmentByTag(TAG_YOUTUBE_MUSIC_FRAGMENT) as? TabFragment
 
-    private fun findAuthorizationFragment(): Fragment? = fragmentManager.findFragmentByTag(TAG_AUTHORIZATION_FRAGMENT)
+    private fun findAuthorizationFragment(): TabFragment? = fragmentManager.findFragmentByTag(TAG_AUTHORIZATION_FRAGMENT) as? TabFragment
 
-    private fun replaceActivityFragmentWithAuthorizationFragment(authorizationFragment: Fragment) {
+    private fun replaceActivityFragmentWithAuthorizationFragment(authorizationFragment: TabFragment) {
         fragmentManager.beginTransaction().also { fragmentTransaction ->
             fragmentTransaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left)
             hideActiveFragmentIfExist(fragmentTransaction)
@@ -121,7 +110,7 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
         activeFragment = authorizationFragment
     }
 
-    private fun replaceActivityFragmentWithYouTubeMusicFragment(youTubeMusicsFragment: Fragment) {
+    private fun replaceActivityFragmentWithYouTubeMusicFragment(youTubeMusicsFragment: TabFragment) {
         fragmentManager.beginTransaction().run {
             setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left)
             hideActiveFragmentIfExist(this)
@@ -132,24 +121,24 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
     }
 
 
-    private fun getOrCreateAuthorizationFragment(): Fragment {
-        val authorizationFragment: Fragment? = findAuthorizationFragment()
+    private fun getOrCreateAuthorizationFragment(): TabFragment {
+        val authorizationFragment: TabFragment? = findAuthorizationFragment()
         return authorizationFragment ?: createAuthorizationFragment()
     }
 
-    private fun createAuthorizationFragment(): Fragment {
-        val authorizationFragment = AuthorizationFragment.createInstance()
+    private fun createAuthorizationFragment(): TabFragment {
+        val authorizationFragment: TabFragment = AuthorizationFragment.createInstance()
         fragmentManager.beginTransaction().run {
             add(R.id.frameLayout, authorizationFragment, TAG_AUTHORIZATION_FRAGMENT)
             hide(authorizationFragment)
-        }.commit()
+        }.commitNow()
 
         return authorizationFragment
     }
 
     companion object {
-        private const val TAG_SAVED_MUSIC_FRAGMENT = "com.yurii.youtubemusic.saved.music.fragment.tag"
-        private const val TAG_YOUTUBE_MUSIC_FRAGMENT = "youtube.music.fragment.tag"
-        private const val TAG_AUTHORIZATION_FRAGMENT = "com.yurii.youtubemusic.authorization.fragment.tag"
+        private const val TAG_SAVED_MUSIC_FRAGMENT = "com.yurii.youtube.music.saved.music.fragment.tag"
+        private const val TAG_YOUTUBE_MUSIC_FRAGMENT = "com.yurii.youtube.music.youtube.music.fragment.tag"
+        private const val TAG_AUTHORIZATION_FRAGMENT = "com.yurii.youtube.music.authorization.fragment.tag"
     }
 }

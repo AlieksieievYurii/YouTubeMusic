@@ -5,13 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.playlists.PlayListsDialogFragment
@@ -35,41 +30,36 @@ import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeMusicViewModel
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeViewModelFactory
-import kotlinx.android.synthetic.main.content_main.*
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 
-const val TITLE = "YouTube Musics"
 
-class YouTubeMusicsFragment private constructor() : Fragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
+class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
     private lateinit var viewModel: YouTubeMusicViewModel
     private lateinit var binding: FragmentYouTubeMusicsBinding
-    private var isLoadingNewVideoItems = true
     private lateinit var videosListAdapter: VideosListAdapter
+    private var isLoadingNewVideoItems = true
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) = viewModel.onReceive(intent)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
-
-        initActionBar()
+    override fun onInflatedView(viewDataBinding: ViewDataBinding) {
+        binding = viewDataBinding as FragmentYouTubeMusicsBinding
         initViewModel()
         initRecyclerView()
         setSelectPlayListListener()
-
-        return binding.root
+        initToolBarMenu()
     }
 
-    private fun initActionBar() {
-        val toolbar = (activity as AppCompatActivity).toolbar
-        toolbar.title = TITLE
-        initToolBarMenu(toolbar)
+    override fun getTabParameters(): TabParameters {
+        return TabParameters(
+            layoutId = R.layout.fragment_you_tube_musics,
+            title = context!!.getString(R.string.label_fragment_title_youtube_musics),
+            optionMenuId = R.menu.youtube_music_fragment_menu
+        )
     }
 
-    private fun initToolBarMenu(toolbar: Toolbar) {
-        toolbar.menu.clear()
-        toolbar.inflateMenu(R.menu.youtube_music_fragment_menu)
+    private fun initToolBarMenu() {
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.item_log_out -> {
@@ -253,6 +243,7 @@ class YouTubeMusicsFragment private constructor() : Fragment(), VideoItemChange,
 
         fun createInstance(googleSignInAccount: GoogleSignInAccount): YouTubeMusicsFragment {
             val youTubeMusicsFragment = YouTubeMusicsFragment()
+
             youTubeMusicsFragment.arguments = Bundle().apply {
                 this.putParcelable(GOOGLE_SIGN_IN, googleSignInAccount)
             }

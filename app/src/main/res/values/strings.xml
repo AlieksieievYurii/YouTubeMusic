@@ -2,6 +2,8 @@
     <string name="app_name">YouTubeMusic</string>
     <string name="label_saved_musics">Saved</string>
     <string name="label_youtube_musics">YouTube</string>
+    <string name="label_fragment_title_youtube_musics">YouTube Music</string>
+    <string name="label_fragment_title_saved_music">Saved Music</string>
     <string name="image_of_playlist">Image of playList</string>
     <string name="thumbnails_of_playlist">Thumbnails of playList</string>
     <string name="label_videos_count">%d videos</string>
@@ -23,7 +25,7 @@
     <string name="content_description_first_playlist">Selection first playlist illustration</string>
     <string name="dialog_confirm_deletion_message">Are you sure want to delete this music?</string>
     <string name="dialog_confirm_deletion_title">Delete music</string>
-    <string name="dialog_delete">DELETE</string>
-    <string name="dialog_cancel">CANCEL</string>
+    <string name="dialog_delete">Delete</string>
+    <string name="dialog_cancel">Cancel</string>
     <string name="label_log_out">Log out</string>
 </resources>
