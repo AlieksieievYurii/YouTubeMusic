@@ -2,30 +2,27 @@ package com.yurii.youtubemusic
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
+import androidx.databinding.ViewDataBinding
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
-import kotlinx.android.synthetic.main.content_main.*
 
-class AuthorizationFragment private constructor() : Fragment() {
+class AuthorizationFragment : TabFragment() {
     private lateinit var binding: FragmentAuthorizationBinding
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_authorization, container, false)
-
-        initActionBar()
+    override fun onInflatedView(viewDataBinding: ViewDataBinding) {
+        binding = viewDataBinding as FragmentAuthorizationBinding
         initSignInButton()
+    }
 
-        return binding.root
+    override fun getTabParameters(): TabParameters {
+        return TabParameters(
+            layoutId = R.layout.fragment_authorization,
+            title = context!!.getString(R.string.label_fragment_title_youtube_musics)
+        )
     }
 
     private fun initSignInButton() {
@@ -34,13 +31,6 @@ class AuthorizationFragment private constructor() : Fragment() {
             GoogleAccount.startSignInActivity(this)
         }
     }
-
-    private fun initActionBar() {
-        val toolbar = (activity as AppCompatActivity).toolbar
-        toolbar.title = "YouTube Musics"
-        toolbar.menu.clear()
-    }
-
 
     private fun handleSignInResult(result: Intent) {
         try {
