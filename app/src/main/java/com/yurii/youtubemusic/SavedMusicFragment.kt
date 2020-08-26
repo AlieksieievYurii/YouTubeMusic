@@ -1,35 +1,27 @@
 package com.yurii.youtubemusic
 
-
-import android.os.Bundle
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.databinding.ViewDataBinding
+import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
 import com.yurii.youtubemusic.ui.DownloadButton
-import kotlinx.android.synthetic.main.content_main.*
+
 
 /**
  * A simple [Fragment] subclass.
  */
-class SavedMusicFragment private constructor() : Fragment() {
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val toolbar = (activity as AppCompatActivity).toolbar
-        toolbar.menu.clear()
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_saved_music, container, false)
+class SavedMusicFragment : TabFragment() {
+    override fun getTabParameters(): TabParameters {
+        return TabParameters(
+            layoutId = R.layout.fragment_saved_music,
+            title = context!!.getString(R.string.label_fragment_title_saved_music),
+            optionMenuId = R.menu.navigation_menu
+        )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val btnDownload = view.findViewById<DownloadButton>(R.id.btn_download)
+    override fun onInflatedView(viewDataBinding: ViewDataBinding) {
+        val binding = viewDataBinding as FragmentSavedMusicBinding
+        val btnDownload = binding.btnDownload
         btnDownload.setOnClickStateListener(object : DownloadButton.OnClickListener {
             override fun onClick(view: View, currentState: Int) {
                 val newState = when (currentState) {
@@ -40,12 +32,10 @@ class SavedMusicFragment private constructor() : Fragment() {
                 }
                 btnDownload.state = newState
             }
-
         })
     }
 
     companion object {
         fun createInstance(): SavedMusicFragment = SavedMusicFragment()
     }
-
 }
