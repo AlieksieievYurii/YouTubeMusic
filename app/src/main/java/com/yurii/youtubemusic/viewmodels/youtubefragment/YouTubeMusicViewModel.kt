@@ -8,12 +8,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
-import com.google.api.services.youtube.YouTubeScopes
 import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
+import com.yurii.youtubemusic.GoogleAccount
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.Progress
@@ -37,13 +36,12 @@ interface VideoItemChange {
     fun onDownloadingFinished(videoItem: VideoItem)
 }
 
-class YouTubeMusicViewModel(application: Application, private val googleSignInAccount: GoogleSignInAccount) : AndroidViewModel(application) {
+class YouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount) : AndroidViewModel(application) {
     private val youTubeService: IYouTubeService
     private val context: Context = getApplication<Application>().baseContext
     private val _selectedPlayList: MutableLiveData<Playlist?> = MutableLiveData()
     val selectedPlaylist: LiveData<Playlist?> get() = _selectedPlayList
     private var videoLoadingCanceler: ICanceler? = null
-    private val videos: MutableList<VideoItem> = mutableListOf()
     private var nextPageToken: String? = null
     private val musicFolderStorage: File = DataStorage.getMusicStorage(context)
 
@@ -51,15 +49,18 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
     var videoItemChange: VideoItemChange? = null
 
     init {
-        val credential = GoogleAccountCredential.usingOAuth2(context, listOf(YouTubeScopes.YOUTUBE)).also {
-            it.selectedAccount = googleSignInAccount.account
-        }
+        val credential = GoogleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount, context)
         youTubeService = YouTubeService(credential)
 
-         Preferences.getSelectedPlayList(context)?.run {
-            _selectedPlayList.value = this
-             loadVideos(null)
-        }
+        loadVideosIfAlreadySelectedPlaylist()
+    }
+
+    private fun loadVideosIfAlreadySelectedPlaylist() {
+        val currentSelectedPlaylist = Preferences.getSelectedPlayList(context)
+        _selectedPlayList.value = currentSelectedPlaylist
+
+        if (currentSelectedPlaylist != null)
+            loadVideos(null)
     }
 
     fun onReceive(intent: Intent) {
@@ -90,11 +91,20 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
         return youTubeService.loadPlayLists(observer, nextPageToken)
     }
 
+    fun signOut() {
+        GoogleAccount.signOut(context)
+        cleanData()
+    }
+
+    private fun cleanData() {
+        Preferences.setSelectedPlayList(context, null)
+        videoLoadingCanceler?.cancel()
+    }
+
     fun setNewPlayList(playlist: Playlist) {
         if (playlist != _selectedPlayList.value) {
             Preferences.setSelectedPlayList(context, playlist)
             _selectedPlayList.value = playlist
-            videos.clear()
             nextPageToken = null
             loadVideos(nextPageToken)
         }
@@ -142,7 +152,6 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
             throw RuntimeException("Cannot remove the music file $file")
     }
 
-    fun getCurrentVideos() = videos
     fun isVideoPageLast() = nextPageToken.isNullOrEmpty()
 
     private fun retrieveVideos(playlistItemListResponse: PlaylistItemListResponse) {
@@ -151,7 +160,6 @@ class YouTubeMusicViewModel(application: Application, private val googleSignInAc
             object : YouTubeObserver<VideoListResponse> {
                 override fun onResult(result: VideoListResponse) {
                     val videoItems = result.items.map { VideoItem.createFrom(it) }
-                    videos.addAll(videoItems)
                     videosLoader?.onResult(videoItems)
                     videoLoadingCanceler = null
                 }

@@ -5,12 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.playlists.PlayListsDialogFragment
@@ -38,50 +34,65 @@ import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
+class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
     private lateinit var viewModel: YouTubeMusicViewModel
     private lateinit var binding: FragmentYouTubeMusicsBinding
-    private var isLoadingNewVideoItems = true
     private lateinit var videosListAdapter: VideosListAdapter
+    private var isLoadingNewVideoItems = true
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) = viewModel.onReceive(intent)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_you_tube_musics, container, false)
-
-        setActionBar()
+    override fun onInflatedView(viewDataBinding: ViewDataBinding) {
+        binding = viewDataBinding as FragmentYouTubeMusicsBinding
         initViewModel()
         initRecyclerView()
         setSelectPlayListListener()
-        showCurrentVideoItemsIfExist()
-
-        return binding.root
+        initToolBarMenu()
     }
 
-    private fun setActionBar() {
-        (activity as AppCompatActivity).supportActionBar!!.title = "YouTube Musics"
+    override fun getTabParameters(): TabParameters {
+        return TabParameters(
+            layoutId = R.layout.fragment_you_tube_musics,
+            title = context!!.getString(R.string.label_fragment_title_youtube_musics),
+            optionMenuId = R.menu.youtube_music_fragment_menu
+        )
+    }
+
+    private fun initToolBarMenu() {
+        toolbar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.item_log_out -> {
+                    onSignOut()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun initViewModel() {
         val googleSignInAccount = getGoogleSignInAccount()
         val viewModelFactory = YouTubeViewModelFactory(activity!!.application, googleSignInAccount)
-        viewModel = ViewModelProvider(activity!!, viewModelFactory).get(YouTubeMusicViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(YouTubeMusicViewModel::class.java)
         viewModel.videoItemChange = this
         viewModel.videosLoader = this
-
         viewModel.selectedPlaylist.observe(this, Observer { playList ->
             if (playList != null)
                 setPlayListTitle(playList)
             else
                 showOptionToSelectPlayListFirstTime()
         })
-
     }
 
     private fun getGoogleSignInAccount(): GoogleSignInAccount {
         return this.arguments?.getParcelable(GOOGLE_SIGN_IN)
             ?: throw IllegalArgumentException("GoogleSignIn is required!")
+    }
+
+    private fun onSignOut() {
+        LocalBroadcastManager.getInstance(context!!).sendBroadcast(MainActivity.createSignOutIntent())
+        viewModel.signOut()
     }
 
     private fun initRecyclerView() {
@@ -109,14 +120,6 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
     private fun setSelectPlayListListener() {
         binding.btnSelectPlayList.setOnClickListener {
             selectPlayList()
-        }
-    }
-
-    private fun showCurrentVideoItemsIfExist() {
-        val currentVideos = viewModel.getCurrentVideos()
-        if (currentVideos.isNotEmpty()) {
-            setNewVideoItems(currentVideos)
-            showLoadedVideos()
         }
     }
 
@@ -233,10 +236,20 @@ class YouTubeMusicsFragment : Fragment(), VideoItemChange, VideosLoader, Confirm
         ErrorSnackBar.show(binding.root, error.message!!)
     }
 
-    override fun requestConfirmDeletion(onConfirm: () -> Unit) = ConfirmDeletionDialog(onConfirm).show(fragmentManager!!, "fe")
+    override fun requestConfirmDeletion(onConfirm: () -> Unit) = ConfirmDeletionDialog(onConfirm).show(fragmentManager!!, "RequestToDeleteFile")
 
     companion object {
-        const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
+        private const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
+
+        fun createInstance(googleSignInAccount: GoogleSignInAccount): YouTubeMusicsFragment {
+            val youTubeMusicsFragment = YouTubeMusicsFragment()
+
+            youTubeMusicsFragment.arguments = Bundle().apply {
+                this.putParcelable(GOOGLE_SIGN_IN, googleSignInAccount)
+            }
+
+            return youTubeMusicsFragment
+        }
     }
 
 }

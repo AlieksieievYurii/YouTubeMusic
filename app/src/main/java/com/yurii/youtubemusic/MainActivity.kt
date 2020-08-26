@@ -1,76 +1,84 @@
 package com.yurii.youtubemusic
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isNotEmpty
 import androidx.databinding.DataBindingUtil
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
+import com.yurii.youtubemusic.utilities.FragmentHelper
+import kotlinx.android.synthetic.main.content_main.*
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
-    private lateinit var mainActivity: ActivityMainBinding
-
     private var activeBottomMenuItem: Int = -1
+    private val broadCastReceiver = MyBroadCastReceiver()
+    private val fragmentHelper = FragmentHelper(supportFragmentManager)
+    private lateinit var toolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainActivity = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
-        setupBottomNavigationMenu()
-
-        if (savedInstanceState == null)
-            openSavedMusicFragment()
+        initActivity()
+        showDefaultFragment()
     }
 
-    private fun setupBottomNavigationMenu() {
+    private fun showDefaultFragment() {
+        activeBottomMenuItem = R.id.item_saved_music
+        fragmentHelper.showSavedMusicFragment(animated = false)
+    }
+
+    private fun initActivity() {
+        val mainActivity: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        toolbar = mainActivity.contentMain.toolbar
         setSupportActionBar(mainActivity.contentMain.toolbar)
-        mainActivity.bottomNavigationView.setOnNavigationItemSelectedListener(this)
+        setupBottomNavigationMenu(mainActivity)
+    }
+
+    private fun setupBottomNavigationMenu(activityMainBinding: ActivityMainBinding) {
+        activityMainBinding.bottomNavigationView.setOnNavigationItemSelectedListener(this)
     }
 
 
-    private fun openYouTubeMusic(googleSignInAccount: GoogleSignInAccount) {
-        val youTubeMusicsFragment = YouTubeMusicsFragment()
-        youTubeMusicsFragment.arguments = Bundle().apply {
-            this.putParcelable(YouTubeMusicsFragment.GOOGLE_SIGN_IN, googleSignInAccount)
+    private fun initAndOpenYouTubeMusicFragment() {
+        try {
+            val account = GoogleAccount.getLastSignedInAccount(this)
+            fragmentHelper.initYouTubeMusicFragment(account)
+            fragmentHelper.showYouTubeMusicFragment()
+        } catch (e: IsNotSignedIn) {
+            fragmentHelper.showAuthorizationFragment()
+        } catch (e: DoesNotHaveRequiredScopes) {
+            fragmentHelper.showAuthorizationFragment()
         }
-
-        supportFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left).replace(
-            R.id.frameLayout,
-            youTubeMusicsFragment,
-            youTubeMusicsFragment.javaClass.simpleName
-        ).commit()
     }
 
-    private fun openSavedMusicFragment(animation: Boolean = false) {
-        val savedMusicFragment = SavedMusicFragment()
-
-        supportFragmentManager.beginTransaction().apply {
-            if (animation)
-                this.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right)
-
-            this.replace(
-                R.id.frameLayout,
-                savedMusicFragment,
-                savedMusicFragment.javaClass.simpleName
-            )
-            this.commit()
-        }
-
+    private fun openSavedMusicFragment() {
+        fragmentHelper.showSavedMusicFragment()
     }
 
-    private fun openAuthorizationFragment() {
-        val authorizationFragment = AuthorizationFragment()
+    private fun openYouTubeMusicFragmentIfSingedInElseOpenAuthorizationFragment() {
+        if (fragmentHelper.isNotYouTubeMusicFragmentInitialized())
+            initAndOpenYouTubeMusicFragment()
+        else
+            fragmentHelper.showYouTubeMusicFragment()
+    }
 
-        authorizationFragment.signInCallBack = {
-            openYouTubeMusic(it)
-        }
+    private fun handleSignIn(googleSignInAccount: GoogleSignInAccount) {
+        fragmentHelper.initYouTubeMusicFragment(googleSignInAccount)
+        fragmentHelper.removeAuthorizationFragment()
+        fragmentHelper.showYouTubeMusicFragment()
+    }
 
-        supportFragmentManager.beginTransaction().replace(
-            R.id.frameLayout,
-            authorizationFragment,
-            authorizationFragment.javaClass.simpleName
-        ).commit()
+    private fun handleSignOut() {
+        fragmentHelper.removeYouTubeMusicFragment()
+        fragmentHelper.showAuthorizationFragment()
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -81,20 +89,54 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
         return when (activeBottomMenuItem) {
             R.id.item_saved_music -> {
-                openSavedMusicFragment(animation = true)
+                openSavedMusicFragment()
                 true
             }
             R.id.item_you_tube_music -> {
-                val account = AuthorizationFragment.getLastSignedInAccount(this)
-                if (account != null)
-                    openYouTubeMusic(account)
-                else
-                    openAuthorizationFragment()
-
+                openYouTubeMusicFragmentIfSingedInElseOpenAuthorizationFragment()
                 true
             }
             else -> false
         }
+    }
 
+    override fun onStart() {
+        super.onStart()
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadCastReceiver, BROAD_CAST_RECEIVER_FILTER)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadCastReceiver)
+    }
+
+    companion object {
+        private const val ACTION_USER_SIGNED_IN = "com.yurii.youtubemusic.mainactivity.action.signin"
+        private const val ACTION_USER_SIGNED_OUT = "com.yurii.youtubemusic.mainactivity.action.signout"
+
+        private const val EXTRA_GOOGLE_SIGN_IN_ACCOUNT = "com.yurii.youtubemusic.mainactivity.extra.googlesigninaccount"
+
+        val BROAD_CAST_RECEIVER_FILTER = IntentFilter().apply {
+            addAction(ACTION_USER_SIGNED_IN)
+            addAction(ACTION_USER_SIGNED_OUT)
+        }
+
+        fun createSignInIntent(account: GoogleSignInAccount): Intent = Intent(ACTION_USER_SIGNED_IN).apply {
+            putExtra(EXTRA_GOOGLE_SIGN_IN_ACCOUNT, account)
+        }
+
+        fun createSignOutIntent(): Intent = Intent(ACTION_USER_SIGNED_OUT)
+    }
+
+    private inner class MyBroadCastReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                ACTION_USER_SIGNED_IN -> {
+                    val googleSignInAccount = intent.getParcelableExtra(EXTRA_GOOGLE_SIGN_IN_ACCOUNT) as GoogleSignInAccount
+                    handleSignIn(googleSignInAccount)
+                }
+                ACTION_USER_SIGNED_OUT -> handleSignOut()
+            }
+        }
     }
 }
