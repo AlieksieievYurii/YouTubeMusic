@@ -72,7 +72,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface, Exec
         stopSelf(startId)
         localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_FAILED_ACTION).also {
             it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
-            it.putExtra(EXTRA_ERROR, exception.message)
+            it.putExtra(EXTRA_ERROR, exception)
         })
     }
 
