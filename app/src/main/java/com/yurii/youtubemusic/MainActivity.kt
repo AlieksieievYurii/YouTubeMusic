@@ -7,7 +7,6 @@ import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -22,7 +21,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     private var activeBottomMenuItem: Int = -1
     private val broadCastReceiver = MyBroadCastReceiver()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
-    private lateinit var toolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +35,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     private fun initActivity() {
         val mainActivity: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        toolbar = mainActivity.contentMain.toolbar
         setSupportActionBar(mainActivity.contentMain.toolbar)
         setupBottomNavigationMenu(mainActivity)
     }

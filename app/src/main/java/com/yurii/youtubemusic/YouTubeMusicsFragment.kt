@@ -248,7 +248,10 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
     override fun requestFailedToDownloadDialog(videoItem: VideoItem) {
         ErrorDialog.create(videoItem).addListeners(
-            onTryAgain = { viewModel.startDownloadMusic(videoItem); videosListAdapter.setDownloadingState(videoItem) },
+            onTryAgain = {
+                viewModel.startDownloadMusic(videoItem)
+                videosListAdapter.setDownloadingState(videoItem)
+            },
             onCancel = { videosListAdapter.setDownloadState(videoItem) }
         ).show(fragmentManager!!, "ErrorDialog")
     }
