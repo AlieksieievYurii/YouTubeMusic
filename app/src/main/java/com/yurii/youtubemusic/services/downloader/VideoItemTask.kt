@@ -43,6 +43,10 @@ class VideoItemTask(
         val totalSize = audioFormat.contentLength()!!
 
         downloadFile(url, totalSize, outputFile)
+
+        if (isInterrupted)
+            return
+
         ThreadPool.completeTask(this)
         setFileName(outputFile)
         downloadingUpdater.onFinished(videoItem, outputFile, serviceStartId)
