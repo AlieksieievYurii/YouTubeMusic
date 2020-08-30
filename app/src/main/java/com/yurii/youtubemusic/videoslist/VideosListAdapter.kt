@@ -17,14 +17,15 @@ import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.utilities.*
+import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
 enum class ItemState {
-    DOWNLOAD, DOWNLOADED, DOWNLOADING
+    DOWNLOAD, DOWNLOADED, DOWNLOADING, FAILED
 }
 
-interface VideoItemInterface {
+interface VideoItemProvider {
     fun download(videoItem: VideoItem)
     fun cancelDownload(videoItem: VideoItem)
     fun remove(videoItem: VideoItem)
@@ -33,15 +34,16 @@ interface VideoItemInterface {
     fun getCurrentProgress(videoItem: VideoItem): Progress?
 }
 
-interface ConfirmDeletion {
+interface DialogRequests {
     fun requestConfirmDeletion(onConfirm: () -> Unit)
+    fun requestFailedToDownloadDialog(videoItem: VideoItem)
 }
 
 
 class VideosListAdapter(
     context: Context,
-    private val videoItemInterface: VideoItemInterface,
-    private val confirmDeletion: ConfirmDeletion
+    private val videoItemProvider: VideoItemProvider,
+    private val dialogRequests: DialogRequests
 ) : RecyclerView.Adapter<BaseViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val videos: MutableList<VideoItem> = mutableListOf()
@@ -74,9 +76,7 @@ class VideosListAdapter(
         notifyDataSetChanged()
     }
 
-    fun removeAllVideoItem() {
-        videos.clear()
-    }
+    fun removeAllVideoItem() = videos.clear()
 
     fun isVideosEmpty(): Boolean = videos.isEmpty()
 
@@ -90,6 +90,26 @@ class VideosListAdapter(
         findVideoItemView(videoItem) {
             it.setState(state = ItemState.DOWNLOADED)
             it.setProgress(null)
+        }
+    }
+
+    fun setFailedState(videoItem: VideoItem, error: Exception) {
+        videos.find { it == videoItem }?.lastError = error
+        findVideoItemView(videoItem) {
+            it.setState(ItemState.FAILED)
+        }
+    }
+
+    fun setDownloadState(videoItem: VideoItem) {
+        videos.find { it == videoItem }?.lastError = null
+        findVideoItemView(videoItem) {
+            it.setState(ItemState.DOWNLOAD)
+        }
+    }
+
+    fun setDownloadingState(videoItem: VideoItem) {
+        findVideoItemView(videoItem) {
+            it.setState(ItemState.DOWNLOADING)
         }
     }
 
@@ -183,11 +203,12 @@ class VideosListAdapter(
                 when (currentState) {
                     DownloadButton.STATE_DOWNLOAD -> onDownloadVideoItem(videoViewHolder, videoItem)
 
-                    DownloadButton.STATE_DOWNLOADED -> confirmDeletion.requestConfirmDeletion {
+                    DownloadButton.STATE_DOWNLOADED -> dialogRequests.requestConfirmDeletion {
                         onDeleteAlreadyDownloadedMusic(videoViewHolder, videoItem)
                     }
 
                     DownloadButton.STATE_DOWNLOADING -> onCancelDownload(videoViewHolder, videoItem)
+                    DownloadButton.STATE_FAILED -> dialogRequests.requestFailedToDownloadDialog(videoItem)
 
                     else -> throw IllegalArgumentException("Unknown called state!")
                 }
@@ -197,29 +218,27 @@ class VideosListAdapter(
 
 
     private fun onDownloadVideoItem(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
-        videoItemInterface.download(videoItem)
+        videoItemProvider.download(videoItem)
         videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADING)
-        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOADING
     }
 
     private fun onDeleteAlreadyDownloadedMusic(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
-        videoItemInterface.remove(videoItem)
+        videoItemProvider.remove(videoItem)
         videoViewHolder.setData(videoItem)
-        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOAD
     }
 
     private fun onCancelDownload(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
-        videoItemInterface.cancelDownload(videoItem)
+        videoItemProvider.cancelDownload(videoItem)
         videoViewHolder.setData(videoItem)
-        videoViewHolder.downloadButton.state = DownloadButton.STATE_DOWNLOAD
     }
 
     private fun setVideoItemState(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
         when {
-            videoItemInterface.exists(videoItem) -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADED)
-            videoItemInterface.isLoading(videoItem) -> {
-                videoViewHolder.setData(videoItem, progress = videoItemInterface.getCurrentProgress(videoItem), state = ItemState.DOWNLOADING)
+            videoItemProvider.exists(videoItem) -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADED)
+            videoItemProvider.isLoading(videoItem) -> {
+                videoViewHolder.setData(videoItem, progress = videoItemProvider.getCurrentProgress(videoItem), state = ItemState.DOWNLOADING)
             }
+            videoItem.lastError != null -> videoViewHolder.setData(videoItem, state = ItemState.FAILED)
             else -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOAD)
         }
     }
@@ -259,6 +278,7 @@ class VideosListAdapter(
                 ItemState.DOWNLOAD -> DownloadButton.STATE_DOWNLOAD
                 ItemState.DOWNLOADING -> DownloadButton.STATE_DOWNLOADING
                 ItemState.DOWNLOADED -> DownloadButton.STATE_DOWNLOADED
+                ItemState.FAILED -> DownloadButton.STATE_FAILED
             }
         }
 

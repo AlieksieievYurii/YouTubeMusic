@@ -18,7 +18,7 @@
             android:layout_marginTop="10dp"
             custom:backgroundColor="@color/colorAccent"
             custom:progress="50"
-            custom:state="download" />
+            custom:state="failed" />
 
 
     </RelativeLayout>
