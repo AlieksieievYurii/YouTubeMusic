@@ -28,4 +28,8 @@
     <string name="dialog_delete">Delete</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="label_log_out">Log out</string>
+    <string name="broken_robot">A broken robot</string>
+    <string name="label_failed_to_download">Failed to download</string>
+    <string name="label_error_message">Error message:</string>
+    <string name="label_try_again">Try again</string>
 </resources>
