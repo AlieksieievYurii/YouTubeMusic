@@ -14,7 +14,7 @@ class VideoItemTask(
     val videoItem: VideoItem,
     private val outDir: File,
     private val serviceStartId: Int,
-    private val executionUpdate: ExecutionUpdate,
+    private val downloadingUpdater: DownloadingUpdater,
     private val youTubeDownloader: YoutubeDownloader
 ) : Runnable {
     var progress: Progress = Progress.create()
@@ -28,7 +28,7 @@ class VideoItemTask(
             download(audioFormat)
         } catch (error: Exception) {
             ThreadPool.completeTask(this)
-            executionUpdate.onError(videoItem, error, serviceStartId)
+            downloadingUpdater.onError(videoItem, error, serviceStartId)
         }
     }
 
@@ -45,7 +45,7 @@ class VideoItemTask(
         downloadFile(url, totalSize, outputFile)
         ThreadPool.completeTask(this)
         setFileName(outputFile)
-        executionUpdate.onFinished(videoItem, outputFile, serviceStartId)
+        downloadingUpdater.onFinished(videoItem, outputFile, serviceStartId)
     }
 
     private fun checkIfVideoIsLive(video: YoutubeVideo) {
@@ -84,7 +84,7 @@ class VideoItemTask(
                     if (newProgress > progress) {
                         progress = newProgress
                         this.progress.update(progress, total.toInt(), totalSize.toInt())
-                        executionUpdate.onProgress(videoItem, this.progress)
+                        downloadingUpdater.onProgress(videoItem, this.progress)
                     }
                 }
             }

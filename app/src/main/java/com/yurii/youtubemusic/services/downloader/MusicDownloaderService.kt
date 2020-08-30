@@ -11,19 +11,19 @@ import com.yurii.youtubemusic.models.VideoItem
 import java.io.*
 import java.lang.Exception
 
-interface DownloaderInteroperableInterface {
+interface MusicDownloaderServiceInterface {
     fun isLoading(videoItem: VideoItem): Boolean
     fun getProgress(videoItem: VideoItem): Progress?
     fun cancel(videoItem: VideoItem)
 }
 
-interface ExecutionUpdate {
+interface DownloadingUpdater {
     fun onProgress(videoItem: VideoItem, progress: Progress)
     fun onFinished(videoItem: VideoItem, outFile: File, startId: Int)
     fun onError(videoItem: VideoItem, exception: Exception, startId: Int)
 }
 
-class MusicDownloaderService : Service(), DownloaderInteroperableInterface, ExecutionUpdate {
+class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, DownloadingUpdater {
     private lateinit var localBroadcastManager: LocalBroadcastManager
     private val youtubeDownloader = YoutubeDownloader()
 
@@ -93,7 +93,7 @@ class MusicDownloaderService : Service(), DownloaderInteroperableInterface, Exec
     override fun onBind(intent: Intent?): IBinder? = null
 
     object Instance {
-        var serviceInterface: DownloaderInteroperableInterface? = null
+        var serviceInterface: MusicDownloaderServiceInterface? = null
     }
 
     companion object {
