@@ -6,7 +6,8 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.yurii.youtubemusic.R
 
-class ConfirmDeletionDialog(private val onConfirm: () -> Unit) : DialogFragment() {
+class ConfirmDeletionDialog private constructor() : DialogFragment() {
+    private lateinit var onConfirm: () -> Unit
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
@@ -24,4 +25,13 @@ class ConfirmDeletionDialog(private val onConfirm: () -> Unit) : DialogFragment(
         } ?: throw IllegalStateException("Activity cannot be null")
 
     }
+
+    companion object {
+        fun create(onConfirm: () -> Unit): ConfirmDeletionDialog {
+            return ConfirmDeletionDialog().apply {
+                this.onConfirm = onConfirm
+            }
+        }
+    }
+
 }

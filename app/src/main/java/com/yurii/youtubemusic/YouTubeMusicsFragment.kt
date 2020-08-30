@@ -24,7 +24,8 @@ import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.services.youtube.ICanceler
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
-import com.yurii.youtubemusic.videoslist.ConfirmDeletion
+import com.yurii.youtubemusic.ui.ErrorDialog
+import com.yurii.youtubemusic.videoslist.DialogRequests
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
@@ -34,7 +35,7 @@ import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, ConfirmDeletion {
+class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, DialogRequests {
     private lateinit var viewModel: YouTubeMusicViewModel
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videosListAdapter: VideosListAdapter
@@ -96,7 +97,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Conf
     }
 
     private fun initRecyclerView() {
-        videosListAdapter = VideosListAdapter(context!!, viewModel.VideoItemProvider(), this)
+        videosListAdapter = VideosListAdapter(context!!, viewModel.VideoItemProviderImplementation(), this)
         val recyclerView = binding.videos
 
         val layoutManager = LinearLayoutManager(context)
@@ -168,6 +169,10 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Conf
         videosListAdapter.setFinishedState(videoItem)
     }
 
+    override fun onDownloadingFailed(videoItem: VideoItem, error: Exception) {
+        videosListAdapter.setFailedState(videoItem, error)
+    }
+
     private fun setNewVideoItems(videoItems: List<VideoItem>) {
         videosListAdapter.setNewVideoItems(videoItems)
         isLoadingNewVideoItems = false
@@ -193,6 +198,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Conf
         LocalBroadcastManager.getInstance(activity!!).registerReceiver(broadcastReceiver, IntentFilter().also {
             it.addAction(MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION)
             it.addAction(MusicDownloaderService.DOWNLOADING_FINISHED_ACTION)
+            it.addAction(MusicDownloaderService.DOWNLOADING_FAILED_ACTION)
         })
     }
 
@@ -236,7 +242,16 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Conf
         ErrorSnackBar.show(binding.root, error.message!!)
     }
 
-    override fun requestConfirmDeletion(onConfirm: () -> Unit) = ConfirmDeletionDialog(onConfirm).show(fragmentManager!!, "RequestToDeleteFile")
+    override fun requestConfirmDeletion(onConfirm: () -> Unit) {
+        ConfirmDeletionDialog.create(onConfirm).show(fragmentManager!!, "RequestToDeleteFile")
+    }
+
+    override fun requestFailedToDownloadDialog(videoItem: VideoItem) {
+        ErrorDialog.create(videoItem).addListeners(
+            onTryAgain = { viewModel.startDownloadMusic(videoItem); videosListAdapter.setDownloadingState(videoItem) },
+            onCancel = { videosListAdapter.setDownloadState(videoItem) }
+        ).show(fragmentManager!!, "ErrorDialog")
+    }
 
     companion object {
         private const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
