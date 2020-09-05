@@ -7,9 +7,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import android.widget.FrameLayout
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 
 
-internal class BottomNavigationBehavior(context: Context, attr: AttributeSet) : CoordinatorLayout.Behavior<BottomNavigationView>(context, attr) {
+internal class BottomNavigationBehavior(context: Context, attr: AttributeSet) : HideBottomViewOnScrollBehavior<BottomNavigationView>(context, attr) {
+    var enableCollapsingBehavior = true
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: BottomNavigationView, dependency: View): Boolean {
         return dependency is FrameLayout
@@ -22,22 +24,21 @@ internal class BottomNavigationBehavior(context: Context, attr: AttributeSet) : 
         target: View,
         nestedScrollAxes: Int
     ): Boolean {
-        return nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL
+        return nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL && enableCollapsingBehavior
     }
 
-    override fun onNestedPreScroll(coordinatorLayout: CoordinatorLayout, child: BottomNavigationView, target: View, dx: Int, dy: Int, consumed: IntArray) {
-        if (dy < 0) {
-            showBottomNavigationView(child)
-        } else if (dy > 0) {
-            hideBottomNavigationView(child)
-        }
-    }
-
-    private fun hideBottomNavigationView(view: BottomNavigationView) {
-        view.animate().setDuration(300).translationY(view.height.toFloat())
-    }
-
-    private fun showBottomNavigationView(view: BottomNavigationView) {
-        view.animate().setDuration(300).translationY(0f)
+    override fun onNestedPreScroll(
+        coordinatorLayout: CoordinatorLayout,
+        child: BottomNavigationView,
+        target: View,
+        dx: Int,
+        dy: Int,
+        consumed: IntArray,
+        type: Int
+    ) {
+        if (dy > 0)
+            slideDown(child)
+        else if (dy < 0)
+            slideUp(child)
     }
 }

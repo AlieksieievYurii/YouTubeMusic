@@ -1,11 +1,13 @@
 package com.yurii.youtubemusic
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.ViewDataBinding
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
@@ -16,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.yurii.youtubemusic.playlists.PlayListsDialogInterface
 import com.yurii.youtubemusic.models.VideoItem
@@ -23,6 +26,7 @@ import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.services.youtube.ICanceler
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
+import com.yurii.youtubemusic.ui.BottomNavigationBehavior
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.videoslist.DialogRequests
@@ -96,6 +100,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
         viewModel.signOut()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initRecyclerView() {
         videosListAdapter = VideosListAdapter(context!!, viewModel.VideoItemProviderImplementation(), this)
         val recyclerView = binding.videos
@@ -175,8 +180,17 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
     private fun setNewVideoItems(videoItems: List<VideoItem>) {
         videosListAdapter.setNewVideoItems(videoItems)
+        slideUpBottomNavigationMenu()
         isLoadingNewVideoItems = false
     }
+
+    private fun slideUpBottomNavigationMenu() {
+        val bottomMenu = activity!!.findViewById<BottomNavigationView>(R.id.bottom_navigation_view)
+        val params = bottomMenu.layoutParams as CoordinatorLayout.LayoutParams
+        val menuBehavior = params.behavior as BottomNavigationBehavior
+        menuBehavior.slideUp(bottomMenu)
+    }
+
 
     private fun showEmptyPlaylistLabel() {
         binding.apply {
