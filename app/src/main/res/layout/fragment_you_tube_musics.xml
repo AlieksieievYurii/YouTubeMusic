@@ -4,67 +4,72 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".YouTubeMusicsFragment">
 
-    <RelativeLayout
+    <com.otaliastudios.nestedscrollcoordinatorlayout.NestedScrollCoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="true">
+        android:clipToPadding="false">
 
-        <LinearLayout
-            android:id="@+id/layout_selection_playlist"
+
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:background="@color/colorAccent"
-            android:orientation="horizontal"
-            android:paddingLeft="@dimen/mediumPadding"
-            android:paddingRight="@dimen/mediumPadding"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/tvPlayListName"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/layout_selection_playlist"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textSize="12sp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                android:textColor="@android:color/white"
-                tools:text="@tools:sample/lorem/random" />
+                android:background="@color/colorAccent"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/mediumPadding"
+                android:paddingRight="@dimen/mediumPadding"
+                app:layout_scrollFlags="scroll|enterAlways|snap"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-            <Button
-                android:id="@+id/btn_select_play_list"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/mediumMargin"
-                android:minHeight="0dp"
-                android:text="@string/select"
-                android:textColor="@android:color/white" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvPlayListName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    tools:text="@tools:sample/lorem/random" />
 
+                <Button
+                    android:id="@+id/btn_select_play_list"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/mediumMargin"
+                    android:minHeight="0dp"
+                    android:text="@string/select"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/videos"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/layout_selection_playlist"
-            android:layout_centerInParent="true"
+            android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             android:visibility="visible"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             tools:listitem="@layout/item_video"
             tools:visibility="gone" />
+
 
         <TextView
             android:id="@+id/label_empty_playlist"
             style="@style/DescriptionText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:drawableTop="@drawable/ic_empty_playlist"
             android:text="@string/label_empty_playlist"
             android:visibility="gone"
+            android:layout_gravity="center"
             tools:visibility="visible" />
 
 
@@ -72,29 +77,24 @@
             android:id="@+id/progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_gravity="center"
             tools:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/layout_selection_first_playlist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_gravity="center"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone"
             tools:visibility="gone">
 
-            <ImageView
-                android:layout_width="300dp"
-                android:layout_height="300dp"
-                android:contentDescription="@string/content_description_first_playlist"
-                android:src="@drawable/ic_first_selection_illustration" />
-
             <TextView
                 style="@style/DescriptionText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:drawableTop="@drawable/ic_first_selection_illustration"
                 android:text="@string/label_first_playlist" />
 
             <Button
@@ -108,6 +108,5 @@
 
         </LinearLayout>
 
-    </RelativeLayout>
-
+    </com.otaliastudios.nestedscrollcoordinatorlayout.NestedScrollCoordinatorLayout>
 </layout>

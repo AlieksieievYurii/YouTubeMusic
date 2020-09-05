@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     private fun initActivity() {
         val mainActivity: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        setSupportActionBar(mainActivity.contentMain.toolbar)
+        setSupportActionBar(mainActivity.toolbar)
         setupBottomNavigationMenu(mainActivity)
     }
 
