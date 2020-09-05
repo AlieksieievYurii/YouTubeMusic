@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.utilities
 
 import android.content.Context
 import android.content.Intent
@@ -66,5 +66,7 @@ object GoogleAccount {
             throw DoesNotHaveRequiredScopes()
     }
 
-    private fun getClient(context: Context): GoogleSignInClient = GoogleSignIn.getClient(context, googleSignInOptions)
+    private fun getClient(context: Context): GoogleSignInClient = GoogleSignIn.getClient(context,
+        googleSignInOptions
+    )
 }

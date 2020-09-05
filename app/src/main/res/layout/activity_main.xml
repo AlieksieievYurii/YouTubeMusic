@@ -8,11 +8,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include
-            android:id="@+id/content_main"
-            layout="@layout/content_main"
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/text"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation_view"
@@ -24,7 +38,7 @@
             app:itemBackground="@color/colorAccent"
             app:itemIconTint="@android:color/white"
             app:itemTextColor="@android:color/white"
-            app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
+            app:layout_behavior="com.yurii.youtubemusic.ui.BottomNavigationBehavior"
             app:menu="@menu/navigation_menu" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

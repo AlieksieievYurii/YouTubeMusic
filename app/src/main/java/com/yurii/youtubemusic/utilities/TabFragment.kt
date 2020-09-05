@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.utilities
 
 import android.os.Bundle
 import android.view.*
@@ -8,6 +8,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import com.yurii.youtubemusic.R
 
 data class TabParameters(val layoutId: Int, val title: String, val optionMenuId: Int? = null)
 

@@ -167,10 +167,43 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
             STATE_DOWNLOAD -> drawDownloadIcon(canvas)
             STATE_DOWNLOADING -> drawCancelIconWithProgress(canvas)
             STATE_DOWNLOADED -> drawDeleteIcon(canvas)
+            STATE_FAILED -> drawFailIcon(canvas)
         }
 
         if (mIsHover)
             drawHoverEffect(canvas)
+    }
+
+    private fun drawFailIcon(canvas: Canvas) {
+        mPaint.color = Color.RED
+        mPaint.strokeCap = Paint.Cap.ROUND
+        mPaint.strokeWidth = mIconStrokeWidth * 0.75f
+
+        mPaint.style = Paint.Style.FILL
+        canvas.drawCircle(mSize * 0.5f, mSize * 0.62f, mIconStrokeWidth * 0.75f / 2, mPaint)
+
+        mPaint.style = Paint.Style.STROKE
+
+        mPath.reset()
+        mPath.moveTo(mSize * 0.5f, mSize * 0.2f)
+        mPath.lineTo(mSize * 0.75f, mSize * 0.7f)
+
+        mPath.moveTo(mSize * 0.5f, mSize * 0.2f)
+        mPath.lineTo(mSize * 0.25f, mSize * 0.7f)
+
+        mPath.moveTo(mSize * 0.25f, mSize * 0.7f)
+        mPath.lineTo(mSize * 0.75f, mSize * 0.7f)
+
+        canvas.drawPath(mPath, mPaint)
+
+        mPath.reset()
+        mPaint.strokeWidth = mIconStrokeWidth * 0.5f
+
+        mPath.moveTo(mSize * 0.5f, mSize * 0.4f)
+        mPath.lineTo(mSize * 0.5f, mSize * 0.55f)
+
+
+        canvas.drawPath(mPath, mPaint)
     }
 
     private fun drawCancelIconWithProgress(canvas: Canvas) {
@@ -290,5 +323,6 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         const val STATE_DOWNLOAD: Int = 0
         const val STATE_DOWNLOADING: Int = 1
         const val STATE_DOWNLOADED: Int = 2
+        const val STATE_FAILED: Int = 3
     }
 }

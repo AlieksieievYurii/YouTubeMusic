@@ -12,7 +12,7 @@ import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
-import com.yurii.youtubemusic.GoogleAccount
+import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.Progress
@@ -21,7 +21,7 @@ import com.yurii.youtubemusic.services.youtube.IYouTubeService
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
-import com.yurii.youtubemusic.videoslist.VideoItemInterface
+import com.yurii.youtubemusic.videoslist.VideoItemProvider
 import java.io.File
 import java.lang.Exception
 import java.lang.RuntimeException
@@ -34,6 +34,7 @@ interface VideosLoader {
 interface VideoItemChange {
     fun onChangeProgress(videoItem: VideoItem, progress: Progress)
     fun onDownloadingFinished(videoItem: VideoItem)
+    fun onDownloadingFailed(videoItem: VideoItem, error: Exception)
 }
 
 class YouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount) : AndroidViewModel(application) {
@@ -76,6 +77,11 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
                     addTag(videoItem)
                     videoItemChange?.onDownloadingFinished(videoItem)
                 }
+            }
+            MusicDownloaderService.DOWNLOADING_FAILED_ACTION -> {
+                val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
+                val error = intent.getSerializableExtra(MusicDownloaderService.EXTRA_ERROR) as Exception
+                videoItemChange?.onDownloadingFailed(videoItem, error)
             }
         }
     }
@@ -171,7 +177,7 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     }
 
 
-    inner class VideoItemProvider : VideoItemInterface {
+    inner class VideoItemProviderImplementation : VideoItemProvider {
         override fun download(videoItem: VideoItem) = this@YouTubeMusicViewModel.startDownloadMusic(videoItem)
 
         override fun cancelDownload(videoItem: VideoItem) = this@YouTubeMusicViewModel.stopDownloading(videoItem)

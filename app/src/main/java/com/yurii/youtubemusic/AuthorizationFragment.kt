@@ -9,6 +9,10 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
+import com.yurii.youtubemusic.utilities.DoesNotHaveRequiredScopes
+import com.yurii.youtubemusic.utilities.GoogleAccount
+import com.yurii.youtubemusic.utilities.TabFragment
+import com.yurii.youtubemusic.utilities.TabParameters
 
 class AuthorizationFragment : TabFragment() {
     private lateinit var binding: FragmentAuthorizationBinding

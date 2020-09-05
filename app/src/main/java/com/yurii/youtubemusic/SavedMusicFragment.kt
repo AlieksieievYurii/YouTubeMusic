@@ -5,6 +5,8 @@ import android.view.View
 import androidx.databinding.ViewDataBinding
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
 import com.yurii.youtubemusic.ui.DownloadButton
+import com.yurii.youtubemusic.utilities.TabFragment
+import com.yurii.youtubemusic.utilities.TabParameters
 
 
 /**
@@ -27,7 +29,8 @@ class SavedMusicFragment : TabFragment() {
                 val newState = when (currentState) {
                     DownloadButton.STATE_DOWNLOAD -> DownloadButton.STATE_DOWNLOADING
                     DownloadButton.STATE_DOWNLOADING -> DownloadButton.STATE_DOWNLOADED
-                    DownloadButton.STATE_DOWNLOADED -> DownloadButton.STATE_DOWNLOAD
+                    DownloadButton.STATE_DOWNLOADED -> DownloadButton.STATE_FAILED
+                    DownloadButton.STATE_FAILED -> DownloadButton.STATE_DOWNLOAD
                     else -> throw IllegalStateException("Unknown button's state")
                 }
                 btnDownload.state = newState
