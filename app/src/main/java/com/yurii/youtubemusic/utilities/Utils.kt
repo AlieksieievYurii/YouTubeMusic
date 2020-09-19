@@ -6,6 +6,7 @@ import android.view.View
 import com.google.android.material.snackbar.Snackbar
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.model.Playlist
+import com.google.gson.Gson
 import com.yurii.youtubemusic.models.VideoItem
 import org.threeten.bp.Duration
 import java.io.File
@@ -15,6 +16,26 @@ import java.util.concurrent.TimeUnit
 
 const val DEFAULT_SHARED_PREFERENCES_FILE: String = "com.yurii.youtubemusic.shared.preferences"
 const val SHARED_PREFERENCES_SELECTED_PLAY_LIST: String = "com.yurii.youtubemusic.shared.preferences.selected.play.list"
+const val SH_KEY_MUSICS_CATEGORIES: String = "com.yurii.youtubemusic.shared.preferences.music.categories"
+
+object PreferencesV2 {
+    class ValuesNotFound(key: String) : Exception("Value is not found for $key")
+
+    @Throws(ValuesNotFound::class)
+    fun getMusicCategories(context: Context): Array<String> {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val categoriesJson: String = sharedPreferences.getString(SH_KEY_MUSICS_CATEGORIES, null) ?: throw ValuesNotFound(SH_KEY_MUSICS_CATEGORIES)
+        return Gson().fromJson(categoriesJson, Array<String>::class.java)
+    }
+
+    fun setCategories(context: Context, categories: List<String>) {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putString(SH_KEY_MUSICS_CATEGORIES, Gson().toJson(categories))
+            apply()
+        }
+    }
+}
 
 class Preferences private constructor() {
     companion object {
@@ -50,7 +71,11 @@ class ErrorSnackBar private constructor() {
 class DataStorage private constructor() {
     companion object {
         fun getMusicStorage(context: Context): File = File(context.filesDir, "Musics")
+        fun getThumbnailsStorage(context: Context): File = File(context.filesDir, "Thumbnails")
         fun getMusic(context: Context, videoItem: VideoItem): File = File(getMusicStorage(context), "${videoItem.videoId}.mp3")
+        fun getAllMusic(context: Context): List<File> {
+            return getMusicStorage(context).walk().filter { it.extension == "mp3" }.toList()
+        }
     }
 }
 
