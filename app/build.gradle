@@ -41,6 +41,8 @@ android {
 }
 
 dependencies {
+    api "androidx.media:media:1.0.1"
+
     def lifecycle_version = "2.2.0"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -57,6 +59,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation 'com.google.code.gson:gson:2.8.6'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
