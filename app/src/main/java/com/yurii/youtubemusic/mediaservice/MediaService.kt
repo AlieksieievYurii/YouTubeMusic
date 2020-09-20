@@ -1,13 +1,12 @@
 package com.yurii.youtubemusic.mediaservice
 
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
+import android.content.*
+import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.PowerManager
 import android.os.SystemClock
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -16,8 +15,9 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
-import com.yurii.youtubemusic.mediaservicetest.ALL_MUSIC_ITEMS
+import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_SOURCE
 import java.lang.Exception
+import java.lang.IllegalStateException
 
 private const val TAG = "MediaBackgroundService"
 
@@ -34,18 +34,20 @@ private enum class AudioFocus {
 }
 
 class MediaService : MediaBrowserServiceCompat() {
+    private lateinit var audioManager: AudioManager
     private lateinit var musicProvider: MusicsProvider
     private lateinit var queueProvider: QueueProvider
     private lateinit var mediaSession: MediaSessionCompat
 
     private var mediaPlayer: MediaPlayer? = null
-
     private var currentState = PlaybackStateCompat.STATE_NONE
     private var canPlayOnFocusGain = false
     private var currentAudioFocus = AudioFocus.NoFocus
+    private val becomingNoisyReceiver = BecomingNoisyReceiver()
 
     override fun onCreate() {
         super.onCreate()
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         initMediaSession()
         musicProvider = MusicsProvider(baseContext)
         queueProvider = QueueProvider(mediaSession, musicProvider)
@@ -85,7 +87,8 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun requestCategories(result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
-        result.sendResult(musicProvider.getMusicCategories())
+        val categories = musicProvider.getMusicCategories()
+        result.sendResult(categories)
     }
 
     private fun requestMusicItemsByCategory(patentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
@@ -95,7 +98,7 @@ class MediaService : MediaBrowserServiceCompat() {
             result.detach()
             musicProvider.retrieveMusics(object : MusicsProvider.CallBack {
                 override fun onLoadSuccessfully() = result.sendResult(musicProvider.getMusicsByCategory(patentId))
-                override fun onFailedToLoad(error: Exception) = result.sendError(Bundle())
+                override fun onFailedToLoad(error: Exception) = setErrorState(PlaybackStateCompat.ERROR_CODE_ACTION_ABORTED, error.message!!)
             })
         }
     }
@@ -140,35 +143,156 @@ class MediaService : MediaBrowserServiceCompat() {
         return actions
     }
 
+    private fun getMediaPlayer(): MediaPlayer =
+        mediaPlayer ?: throw IllegalStateException("Cannot return mediaPlayer because it's null in state code: $currentState")
+
+
+    private fun resetOrCreateMediaPlayer() {
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer().apply {
+                setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+                )
+                val listeners = MediaPlayerCallBacks()
+                setOnPreparedListener(listeners)
+                setOnCompletionListener(listeners)
+                setOnErrorListener(listeners)
+            }
+        } else
+            getMediaPlayer().reset()
+    }
+
+
+    @Suppress("DEPRECATION")
+    private fun giveUpAudioFocus() {
+        if (currentAudioFocus == AudioFocus.Focused && audioManager.abandonAudioFocus(audioFocus) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            currentAudioFocus = AudioFocus.NoFocus
+        }
+    }
+
+
+    @Suppress("DEPRECATION")
+    private fun tryToGetAudioFocus() {
+        Log.i(TAG, "tryToGetAudioFocus")
+        if (currentAudioFocus == AudioFocus.NoFocus) {
+            val result = audioManager.requestAudioFocus(audioFocus, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
+            currentAudioFocus = if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) AudioFocus.Focused else AudioFocus.NoFocus
+        }
+    }
+
+    private fun configMediaPlayerState() {
+        when (currentAudioFocus) {
+            AudioFocus.NoFocus -> pauseMediaPlayer()
+            AudioFocus.CanDuck -> getMediaPlayer().setVolume(VOLUME_DUCK, VOLUME_DUCK)
+            AudioFocus.Focused -> getMediaPlayer().apply {
+                setVolume(VOLUME_NORMAL, VOLUME_NORMAL)
+                if (canPlayOnFocusGain)
+                    playMediaPlayer()
+            }
+        }
+    }
+
+    private fun handlePlayMusicQueue() {
+        Log.i(TAG, "Call: handlePlayMusicQueue")
+
+        tryToGetAudioFocus()
+        activeMediaSession()
+        prepareMusicFromQueue()
+    }
+
+    private fun prepareMusicFromQueue() {
+        currentState = PlaybackStateCompat.STATE_BUFFERING
+        val metadata = queueProvider.getCurrentQueueItemMetaData()
+        updateCurrentPlaybackState()
+        mediaSession.setMetadata(metadata)
+        resetOrCreateMediaPlayer()
+
+        getMediaPlayer().apply {
+            setDataSource(metadata.getString(METADATA_TRACK_SOURCE))
+            prepareAsync()
+        }
+    }
+
+    private fun playMediaPlayer() {
+        currentState = PlaybackStateCompat.STATE_PLAYING
+        canPlayOnFocusGain = false
+        getMediaPlayer().start()
+        updateCurrentPlaybackState()
+    }
+
+    private fun pauseMediaPlayer() {
+        currentState = PlaybackStateCompat.STATE_PAUSED
+        getMediaPlayer().pause()
+        updateCurrentPlaybackState()
+    }
+
+    private fun handleStopRequest() {
+        currentState = PlaybackStateCompat.STATE_STOPPED
+
+        getMediaPlayer().apply {
+            reset()
+            release()
+            mediaPlayer = null
+        }
+
+        giveUpAudioFocus()
+        updateCurrentPlaybackState()
+        stopSelf()
+    }
+
+    private fun activeMediaSession() {
+        if (!mediaSession.isActive)
+            mediaSession.isActive = true
+    }
+
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
         override fun onPlay() {
             super.onPlay()
             Log.i(TAG, "OnPlay")
+            registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
+            playMediaPlayer()
         }
 
         override fun onPlayFromMediaId(mediaId: String, extras: Bundle?) {
             super.onPlayFromMediaId(mediaId, extras)
-            Log.i(TAG, "onPlayFromMediaId")
+            val category = extras?.getString("KEY_CATEGORY") ?: "all"
+            Log.i(TAG, "onPlayFromMediaId mediaId=$mediaId category=$category")
+
+            queueProvider.createQueue(mediaId, category)
+            registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
+            handlePlayMusicQueue()
         }
+
 
         override fun onStop() {
             super.onStop()
             Log.i(TAG, "OnStop")
+            handleStopRequest()
+            unregisterReceiver(becomingNoisyReceiver)
         }
 
         override fun onPause() {
             super.onPause()
-            Log.i(TAG, "OnPause")
+            Log.i(TAG, "onPause")
+            pauseMediaPlayer()
         }
 
         override fun onSkipToNext() {
             super.onSkipToNext()
             Log.i(TAG, "Next")
+            queueProvider.moveToNextQueueItem()
+            handlePlayMusicQueue()
         }
 
         override fun onSkipToPrevious() {
             super.onSkipToPrevious()
             Log.i(TAG, "Previous")
+            queueProvider.moveToPreviousQueueItem()
+            handlePlayMusicQueue()
         }
 
         override fun onSeekTo(pos: Long) {
@@ -177,25 +301,51 @@ class MediaService : MediaBrowserServiceCompat() {
         }
     }
 
-    private inner class AudioFocusChanges : AudioManager.OnAudioFocusChangeListener {
-        override fun onAudioFocusChange(focusChange: Int) {
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> {
-                }
-                AudioManager.AUDIOFOCUS_LOSS -> {
-                }
-                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                }
-                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                }
+    private inner class MediaPlayerCallBacks : MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+        override fun onPrepared(mp: MediaPlayer?) {
+            Log.i(TAG, "Music has been prepared!")
+            playMediaPlayer()
+        }
+
+        override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun onCompletion(mp: MediaPlayer?) {
+            if (queueProvider.isQueueEmpty()) {
+                handleStopRequest()
+            } else if (!queueProvider.canMoveToNext()) {
+                queueProvider.setOnFirstPosition()
+                handlePlayMusicQueue()
+            } else {
+                queueProvider.moveToNextQueueItem()
+                handlePlayMusicQueue()
             }
         }
     }
 
+    private val audioFocus = AudioManager.OnAudioFocusChangeListener { focusChange ->
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> currentAudioFocus = AudioFocus.Focused
+
+            AudioManager.AUDIOFOCUS_LOSS -> currentAudioFocus = AudioFocus.NoFocus
+
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                currentAudioFocus = AudioFocus.NoFocus
+                canPlayOnFocusGain = true
+            }
+
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> currentAudioFocus = AudioFocus.CanDuck
+        }
+        configMediaPlayerState()
+    }
+
     private inner class BecomingNoisyReceiver : BroadcastReceiver() {
+        val becomingNoisyIntent = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY && mediaPlayer?.isPlaying == true)
-                mediaPlayer?.pause()
+                pauseMediaPlayer()
         }
     }
 
