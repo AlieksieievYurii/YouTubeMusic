@@ -5,6 +5,7 @@ import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
 import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_CATEGORY
 import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_SOURCE
 import com.yurii.youtubemusic.utilities.DataStorage
@@ -24,6 +25,10 @@ class MusicsProvider(private val context: Context) {
 
     var isMusicsInitialized: Boolean = false
         private set
+
+    fun getMetaData(queueItem: MediaSessionCompat.QueueItem): MediaMetadataCompat {
+        return metaDataItems.find { it.description.mediaId == queueItem.description.mediaId } ?: throw IllegalStateException("Cannot find metadata")
+    }
 
     fun getMusicsByCategory(category: String): MutableList<MediaBrowserCompat.MediaItem> {
         if (category == "all")
