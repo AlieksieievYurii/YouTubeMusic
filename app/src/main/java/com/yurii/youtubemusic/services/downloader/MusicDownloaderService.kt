@@ -8,6 +8,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.github.kiulian.downloader.YoutubeDownloader
 import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.utilities.MediaMetadata
+import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 import java.io.*
 import java.lang.Exception
 
@@ -26,6 +28,7 @@ interface DownloadingUpdater {
 class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, DownloadingUpdater {
     private lateinit var localBroadcastManager: LocalBroadcastManager
     private val youtubeDownloader = YoutubeDownloader()
+    private val mediaMetadataProvider = MediaMetadataProvider(baseContext)
 
     override fun onCreate() {
         super.onCreate()
@@ -63,6 +66,8 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
 
     override fun onFinished(videoItem: VideoItem, outFile: File, startId: Int) {
         stopSelf(startId)
+        addMetadata(videoItem)
+
         localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_FINISHED_ACTION).also {
             it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
         })
@@ -76,6 +81,17 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
         })
     }
 
+    private fun addMetadata(videoItem: VideoItem) {
+        mediaMetadataProvider.setMetadata(
+            videoItem.videoId, MediaMetadata(
+                title = videoItem.title,
+                musicId = videoItem.videoId,
+                author = videoItem.authorChannelTitle,
+                description = videoItem.description,
+                thumbnail = ""
+            )
+        )
+    }
 
     override fun cancel(videoItem: VideoItem) {
         ThreadPool.cancel(videoItem)

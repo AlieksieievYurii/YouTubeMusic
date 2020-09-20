@@ -73,10 +73,7 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
             }
             MusicDownloaderService.DOWNLOADING_FINISHED_ACTION -> {
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
-                videoItem.also {
-                    addTag(videoItem)
-                    videoItemChange?.onDownloadingFinished(videoItem)
-                }
+                videoItemChange?.onDownloadingFinished(videoItem)
             }
             MusicDownloaderService.DOWNLOADING_FAILED_ACTION -> {
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
@@ -84,12 +81,6 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
                 videoItemChange?.onDownloadingFailed(videoItem, error)
             }
         }
-    }
-
-    private fun addTag(videoItem: VideoItem) {
-        val file = DataStorage.getMusic(context, videoItem)
-        val tag = Tag(title = videoItem.title, authorChannel = videoItem.authorChannelTitle)
-        TaggerV1(file).writeTag(tag)
     }
 
     fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null): ICanceler {

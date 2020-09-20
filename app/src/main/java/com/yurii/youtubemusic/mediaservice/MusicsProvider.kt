@@ -9,8 +9,8 @@ import android.support.v4.media.session.MediaSessionCompat
 import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_CATEGORY
 import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_SOURCE
 import com.yurii.youtubemusic.utilities.DataStorage
+import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 import com.yurii.youtubemusic.utilities.Preferences
-import com.yurii.youtubemusic.utilities.TaggerV1
 import java.io.File
 import java.lang.Exception
 import java.lang.IllegalStateException
@@ -95,6 +95,7 @@ class MusicsProvider(private val context: Context) {
 private class MusicsLoader(context: Context) : AsyncTask<Void, Void, MutableList<MediaMetadataCompat>>() {
     private val musicFolder = DataStorage.getMusicStorage(context)
     private val thumbnailsFolder = DataStorage.getThumbnailsStorage(context)
+    private val mediaMetadataCompat = MediaMetadataProvider(context)
 
     var onLoadSuccessfully: ((musicItems: MutableList<MediaMetadataCompat>) -> Unit)? = null
     var onFailedToLoad: ((error: Exception) -> Unit)? = null
@@ -113,22 +114,22 @@ private class MusicsLoader(context: Context) : AsyncTask<Void, Void, MutableList
     private fun getMetaDataItems(): ArrayList<MediaMetadataCompat> {
         return ArrayList<MediaMetadataCompat>().apply {
             retrieveMusics().forEach { file ->
-                this.add(retrieveMusicMetaData(file))
+                this.add(retrieveMusicMetaData(file.nameWithoutExtension, file))
             }
         }
     }
 
     private fun retrieveMusics(): List<File> = musicFolder.walk().filter { it.extension == "mp3" }.toList()
 
-    private fun retrieveMusicMetaData(musicFile: File): MediaMetadataCompat {
-        val tag = TaggerV1(musicFile).readTag()
+    private fun retrieveMusicMetaData(musicId: String, musicFile: File): MediaMetadataCompat {
+        val musicMetadata =  mediaMetadataCompat.readMetadata(musicId)
         return MediaMetadataCompat.Builder().apply {
-            putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, musicFile.nameWithoutExtension)
-            putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, tag.title)
-            putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, tag.authorChannel)
-            putString(MediaMetadataCompat.METADATA_KEY_ARTIST, tag.authorChannel)
-            putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, "Test description. Will be removed")
-            putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, File(thumbnailsFolder, musicFile.nameWithoutExtension).toURI().toString())
+            putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, musicMetadata.musicId)
+            putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, musicMetadata.title)
+            putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, musicMetadata.author)
+            putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicMetadata.author)
+            putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, musicMetadata.description)
+            putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicMetadata.thumbnail)
             putString(METADATA_TRACK_SOURCE, musicFile.toURI().toString())
             putString(METADATA_TRACK_CATEGORY, "bass") //TODO (alieksiy) It's necessary to add category
         }.build()
