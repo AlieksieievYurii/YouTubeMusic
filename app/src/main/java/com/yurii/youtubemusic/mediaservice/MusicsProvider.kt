@@ -9,7 +9,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_CATEGORY
 import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_SOURCE
 import com.yurii.youtubemusic.utilities.DataStorage
-import com.yurii.youtubemusic.utilities.PreferencesV2
+import com.yurii.youtubemusic.utilities.Preferences
 import com.yurii.youtubemusic.utilities.TaggerV1
 import java.io.File
 import java.lang.Exception
@@ -79,9 +79,9 @@ class MusicsProvider(private val context: Context) {
     private fun retrieveMusicCategories(): List<String> {
         val categories = mutableListOf("all") //Always there will be minimum one category 'All'
         return try {
-            categories.addAll(PreferencesV2.getMusicCategories(context))
+            categories.addAll(Preferences.getMusicCategories(context))
             categories
-        } catch (error: PreferencesV2.ValuesNotFound) {
+        } catch (error: Preferences.ValuesNotFound) {
             categories
         }
     }

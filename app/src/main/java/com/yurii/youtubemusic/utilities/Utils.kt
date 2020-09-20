@@ -18,7 +18,7 @@ const val DEFAULT_SHARED_PREFERENCES_FILE: String = "com.yurii.youtubemusic.shar
 const val SHARED_PREFERENCES_SELECTED_PLAY_LIST: String = "com.yurii.youtubemusic.shared.preferences.selected.play.list"
 const val SH_KEY_MUSICS_CATEGORIES: String = "com.yurii.youtubemusic.shared.preferences.music.categories"
 
-object PreferencesV2 {
+object Preferences {
     class ValuesNotFound(key: String) : Exception("Value is not found for $key")
 
     @Throws(ValuesNotFound::class)
@@ -35,26 +35,23 @@ object PreferencesV2 {
             apply()
         }
     }
-}
 
-class Preferences private constructor() {
-    companion object {
-        fun setSelectedPlayList(context: Context, playList: Playlist?) {
-            val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-            with(sharedPreferences.edit()) {
-                putString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, playList?.toString())
-                apply()
-            }
+    fun setSelectedPlayList(context: Context, playList: Playlist?) {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, playList?.toString())
+            apply()
         }
 
-        fun getSelectedPlayList(context: Context): Playlist? {
-            val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-            val jsonRepresentation: String? = sharedPreferences.getString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, null)
-            jsonRepresentation?.let {
-                val jsonFactory: com.google.api.client.json.JsonFactory = JacksonFactory.getDefaultInstance()
-                return jsonFactory.fromString(it, Playlist::class.java)
-            } ?: return null
-        }
+    }
+
+    fun getSelectedPlayList(context: Context): Playlist? {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val jsonRepresentation: String? = sharedPreferences.getString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, null)
+        jsonRepresentation?.let {
+            val jsonFactory: com.google.api.client.json.JsonFactory = JacksonFactory.getDefaultInstance()
+            return jsonFactory.fromString(it, Playlist::class.java)
+        } ?: return null
     }
 }
 
