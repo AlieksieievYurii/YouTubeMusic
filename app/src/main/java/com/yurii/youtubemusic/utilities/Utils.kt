@@ -67,9 +67,14 @@ class ErrorSnackBar private constructor() {
 
 object DataStorage {
     fun getMusicStorage(context: Context): File = File(context.filesDir, "Musics")
-    fun getThumbnailsStorage(context: Context): File = File(context.filesDir, "Thumbnails")
-    fun getMusicMetadataStorage(context: Context): File = File(context.filesDir, "Metadata")
-    fun getMusic(context: Context, videoItem: VideoItem): File = File(getMusicStorage(context), "${videoItem.videoId}.mp3")
+    private fun getThumbnailsStorage(context: Context): File = File(context.filesDir, "Thumbnails")
+    private fun getMusicMetadataStorage(context: Context): File = File(context.filesDir, "Metadata")
+
+    fun getMusic(context: Context, musicId: String): File = File(getMusicStorage(context), "$musicId.mp3")
+    fun getThumbnail(context: Context, musicId: String): File = File(getThumbnailsStorage(context), "$musicId.jpeg")
+    fun getMetadata(context: Context, musicId: String): File = File(getMusicMetadataStorage(context), "$musicId.json")
+
+    fun getAllMusicFiles(context: Context): List<File> = getMusicStorage(context).walk().filter { it.extension == "mp3" }.toList()
 }
 
 fun parseDurationToHumanView(text: String): String {

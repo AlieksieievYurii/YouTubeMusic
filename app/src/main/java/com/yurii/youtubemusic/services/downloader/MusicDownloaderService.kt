@@ -6,9 +6,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.github.kiulian.downloader.YoutubeDownloader
-import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.utilities.MediaMetadata
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 import java.io.*
 import java.lang.Exception
@@ -28,11 +26,12 @@ interface DownloadingUpdater {
 class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, DownloadingUpdater {
     private lateinit var localBroadcastManager: LocalBroadcastManager
     private val youtubeDownloader = YoutubeDownloader()
-    private val mediaMetadataProvider = MediaMetadataProvider(baseContext)
+    private lateinit var mediaMetadataProvider: MediaMetadataProvider
 
     override fun onCreate() {
         super.onCreate()
         Log.i(TAG, "Service has been created")
+        mediaMetadataProvider = MediaMetadataProvider(baseContext)
         Instance.serviceInterface = this
         localBroadcastManager = LocalBroadcastManager.getInstance(applicationContext)
     }
@@ -51,8 +50,7 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
 
     private fun startDownloading(videoItem: VideoItem, startId: Int) {
         Log.i(TAG, "Start downloading: ${videoItem.videoId}. StartId: $startId")
-        val outDir = DataStorage.getMusicStorage(applicationContext)
-        val task = VideoItemTask(videoItem, outDir, startId, this, youtubeDownloader)
+        val task = VideoItemTask(videoItem, baseContext, startId, this, youtubeDownloader)
         ThreadPool.execute(task)
     }
 
@@ -81,17 +79,7 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
         })
     }
 
-    private fun addMetadata(videoItem: VideoItem) {
-        mediaMetadataProvider.setMetadata(
-            videoItem.videoId, MediaMetadata(
-                title = videoItem.title,
-                musicId = videoItem.videoId,
-                author = videoItem.authorChannelTitle,
-                description = videoItem.description,
-                thumbnail = ""
-            )
-        )
-    }
+    private fun addMetadata(videoItem: VideoItem) = mediaMetadataProvider.setMetadata(videoItem)
 
     override fun cancel(videoItem: VideoItem) {
         ThreadPool.cancel(videoItem)

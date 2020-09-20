@@ -92,9 +92,7 @@ class MusicsProvider(private val context: Context) {
     }
 }
 
-private class MusicsLoader(context: Context) : AsyncTask<Void, Void, MutableList<MediaMetadataCompat>>() {
-    private val musicFolder = DataStorage.getMusicStorage(context)
-    private val thumbnailsFolder = DataStorage.getThumbnailsStorage(context)
+private class MusicsLoader(private val context: Context) : AsyncTask<Void, Void, MutableList<MediaMetadataCompat>>() {
     private val mediaMetadataCompat = MediaMetadataProvider(context)
 
     var onLoadSuccessfully: ((musicItems: MutableList<MediaMetadataCompat>) -> Unit)? = null
@@ -119,7 +117,7 @@ private class MusicsLoader(context: Context) : AsyncTask<Void, Void, MutableList
         }
     }
 
-    private fun retrieveMusics(): List<File> = musicFolder.walk().filter { it.extension == "mp3" }.toList()
+    private fun retrieveMusics(): List<File> = DataStorage.getAllMusicFiles(context)
 
     private fun retrieveMusicMetaData(musicId: String, musicFile: File): MediaMetadataCompat {
         val musicMetadata =  mediaMetadataCompat.readMetadata(musicId)

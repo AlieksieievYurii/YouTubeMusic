@@ -22,7 +22,6 @@ import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.videoslist.VideoItemProvider
-import java.io.File
 import java.lang.Exception
 import java.lang.RuntimeException
 
@@ -44,7 +43,6 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     val selectedPlaylist: LiveData<Playlist?> get() = _selectedPlayList
     private var videoLoadingCanceler: ICanceler? = null
     private var nextPageToken: String? = null
-    private val musicFolderStorage: File = DataStorage.getMusicStorage(context)
 
     var videosLoader: VideosLoader? = null
     var videoItemChange: VideoItemChange? = null
@@ -126,8 +124,7 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
         }, nextPageToken)
     }
 
-    //TODO I think .mp3 should be removed from all files
-    fun exists(videoItem: VideoItem): Boolean = File(musicFolderStorage, "${videoItem.videoId}.mp3").exists()
+    fun exists(videoItem: VideoItem): Boolean = DataStorage.getMusic(context, videoItem.videoId).exists()
 
     fun isVideoItemLoading(videoItem: VideoItem): Boolean = MusicDownloaderService.Instance.serviceInterface?.isLoading(videoItem) ?: false
 
@@ -144,9 +141,27 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     }
 
     fun removeVideoItem(videoItem: VideoItem) {
-        val file = DataStorage.getMusic(context, videoItem)
-        if (!file.delete())
-            throw RuntimeException("Cannot remove the music file $file")
+        deleteMusic(videoItem)
+        deleteMetadata(videoItem)
+        deleteThumbnail(videoItem)
+    }
+
+    private fun deleteMusic(videoItem: VideoItem) {
+        val musicFile = DataStorage.getMusic(context, videoItem.videoId)
+        if (!musicFile.delete())
+            throw RuntimeException("Cannot remove the music file $musicFile")
+    }
+
+    private fun deleteMetadata(videoItem: VideoItem) {
+        val metadataFile = DataStorage.getMetadata(context, videoItem.videoId)
+        if (!metadataFile.delete())
+            throw RuntimeException("Cannot remove the metadata file $metadataFile")
+    }
+
+    private fun deleteThumbnail(videoItem: VideoItem) {
+        val thumbnail = DataStorage.getThumbnail(context, videoItem.videoId)
+        if (!thumbnail.delete())
+            throw RuntimeException("Cannot remove the thumbnail $thumbnail")
     }
 
     fun isVideoPageLast() = nextPageToken.isNullOrEmpty()
