@@ -284,14 +284,24 @@ class MediaService : MediaBrowserServiceCompat() {
         override fun onSkipToNext() {
             super.onSkipToNext()
             Log.i(TAG, "Next")
-            queueProvider.moveToNextQueueItem()
+
+            if (queueProvider.canMoveToNext())
+                queueProvider.moveToNextQueueItem()
+            else
+                queueProvider.setOnFirstPosition()
+
             handlePlayMusicQueue()
         }
 
         override fun onSkipToPrevious() {
             super.onSkipToPrevious()
             Log.i(TAG, "Previous")
-            queueProvider.moveToPreviousQueueItem()
+
+            if (queueProvider.canMoveToPrevious())
+                queueProvider.moveToPreviousQueueItem()
+            else
+                queueProvider.setOnLastPosition()
+
             handlePlayMusicQueue()
         }
 

@@ -14,6 +14,10 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val mu
         currentQueueIndex = 0
     }
 
+    fun setOnLastPosition() {
+        currentQueueIndex = queue?.lastIndex ?: throw IllegalStateException("Cannot call setOnLastPosition on null queue")
+    }
+
     fun createQueue(mediaId: String, category: String) {
         var id = 0L
         val queue = musicsProvider.getMusicsByCategory(category).map { MediaSessionCompat.QueueItem(it.description, id++) }
