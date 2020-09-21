@@ -13,6 +13,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.text.TextUtils
 import android.util.Log
+import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_SOURCE
@@ -254,7 +255,10 @@ class MediaService : MediaBrowserServiceCompat() {
             super.onPlay()
             Log.i(TAG, "OnPlay")
             registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
-            playMediaPlayer()
+            if (currentState == PlaybackStateCompat.STATE_PAUSED) {
+                tryToGetAudioFocus()
+                playMediaPlayer()
+            }
         }
 
         override fun onPlayFromMediaId(mediaId: String, extras: Bundle?) {
@@ -278,6 +282,7 @@ class MediaService : MediaBrowserServiceCompat() {
         override fun onPause() {
             super.onPause()
             Log.i(TAG, "onPause")
+            giveUpAudioFocus()
             pauseMediaPlayer()
         }
 
@@ -318,7 +323,8 @@ class MediaService : MediaBrowserServiceCompat() {
         }
 
         override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
-            TODO("Not yet implemented")
+            Toast.makeText(applicationContext, "Error has been occured", Toast.LENGTH_LONG).show()
+            return true
         }
 
         override fun onCompletion(mp: MediaPlayer?) {
@@ -354,8 +360,10 @@ class MediaService : MediaBrowserServiceCompat() {
         val becomingNoisyIntent = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
 
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY && mediaPlayer?.isPlaying == true)
+            if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY && mediaPlayer?.isPlaying == true) {
                 pauseMediaPlayer()
+                giveUpAudioFocus()
+            }
         }
     }
 
