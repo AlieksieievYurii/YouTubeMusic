@@ -16,11 +16,14 @@ import com.yurii.youtubemusic.utilities.DoesNotHaveRequiredScopes
 import com.yurii.youtubemusic.utilities.FragmentHelper
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.utilities.IsNotSignedIn
+import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private var activeBottomMenuItem: Int = -1
     private val broadCastReceiver = MyBroadCastReceiver()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
+
+    private lateinit var activityMainBinding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,9 +37,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     }
 
     private fun initActivity() {
-        val mainActivity: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        setSupportActionBar(mainActivity.toolbar)
-        setupBottomNavigationMenu(mainActivity)
+        activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        setSupportActionBar(activityMainBinding.toolbar)
+        setupBottomNavigationMenu(activityMainBinding)
     }
 
     private fun setupBottomNavigationMenu(activityMainBinding: ActivityMainBinding) {
@@ -107,7 +110,26 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadCastReceiver)
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.getStringExtra(EXTRA_LAUNCH_FRAGMENT)?.let { fragmentExtra: String ->
+            onNavigationItemSelected(
+                activityMainBinding.bottomNavigationView.menu.findItem(
+                    when (fragmentExtra) {
+                        EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC -> R.id.item_saved_music
+                        EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC -> R.id.item_you_tube_music
+                        else -> throw IllegalStateException("Cannot open fragment with $fragmentExtra")
+                    }
+                )
+            )
+        }
+    }
+
     companion object {
+        const val EXTRA_LAUNCH_FRAGMENT = "com.yurii.youtubemusic.mainactivity.extra.launch.fragment"
+        const val EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC = "com.yurii.youtubemusic.mainactivity.extra.launch.savedmusic.fragment"
+        const val EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC = "com.yurii.youtubemusic.mainactivity.extra.launch.youtubemusic.fragment"
+
         private const val ACTION_USER_SIGNED_IN = "com.yurii.youtubemusic.mainactivity.action.signin"
         private const val ACTION_USER_SIGNED_OUT = "com.yurii.youtubemusic.mainactivity.action.signout"
 
