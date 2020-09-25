@@ -127,7 +127,7 @@ private class MusicsLoader(private val context: Context) : AsyncTask<Void, Void,
             putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, musicMetadata.author)
             putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicMetadata.author)
             putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, musicMetadata.description)
-            putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicMetadata.thumbnail)
+            putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicMetadata.thumbnail.toURI().toString())
             putString(METADATA_TRACK_SOURCE, musicFile.toURI().toString())
             putString(METADATA_TRACK_CATEGORY, "bass") //TODO (alieksiy) It's necessary to add category
         }.build()

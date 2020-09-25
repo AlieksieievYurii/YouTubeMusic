@@ -11,7 +11,7 @@ data class MediaMetadata(
     val title: String,
     val description: String,
     val author: String,
-    val thumbnail: String,
+    val thumbnail: File,
     val tags: List<String> = emptyList()
 )
 
@@ -27,7 +27,7 @@ class MediaMetadataProvider(private val context: Context) {
             musicId = videoItem.videoId,
             author = videoItem.authorChannelTitle,
             description = videoItem.description,
-            thumbnail = videoItem.thumbnail
+            thumbnail = DataStorage.getThumbnail(context, videoItem.videoId)
         )
 
         val metadataJson = getMusicMetadataFile(videoItem.videoId)

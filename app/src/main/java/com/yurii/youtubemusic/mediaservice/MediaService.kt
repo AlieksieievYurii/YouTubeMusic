@@ -16,9 +16,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
+import com.yurii.youtubemusic.MainActivity
 import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_SOURCE
-import java.lang.Exception
-import java.lang.IllegalStateException
 
 private const val TAG = "MediaBackgroundService"
 
@@ -38,6 +37,7 @@ class MediaService : MediaBrowserServiceCompat() {
     private lateinit var audioManager: AudioManager
     private lateinit var musicProvider: MusicsProvider
     private lateinit var queueProvider: QueueProvider
+    private lateinit var notificationManager: NotificationManager
     private lateinit var mediaSession: MediaSessionCompat
 
     private var mediaPlayer: MediaPlayer? = null
@@ -45,6 +45,7 @@ class MediaService : MediaBrowserServiceCompat() {
     private var canPlayOnFocusGain = false
     private var currentAudioFocus = AudioFocus.NoFocus
     private val becomingNoisyReceiver = BecomingNoisyReceiver()
+    private val playbackStateBuilder = PlaybackStateCompat.Builder()
 
     override fun onCreate() {
         super.onCreate()
@@ -52,12 +53,17 @@ class MediaService : MediaBrowserServiceCompat() {
         initMediaSession()
         musicProvider = MusicsProvider(baseContext)
         queueProvider = QueueProvider(mediaSession, musicProvider)
+        notificationManager = NotificationManager(baseContext, sessionToken!!)
         updateCurrentPlaybackState()
     }
 
     private fun initMediaSession() {
-        val mediaButtonReceiver = ComponentName(applicationContext, MediaButtonReceiver::class.java)
+        val sessionActivityPendingIntent = packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
+            sessionIntent.putExtra(MainActivity.EXTRA_LAUNCH_FRAGMENT, MainActivity.EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC)
+            PendingIntent.getActivity(this, 0, sessionIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
 
+        val mediaButtonReceiver = ComponentName(applicationContext, MediaButtonReceiver::class.java)
         val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON).apply {
             setClass(applicationContext, MediaButtonReceiver::class.java)
         }
@@ -68,6 +74,7 @@ class MediaService : MediaBrowserServiceCompat() {
             setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
             setCallback(MediaSessionCallBacks())
             setMediaButtonReceiver(pendingIntent)
+            setSessionActivity(sessionActivityPendingIntent)
         }
         sessionToken = mediaSession.sessionToken
     }
@@ -120,7 +127,7 @@ class MediaService : MediaBrowserServiceCompat() {
     private fun getCurrentPlaybackStateBuilder(): PlaybackStateCompat.Builder {
         val position: Long = mediaPlayer?.run { currentPosition.toLong() } ?: PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN
 
-        return PlaybackStateCompat.Builder().apply {
+        return playbackStateBuilder.apply {
             setActions(getAvailableActions())
             setState(currentState, position, 1.0f, SystemClock.elapsedRealtime())
         }
@@ -178,7 +185,6 @@ class MediaService : MediaBrowserServiceCompat() {
 
     @Suppress("DEPRECATION")
     private fun tryToGetAudioFocus() {
-        Log.i(TAG, "tryToGetAudioFocus")
         if (currentAudioFocus == AudioFocus.NoFocus) {
             val result = audioManager.requestAudioFocus(audioFocus, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
             currentAudioFocus = if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) AudioFocus.Focused else AudioFocus.NoFocus
@@ -198,10 +204,8 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun handlePlayMusicQueue() {
-        Log.i(TAG, "Call: handlePlayMusicQueue")
-
         tryToGetAudioFocus()
-        activeMediaSession()
+        mediaSession.isActive = true
         prepareMusicFromQueue()
     }
 
@@ -222,12 +226,16 @@ class MediaService : MediaBrowserServiceCompat() {
         currentState = PlaybackStateCompat.STATE_PLAYING
         canPlayOnFocusGain = false
         getMediaPlayer().start()
+        notificationManager.showPlayingNotification()
+        startForeground(NotificationManager.NOTIFICATION_ID, notificationManager.getCurrentNotification())
         updateCurrentPlaybackState()
     }
 
     private fun pauseMediaPlayer() {
         currentState = PlaybackStateCompat.STATE_PAUSED
         getMediaPlayer().pause()
+        notificationManager.showPauseNotification()
+        stopForeground(false)
         updateCurrentPlaybackState()
     }
 
@@ -240,20 +248,15 @@ class MediaService : MediaBrowserServiceCompat() {
             mediaPlayer = null
         }
 
+        stopForeground(true)
         giveUpAudioFocus()
         updateCurrentPlaybackState()
         stopSelf()
     }
 
-    private fun activeMediaSession() {
-        if (!mediaSession.isActive)
-            mediaSession.isActive = true
-    }
-
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
         override fun onPlay() {
             super.onPlay()
-            Log.i(TAG, "OnPlay")
             registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
             if (currentState == PlaybackStateCompat.STATE_PAUSED) {
                 tryToGetAudioFocus()
@@ -264,7 +267,6 @@ class MediaService : MediaBrowserServiceCompat() {
         override fun onPlayFromMediaId(mediaId: String, extras: Bundle?) {
             super.onPlayFromMediaId(mediaId, extras)
             val category = extras?.getString("KEY_CATEGORY") ?: "all"
-            Log.i(TAG, "onPlayFromMediaId mediaId=$mediaId category=$category")
 
             queueProvider.createQueue(mediaId, category)
             registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
@@ -274,21 +276,18 @@ class MediaService : MediaBrowserServiceCompat() {
 
         override fun onStop() {
             super.onStop()
-            Log.i(TAG, "OnStop")
             handleStopRequest()
             unregisterReceiver(becomingNoisyReceiver)
         }
 
         override fun onPause() {
             super.onPause()
-            Log.i(TAG, "onPause")
             giveUpAudioFocus()
             pauseMediaPlayer()
         }
 
         override fun onSkipToNext() {
             super.onSkipToNext()
-            Log.i(TAG, "Next")
 
             if (queueProvider.canMoveToNext())
                 queueProvider.moveToNextQueueItem()
@@ -300,7 +299,6 @@ class MediaService : MediaBrowserServiceCompat() {
 
         override fun onSkipToPrevious() {
             super.onSkipToPrevious()
-            Log.i(TAG, "Previous")
 
             if (queueProvider.canMoveToPrevious())
                 queueProvider.moveToPreviousQueueItem()
@@ -354,6 +352,14 @@ class MediaService : MediaBrowserServiceCompat() {
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> currentAudioFocus = AudioFocus.CanDuck
         }
         configMediaPlayerState()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaSession.run {
+            isActive = false
+            release()
+        }
     }
 
     private inner class BecomingNoisyReceiver : BroadcastReceiver() {
