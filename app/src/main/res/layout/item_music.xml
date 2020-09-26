@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
+
+        <variable
+            name="musicItem"
+            type="com.yurii.youtubemusic.models.MediaItem" />
+    </data>
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/mediumMargin"
+        android:layout_marginEnd="@dimen/mediumMargin"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        card_view:cardCornerRadius="@dimen/defCornerRadius"
+        card_view:cardUseCompatPadding="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/thumbnail"
+                android:layout_width="100dp"
+                android:layout_height="70dp"
+                android:layout_margin="@dimen/mediumMargin"
+                app:imageSrc="@{musicItem.thumbnailPath}"
+                tools:src="@tools:sample/backgrounds/scenic" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/mediumMargin"
+                android:layout_marginTop="@dimen/mediumMargin"
+                android:layout_toStartOf="@id/more_options"
+                android:layout_toEndOf="@id/thumbnail"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@{musicItem.title}"
+                android:textAppearance="?attr/textAppearanceSubtitle1"
+                android:textSize="14sp"
+                tools:text="@tools:sample/lorem/random" />
+
+            <TextView
+                android:id="@+id/author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/title"
+                android:layout_marginStart="@dimen/mediumMargin"
+                android:layout_toStartOf="@id/more_options"
+                android:layout_toEndOf="@id/thumbnail"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@{musicItem.author}"
+                android:textSize="12sp"
+                tools:text="@tools:sample/lorem/random" />
+
+            <TextView
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/author"
+                android:layout_marginStart="@dimen/mediumMargin"
+                android:layout_marginTop="@dimen/mediumMargin"
+                android:layout_toEndOf="@id/thumbnail"
+                android:text="@{UtilsKt.parseDurationToHumanView(musicItem.duration)}"
+                tools:text="3:23" />
+
+            <ImageButton
+                android:id="@+id/more_options"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/content_description_more_options"
+                android:src="@drawable/ic_baseline_more_vert_24" />
+
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+
+</layout>

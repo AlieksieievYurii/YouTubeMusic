@@ -1,42 +1,58 @@
 package com.yurii.youtubemusic
 
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import android.view.View
 import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
-import com.yurii.youtubemusic.ui.DownloadButton
+import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
 import com.yurii.youtubemusic.utilities.TabParameters
+import com.yurii.youtubemusic.videoslist.MediaListAdapter
+import com.yurii.youtubemusic.viewmodels.savedmusic.SavedMusicViewModel
 
 
 /**
  * A simple [Fragment] subclass.
  */
 class SavedMusicFragment : TabFragment() {
+    private val savedMusicViewModel by viewModels<SavedMusicViewModel> {
+        Injector.provideSavedMusicViewModel(requireContext())
+    }
+
+
+    private lateinit var mediaItemsAdapter: MediaListAdapter
+
     override fun getTabParameters(): TabParameters {
         return TabParameters(
             layoutId = R.layout.fragment_saved_music,
-            title = context!!.getString(R.string.label_fragment_title_saved_music),
+            title = requireContext().getString(R.string.label_fragment_title_saved_music),
             optionMenuId = R.menu.navigation_menu
         )
     }
 
+    private lateinit var binding: FragmentSavedMusicBinding
+
     override fun onInflatedView(viewDataBinding: ViewDataBinding) {
-        val binding = viewDataBinding as FragmentSavedMusicBinding
-        val btnDownload = binding.btnDownload
-        btnDownload.setOnClickStateListener(object : DownloadButton.OnClickListener {
-            override fun onClick(view: View, currentState: Int) {
-                val newState = when (currentState) {
-                    DownloadButton.STATE_DOWNLOAD -> DownloadButton.STATE_DOWNLOADING
-                    DownloadButton.STATE_DOWNLOADING -> DownloadButton.STATE_DOWNLOADED
-                    DownloadButton.STATE_DOWNLOADED -> DownloadButton.STATE_FAILED
-                    DownloadButton.STATE_FAILED -> DownloadButton.STATE_DOWNLOAD
-                    else -> throw IllegalStateException("Unknown button's state")
-                }
-                btnDownload.state = newState
-            }
+        binding = viewDataBinding as FragmentSavedMusicBinding
+        mediaItemsAdapter = MediaListAdapter(requireContext())
+        binding.musics.apply {
+            setHasFixedSize(false)
+            layoutManager = LinearLayoutManager(context)
+            adapter = mediaItemsAdapter
+        }
+
+        savedMusicViewModel.mediaItems.observe(viewLifecycleOwner, Observer {mediaItems ->
+            mediaItemsAdapter.setMediaItems(mediaItems)
+        })
+
+        savedMusicViewModel.categoryItems.observe(viewLifecycleOwner, Observer {categoryItems ->
+            Toast.makeText(requireContext(), categoryItems.toString(), Toast.LENGTH_LONG).show()
         })
     }
+
 
     companion object {
         fun createInstance(): SavedMusicFragment = SavedMusicFragment()

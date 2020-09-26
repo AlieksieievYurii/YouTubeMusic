@@ -36,4 +36,5 @@
     <string name="label_action_play">Play</string>
     <string name="label_action_next">Next</string>
     <string name="label_action_previous">Previous</string>
+    <string name="content_description_more_options">More options for music item</string>
 </resources>
