@@ -14,11 +14,12 @@
             android:layout_height="wrap_content"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-            <androidx.appcompat.widget.Toolbar
+            <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
+                app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -26,7 +27,7 @@
             android:id="@+id/frameLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation_view"
@@ -35,9 +36,11 @@
             android:layout_gravity="bottom"
             android:background="@color/colorAccent"
             android:foreground="?attr/selectableItemBackground"
-            app:itemBackground="@color/colorAccent"
-            app:itemIconTint="@android:color/white"
-            app:itemTextColor="@android:color/white"
+            android:clickable="true"
+            android:focusable="true"
+            app:labelVisibilityMode="selected"
+            app:itemIconTint="@color/nav_item_state"
+            app:itemTextColor="@color/nav_item_state"
             app:layout_behavior="com.yurii.youtubemusic.ui.BottomNavigationBehavior"
             app:menu="@menu/navigation_menu" />
 

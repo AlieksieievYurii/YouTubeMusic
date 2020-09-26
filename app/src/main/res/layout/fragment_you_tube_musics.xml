@@ -18,7 +18,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorAccent"
+                android:background="@color/colorPrimary"
                 android:orientation="horizontal"
                 android:paddingLeft="@dimen/mediumPadding"
                 android:paddingRight="@dimen/mediumPadding"
@@ -37,7 +37,7 @@
                     android:textSize="12sp"
                     tools:text="@tools:sample/lorem/random" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_select_play_list"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
@@ -70,7 +70,7 @@
             android:text="@string/label_empty_playlist"
             android:visibility="gone"
             android:layout_gravity="center"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
 
         <ProgressBar
@@ -78,12 +78,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/layout_selection_first_playlist"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
             android:gravity="center"
             android:orientation="vertical"
@@ -97,7 +97,7 @@
                 android:drawableTop="@drawable/ic_first_selection_illustration"
                 android:text="@string/label_first_playlist" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_select_play_list_first"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

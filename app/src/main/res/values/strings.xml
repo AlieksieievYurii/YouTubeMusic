@@ -31,10 +31,11 @@
     <string name="broken_robot">A broken robot</string>
     <string name="label_failed_to_download">Failed to download</string>
     <string name="label_error_message">Error message:</string>
-    <string name="label_try_again">Try again</string>
+    <string name="label_try_again">Retry</string>
     <string name="label_action_pause">Pause</string>
     <string name="label_action_play">Play</string>
     <string name="label_action_next">Next</string>
     <string name="label_action_previous">Previous</string>
     <string name="content_description_more_options">More options for music item</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
 </resources>

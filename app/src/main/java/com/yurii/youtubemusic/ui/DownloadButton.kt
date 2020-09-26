@@ -175,7 +175,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     }
 
     private fun drawFailIcon(canvas: Canvas) {
-        mPaint.color = Color.RED
+        mPaint.color = Color.parseColor("#F44336")
         mPaint.strokeCap = Paint.Cap.ROUND
         mPaint.strokeWidth = mIconStrokeWidth * 0.75f
 
