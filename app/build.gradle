@@ -7,7 +7,6 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 
 
-
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -46,11 +45,12 @@ dependencies {
     def lifecycle_version = "2.2.0"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation "androidx.recyclerview:recyclerview:1.1.0"
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'androidx.core:core-ktx:1.2.0'
+    implementation "androidx.fragment:fragment-ktx:1.2.5"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation 'org.threeten:threetenbp:1.4.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'

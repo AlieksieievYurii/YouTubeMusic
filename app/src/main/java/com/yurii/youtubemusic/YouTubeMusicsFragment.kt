@@ -59,7 +59,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
     override fun getTabParameters(): TabParameters {
         return TabParameters(
             layoutId = R.layout.fragment_you_tube_musics,
-            title = context!!.getString(R.string.label_fragment_title_youtube_musics),
+            title = requireContext().getString(R.string.label_fragment_title_youtube_musics),
             optionMenuId = R.menu.youtube_music_fragment_menu
         )
     }
@@ -78,7 +78,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
     private fun initViewModel() {
         val googleSignInAccount = getGoogleSignInAccount()
-        val viewModelFactory = YouTubeViewModelFactory(activity!!.application, googleSignInAccount)
+        val viewModelFactory = YouTubeViewModelFactory(requireActivity().application, googleSignInAccount)
         viewModel = ViewModelProvider(this, viewModelFactory).get(YouTubeMusicViewModel::class.java)
         viewModel.videoItemChange = this
         viewModel.videosLoader = this
@@ -96,13 +96,13 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
     }
 
     private fun onSignOut() {
-        LocalBroadcastManager.getInstance(context!!).sendBroadcast(MainActivity.createSignOutIntent())
+        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(MainActivity.createSignOutIntent())
         viewModel.signOut()
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initRecyclerView() {
-        videosListAdapter = VideosListAdapter(context!!, viewModel.VideoItemProviderImplementation(), this)
+        videosListAdapter = VideosListAdapter(requireContext(), viewModel.VideoItemProviderImplementation(), this)
         val recyclerView = binding.videos
 
         val layoutManager = LinearLayoutManager(context)
@@ -153,7 +153,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
             }
         }, viewModel.selectedPlaylist.value)
 
-        selectionPlayListDialog.show(activity!!.supportFragmentManager, "SelectionPlayListFragment")
+        selectionPlayListDialog.show(requireActivity().supportFragmentManager, "SelectionPlayListFragment")
     }
 
     private fun removeExitingVideos() {
@@ -185,7 +185,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
     }
 
     private fun slideUpBottomNavigationMenu() {
-        val bottomMenu = activity!!.findViewById<BottomNavigationView>(R.id.bottom_navigation_view)
+        val bottomMenu = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation_view)
         val params = bottomMenu.layoutParams as CoordinatorLayout.LayoutParams
         val menuBehavior = params.behavior as BottomNavigationBehavior
         menuBehavior.slideUp(bottomMenu)
@@ -209,7 +209,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
     override fun onStart() {
         super.onStart()
-        LocalBroadcastManager.getInstance(activity!!).registerReceiver(broadcastReceiver, IntentFilter().also {
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(broadcastReceiver, IntentFilter().also {
             it.addAction(MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION)
             it.addAction(MusicDownloaderService.DOWNLOADING_FINISHED_ACTION)
             it.addAction(MusicDownloaderService.DOWNLOADING_FAILED_ACTION)
@@ -218,7 +218,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
     override fun onStop() {
         super.onStop()
-        LocalBroadcastManager.getInstance(activity!!).unregisterReceiver(broadcastReceiver)
+        LocalBroadcastManager.getInstance(requireActivity()).unregisterReceiver(broadcastReceiver)
     }
 
     private fun alterSelectionPlayListButton(): Unit =
@@ -257,7 +257,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
     }
 
     override fun requestConfirmDeletion(onConfirm: () -> Unit) {
-        ConfirmDeletionDialog.create(onConfirm).show(fragmentManager!!, "RequestToDeleteFile")
+        ConfirmDeletionDialog.create(onConfirm).show(requireFragmentManager(), "RequestToDeleteFile")
     }
 
     override fun requestFailedToDownloadDialog(videoItem: VideoItem) {
@@ -267,7 +267,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
                 videosListAdapter.setDownloadingState(videoItem)
             },
             onCancel = { videosListAdapter.setDownloadState(videoItem) }
-        ).show(fragmentManager!!, "ErrorDialog")
+        ).show(requireFragmentManager(), "ErrorDialog")
     }
 
     companion object {
