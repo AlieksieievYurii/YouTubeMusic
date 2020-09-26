@@ -9,9 +9,11 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.media.session.MediaButtonReceiver
 import com.yurii.youtubemusic.Application
 import com.yurii.youtubemusic.R
+import com.yurii.youtubemusic.utilities.createFromPathOrReturnMock
 import java.lang.IllegalStateException
 
 class NotificationManager(private val context: Context, private val sessionToken: MediaSessionCompat.Token) {
@@ -81,7 +83,7 @@ class NotificationManager(private val context: Context, private val sessionToken
 
         setContentTitle(mediaController.metadata.description.title)
         setContentText(mediaController.metadata.getString(MediaMetadata.METADATA_KEY_AUTHOR))
-        setLargeIcon(BitmapFactory.decodeFile(mediaController.metadata.description.iconUri!!.encodedPath))
+        setLargeIcon(createFromPathOrReturnMock(context, mediaController.metadata.description.iconUri!!.encodedPath!!).toBitmap())
     }
 
 

@@ -5,12 +5,14 @@ import com.google.gson.Gson
 import com.yurii.youtubemusic.models.VideoItem
 import java.io.File
 import java.io.FileNotFoundException
+import org.threeten.bp.Duration
 
 data class MediaMetadata(
     val musicId: String,
     val title: String,
     val description: String,
     val author: String,
+    val duration: Long,
     val thumbnail: File,
     val tags: List<String> = emptyList()
 )
@@ -27,7 +29,8 @@ class MediaMetadataProvider(private val context: Context) {
             musicId = videoItem.videoId,
             author = videoItem.authorChannelTitle,
             description = videoItem.description,
-            thumbnail = DataStorage.getThumbnail(context, videoItem.videoId)
+            thumbnail = DataStorage.getThumbnail(context, videoItem.videoId),
+            duration = Duration.parse(videoItem.duration).toMillis()
         )
 
         val metadataJson = getMusicMetadataFile(videoItem.videoId)

@@ -1,13 +1,15 @@
 package com.yurii.youtubemusic.utilities
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.model.Playlist
 import com.google.gson.Gson
-import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.R
 import org.threeten.bp.Duration
 import java.io.File
 import java.math.BigInteger
@@ -79,6 +81,10 @@ object DataStorage {
 
 fun parseDurationToHumanView(text: String): String {
     val millis = Duration.parse(text).toMillis()
+   return parseDurationToHumanView(millis)
+}
+
+fun parseDurationToHumanView(millis: Long): String {
     val hours = TimeUnit.MILLISECONDS.toHours(millis)
     val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1)
     val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1)
@@ -87,6 +93,7 @@ fun parseDurationToHumanView(text: String): String {
 
     return if (hours > 0) "$hours:$minutes:$secondsString" else "$minutes:$secondsString"
 }
+
 
 fun bigIntegerToShortCutSuffix(value: BigInteger): String {
     return longToShortCutSuffix(value.toLong())
@@ -116,6 +123,10 @@ fun longToShortCutSuffix(value: Long): String {
 fun calculateLikeBarValue(likeCount: BigInteger, disLikeCount: BigInteger): Int {
     val sum = likeCount.plus(disLikeCount)
     return if (sum.compareTo(BigInteger.ZERO) == 0) 50 else likeCount.multiply(BigInteger("100")).divide(sum).toInt()
+}
+
+fun createFromPathOrReturnMock(context: Context, path: String): Drawable  {
+    return Drawable.createFromPath(path) ?: context.getDrawable(R.drawable.ic_thumbnail_mock)!!
 }
 
 
