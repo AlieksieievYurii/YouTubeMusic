@@ -2,12 +2,12 @@ package com.yurii.youtubemusic.mediaservice
 
 import android.content.Context
 import android.os.AsyncTask
+import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_CATEGORY
-import com.yurii.youtubemusic.mediaservice.MusicsProvider.Companion.METADATA_TRACK_SOURCE
 import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 import com.yurii.youtubemusic.utilities.Preferences
@@ -38,9 +38,26 @@ class MusicsProvider(private val context: Context) {
     }
 
     private fun convertMusicMetaDataToMediaItem(metaDataFiles: List<MediaMetadataCompat>): MutableList<MediaBrowserCompat.MediaItem> {
-        return metaDataFiles.map { MediaBrowserCompat.MediaItem(it.description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE) }.toMutableList()
+        return metaDataFiles.map {
+            MediaBrowserCompat.MediaItem(getDescription(it), MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
+        }.toMutableList()
     }
 
+    private fun getDescription(mediaItem: MediaMetadataCompat): MediaDescriptionCompat {
+        val extras = Bundle().apply {
+            putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, mediaItem.getString(MediaMetadataCompat.METADATA_KEY_AUTHOR))
+            putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaItem.getLong(MediaMetadataCompat.METADATA_KEY_DURATION))
+        }
+        return MediaDescriptionCompat.Builder().apply {
+            setDescription(mediaItem.description.description)
+            setTitle(mediaItem.description.title)
+            setSubtitle(mediaItem.description.subtitle)
+            setMediaId(mediaItem.description.mediaId)
+            setIconUri(mediaItem.description.iconUri)
+            setMediaUri(mediaItem.description.mediaUri)
+            setExtras(extras)
+        }.build()
+    }
 
     fun retrieveMusics(callback: CallBack) {
         if (isMusicsInitialized)
@@ -87,7 +104,6 @@ class MusicsProvider(private val context: Context) {
     }
 
     companion object {
-        const val METADATA_TRACK_SOURCE = "__SOURCE__"
         const val METADATA_TRACK_CATEGORY = "__CATEGORY__"
     }
 }
@@ -120,7 +136,7 @@ private class MusicsLoader(private val context: Context) : AsyncTask<Void, Void,
     private fun retrieveMusics(): List<File> = DataStorage.getAllMusicFiles(context)
 
     private fun retrieveMusicMetaData(musicId: String, musicFile: File): MediaMetadataCompat {
-        val musicMetadata =  mediaMetadataCompat.readMetadata(musicId)
+        val musicMetadata = mediaMetadataCompat.readMetadata(musicId)
         return MediaMetadataCompat.Builder().apply {
             putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, musicMetadata.musicId)
             putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, musicMetadata.title)
@@ -128,8 +144,9 @@ private class MusicsLoader(private val context: Context) : AsyncTask<Void, Void,
             putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicMetadata.author)
             putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, musicMetadata.description)
             putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicMetadata.thumbnail.toURI().toString())
-            putString(METADATA_TRACK_SOURCE, musicFile.toURI().toString())
-            putString(METADATA_TRACK_CATEGORY, "bass") //TODO (alieksiy) It's necessary to add category
+            putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, musicFile.toURI().toString())
+            putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicMetadata.duration)
+            putString(METADATA_TRACK_CATEGORY, "bass")
         }.build()
 
     }
