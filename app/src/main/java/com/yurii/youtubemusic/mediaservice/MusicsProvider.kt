@@ -96,7 +96,7 @@ class MusicsProvider(private val context: Context) {
     private fun retrieveMusicCategories(): List<String> {
         val categories = mutableListOf("all") //Always there will be minimum one category 'All'
         return try {
-            categories.addAll(Preferences.getMusicCategories(context))
+            categories.addAll(Preferences.getMusicCategories(context).map { it.name }) //TODO Temporary workaround
             categories
         } catch (error: Preferences.ValuesNotFound) {
             categories

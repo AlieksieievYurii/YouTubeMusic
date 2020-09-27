@@ -1,7 +1,6 @@
 package com.yurii.youtubemusic.utilities
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.View
@@ -10,6 +9,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.model.Playlist
 import com.google.gson.Gson
 import com.yurii.youtubemusic.R
+import com.yurii.youtubemusic.models.Category
 import org.threeten.bp.Duration
 import java.io.File
 import java.math.BigInteger
@@ -24,13 +24,13 @@ object Preferences {
     class ValuesNotFound(key: String) : Exception("Value is not found for $key")
 
     @Throws(ValuesNotFound::class)
-    fun getMusicCategories(context: Context): Array<String> {
+    fun getMusicCategories(context: Context): Array<Category> {
         val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         val categoriesJson: String = sharedPreferences.getString(SH_KEY_MUSICS_CATEGORIES, null) ?: throw ValuesNotFound(SH_KEY_MUSICS_CATEGORIES)
-        return Gson().fromJson(categoriesJson, Array<String>::class.java)
+        return Gson().fromJson(categoriesJson, Array<Category>::class.java)
     }
 
-    fun setCategories(context: Context, categories: List<String>) {
+    fun setCategories(context: Context, categories: List<Category>) {
         val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         with(sharedPreferences.edit()) {
             putString(SH_KEY_MUSICS_CATEGORIES, Gson().toJson(categories))

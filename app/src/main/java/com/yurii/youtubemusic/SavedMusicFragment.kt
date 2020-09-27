@@ -1,16 +1,17 @@
 package com.yurii.youtubemusic
 
-import android.widget.Toast
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.tabs.TabLayoutMediator
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
 import com.yurii.youtubemusic.utilities.TabParameters
-import com.yurii.youtubemusic.videoslist.MediaListAdapter
+import com.yurii.youtubemusic.videoslist.CategoriesTabAdapter
 import com.yurii.youtubemusic.viewmodels.savedmusic.SavedMusicViewModel
 
 
@@ -22,8 +23,7 @@ class SavedMusicFragment : TabFragment() {
         Injector.provideSavedMusicViewModel(requireContext())
     }
 
-
-    private lateinit var mediaItemsAdapter: MediaListAdapter
+    private lateinit var viewPagerAdapter: CategoriesTabAdapter
 
     override fun getTabParameters(): TabParameters {
         return TabParameters(
@@ -37,22 +37,20 @@ class SavedMusicFragment : TabFragment() {
 
     override fun onInflatedView(viewDataBinding: ViewDataBinding) {
         binding = viewDataBinding as FragmentSavedMusicBinding
-        mediaItemsAdapter = MediaListAdapter(requireContext())
-        binding.musics.apply {
-            setHasFixedSize(false)
-            layoutManager = LinearLayoutManager(context)
-            adapter = mediaItemsAdapter
-        }
 
-        savedMusicViewModel.mediaItems.observe(viewLifecycleOwner, Observer {mediaItems ->
-            mediaItemsAdapter.setMediaItems(mediaItems)
-        })
-
-        savedMusicViewModel.categoryItems.observe(viewLifecycleOwner, Observer {categoryItems ->
-            Toast.makeText(requireContext(), categoryItems.toString(), Toast.LENGTH_LONG).show()
+        savedMusicViewModel.categoryItems.observe(viewLifecycleOwner, Observer { categoryItems ->
+            initCategoriesLayout(categoryItems)
         })
     }
 
+    private fun initCategoriesLayout(categories: List<Category>) {
+        viewPagerAdapter = CategoriesTabAdapter(this, categories)
+        binding.viewpager.adapter = viewPagerAdapter
+        TabLayoutMediator(binding.categories, binding.viewpager) { tab, position ->
+            tab.text = categories[position].name
+        }.attach()
+        binding.categories.visibility = View.VISIBLE
+    }
 
     companion object {
         fun createInstance(): SavedMusicFragment = SavedMusicFragment()

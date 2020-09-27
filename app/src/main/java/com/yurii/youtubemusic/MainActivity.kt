@@ -12,10 +12,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
-import com.yurii.youtubemusic.utilities.DoesNotHaveRequiredScopes
-import com.yurii.youtubemusic.utilities.FragmentHelper
-import com.yurii.youtubemusic.utilities.GoogleAccount
-import com.yurii.youtubemusic.utilities.IsNotSignedIn
+import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.utilities.*
 import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
@@ -27,6 +25,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Preferences.setCategories(this, listOf("english", "test", "favorite", "podCasts", "Android", "gorilla").map {
+            Category(it)
+        })
         initActivity()
         showDefaultFragment()
     }
