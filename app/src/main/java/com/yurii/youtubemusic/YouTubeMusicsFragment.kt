@@ -62,7 +62,9 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
             optionMenuId = R.menu.youtube_music_fragment_menu,
             onClickOption = {
                 when (it) {
-                    R.id.item_log_out -> { onSignOut()}
+                    R.id.item_log_out -> {
+                        onSignOut()
+                    }
                 }
             }
         )
@@ -249,7 +251,11 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
     }
 
     override fun requestConfirmDeletion(onConfirm: () -> Unit) {
-        ConfirmDeletionDialog.create(onConfirm).show(requireFragmentManager(), "RequestToDeleteFile")
+        ConfirmDeletionDialog.create(
+            titleId = R.string.dialog_confirm_deletion_music_title,
+            messageId = R.string.dialog_confirm_deletion_music_message,
+            onConfirm = onConfirm
+        ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")
     }
 
     override fun requestFailedToDownloadDialog(videoItem: VideoItem) {
@@ -259,7 +265,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
                 videosListAdapter.setDownloadingState(videoItem)
             },
             onCancel = { videosListAdapter.setDownloadState(videoItem) }
-        ).show(requireFragmentManager(), "ErrorDialog")
+        ).show(requireActivity().supportFragmentManager, "ErrorDialog")
     }
 
     companion object {
