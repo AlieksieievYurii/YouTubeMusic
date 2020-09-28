@@ -10,7 +10,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.yurii.youtubemusic.R
 
-data class TabParameters(val layoutId: Int, val title: String, val optionMenuId: Int? = null)
+data class TabParameters(val layoutId: Int, val title: String, val optionMenuId: Int? = null, val onClickOption: ((id: Int) -> Unit)? = null)
 
 abstract class TabFragment : Fragment() {
     protected lateinit var toolbar: Toolbar
@@ -40,6 +40,10 @@ abstract class TabFragment : Fragment() {
 
     private fun inflateOptionsMenuIfRequired(menu: Menu, inflater: MenuInflater) {
         tabParameters.optionMenuId?.run { inflater.inflate(this, menu) }
+        toolbar.setOnMenuItemClickListener {
+            tabParameters.onClickOption?.run { this(it.itemId) }
+            true
+        }
     }
 
     private fun setTitle() {

@@ -53,27 +53,19 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
         initViewModel()
         initRecyclerView()
         setSelectPlayListListener()
-        initToolBarMenu()
     }
 
     override fun getTabParameters(): TabParameters {
         return TabParameters(
             layoutId = R.layout.fragment_you_tube_musics,
             title = requireContext().getString(R.string.label_fragment_title_youtube_musics),
-            optionMenuId = R.menu.youtube_music_fragment_menu
-        )
-    }
-
-    private fun initToolBarMenu() {
-        toolbar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.item_log_out -> {
-                    onSignOut()
-                    true
+            optionMenuId = R.menu.youtube_music_fragment_menu,
+            onClickOption = {
+                when (it) {
+                    R.id.item_log_out -> { onSignOut()}
                 }
-                else -> false
             }
-        }
+        )
     }
 
     private fun initViewModel() {
