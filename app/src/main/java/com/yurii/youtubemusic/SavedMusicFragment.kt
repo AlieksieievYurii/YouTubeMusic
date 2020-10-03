@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic
 
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.databinding.ViewDataBinding
@@ -29,7 +30,15 @@ class SavedMusicFragment : TabFragment() {
         return TabParameters(
             layoutId = R.layout.fragment_saved_music,
             title = requireContext().getString(R.string.label_fragment_title_saved_music),
-            optionMenuId = R.menu.navigation_menu
+            optionMenuId = R.menu.saved_musics_fragment_menu,
+            onClickOption = {
+                when (it) {
+                    R.id.item_add_edit_categories -> {
+                        Log.i("TEST", "has been clicked")
+                        openCategoriesEditor()
+                    }
+                }
+            }
         )
     }
 
@@ -41,6 +50,11 @@ class SavedMusicFragment : TabFragment() {
         savedMusicViewModel.categoryItems.observe(viewLifecycleOwner, Observer { categoryItems ->
             initCategoriesLayout(categoryItems)
         })
+    }
+
+    private fun openCategoriesEditor() {
+        val activity = CategoriesEditorActivity.create(requireContext())
+        startActivity(activity)
     }
 
     private fun initCategoriesLayout(categories: List<Category>) {

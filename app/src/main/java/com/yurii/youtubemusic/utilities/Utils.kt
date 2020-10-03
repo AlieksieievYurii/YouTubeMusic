@@ -26,7 +26,7 @@ object Preferences {
     @Throws(ValuesNotFound::class)
     fun getMusicCategories(context: Context): Array<Category> {
         val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-        val categoriesJson: String = sharedPreferences.getString(SH_KEY_MUSICS_CATEGORIES, null) ?: throw ValuesNotFound(SH_KEY_MUSICS_CATEGORIES)
+        val categoriesJson: String = sharedPreferences.getString(SH_KEY_MUSICS_CATEGORIES, null) ?: return emptyArray()
         return Gson().fromJson(categoriesJson, Array<Category>::class.java)
     }
 
@@ -81,7 +81,7 @@ object DataStorage {
 
 fun parseDurationToHumanView(text: String): String {
     val millis = Duration.parse(text).toMillis()
-   return parseDurationToHumanView(millis)
+    return parseDurationToHumanView(millis)
 }
 
 fun parseDurationToHumanView(millis: Long): String {
@@ -125,7 +125,7 @@ fun calculateLikeBarValue(likeCount: BigInteger, disLikeCount: BigInteger): Int 
     return if (sum.compareTo(BigInteger.ZERO) == 0) 50 else likeCount.multiply(BigInteger("100")).divide(sum).toInt()
 }
 
-fun createFromPathOrReturnMock(context: Context, path: String): Drawable  {
+fun createFromPathOrReturnMock(context: Context, path: String): Drawable {
     return Drawable.createFromPath(path) ?: context.getDrawable(R.drawable.ic_thumbnail_mock)!!
 }
 

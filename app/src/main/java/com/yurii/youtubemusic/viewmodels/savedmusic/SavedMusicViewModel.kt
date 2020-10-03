@@ -19,7 +19,7 @@ class SavedMusicViewModel(application: Application, musicServiceConnection: Musi
     private val categoryItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
             super.onChildrenLoaded(parentId, children)
-            _categoryItems.postValue(children.map { Category(it.mediaId!!) })
+            _categoryItems.postValue(children.map { Category(0, it.mediaId!!) })
         }
 
         override fun onError(parentId: String, options: Bundle) {

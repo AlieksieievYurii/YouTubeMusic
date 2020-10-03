@@ -1,14 +1,20 @@
 package com.yurii.youtubemusic.utilities
 
+import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import com.yurii.youtubemusic.mediaservice.MediaService
 import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.viewmodels.categorieseditor.CategoriesEditorViewModelFactory
 import com.yurii.youtubemusic.viewmodels.mediaitems.MediaItemsViewModel
 import com.yurii.youtubemusic.viewmodels.savedmusic.SavedMusicViewModelFactory
 
 object Injector {
+
+    fun provideCategoriesViewModel(application: Application): CategoriesEditorViewModelFactory {
+        return CategoriesEditorViewModelFactory(application)
+    }
 
     fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel {
         val musicServiceConnection = provideMusicServiceConnection(context)

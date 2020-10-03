@@ -18,6 +18,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".CategoriesEditorActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -32,7 +35,6 @@
         <service
             android:name=".services.downloader.MusicDownloaderService"
             android:exported="false" />
-
         <service
             android:name=".mediaservice.MediaService"
             android:exported="false">
