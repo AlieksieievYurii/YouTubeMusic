@@ -4,6 +4,9 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -64,6 +67,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     var progress: Int = 0
 
     private var onClickListener: OnClickListener? = null
+    private var onLongClickDownloadListener: ((view: View) -> Unit)? = null
 
     private var mViewHolder = Rect(0, 0, mSize, mSize)
 
@@ -78,6 +82,14 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         override fun onSingleTapUp(e: MotionEvent?): Boolean {
             invokeClickListenerCallBack()
             return true
+        }
+
+        override fun onLongPress(e: MotionEvent?) {
+            super.onLongPress(e)
+            if (state == STATE_DOWNLOAD)
+                onLongClickDownloadListener?.invoke(this@DownloadButton).also {
+                    vibrationEffect()
+                }
         }
     })
 
@@ -105,6 +117,18 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         this.onClickListener = onClickListener
     }
 
+    fun setOnLongClickDownloadLister(onLongClickDownloadListener: (view: View) -> Unit) {
+        this.onLongClickDownloadListener = onLongClickDownloadListener
+    }
+
+    private fun vibrationEffect() {
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= 26)
+            vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+        else
+            vibrator.vibrate(50)
+
+    }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
