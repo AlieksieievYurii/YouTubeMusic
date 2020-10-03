@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.api.services.youtube.model.PlaylistListResponse
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.playlists.PlayListsDialogInterface
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
@@ -29,6 +30,7 @@ import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.ui.BottomNavigationBehavior
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog
+import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.videoslist.DialogRequests
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
@@ -266,6 +268,12 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
             },
             onCancel = { videosListAdapter.setDownloadState(videoItem) }
         ).show(requireActivity().supportFragmentManager, "ErrorDialog")
+    }
+
+    override fun requestDownloadAndAddCategories(videoItem: VideoItem, onApplyCategories: (categories: List<Category>) -> Unit) {
+        SelectCategoriesDialog.create {
+            onApplyCategories.invoke(it)
+        }.show(requireActivity().supportFragmentManager, "SelectCategoriesDialog")
     }
 
     companion object {

@@ -6,6 +6,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.github.kiulian.downloader.YoutubeDownloader
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 import java.io.*
@@ -38,9 +39,14 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val videoItem = getVideoItemFromIntent(intent)
-        startDownloading(videoItem, startId)
+        val categories = getCategoriesFromIntent(intent)
+        startDownloading(videoItem, startId, categories)
 
         return START_REDELIVER_INTENT
+    }
+
+    private fun getCategoriesFromIntent(intent: Intent): Array<Category> {
+        return intent.extras?.getParcelableArrayList<Category>(EXTRA_CATEGORIES)!!.toTypedArray()
     }
 
     private fun getVideoItemFromIntent(intent: Intent): VideoItem {
@@ -48,9 +54,9 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
             ?: throw IOException("You must pass VideoItem object by key $EXTRA_VIDEO_ITEM to perform downloading")
     }
 
-    private fun startDownloading(videoItem: VideoItem, startId: Int) {
+    private fun startDownloading(videoItem: VideoItem, startId: Int, categories: Array<Category>) {
         Log.i(TAG, "Start downloading: ${videoItem.videoId}. StartId: $startId")
-        val task = VideoItemTask(videoItem, baseContext, startId, this, youtubeDownloader)
+        val task = VideoItemTask(videoItem, categories, baseContext, startId, this, youtubeDownloader, mediaMetadataProvider)
         ThreadPool.execute(task)
     }
 
@@ -64,7 +70,6 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
 
     override fun onFinished(videoItem: VideoItem, outFile: File, startId: Int) {
         stopSelf(startId)
-        addMetadata(videoItem)
 
         localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_FINISHED_ACTION).also {
             it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
@@ -79,7 +84,6 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
         })
     }
 
-    private fun addMetadata(videoItem: VideoItem) = mediaMetadataProvider.setMetadata(videoItem)
 
     override fun cancel(videoItem: VideoItem) {
         ThreadPool.cancel(videoItem)
@@ -102,6 +106,7 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
 
     companion object {
         const val EXTRA_VIDEO_ITEM: String = "com.yurii.youtubemusic.download.item"
+        const val EXTRA_CATEGORIES: String = "com.yurii.youtubemusic.download.item.categories"
         const val DOWNLOADING_PROGRESS_ACTION: String = "com.yurii.youtubemusic.downloading.currentProgress.action"
         const val DOWNLOADING_FINISHED_ACTION: String = "com.yurii.youtubemusic.downloading.finished.action"
         const val DOWNLOADING_FAILED_ACTION: String = "com.yurii.youtubemusic.downloading.failed.action"

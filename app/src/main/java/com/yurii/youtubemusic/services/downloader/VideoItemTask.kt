@@ -8,18 +8,22 @@ import com.github.kiulian.downloader.YoutubeDownloader
 import com.github.kiulian.downloader.YoutubeException
 import com.github.kiulian.downloader.model.YoutubeVideo
 import com.github.kiulian.downloader.model.formats.AudioFormat
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.utilities.DataStorage
+import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 import java.io.*
 import java.lang.Exception
 import java.net.URL
 
 class VideoItemTask(
     val videoItem: VideoItem,
+    private val categories: Array<Category>,
     private val context: Context,
     private val serviceStartId: Int,
     private val downloadingUpdater: DownloadingUpdater,
-    private val youTubeDownloader: YoutubeDownloader
+    private val youTubeDownloader: YoutubeDownloader,
+    private val mediaMetadataProvider: MediaMetadataProvider
 ) : Runnable {
     var progress: Progress = Progress.create()
     private var isInterrupted = false
@@ -28,6 +32,7 @@ class VideoItemTask(
         try {
             downloadMusic()
             downloadThumbnail()
+            addMetadata()
         } catch (error: Exception) {
             ThreadPool.completeTask(this)
             downloadingUpdater.onError(videoItem, error, serviceStartId)
@@ -50,6 +55,8 @@ class VideoItemTask(
         val bitmap = downloadBitmap(videoItem.normalThumbnail)
         saveBitmapToFile(bitmap)
     }
+
+    private fun addMetadata() = mediaMetadataProvider.setMetadata(videoItem, categories.toList())
 
     private fun saveBitmapToFile(bitmap: Bitmap) {
         val file = DataStorage.getThumbnail(context, videoItem.videoId).also {

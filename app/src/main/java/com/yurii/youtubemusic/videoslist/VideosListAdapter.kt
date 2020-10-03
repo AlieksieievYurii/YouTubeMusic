@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemLoadingBinding
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.ui.DownloadButton
@@ -27,6 +28,7 @@ enum class ItemState {
 
 interface VideoItemProvider {
     fun download(videoItem: VideoItem)
+    fun downloadAndAddCategories(videoItem: VideoItem, categories: List<Category>)
     fun cancelDownload(videoItem: VideoItem)
     fun remove(videoItem: VideoItem)
     fun exists(videoItem: VideoItem): Boolean
@@ -37,6 +39,7 @@ interface VideoItemProvider {
 interface DialogRequests {
     fun requestConfirmDeletion(onConfirm: () -> Unit)
     fun requestFailedToDownloadDialog(videoItem: VideoItem)
+    fun requestDownloadAndAddCategories(videoItem: VideoItem, onApplyCategories: (categories: List<Category>) -> Unit)
 }
 
 
@@ -198,6 +201,12 @@ class VideosListAdapter(
     }
 
     private fun setButtonClickListener(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
+        videoViewHolder.downloadButton.setOnLongClickDownloadLister {
+            dialogRequests.requestDownloadAndAddCategories(videoItem) {
+                videoViewHolder.setState(ItemState.DOWNLOADING)
+                videoItemProvider.downloadAndAddCategories(videoItem, it)
+            }
+        }
         videoViewHolder.downloadButton.setOnClickStateListener(object : DownloadButton.OnClickListener {
             override fun onClick(view: View, currentState: Int) {
                 when (currentState) {
@@ -215,7 +224,6 @@ class VideosListAdapter(
             }
         })
     }
-
 
     private fun onDownloadVideoItem(videoViewHolder: VideoViewHolder, videoItem: VideoItem) {
         videoItemProvider.download(videoItem)

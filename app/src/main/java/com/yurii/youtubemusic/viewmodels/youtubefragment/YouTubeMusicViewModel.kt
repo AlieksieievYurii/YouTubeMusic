@@ -12,6 +12,7 @@ import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
@@ -24,6 +25,7 @@ import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.videoslist.VideoItemProvider
 import java.lang.Exception
 import java.lang.RuntimeException
+import java.util.ArrayList
 
 interface VideosLoader {
     fun onResult(newVideos: List<VideoItem>)
@@ -130,9 +132,10 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
 
     fun getCurrentProgress(videoItem: VideoItem) = MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem)
 
-    fun startDownloadMusic(videoItem: VideoItem) {
+    fun startDownloadMusic(videoItem: VideoItem, categories: Array<Category> = emptyArray()) {
         context.startService(Intent(context, MusicDownloaderService::class.java).also {
             it.putExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM, videoItem)
+            it.putParcelableArrayListExtra(MusicDownloaderService.EXTRA_CATEGORIES, ArrayList(categories.toMutableList()))
         })
     }
 
@@ -185,6 +188,10 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
 
     inner class VideoItemProviderImplementation : VideoItemProvider {
         override fun download(videoItem: VideoItem) = this@YouTubeMusicViewModel.startDownloadMusic(videoItem)
+
+        override fun downloadAndAddCategories(videoItem: VideoItem, categories: List<Category>) {
+            this@YouTubeMusicViewModel.startDownloadMusic(videoItem, categories.toTypedArray())
+        }
 
         override fun cancelDownload(videoItem: VideoItem) = this@YouTubeMusicViewModel.stopDownloading(videoItem)
 

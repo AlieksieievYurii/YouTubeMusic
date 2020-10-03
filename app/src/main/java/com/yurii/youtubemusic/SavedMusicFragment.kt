@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic
 
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.databinding.ViewDataBinding
@@ -34,7 +33,6 @@ class SavedMusicFragment : TabFragment() {
             onClickOption = {
                 when (it) {
                     R.id.item_add_edit_categories -> {
-                        Log.i("TEST", "has been clicked")
                         openCategoriesEditor()
                     }
                 }

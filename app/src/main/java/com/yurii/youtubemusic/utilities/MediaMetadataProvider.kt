@@ -2,6 +2,7 @@ package com.yurii.youtubemusic.utilities
 
 import android.content.Context
 import com.google.gson.Gson
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.VideoItem
 import java.io.File
 import java.io.FileNotFoundException
@@ -14,7 +15,7 @@ data class MediaMetadata(
     val author: String,
     val duration: Long,
     val thumbnail: File,
-    val tags: List<String> = emptyList()
+    val categories: List<Category> = emptyList()
 )
 
 class MediaMetadataProvider(private val context: Context) {
@@ -23,14 +24,15 @@ class MediaMetadataProvider(private val context: Context) {
         return Gson().fromJson<MediaMetadata>(musicDescriptionFile.reader(), MediaMetadata::class.java)
     }
 
-    fun setMetadata(videoItem: VideoItem) {
+    fun setMetadata(videoItem: VideoItem, categories: List<Category>) {
         val metadata = MediaMetadata(
             title = videoItem.title,
             musicId = videoItem.videoId,
             author = videoItem.authorChannelTitle,
             description = videoItem.description,
             thumbnail = DataStorage.getThumbnail(context, videoItem.videoId),
-            duration = Duration.parse(videoItem.duration).toMillis()
+            duration = Duration.parse(videoItem.duration).toMillis(),
+            categories = categories
         )
 
         val metadataJson = getMusicMetadataFile(videoItem.videoId)
