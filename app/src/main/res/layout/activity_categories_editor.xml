@@ -13,9 +13,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
-            tools:visibility="visible"
-            tools:layout_editor_absoluteX="59dp"
-            tools:layout_editor_absoluteY="121dp">
+            tools:visibility="visible">
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/categories"
@@ -23,9 +21,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
-                android:animateLayoutChanges="true"
-                tools:layout_editor_absoluteX="99dp"
-                tools:layout_editor_absoluteY="0dp">
+                android:animateLayoutChanges="true">
 
             </com.google.android.material.chip.ChipGroup>
         </ScrollView>
