@@ -4,11 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
+import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.videoslist.MediaListAdapter
@@ -17,15 +16,13 @@ import com.yurii.youtubemusic.viewmodels.mediaitems.MediaItemsViewModel
 class MediaItemsFragment : Fragment() {
     private lateinit var viewModel: MediaItemsViewModel
     private lateinit var mediaItemsAdapter: MediaListAdapter
-
-    private lateinit var binding: FragmentMediaItemsBinding
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_media_items, container, false)
+        val root = inflater.inflate(R.layout.fragment_media_items, container, false)
+        val mediaItemsRecyclerView: RecyclerView = root.findViewById(R.id.media_items)
         val category: Category = requireArguments().getParcelable(EXTRA_CATEGORY)!!
-        binding.test.text = category.name
-        initRecyclerView()
+        initRecyclerView(mediaItemsRecyclerView)
         initViewModel(category)
-        return binding.root
+        return root
     }
 
     private fun initViewModel(category: Category) {
@@ -35,9 +32,9 @@ class MediaItemsFragment : Fragment() {
         })
     }
 
-    private fun initRecyclerView() {
+    private fun initRecyclerView(recyclerView: RecyclerView) {
         mediaItemsAdapter = MediaListAdapter(requireContext())
-        binding.mediaItems.apply {
+        recyclerView.apply {
             this.setHasFixedSize(true)
             this.layoutManager = LinearLayoutManager(requireContext())
             this.adapter = mediaItemsAdapter
