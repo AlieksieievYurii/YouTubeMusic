@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
@@ -110,9 +111,10 @@ class CategoriesEditorActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun finish() {
         viewModel.saveChanges()
+        setResult(if (viewModel.areChanges) CATEGORIES_ARE_CHANGE_RESULT_CODE else -1)
+        super.finish()
     }
 
     private fun removeCategory(view: View) {
@@ -127,6 +129,8 @@ class CategoriesEditorActivity : AppCompatActivity() {
     }
 
     companion object {
+        const val REQUEST_CODE = 1000
+        const val CATEGORIES_ARE_CHANGE_RESULT_CODE = 1
         fun create(context: Context): Intent {
             return Intent(context, CategoriesEditorActivity::class.java)
         }

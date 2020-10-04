@@ -1,5 +1,7 @@
 package com.yurii.youtubemusic
 
+import android.content.Intent
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.databinding.ViewDataBinding
@@ -52,7 +54,7 @@ class SavedMusicFragment : TabFragment() {
 
     private fun openCategoriesEditor() {
         val activity = CategoriesEditorActivity.create(requireContext())
-        startActivity(activity)
+        startActivityForResult(activity, CategoriesEditorActivity.REQUEST_CODE)
     }
 
     private fun initCategoriesLayout(categories: List<Category>) {
@@ -62,6 +64,14 @@ class SavedMusicFragment : TabFragment() {
             tab.text = categories[position].name
         }.attach()
         binding.categories.visibility = View.VISIBLE
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == CategoriesEditorActivity.REQUEST_CODE && resultCode == CategoriesEditorActivity.CATEGORIES_ARE_CHANGE_RESULT_CODE) {
+            Log.i("TEST", "YES")
+        }
     }
 
     companion object {

@@ -18,6 +18,8 @@ class CategoriesEditorViewModel(application: Application) : AndroidViewModel(app
         it.postValue(categoriesList)
     }
 
+    var areChanges = false
+
     fun getCategoryByName(name: String): Category =
         categoriesList.find { it.name == name } ?: throw IllegalStateException("Cannot find category with name $name")
 
@@ -30,6 +32,7 @@ class CategoriesEditorViewModel(application: Application) : AndroidViewModel(app
     }
 
     fun updateCategory(category: Category) {
+        areChanges = true
         categoriesList.forEachIndexed { index, it ->
             if (category.id == it.id) {
                 categoriesList[index] = category
@@ -39,6 +42,7 @@ class CategoriesEditorViewModel(application: Application) : AndroidViewModel(app
     }
 
     fun createNewCategory(categoryName: String): Category {
+        areChanges = true
         val category = Category(getUniqueCategoryId(), categoryName)
         categoriesList.add(category)
         return category
@@ -54,11 +58,15 @@ class CategoriesEditorViewModel(application: Application) : AndroidViewModel(app
     }
 
     fun removeCategory(category: Category) {
+        areChanges = true
         categoriesList.remove(category)
 
         if (categoriesList.isEmpty())
             _categories.postValue(categoriesList)
     }
 
-    fun saveChanges() = Preferences.setCategories(getApplication(), categoriesList)
+    fun saveChanges() {
+        if (areChanges)
+            Preferences.setCategories(getApplication(), categoriesList)
+    }
 }
