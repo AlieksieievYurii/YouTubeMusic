@@ -3,35 +3,27 @@ package com.yurii.youtubemusic.utilities
 import android.content.Context
 import com.google.gson.Gson
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.models.VideoItem
 import java.io.File
 import java.io.FileNotFoundException
 import org.threeten.bp.Duration
 
-data class MediaMetadata(
-    val musicId: String,
-    val title: String,
-    val description: String,
-    val author: String,
-    val duration: Long,
-    val thumbnail: File,
-    val categories: List<Category> = emptyList()
-)
-
 class MediaMetadataProvider(private val context: Context) {
-    fun readMetadata(musicId: String): MediaMetadata {
+    fun readMetadata(musicId: String): MediaMetaData {
         val musicDescriptionFile = getMusicMetadataFile(musicId, raiseIfDoestNotExist = true)
-        return Gson().fromJson<MediaMetadata>(musicDescriptionFile.reader(), MediaMetadata::class.java)
+        return Gson().fromJson(musicDescriptionFile.reader(), MediaMetaData::class.java)
     }
 
     fun setMetadata(videoItem: VideoItem, categories: List<Category>) {
-        val metadata = MediaMetadata(
+        val metadata = MediaMetaData(
             title = videoItem.title,
-            musicId = videoItem.videoId,
+            mediaId = videoItem.videoId,
             author = videoItem.authorChannelTitle,
             description = videoItem.description,
             thumbnail = DataStorage.getThumbnail(context, videoItem.videoId),
             duration = Duration.parse(videoItem.duration).toMillis(),
+            mediaFile = DataStorage.getMusic(context, videoItem.videoId),
             categories = categories
         )
 
@@ -41,6 +33,7 @@ class MediaMetadataProvider(private val context: Context) {
     }
 
 
+    @Throws(FileNotFoundException::class)
     private fun getMusicMetadataFile(musicId: String, raiseIfDoestNotExist: Boolean = false): File {
         val file = DataStorage.getMetadata(context, musicId).apply {
             if (!parentFile!!.exists())

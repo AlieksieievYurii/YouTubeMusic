@@ -11,7 +11,7 @@
 
         <variable
             name="musicItem"
-            type="com.yurii.youtubemusic.models.MediaItem" />
+            type="com.yurii.youtubemusic.models.MediaMetaData" />
     </data>
 
 
@@ -35,7 +35,7 @@
                 android:layout_width="100dp"
                 android:layout_height="70dp"
                 android:layout_margin="@dimen/mediumMargin"
-                app:imageSrc="@{musicItem.thumbnailPath}"
+                app:imageSrc="@{musicItem.thumbnail.absolutePath}"
                 tools:src="@tools:sample/backgrounds/scenic" />
 
             <TextView

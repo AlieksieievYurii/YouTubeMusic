@@ -7,14 +7,14 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemMusicBinding
-import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.BaseViewHolder
 
 class MediaListAdapter(context: Context) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
-    private val musics = mutableListOf<MediaItem>()
+    private val musics = mutableListOf<MediaMetaData>()
 
-    fun setMediaItems(list: List<MediaItem>) {
+    fun setMediaItems(list: List<MediaMetaData>) {
         musics.clear()
         musics.addAll(list)
         notifyDataSetChanged()
@@ -31,7 +31,7 @@ class MediaListAdapter(context: Context) : RecyclerView.Adapter<MediaListAdapter
     }
 
     class MusicViewHolder(private val itemMusicBinding: ItemMusicBinding) : BaseViewHolder(itemMusicBinding.root) {
-        fun setMusicItem(mediaItem: MediaItem) {
+        fun setMusicItem(mediaItem: MediaMetaData) {
             itemMusicBinding.apply {
                 this.musicItem = mediaItem
             }.executePendingBindings()

@@ -15,19 +15,17 @@ import java.io.File
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 const val DEFAULT_SHARED_PREFERENCES_FILE: String = "com.yurii.youtubemusic.shared.preferences"
 const val SHARED_PREFERENCES_SELECTED_PLAY_LIST: String = "com.yurii.youtubemusic.shared.preferences.selected.play.list"
 const val SH_KEY_MUSICS_CATEGORIES: String = "com.yurii.youtubemusic.shared.preferences.music.categories"
 
 object Preferences {
-    class ValuesNotFound(key: String) : Exception("Value is not found for $key")
-
-    @Throws(ValuesNotFound::class)
-    fun getMusicCategories(context: Context): Array<Category> {
+    fun getMusicCategories(context: Context): List<Category> {
         val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-        val categoriesJson: String = sharedPreferences.getString(SH_KEY_MUSICS_CATEGORIES, null) ?: return emptyArray()
-        return Gson().fromJson(categoriesJson, Array<Category>::class.java)
+        val categoriesJson: String = sharedPreferences.getString(SH_KEY_MUSICS_CATEGORIES, null) ?: return emptyList()
+        return Gson().fromJson(categoriesJson, Array<Category>::class.java).toList()
     }
 
     fun setCategories(context: Context, categories: List<Category>) {

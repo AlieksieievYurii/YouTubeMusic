@@ -41,7 +41,7 @@ class SelectCategoriesDialog : DialogFragment() {
         }
     }
 
-    private fun getCategories(): Array<Category> = Preferences.getMusicCategories(requireContext())
+    private fun getCategories(): List<Category> = Preferences.getMusicCategories(requireContext())
 
     companion object {
         fun create(callBack: OnApplyCallBack) = SelectCategoriesDialog().also {
@@ -50,7 +50,7 @@ class SelectCategoriesDialog : DialogFragment() {
     }
 }
 
-private class CategoriesAdapter(context: Context, private val categories: Array<Category>) : BaseAdapter() {
+private class CategoriesAdapter(context: Context, private val categories: List<Category>) : BaseAdapter() {
     private val layoutInflater = LayoutInflater.from(context)
     val selectedCategories = mutableListOf<Category>()
 

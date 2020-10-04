@@ -9,7 +9,6 @@ import androidx.lifecycle.MutableLiveData
 import com.yurii.youtubemusic.mediaservice.CATEGORIES_CONTENT
 import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.MediaItem
 
 class SavedMusicViewModel(application: Application, musicServiceConnection: MusicServiceConnection) : AndroidViewModel(application) {
     private val _categoryItems = MutableLiveData<List<Category>>()
@@ -19,7 +18,7 @@ class SavedMusicViewModel(application: Application, musicServiceConnection: Musi
     private val categoryItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
             super.onChildrenLoaded(parentId, children)
-            _categoryItems.postValue(children.map { Category(0, it.mediaId!!) })
+            _categoryItems.postValue(children.map { Category.createFrom(it) })
         }
 
         override fun onError(parentId: String, options: Bundle) {
