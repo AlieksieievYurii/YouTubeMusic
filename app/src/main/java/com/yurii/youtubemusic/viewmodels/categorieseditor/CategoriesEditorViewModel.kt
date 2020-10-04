@@ -22,7 +22,10 @@ class CategoriesEditorViewModel(application: Application) : AndroidViewModel(app
         categoriesList.find { it.name == name } ?: throw IllegalStateException("Cannot find category with name $name")
 
     fun isCategoryNameExist(categoryName: String): Boolean {
-        val res = categoriesList.find { it.name.toLowerCase(Locale.ROOT).trim() == categoryName.toLowerCase(Locale.ROOT).trim() }
+        val trimCategoryName = categoryName.toLowerCase(Locale.ROOT).trim()
+        if (trimCategoryName == Category.ALL.name)
+            return true
+        val res = categoriesList.find { it.name.toLowerCase(Locale.ROOT).trim() == trimCategoryName }
         return res != null
     }
 
