@@ -22,26 +22,44 @@ class SelectCategoriesDialog : DialogFragment() {
     private lateinit var binding: DialogSelectCategoriesBinding
     private lateinit var listAdapter: CategoriesAdapter
     private lateinit var onApplyCallBack: OnApplyCallBack
+    private lateinit var categories: ArrayList<Category>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.dialog_select_categories, container, false)
-        listAdapter = CategoriesAdapter(requireContext(), getCategories())
+        categories = ArrayList(Preferences.getMusicCategories(requireContext()))
+        listAdapter = CategoriesAdapter(requireContext(), categories)
+
+        initView()
+        switchLayouts()
+        return binding.root
+    }
+
+    private fun initView() {
         binding.apply.setOnClickListener {
             onApplyCallBack.invoke(listAdapter.selectedCategories)
             dismiss()
         }
-        initListView()
-        return binding.root
-    }
 
-    private fun initListView() {
         binding.categories.apply {
             choiceMode = ListView.CHOICE_MODE_MULTIPLE
             this.adapter = listAdapter
         }
     }
 
-    private fun getCategories(): List<Category> = Preferences.getMusicCategories(requireContext())
+    private fun switchLayouts() {
+        if (categories.isEmpty()) {
+            binding.layoutNoCategories.visibility = View.VISIBLE
+            binding.layoutListOfCategories.visibility = View.GONE
+        } else {
+            binding.layoutNoCategories.visibility = View.GONE
+            binding.layoutListOfCategories.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setStyle(STYLE_NO_TITLE, android.R.style.Theme_Holo_Light_Dialog_NoActionBar_MinWidth)
+    }
 
     companion object {
         fun create(callBack: OnApplyCallBack) = SelectCategoriesDialog().also {
