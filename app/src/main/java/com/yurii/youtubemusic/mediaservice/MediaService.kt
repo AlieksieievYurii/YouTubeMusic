@@ -7,6 +7,7 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.PowerManager
+import android.os.ResultReceiver
 import android.os.SystemClock
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -26,6 +27,9 @@ private const val TAG = "MediaBackgroundService"
 
 const val CATEGORIES_CONTENT = "__youtube_musics_categories__"
 const val EMPTY_CONTENT = "__empty__"
+
+const val REQUEST_COMMAND_UPDATE_MEDIA_ITEMS = "__request_command_update_media_items"
+const val REQUEST_CODE_UPDATE_MEDIA_ITEMS = 1001
 
 private const val VOLUME_DUCK = 0.2f
 private const val VOLUME_NORMAL = 1.0f
@@ -258,6 +262,13 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
+        override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
+            super.onCommand(command, extras, cb)
+            if (command == REQUEST_COMMAND_UPDATE_MEDIA_ITEMS) {
+                cb?.send(REQUEST_CODE_UPDATE_MEDIA_ITEMS, null)
+            }
+        }
+
         override fun onPlay() {
             super.onPlay()
             registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)

@@ -70,7 +70,7 @@ class SavedMusicFragment : TabFragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == CategoriesEditorActivity.REQUEST_CODE && resultCode == CategoriesEditorActivity.CATEGORIES_ARE_CHANGE_RESULT_CODE) {
-            Log.i("TEST", "YES")
+            savedMusicViewModel.refreshCategories()
         }
     }
 
