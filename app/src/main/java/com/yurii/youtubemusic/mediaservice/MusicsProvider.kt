@@ -19,6 +19,7 @@ class MusicsProvider(private val context: Context) {
         fun onFailedToLoad(error: Exception)
     }
 
+    private val mediaMetadataCompat = MediaMetadataProvider(context)
     private lateinit var metaDataItems: List<MediaMetaData>
     private val categories: List<Category> by lazy {
         ArrayList<Category>().apply {
@@ -50,7 +51,7 @@ class MusicsProvider(private val context: Context) {
         if (isMusicsInitialized)
             throw IllegalStateException("Music provider is already initialized")
 
-        MusicsLoader(context).apply {
+        MusicsLoader(context, mediaMetadataCompat).apply {
             onLoadSuccessfully = { mediaItems ->
                 metaDataItems = mediaItems
                 isMusicsInitialized = true
@@ -65,9 +66,8 @@ class MusicsProvider(private val context: Context) {
     fun isEmptyMusicsList() = metaDataItems.isEmpty()
 }
 
-private class MusicsLoader(private val context: Context) : AsyncTask<Void, Void, List<MediaMetaData>>() {
-    private val mediaMetadataCompat = MediaMetadataProvider(context)
-
+private class MusicsLoader(private val context: Context, private val mediaMetadataProvider: MediaMetadataProvider) :
+    AsyncTask<Void, Void, List<MediaMetaData>>() {
     var onLoadSuccessfully: ((musicItems: List<MediaMetaData>) -> Unit)? = null
     var onFailedToLoad: ((error: Exception) -> Unit)? = null
 
@@ -85,7 +85,7 @@ private class MusicsLoader(private val context: Context) : AsyncTask<Void, Void,
     private fun getMetaDataItems(): List<MediaMetaData> {
         return ArrayList<MediaMetaData>().apply {
             retrieveMusics().forEach { file ->
-                this.add(mediaMetadataCompat.readMetadata(file.nameWithoutExtension))
+                this.add(mediaMetadataProvider.readMetadata(file.nameWithoutExtension))
             }
         }
     }
