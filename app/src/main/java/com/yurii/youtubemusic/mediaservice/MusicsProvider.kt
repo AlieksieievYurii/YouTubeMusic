@@ -19,7 +19,7 @@ class MusicsProvider(private val context: Context) {
         fun onFailedToLoad(error: Exception)
     }
 
-    private val mediaMetadataCompat = MediaMetadataProvider(context)
+    private val mediaMetadataProvider = MediaMetadataProvider(context)
     private lateinit var metaDataItems: List<MediaMetaData>
     private val categories: List<Category> by lazy {
         ArrayList<Category>().apply {
@@ -51,7 +51,7 @@ class MusicsProvider(private val context: Context) {
         if (isMusicsInitialized)
             throw IllegalStateException("Music provider is already initialized")
 
-        MusicsLoader(context, mediaMetadataCompat).apply {
+        MusicsLoader(context, mediaMetadataProvider).apply {
             onLoadSuccessfully = { mediaItems ->
                 metaDataItems = mediaItems
                 isMusicsInitialized = true
