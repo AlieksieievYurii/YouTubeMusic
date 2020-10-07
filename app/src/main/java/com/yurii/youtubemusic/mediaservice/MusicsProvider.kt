@@ -21,12 +21,7 @@ class MusicsProvider(private val context: Context) {
 
     private val mediaMetadataProvider = MediaMetadataProvider(context)
     private lateinit var metaDataItems: List<MediaMetaData>
-    private val categories: List<Category> by lazy {
-        ArrayList<Category>().apply {
-            add(Category.ALL)
-            addAll(Preferences.getMusicCategories(context))
-        }
-    }
+    private val categories: ArrayList<Category> by lazy { retrieveCategories() }
 
     var isMusicsInitialized: Boolean = false
         private set
@@ -42,6 +37,22 @@ class MusicsProvider(private val context: Context) {
 
         return filterMediaItemsByCategory(category)
     }
+
+    fun updateMediaItems() {
+        updateCategories()
+        //TODO Update mediaItems -> remove recently deleted categories
+    }
+
+    private fun updateCategories() {
+        categories.clear()
+        categories.addAll(retrieveCategories())
+    }
+
+    private fun retrieveCategories(): ArrayList<Category> =
+        ArrayList<Category>().apply {
+            add(Category.ALL)
+            addAll(Preferences.getMusicCategories(context))
+        }
 
     private fun filterMediaItemsByCategory(category: Category): List<MediaMetaData> {
         return metaDataItems.filter { item -> category in item.categories }

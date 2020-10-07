@@ -265,6 +265,7 @@ class MediaService : MediaBrowserServiceCompat() {
         override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
             super.onCommand(command, extras, cb)
             if (command == REQUEST_COMMAND_UPDATE_MEDIA_ITEMS) {
+                musicProvider.updateMediaItems()
                 cb?.send(REQUEST_CODE_UPDATE_MEDIA_ITEMS, null)
             }
         }
