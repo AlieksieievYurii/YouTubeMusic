@@ -40,7 +40,27 @@ class MusicsProvider(private val context: Context) {
 
     fun updateMediaItems() {
         updateCategories()
-        //TODO Update mediaItems -> remove recently deleted categories
+        updateMetadata()
+    }
+
+    private fun updateMetadata() {
+        metaDataItems.forEach {
+            if (hasNonExistentCategories(it))
+                deleteNonExistentCategories(it)
+        }
+    }
+
+    private fun deleteNonExistentCategories(mediaMetaData: MediaMetaData) {
+        mediaMetaData.categories.removeAll { it !in categories }
+        mediaMetadataProvider.updateMetaData(mediaMetaData)
+    }
+
+    private fun hasNonExistentCategories(mediaMetaData: MediaMetaData): Boolean {
+        mediaMetaData.categories.forEach {
+            if (it !in categories)
+                return true
+        }
+        return false
     }
 
     private fun updateCategories() {

@@ -16,7 +16,7 @@ data class MediaMetaData(
     val duration: Long,
     val thumbnail: File,
     val mediaFile: File,
-    val categories: List<Category> = emptyList()
+    val categories: ArrayList<Category> = ArrayList()
 ) {
     companion object {
         fun createFrom(mediaItem: MediaBrowserCompat.MediaItem): MediaMetaData {
