@@ -48,8 +48,8 @@
     <string name="label_add">Add</string>
     <string name="label_category_name_already_exists">Category with this name already exists</string>
     <string name="label_category_name_cannot_be_empty">You must enter name</string>
-    <string name="label_not_categories">You haven\'t create any category. Click create new</string>
     <string name="label_create">Create</string>
     <string name="label_add_category">Add category</string>
     <string name="label_apply">Apply</string>
+    <string name="label_not_categories">You haven\'t created any category yet</string>
 </resources>
