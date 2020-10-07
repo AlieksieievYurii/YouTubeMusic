@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.viewmodels.categorieseditor
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,11 +12,13 @@ import java.util.*
 
 class CategoriesEditorViewModel(application: Application) : AndroidViewModel(application) {
     private val categoriesList = mutableListOf<Category>()
+    private var nextId = -1
 
     private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
     val categories: LiveData<List<Category>> = _categories.also {
         categoriesList.addAll(Preferences.getMusicCategories(application).toMutableList())
         it.postValue(categoriesList)
+        nextId = initLastAvailableId()
     }
 
     var areChanges = false
@@ -43,12 +46,12 @@ class CategoriesEditorViewModel(application: Application) : AndroidViewModel(app
 
     fun createNewCategory(categoryName: String): Category {
         areChanges = true
-        val category = Category(getUniqueCategoryId(), categoryName)
+        val category = Category(generateId(), categoryName)
         categoriesList.add(category)
         return category
     }
 
-    private fun getUniqueCategoryId(): Int {
+    private fun initLastAvailableId(): Int {
         var id = 1 //Starts from 1 because it assumes that the main category ALL has id 1
         categoriesList.forEach {
             if (it.id > id)
@@ -56,6 +59,8 @@ class CategoriesEditorViewModel(application: Application) : AndroidViewModel(app
         }
         return ++id
     }
+
+    private fun generateId(): Int = nextId++
 
     fun removeCategory(category: Category) {
         areChanges = true
