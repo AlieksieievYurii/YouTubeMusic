@@ -2,6 +2,7 @@
 <resources>
 
     <color name="white">#FFFFFF</color>
+    <color name="white_transparent">#C6FFFFFF</color>
 
     <color name="colorPrimary">#1179bf</color>
     <color name="colorPrimaryDark">#004e8e</color>

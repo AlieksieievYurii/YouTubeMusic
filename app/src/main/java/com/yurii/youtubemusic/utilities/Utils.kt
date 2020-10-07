@@ -2,38 +2,56 @@ package com.yurii.youtubemusic.utilities
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.model.Playlist
-import com.yurii.youtubemusic.models.VideoItem
+import com.google.gson.Gson
+import com.yurii.youtubemusic.R
+import com.yurii.youtubemusic.models.Category
 import org.threeten.bp.Duration
 import java.io.File
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 const val DEFAULT_SHARED_PREFERENCES_FILE: String = "com.yurii.youtubemusic.shared.preferences"
 const val SHARED_PREFERENCES_SELECTED_PLAY_LIST: String = "com.yurii.youtubemusic.shared.preferences.selected.play.list"
+const val SH_KEY_MUSICS_CATEGORIES: String = "com.yurii.youtubemusic.shared.preferences.music.categories"
 
-class Preferences private constructor() {
-    companion object {
-        fun setSelectedPlayList(context: Context, playList: Playlist?) {
-            val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-            with(sharedPreferences.edit()) {
-                putString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, playList?.toString())
-                apply()
-            }
+object Preferences {
+    fun getMusicCategories(context: Context): List<Category> {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val categoriesJson: String = sharedPreferences.getString(SH_KEY_MUSICS_CATEGORIES, null) ?: return emptyList()
+        return Gson().fromJson(categoriesJson, Array<Category>::class.java).toList()
+    }
+
+    fun setCategories(context: Context, categories: List<Category>) {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putString(SH_KEY_MUSICS_CATEGORIES, Gson().toJson(categories))
+            apply()
+        }
+    }
+
+    fun setSelectedPlayList(context: Context, playList: Playlist?) {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, playList?.toString())
+            apply()
         }
 
-        fun getSelectedPlayList(context: Context): Playlist? {
-            val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-            val jsonRepresentation: String? = sharedPreferences.getString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, null)
-            jsonRepresentation?.let {
-                val jsonFactory: com.google.api.client.json.JsonFactory = JacksonFactory.getDefaultInstance()
-                return jsonFactory.fromString(it, Playlist::class.java)
-            } ?: return null
-        }
+    }
+
+    fun getSelectedPlayList(context: Context): Playlist? {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val jsonRepresentation: String? = sharedPreferences.getString(SHARED_PREFERENCES_SELECTED_PLAY_LIST, null)
+        jsonRepresentation?.let {
+            val jsonFactory: com.google.api.client.json.JsonFactory = JacksonFactory.getDefaultInstance()
+            return jsonFactory.fromString(it, Playlist::class.java)
+        } ?: return null
     }
 }
 
@@ -47,15 +65,24 @@ class ErrorSnackBar private constructor() {
     }
 }
 
-class DataStorage private constructor() {
-    companion object {
-        fun getMusicStorage(context: Context): File = File(context.filesDir, "Musics")
-        fun getMusic(context: Context, videoItem: VideoItem): File = File(getMusicStorage(context), "${videoItem.videoId}.mp3")
-    }
+object DataStorage {
+    fun getMusicStorage(context: Context): File = File(context.filesDir, "Musics")
+    private fun getThumbnailsStorage(context: Context): File = File(context.filesDir, "Thumbnails")
+    private fun getMusicMetadataStorage(context: Context): File = File(context.filesDir, "Metadata")
+
+    fun getMusic(context: Context, musicId: String): File = File(getMusicStorage(context), "$musicId.mp3")
+    fun getThumbnail(context: Context, musicId: String): File = File(getThumbnailsStorage(context), "$musicId.jpeg")
+    fun getMetadata(context: Context, musicId: String): File = File(getMusicMetadataStorage(context), "$musicId.json")
+
+    fun getAllMusicFiles(context: Context): List<File> = getMusicStorage(context).walk().filter { it.extension == "mp3" }.toList()
 }
 
 fun parseDurationToHumanView(text: String): String {
     val millis = Duration.parse(text).toMillis()
+    return parseDurationToHumanView(millis)
+}
+
+fun parseDurationToHumanView(millis: Long): String {
     val hours = TimeUnit.MILLISECONDS.toHours(millis)
     val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1)
     val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1)
@@ -64,6 +91,7 @@ fun parseDurationToHumanView(text: String): String {
 
     return if (hours > 0) "$hours:$minutes:$secondsString" else "$minutes:$secondsString"
 }
+
 
 fun bigIntegerToShortCutSuffix(value: BigInteger): String {
     return longToShortCutSuffix(value.toLong())
@@ -93,6 +121,10 @@ fun longToShortCutSuffix(value: Long): String {
 fun calculateLikeBarValue(likeCount: BigInteger, disLikeCount: BigInteger): Int {
     val sum = likeCount.plus(disLikeCount)
     return if (sum.compareTo(BigInteger.ZERO) == 0) 50 else likeCount.multiply(BigInteger("100")).divide(sum).toInt()
+}
+
+fun createFromPathOrReturnMock(context: Context, path: String): Drawable {
+    return Drawable.createFromPath(path) ?: context.getDrawable(R.drawable.ic_thumbnail_mock)!!
 }
 
 

@@ -13,3 +13,8 @@ fun loadImage(view: ImageView, url: String) {
         .error(R.drawable.ic_loadint_image_error)
         .into(view)
 }
+
+@BindingAdapter("imageSrc")
+fun decodeImage(view: ImageView, path: String) {
+    view.setImageDrawable(createFromPathOrReturnMock(view.context, path))
+}

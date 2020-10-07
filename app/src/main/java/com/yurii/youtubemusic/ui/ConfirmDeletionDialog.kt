@@ -6,13 +6,13 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.yurii.youtubemusic.R
 
-class ConfirmDeletionDialog private constructor() : DialogFragment() {
+class ConfirmDeletionDialog : DialogFragment() {
     private lateinit var onConfirm: () -> Unit
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
-            builder.setTitle(R.string.dialog_confirm_deletion_title)
-            builder.setMessage(R.string.dialog_confirm_deletion_message)
+            builder.setTitle(requireArguments().getInt(EXTRA_TITLE_ID))
+            builder.setMessage(requireArguments().getInt(EXTRA_MESSAGE_ID))
             builder.setPositiveButton(R.string.dialog_delete) { _, _ ->
                 onConfirm.invoke()
             }
@@ -27,8 +27,15 @@ class ConfirmDeletionDialog private constructor() : DialogFragment() {
     }
 
     companion object {
-        fun create(onConfirm: () -> Unit): ConfirmDeletionDialog {
+        private const val EXTRA_TITLE_ID = "com.yurii.youtubemusic.title.extra"
+        private const val EXTRA_MESSAGE_ID = "com.yurii.youtubemusic.message.extra"
+
+        fun create(titleId: Int, messageId: Int, onConfirm: () -> Unit): ConfirmDeletionDialog {
             return ConfirmDeletionDialog().apply {
+                arguments = Bundle().apply {
+                    putInt(EXTRA_TITLE_ID, titleId)
+                    putInt(EXTRA_MESSAGE_ID, messageId)
+                }
                 this.onConfirm = onConfirm
             }
         }

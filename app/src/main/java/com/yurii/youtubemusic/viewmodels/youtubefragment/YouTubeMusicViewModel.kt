@@ -12,6 +12,7 @@ import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
@@ -22,9 +23,9 @@ import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.videoslist.VideoItemProvider
-import java.io.File
 import java.lang.Exception
 import java.lang.RuntimeException
+import java.util.ArrayList
 
 interface VideosLoader {
     fun onResult(newVideos: List<VideoItem>)
@@ -44,7 +45,6 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     val selectedPlaylist: LiveData<Playlist?> get() = _selectedPlayList
     private var videoLoadingCanceler: ICanceler? = null
     private var nextPageToken: String? = null
-    private val musicFolderStorage: File = DataStorage.getMusicStorage(context)
 
     var videosLoader: VideosLoader? = null
     var videoItemChange: VideoItemChange? = null
@@ -73,10 +73,7 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
             }
             MusicDownloaderService.DOWNLOADING_FINISHED_ACTION -> {
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
-                videoItem.also {
-                    addTag(videoItem)
-                    videoItemChange?.onDownloadingFinished(videoItem)
-                }
+                videoItemChange?.onDownloadingFinished(videoItem)
             }
             MusicDownloaderService.DOWNLOADING_FAILED_ACTION -> {
                 val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
@@ -84,12 +81,6 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
                 videoItemChange?.onDownloadingFailed(videoItem, error)
             }
         }
-    }
-
-    private fun addTag(videoItem: VideoItem) {
-        val file = DataStorage.getMusic(context, videoItem)
-        val tag = Tag(title = videoItem.title, authorChannel = videoItem.authorChannelTitle)
-        TaggerV1(file).writeTag(tag)
     }
 
     fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null): ICanceler {
@@ -135,16 +126,16 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
         }, nextPageToken)
     }
 
-    //TODO I think .mp3 should be removed from all files
-    fun exists(videoItem: VideoItem): Boolean = File(musicFolderStorage, "${videoItem.videoId}.mp3").exists()
+    fun exists(videoItem: VideoItem): Boolean = DataStorage.getMusic(context, videoItem.videoId).exists()
 
     fun isVideoItemLoading(videoItem: VideoItem): Boolean = MusicDownloaderService.Instance.serviceInterface?.isLoading(videoItem) ?: false
 
     fun getCurrentProgress(videoItem: VideoItem) = MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem)
 
-    fun startDownloadMusic(videoItem: VideoItem) {
+    fun startDownloadMusic(videoItem: VideoItem, categories: Array<Category> = emptyArray()) {
         context.startService(Intent(context, MusicDownloaderService::class.java).also {
             it.putExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM, videoItem)
+            it.putParcelableArrayListExtra(MusicDownloaderService.EXTRA_CATEGORIES, ArrayList(categories.toMutableList()))
         })
     }
 
@@ -153,9 +144,27 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     }
 
     fun removeVideoItem(videoItem: VideoItem) {
-        val file = DataStorage.getMusic(context, videoItem)
-        if (!file.delete())
-            throw RuntimeException("Cannot remove the music file $file")
+        deleteMusic(videoItem)
+        deleteMetadata(videoItem)
+        deleteThumbnail(videoItem)
+    }
+
+    private fun deleteMusic(videoItem: VideoItem) {
+        val musicFile = DataStorage.getMusic(context, videoItem.videoId)
+        if (!musicFile.delete())
+            throw RuntimeException("Cannot remove the music file $musicFile")
+    }
+
+    private fun deleteMetadata(videoItem: VideoItem) {
+        val metadataFile = DataStorage.getMetadata(context, videoItem.videoId)
+        if (!metadataFile.delete())
+            throw RuntimeException("Cannot remove the metadata file $metadataFile")
+    }
+
+    private fun deleteThumbnail(videoItem: VideoItem) {
+        val thumbnail = DataStorage.getThumbnail(context, videoItem.videoId)
+        if (!thumbnail.delete())
+            throw RuntimeException("Cannot remove the thumbnail $thumbnail")
     }
 
     fun isVideoPageLast() = nextPageToken.isNullOrEmpty()
@@ -179,6 +188,10 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
 
     inner class VideoItemProviderImplementation : VideoItemProvider {
         override fun download(videoItem: VideoItem) = this@YouTubeMusicViewModel.startDownloadMusic(videoItem)
+
+        override fun downloadAndAddCategories(videoItem: VideoItem, categories: List<Category>) {
+            this@YouTubeMusicViewModel.startDownloadMusic(videoItem, categories.toTypedArray())
+        }
 
         override fun cancelDownload(videoItem: VideoItem) = this@YouTubeMusicViewModel.stopDownloading(videoItem)
 

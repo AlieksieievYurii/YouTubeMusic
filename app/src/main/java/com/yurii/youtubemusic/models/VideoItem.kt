@@ -14,7 +14,8 @@ data class VideoItem(
     val viewCount: BigInteger,
     val likeCount: BigInteger,
     val disLikeCount: BigInteger,
-    val thumbnail: String
+    val thumbnail: String,
+    val normalThumbnail: String
 ) : Serializable {
     var lastError: Exception? = null
 
@@ -44,10 +45,11 @@ data class VideoItem(
                 likeCount = video.statistics.likeCount,
                 disLikeCount = video.statistics.dislikeCount,
                 authorChannelTitle = video.snippet.channelTitle,
-                thumbnail = video.snippet.thumbnails.default.url
+                thumbnail = video.snippet.thumbnails.default.url,
+                normalThumbnail = video.snippet.thumbnails.medium.url
             )
 
         fun createMock(): VideoItem =
-            VideoItem("", "", "", "", "", BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO, "")
+            VideoItem("", "", "", "", "", BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO, "", "")
     }
 }

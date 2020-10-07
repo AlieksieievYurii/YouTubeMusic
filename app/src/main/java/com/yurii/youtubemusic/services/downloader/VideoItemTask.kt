@@ -1,31 +1,38 @@
 package com.yurii.youtubemusic.services.downloader
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.github.kiulian.downloader.YoutubeDownloader
 import com.github.kiulian.downloader.YoutubeException
 import com.github.kiulian.downloader.model.YoutubeVideo
 import com.github.kiulian.downloader.model.formats.AudioFormat
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.utilities.DataStorage
+import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 import java.io.*
 import java.lang.Exception
 import java.net.URL
 
 class VideoItemTask(
     val videoItem: VideoItem,
-    private val outDir: File,
+    private val categories: Array<Category>,
+    private val context: Context,
     private val serviceStartId: Int,
     private val downloadingUpdater: DownloadingUpdater,
-    private val youTubeDownloader: YoutubeDownloader
+    private val youTubeDownloader: YoutubeDownloader,
+    private val mediaMetadataProvider: MediaMetadataProvider
 ) : Runnable {
     var progress: Progress = Progress.create()
     private var isInterrupted = false
 
     override fun run() {
         try {
-            val video = youTubeDownloader.getVideo(videoItem.videoId)
-            checkIfVideoIsLive(video)
-            val audioFormat = video.audioFormats().last()
-            download(audioFormat)
+            downloadMusic()
+            downloadThumbnail()
+            addMetadata()
         } catch (error: Exception) {
             ThreadPool.completeTask(this)
             downloadingUpdater.onError(videoItem, error, serviceStartId)
@@ -33,8 +40,43 @@ class VideoItemTask(
     }
 
     fun cancel() {
-        check(!isInterrupted) { "The task: ${this} is already interrupted" }
+        check(!isInterrupted) { "The task: $this is already interrupted" }
         isInterrupted = true
+    }
+
+    private fun downloadMusic() {
+        val video = youTubeDownloader.getVideo(videoItem.videoId)
+        checkIfVideoIsLive(video)
+        val audioFormat = video.audioFormats().last()
+        download(audioFormat)
+    }
+
+    private fun downloadThumbnail() {
+        val bitmap = downloadBitmap(videoItem.normalThumbnail)
+        saveBitmapToFile(bitmap)
+    }
+
+    private fun addMetadata() = mediaMetadataProvider.setMetadata(videoItem, categories.toList())
+
+    private fun saveBitmapToFile(bitmap: Bitmap) {
+        val file = DataStorage.getThumbnail(context, videoItem.videoId).also {
+            if (!it.parentFile!!.exists())
+                it.parentFile!!.mkdirs()
+        }
+
+        file.outputStream().run {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, this)
+        }
+    }
+
+    private fun downloadBitmap(srcUrl: String): Bitmap {
+        val url = URL(srcUrl)
+        val httpConnection = url.openConnection().apply {
+            doInput = true
+            connect()
+        }
+        val inputStream = httpConnection.getInputStream()
+        return BitmapFactory.decodeStream(inputStream)
     }
 
     private fun download(audioFormat: AudioFormat) {
@@ -59,7 +101,8 @@ class VideoItemTask(
     }
 
     private fun setFileName(file: File) {
-        val isRenamed = file.renameTo(File("${file.parent}/${videoItem.videoId}.mp3"))
+        val newFile = DataStorage.getMusic(context, videoItem.videoId)
+        val isRenamed = file.renameTo(newFile)
 
         check(isRenamed) { "Cannot rename the file after complete downloading" }
     }
@@ -96,11 +139,15 @@ class VideoItemTask(
     }
 
     private fun getOutputFile(): File {
-        createOutputFolderIfDoesNotExist()
-        return getFreeFileName()
+        val outDir = DataStorage.getMusicStorage(context).also {
+            if (!it.exists())
+                it.mkdirs()
+        }
+
+        return getFreeFileName(outDir)
     }
 
-    private fun getFreeFileName(): File {
+    private fun getFreeFileName(outDir: File): File {
         var id = 0
 
         while (true) {
@@ -117,17 +164,5 @@ class VideoItemTask(
         }
     }
 
-    private fun createOutputFolderIfDoesNotExist() {
-        if (outDir.exists())
-            return
-
-        val isFolderCreated = outDir.mkdirs()
-        if (!isFolderCreated)
-            throw IOException("Could not create output directory: $outDir")
-    }
-
-    override fun toString(): String {
-        return "VideoItemTask(videoItem=${videoItem.videoId}, progress=$progress)"
-    }
-
+    override fun toString(): String = "VideoItemTask(videoItem=${videoItem.videoId}, progress=$progress)"
 }
