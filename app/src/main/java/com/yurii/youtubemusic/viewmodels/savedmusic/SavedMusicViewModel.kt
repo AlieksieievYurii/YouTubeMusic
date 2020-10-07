@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.viewmodels.savedmusic
 import android.app.Application
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,6 +25,13 @@ class SavedMusicViewModel(application: Application, musicServiceConnection: Musi
         override fun onError(parentId: String, options: Bundle) {
             super.onError(parentId, options)
             //TODO Implement error handling
+        }
+    }
+
+    fun refreshCategories() {
+        musicServiceConnection.requestUpdatingMediaItems {
+            musicServiceConnection.unsubscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
+            musicServiceConnection.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
         }
     }
 

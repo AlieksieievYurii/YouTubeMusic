@@ -2,6 +2,9 @@ package com.yurii.youtubemusic.mediaservice
 
 import android.content.ComponentName
 import android.content.Context
+import android.os.Bundle
+import android.os.Handler
+import android.os.ResultReceiver
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -39,6 +42,15 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
 
     fun unsubscribe(parentId: String, callback: MediaBrowserCompat.SubscriptionCallback) {
         mediaBrowser.unsubscribe(parentId, callback)
+    }
+
+    fun requestUpdatingMediaItems(onFinishedCallback: (() -> Unit)) {
+        mediaController.sendCommand(REQUEST_COMMAND_UPDATE_MEDIA_ITEMS, null, object : ResultReceiver(Handler()) {
+            override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                if (resultCode == REQUEST_CODE_UPDATE_MEDIA_ITEMS)
+                    onFinishedCallback.invoke()
+            }
+        })
     }
 
     private inner class MediaBrowserConnectionCallback(private val context: Context) : MediaBrowserCompat.ConnectionCallback() {

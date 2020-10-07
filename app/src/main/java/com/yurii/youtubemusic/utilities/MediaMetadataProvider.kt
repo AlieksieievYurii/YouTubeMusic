@@ -24,10 +24,16 @@ class MediaMetadataProvider(private val context: Context) {
             thumbnail = DataStorage.getThumbnail(context, videoItem.videoId),
             duration = Duration.parse(videoItem.duration).toMillis(),
             mediaFile = DataStorage.getMusic(context, videoItem.videoId),
-            categories = categories
+            categories = ArrayList(categories) //TODO It's necessary to investigate whether is better way to do it
         )
 
-        val metadataJson = getMusicMetadataFile(videoItem.videoId)
+        writeToFile(metadata)
+    }
+
+    fun updateMetaData(metaData: MediaMetaData) = writeToFile(metaData)
+
+    private fun writeToFile(metadata: MediaMetaData) {
+        val metadataJson = getMusicMetadataFile(metadata.mediaId)
         val json = Gson().toJson(metadata)
         metadataJson.writeText(json)
     }
