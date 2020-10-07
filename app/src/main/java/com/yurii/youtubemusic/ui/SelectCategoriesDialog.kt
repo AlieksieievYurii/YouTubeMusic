@@ -12,19 +12,19 @@ import android.widget.ListView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.SelectCategoriesDialogBinding
+import com.yurii.youtubemusic.databinding.DialogSelectCategoriesBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Preferences
 
 private typealias OnApplyCallBack = (categories: List<Category>) -> Unit
 
 class SelectCategoriesDialog : DialogFragment() {
-    private lateinit var binding: SelectCategoriesDialogBinding
+    private lateinit var binding: DialogSelectCategoriesBinding
     private lateinit var listAdapter: CategoriesAdapter
     private lateinit var onApplyCallBack: OnApplyCallBack
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.select_categories_dialog, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.dialog_select_categories, container, false)
         listAdapter = CategoriesAdapter(requireContext(), getCategories())
         binding.apply.setOnClickListener {
             onApplyCallBack.invoke(listAdapter.selectedCategories)
