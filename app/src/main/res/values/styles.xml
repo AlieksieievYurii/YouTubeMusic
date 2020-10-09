@@ -40,4 +40,8 @@
         <item name="tabTextColor">@color/white</item>
     </style>
 
+    <style name="roundedImageView" parent="">
+        <item name="cornerSize">15%</item>
+    </style>
+
 </resources>

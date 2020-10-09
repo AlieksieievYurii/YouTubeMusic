@@ -2,7 +2,6 @@
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -18,65 +17,90 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/mediumMargin"
-        android:layout_marginEnd="@dimen/mediumMargin"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground"
-        card_view:cardCornerRadius="@dimen/defCornerRadius"
-        card_view:cardUseCompatPadding="true">
+        android:foreground="?android:attr/selectableItemBackground">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
 
-            <ImageView
-                android:id="@+id/thumbnail"
-                android:layout_width="100dp"
-                android:layout_height="70dp"
-                android:layout_margin="@dimen/mediumMargin"
-                app:imageSrc="@{musicItem.thumbnail.absolutePath}"
-                tools:src="@tools:sample/backgrounds/scenic" />
+            <FrameLayout
+                android:id="@+id/thumbnail_layout"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true">
 
-            <TextView
-                android:id="@+id/title"
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/thumbnail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    app:imageSrc="@{musicItem.thumbnail.absolutePath}"
+                    app:shapeAppearanceOverlay="@style/roundedImageView"
+                    tools:ignore="ContentDescription"
+                    tools:src="@tools:sample/backgrounds/scenic" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/thumbnail_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="false"
+                    android:background="#77C6C6C6"
+                    android:src="@android:drawable/ic_media_play"
+                    android:visibility="gone"
+                    app:shapeAppearanceOverlay="@style/roundedImageView"
+                    tools:ignore="ContentDescription" />
+            </FrameLayout>
+
+
+            <LinearLayout
+                android:id="@+id/description_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
                 android:layout_marginStart="@dimen/mediumMargin"
-                android:layout_marginTop="@dimen/mediumMargin"
-                android:layout_toStartOf="@id/more_options"
-                android:layout_toEndOf="@id/thumbnail"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="@{musicItem.title}"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textSize="14sp"
-                tools:text="@tools:sample/lorem/random" />
+                android:layout_toStartOf="@id/duration"
+                android:layout_toEndOf="@id/thumbnail_layout"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/author"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/title"
-                android:layout_marginStart="@dimen/mediumMargin"
-                android:layout_toStartOf="@id/more_options"
-                android:layout_toEndOf="@id/thumbnail"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="@{musicItem.author}"
-                android:textSize="12sp"
-                tools:text="@tools:sample/lorem/random" />
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{musicItem.title}"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textSize="12sp"
+                    tools:text="@tools:sample/lorem/random" />
+
+                <TextView
+                    android:id="@+id/author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{musicItem.author}"
+                    android:textSize="10sp"
+                    tools:ignore="SmallSp"
+                    tools:text="@tools:sample/lorem/random" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/author"
-                android:layout_marginStart="@dimen/mediumMargin"
-                android:layout_marginTop="@dimen/mediumMargin"
-                android:layout_toEndOf="@id/thumbnail"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:layout_toStartOf="@id/more_options"
                 android:text="@{UtilsKt.parseDurationToHumanView(musicItem.duration)}"
+                android:textSize="12sp"
+                tools:ignore="SmallSp"
                 tools:text="3:23" />
+
 
             <ImageButton
                 android:id="@+id/more_options"
@@ -84,6 +108,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/mediumMargin"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/content_description_more_options"
                 android:src="@drawable/ic_baseline_more_vert_24" />
