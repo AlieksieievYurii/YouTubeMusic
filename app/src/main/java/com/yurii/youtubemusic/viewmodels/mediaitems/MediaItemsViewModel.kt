@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
 import com.yurii.youtubemusic.models.MediaMetaData
 
 class MediaItemsViewModel(
@@ -33,7 +34,9 @@ class MediaItemsViewModel(
     }
 
     fun playMusic(mediaMetaData: MediaMetaData) {
-        musicServiceConnection.transportControls.playFromMediaId(mediaMetaData.mediaId, null)
+        musicServiceConnection.transportControls.playFromMediaId(mediaMetaData.mediaId, Bundle().apply {
+            putParcelable(EXTRA_KEY_CATEGORIES, category)
+        })
     }
 
     private val musicServiceConnection = musicServiceConnection.also {
