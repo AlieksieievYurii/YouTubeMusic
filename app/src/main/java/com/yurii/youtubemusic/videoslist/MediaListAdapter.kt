@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.videoslist
 import android.content.Context
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
@@ -21,7 +22,7 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     MediaListAdapterController {
     interface CallBack {
         fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat?
-        fun onOptionsClick(mediaItem: MediaMetaData)
+        fun onOptionsClick(mediaItem: MediaMetaData, view: View)
         fun onItemClick(mediaItem: MediaMetaData)
     }
 
@@ -102,6 +103,10 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
 
             itemMusicBinding.root.setOnClickListener {
                 callBack.onItemClick(mediaItem)
+            }
+
+            itemMusicBinding.moreOptions.setOnClickListener {
+                callBack.onOptionsClick(mediaItem, it)
             }
         }
 

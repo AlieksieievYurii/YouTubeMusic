@@ -5,6 +5,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -56,14 +57,32 @@ class MediaItemsFragment : Fragment() {
         }
     }
 
+    private fun deleteMediaItem(mediaItem: MediaMetaData) {
+
+    }
+
+    private fun openCategoriesEditor(mediaItem: MediaMetaData) {
+
+    }
+
     private inner class MediaListAdapterCallBack : MediaListAdapter.CallBack {
         override fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat? {
             val currentMediaItem = viewModel.playbackState.value!!.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
             return if (mediaItem == currentMediaItem) viewModel.playbackState.value!! else null
         }
 
-        override fun onOptionsClick(mediaItem: MediaMetaData) {
-            TODO("Not yet implemented")
+        override fun onOptionsClick(mediaItem: MediaMetaData, view: View) {
+            val popupMenu = PopupMenu(requireContext(), view)
+            popupMenu.menuInflater.inflate(R.menu.media_item_menu, popupMenu.menu)
+            popupMenu.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.item_delete_media_item -> deleteMediaItem(mediaItem)
+                    R.id.item_edit_categories -> openCategoriesEditor(mediaItem)
+                    else -> return@setOnMenuItemClickListener false
+                }
+                true
+            }
+            popupMenu.show()
         }
 
         override fun onItemClick(mediaItem: MediaMetaData) {
