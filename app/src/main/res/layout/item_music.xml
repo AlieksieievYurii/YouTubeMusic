@@ -43,12 +43,11 @@
                     tools:src="@tools:sample/backgrounds/scenic" />
 
                 <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/thumbnail_status"
+                    android:id="@+id/thumbnail_state"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:adjustViewBounds="false"
                     android:background="#77C6C6C6"
-                    android:src="@android:drawable/ic_media_play"
                     android:visibility="gone"
                     app:shapeAppearanceOverlay="@style/roundedImageView"
                     tools:ignore="ContentDescription" />
