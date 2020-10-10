@@ -21,25 +21,25 @@ class NotificationManager(private val context: Context, private val sessionToken
     private val mediaController = MediaControllerCompat(context, sessionToken)
 
     private val pauseAction = NotificationCompat.Action(
-        android.R.drawable.ic_media_pause,
+        R.drawable.ic_pause_48px,
         context.getString(R.string.label_action_pause),
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PAUSE)
     )
 
     private val playAction = NotificationCompat.Action(
-        android.R.drawable.ic_media_play,
+        R.drawable.ic_play_48dp,
         context.getString(R.string.label_action_play),
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY)
     )
 
     private val nextAction = NotificationCompat.Action(
-        android.R.drawable.ic_media_next,
+        R.drawable.ic_skip_next_48dp,
         context.getString(R.string.label_action_next),
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
     )
 
     private val previousAction = NotificationCompat.Action(
-        android.R.drawable.ic_media_previous,
+        R.drawable.ic_skip_previous_48dp,
         context.getString(R.string.label_action_previous),
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
     )
