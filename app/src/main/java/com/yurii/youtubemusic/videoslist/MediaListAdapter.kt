@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.videoslist
 
 import android.content.Context
+import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -10,7 +11,18 @@ import com.yurii.youtubemusic.databinding.ItemMusicBinding
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.BaseViewHolder
 
-class MediaListAdapter(context: Context) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>() {
+interface MediaListAdapterController {
+    fun onChangePlaybackState(mediaItem: MediaMetaData, playbackStateCompat: PlaybackStateCompat)
+}
+
+class MediaListAdapter(context: Context, private val callback: CallBack) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(),
+    MediaListAdapterController {
+    interface CallBack {
+        fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat
+        fun onOptionsClick(mediaItem: MediaMetaData)
+        fun onItemClick(mediaItem: MediaMetaData)
+    }
+
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val musics = mutableListOf<MediaMetaData>()
 
@@ -27,14 +39,22 @@ class MediaListAdapter(context: Context) : RecyclerView.Adapter<MediaListAdapter
     override fun getItemCount(): Int = musics.size
 
     override fun onBindViewHolder(holder: MusicViewHolder, position: Int) {
-        holder.setMusicItem(musics[position])
+        holder.setMusicItem(musics[position], callback)
     }
 
     class MusicViewHolder(private val itemMusicBinding: ItemMusicBinding) : BaseViewHolder(itemMusicBinding.root) {
-        fun setMusicItem(mediaItem: MediaMetaData) {
+        fun setMusicItem(mediaItem: MediaMetaData, callBack: CallBack) {
             itemMusicBinding.apply {
                 this.musicItem = mediaItem
             }.executePendingBindings()
+
+            itemMusicBinding.root.setOnClickListener {
+                callBack.onItemClick(mediaItem)
+            }
         }
+    }
+
+    override fun onChangePlaybackState(mediaItem: MediaMetaData, playbackStateCompat: PlaybackStateCompat) {
+        TODO("Not yet implemented")
     }
 }

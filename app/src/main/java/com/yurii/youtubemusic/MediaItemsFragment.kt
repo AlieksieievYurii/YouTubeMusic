@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic
 
 import android.os.Bundle
+import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.videoslist.MediaListAdapter
 import com.yurii.youtubemusic.viewmodels.mediaitems.MediaItemsViewModel
@@ -34,13 +36,28 @@ class MediaItemsFragment : Fragment() {
     }
 
     private fun initRecyclerView(recyclerView: RecyclerView) {
-        mediaItemsAdapter = MediaListAdapter(requireContext())
+        mediaItemsAdapter = MediaListAdapter(requireContext(), MediaListAdapterCallBack())
         recyclerView.apply {
             addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
             this.setHasFixedSize(true)
             this.layoutManager = LinearLayoutManager(requireContext())
             this.adapter = mediaItemsAdapter
         }
+    }
+
+    private inner class MediaListAdapterCallBack : MediaListAdapter.CallBack {
+        override fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat {
+            TODO("Not yet implemented")
+        }
+
+        override fun onOptionsClick(mediaItem: MediaMetaData) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onItemClick(mediaItem: MediaMetaData) {
+            viewModel.playMusic(mediaItem)
+        }
+
     }
 
     companion object {

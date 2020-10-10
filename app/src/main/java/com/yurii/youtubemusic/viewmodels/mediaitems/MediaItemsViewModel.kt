@@ -30,6 +30,10 @@ class MediaItemsViewModel(
         }
     }
 
+    fun playMusic(mediaMetaData: MediaMetaData) {
+        musicServiceConnection.transportControls.playFromMediaId(mediaMetaData.mediaId, null)
+    }
+
     private val musicServiceConnection = musicServiceConnection.also {
         it.subscribe(category.id.toString(), mediaItemsSubscription)
     }
