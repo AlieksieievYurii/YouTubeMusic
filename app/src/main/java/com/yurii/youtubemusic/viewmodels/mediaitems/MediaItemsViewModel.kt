@@ -3,9 +3,11 @@ package com.yurii.youtubemusic.viewmodels.mediaitems
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
+import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
 import com.yurii.youtubemusic.models.MediaMetaData
@@ -33,7 +35,21 @@ class MediaItemsViewModel(
         }
     }
 
-    fun playMusic(mediaMetaData: MediaMetaData) {
+    fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat? {
+        val currentMediaItem = playbackState.value!!.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
+        return if (mediaItem == currentMediaItem) playbackState.value!! else null
+    }
+
+    fun onClickMediaItem(mediaMetaData: MediaMetaData) {
+        getPlaybackState(mediaMetaData)?.run {
+            if (state == PlaybackStateCompat.STATE_PLAYING)
+                musicServiceConnection.transportControls.pause()
+            else if (state == PlaybackStateCompat.STATE_PAUSED)
+                musicServiceConnection.transportControls.play()
+        } ?: playMusic(mediaMetaData)
+    }
+
+    private fun playMusic(mediaMetaData: MediaMetaData) {
         musicServiceConnection.transportControls.playFromMediaId(mediaMetaData.mediaId, Bundle().apply {
             putParcelable(EXTRA_KEY_CATEGORIES, category)
         })

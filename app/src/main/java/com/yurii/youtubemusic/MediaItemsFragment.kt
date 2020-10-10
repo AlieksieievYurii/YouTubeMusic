@@ -66,10 +66,7 @@ class MediaItemsFragment : Fragment() {
     }
 
     private inner class MediaListAdapterCallBack : MediaListAdapter.CallBack {
-        override fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat? {
-            val currentMediaItem = viewModel.playbackState.value!!.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
-            return if (mediaItem == currentMediaItem) viewModel.playbackState.value!! else null
-        }
+        override fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat? = viewModel.getPlaybackState(mediaItem)
 
         override fun onOptionsClick(mediaItem: MediaMetaData, view: View) {
             val popupMenu = PopupMenu(requireContext(), view)
@@ -86,7 +83,7 @@ class MediaItemsFragment : Fragment() {
         }
 
         override fun onItemClick(mediaItem: MediaMetaData) {
-            viewModel.playMusic(mediaItem)
+            viewModel.onClickMediaItem(mediaItem)
         }
 
     }
