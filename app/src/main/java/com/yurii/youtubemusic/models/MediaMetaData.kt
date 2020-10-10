@@ -1,13 +1,15 @@
 package com.yurii.youtubemusic.models
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import kotlinx.android.parcel.Parcelize
 import java.io.File
-
+@Parcelize
 data class MediaMetaData(
     val mediaId: String,
     val title: String,
@@ -17,7 +19,7 @@ data class MediaMetaData(
     val thumbnail: File,
     val mediaFile: File,
     val categories: ArrayList<Category> = ArrayList()
-) {
+) : Parcelable {
     companion object {
         fun createFrom(mediaItem: MediaBrowserCompat.MediaItem): MediaMetaData {
             val extras = mediaItem.description.extras!!
