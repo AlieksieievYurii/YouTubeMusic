@@ -17,6 +17,8 @@ class MediaItemsViewModel(
     private val _mediaItems = MutableLiveData<List<MediaMetaData>>()
     val mediaItems: LiveData<List<MediaMetaData>> = _mediaItems
 
+    val playbackState = musicServiceConnection.playbackState
+
     private val mediaItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
             super.onChildrenLoaded(parentId, children)

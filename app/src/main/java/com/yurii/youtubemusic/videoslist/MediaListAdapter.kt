@@ -4,6 +4,7 @@ import android.content.Context
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
@@ -12,7 +13,7 @@ import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.BaseViewHolder
 
 interface MediaListAdapterController {
-    fun onChangePlaybackState(mediaItem: MediaMetaData, playbackStateCompat: PlaybackStateCompat)
+    fun onChangePlaybackState(mediaMetaData: MediaMetaData, playbackStateCompat: PlaybackStateCompat)
 }
 
 class MediaListAdapter(context: Context, private val callback: CallBack) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(),
@@ -25,11 +26,18 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val musics = mutableListOf<MediaMetaData>()
+    private lateinit var recyclerView: RecyclerView
 
     fun setMediaItems(list: List<MediaMetaData>) {
         musics.clear()
         musics.addAll(list)
         notifyDataSetChanged()
+    }
+
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MusicViewHolder {
@@ -42,6 +50,49 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
         holder.setMusicItem(musics[position], callback)
     }
 
+    private fun findVideoItemView(mediaItem: MediaMetaData, onFound: ((MusicViewHolder) -> Unit)) {
+        for (index: Int in 0 until recyclerView.childCount) {
+            val position = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(index))
+
+            if (position == RecyclerView.NO_POSITION || musics.isEmpty())
+                continue
+
+            if (musics[position].mediaId == mediaItem.mediaId) {
+                val viewHolder = recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as MusicViewHolder
+                onFound.invoke(viewHolder)
+                return
+            }
+        }
+    }
+
+    private fun resetItemsState() {
+        getVisibleItems().forEach {
+            it.setNoneState()
+        }
+    }
+
+    private fun getVisibleItems(): List<MusicViewHolder> = ArrayList<MusicViewHolder>().apply {
+        for (index: Int in 0 until recyclerView.childCount) {
+            val position = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(index))
+
+            if (position == RecyclerView.NO_POSITION || musics.isEmpty())
+                continue
+
+            val viewHolder = recyclerView.getChildViewHolder(recyclerView.getChildAt(index)) as MusicViewHolder
+            add(viewHolder)
+        }
+    }
+
+    override fun onChangePlaybackState(mediaMetaData: MediaMetaData, playbackStateCompat: PlaybackStateCompat) {
+        resetItemsState()
+        findVideoItemView(mediaMetaData) {
+            when (playbackStateCompat.state) {
+                PlaybackStateCompat.STATE_PLAYING -> it.setPlayingState()
+                PlaybackStateCompat.STATE_PAUSED -> it.setPausedState()
+            }
+        }
+    }
+
     class MusicViewHolder(private val itemMusicBinding: ItemMusicBinding) : BaseViewHolder(itemMusicBinding.root) {
         fun setMusicItem(mediaItem: MediaMetaData, callBack: CallBack) {
             itemMusicBinding.apply {
@@ -52,9 +103,28 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
                 callBack.onItemClick(mediaItem)
             }
         }
-    }
 
-    override fun onChangePlaybackState(mediaItem: MediaMetaData, playbackStateCompat: PlaybackStateCompat) {
-        TODO("Not yet implemented")
+        fun setPlayingState() {
+            val context = itemMusicBinding.root.context
+            itemMusicBinding.thumbnailState.apply {
+                isVisible = true
+                setImageDrawable(context.getDrawable(R.drawable.ic_play_24dp))
+            }
+        }
+
+        fun setPausedState() {
+            val context = itemMusicBinding.root.context
+            itemMusicBinding.thumbnailState.apply {
+                isVisible = true
+                setImageDrawable(context.getDrawable(R.drawable.ic_pause_24px))
+            }
+        }
+
+        fun setNoneState() {
+            itemMusicBinding.thumbnailState.apply {
+                isVisible = false
+                setImageDrawable(null)
+            }
+        }
     }
 }

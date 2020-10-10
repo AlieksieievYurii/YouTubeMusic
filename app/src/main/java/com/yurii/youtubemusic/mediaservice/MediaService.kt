@@ -31,6 +31,8 @@ const val EMPTY_CONTENT = "__empty__"
 const val REQUEST_COMMAND_UPDATE_MEDIA_ITEMS = "__request_command_update_media_items"
 const val REQUEST_CODE_UPDATE_MEDIA_ITEMS = 1001
 
+const val PLAYBACK_STATE_MEDIA_ITEM = "com.yurii.youtubemusic.playback.state.media.item"
+
 private const val VOLUME_DUCK = 0.2f
 private const val VOLUME_NORMAL = 1.0f
 
@@ -119,7 +121,13 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun updateCurrentPlaybackState() {
-        val currentPlaybackState = getCurrentPlaybackStateBuilder().build()
+        val extras = Bundle().apply {
+            if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED)
+                putParcelable(PLAYBACK_STATE_MEDIA_ITEM, queueProvider.queue.getCurrentQueueItem())
+        }
+        val currentPlaybackState = getCurrentPlaybackStateBuilder().apply {
+            setExtras(extras)
+        }.build()
         mediaSession.setPlaybackState(currentPlaybackState)
     }
 
