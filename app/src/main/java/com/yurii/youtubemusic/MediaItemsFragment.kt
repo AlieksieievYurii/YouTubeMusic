@@ -2,7 +2,6 @@ package com.yurii.youtubemusic
 
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +20,6 @@ import com.yurii.youtubemusic.viewmodels.mediaitems.MediaItemsViewModel
 
 class MediaItemsFragment : Fragment() {
     private lateinit var viewModel: MediaItemsViewModel
-    private lateinit var mediaItemsAdapter: MediaListAdapter
     private lateinit var mediaItemsAdapterController: MediaListAdapterController
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -36,7 +34,7 @@ class MediaItemsFragment : Fragment() {
     private fun initViewModel(category: Category) {
         viewModel = Injector.provideMediaItemsViewModel(requireContext(), category)
         viewModel.mediaItems.observe(viewLifecycleOwner, Observer {
-            mediaItemsAdapter.setMediaItems(it)
+            mediaItemsAdapterController.setMediaItems(it)
         })
 
         viewModel.playbackState.observe(viewLifecycleOwner, Observer {
@@ -48,7 +46,7 @@ class MediaItemsFragment : Fragment() {
     }
 
     private fun initRecyclerView(recyclerView: RecyclerView) {
-        mediaItemsAdapter = MediaListAdapter(requireContext(), MediaListAdapterCallBack())
+        val mediaItemsAdapter = MediaListAdapter(requireContext(), MediaListAdapterCallBack())
         mediaItemsAdapterController = mediaItemsAdapter
         recyclerView.apply {
             addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
@@ -59,8 +57,9 @@ class MediaItemsFragment : Fragment() {
     }
 
     private inner class MediaListAdapterCallBack : MediaListAdapter.CallBack {
-        override fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat {
-            TODO("Not yet implemented")
+        override fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat? {
+            val currentMediaItem = viewModel.playbackState.value!!.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
+            return if (mediaItem == currentMediaItem) viewModel.playbackState.value!! else null
         }
 
         override fun onOptionsClick(mediaItem: MediaMetaData) {

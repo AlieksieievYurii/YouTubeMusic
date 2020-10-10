@@ -9,6 +9,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 class MusicServiceConnection(context: Context, serviceComponent: ComponentName) {
@@ -25,9 +26,11 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
         null
     ).apply { connect() }
 
-    val playbackState = MutableLiveData<PlaybackStateCompat>().apply {
+    private val _playbackState = MutableLiveData<PlaybackStateCompat>().apply {
         postValue(EMPTY_PLAYBACK_STATE)
     }
+    val playbackState: LiveData<PlaybackStateCompat> = _playbackState
+
     val nowPlaying = MutableLiveData<MediaMetadataCompat>()
         .apply { postValue(NOTHING_PLAYING) }
 
@@ -75,7 +78,7 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
 
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            playbackState.postValue(state ?: EMPTY_PLAYBACK_STATE)
+            _playbackState.postValue(state ?: EMPTY_PLAYBACK_STATE)
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {

@@ -14,12 +14,13 @@ import com.yurii.youtubemusic.utilities.BaseViewHolder
 
 interface MediaListAdapterController {
     fun onChangePlaybackState(mediaMetaData: MediaMetaData, playbackStateCompat: PlaybackStateCompat)
+    fun setMediaItems(list: List<MediaMetaData>)
 }
 
 class MediaListAdapter(context: Context, private val callback: CallBack) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(),
     MediaListAdapterController {
     interface CallBack {
-        fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat
+        fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat?
         fun onOptionsClick(mediaItem: MediaMetaData)
         fun onItemClick(mediaItem: MediaMetaData)
     }
@@ -28,7 +29,7 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     private val musics = mutableListOf<MediaMetaData>()
     private lateinit var recyclerView: RecyclerView
 
-    fun setMediaItems(list: List<MediaMetaData>) {
+    override fun setMediaItems(list: List<MediaMetaData>) {
         musics.clear()
         musics.addAll(list)
         notifyDataSetChanged()
@@ -47,7 +48,10 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     override fun getItemCount(): Int = musics.size
 
     override fun onBindViewHolder(holder: MusicViewHolder, position: Int) {
-        holder.setMusicItem(musics[position], callback)
+        val mediaItem = musics[position]
+        holder.setMusicItem(mediaItem, callback)
+        callback.getPlaybackState(mediaItem)?.run { holder.setPlaybackState(this) } ?: holder.setNoneState()
+
     }
 
     private fun findVideoItemView(mediaItem: MediaMetaData, onFound: ((MusicViewHolder) -> Unit)) {
@@ -86,10 +90,7 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     override fun onChangePlaybackState(mediaMetaData: MediaMetaData, playbackStateCompat: PlaybackStateCompat) {
         resetItemsState()
         findVideoItemView(mediaMetaData) {
-            when (playbackStateCompat.state) {
-                PlaybackStateCompat.STATE_PLAYING -> it.setPlayingState()
-                PlaybackStateCompat.STATE_PAUSED -> it.setPausedState()
-            }
+            it.setPlaybackState(playbackStateCompat)
         }
     }
 
@@ -104,7 +105,20 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
             }
         }
 
-        fun setPlayingState() {
+        fun setNoneState() {
+            itemMusicBinding.thumbnailState.apply {
+                isVisible = false
+            }
+        }
+
+        fun setPlaybackState(playbackStateCompat: PlaybackStateCompat) {
+            when (playbackStateCompat.state) {
+                PlaybackStateCompat.STATE_PLAYING -> setPlayingState()
+                PlaybackStateCompat.STATE_PAUSED -> setPausedState()
+            }
+        }
+
+        private fun setPlayingState() {
             val context = itemMusicBinding.root.context
             itemMusicBinding.thumbnailState.apply {
                 isVisible = true
@@ -112,18 +126,11 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
             }
         }
 
-        fun setPausedState() {
+        private fun setPausedState() {
             val context = itemMusicBinding.root.context
             itemMusicBinding.thumbnailState.apply {
                 isVisible = true
                 setImageDrawable(context.getDrawable(R.drawable.ic_pause_24px))
-            }
-        }
-
-        fun setNoneState() {
-            itemMusicBinding.thumbnailState.apply {
-                isVisible = false
-                setImageDrawable(null)
             }
         }
     }
