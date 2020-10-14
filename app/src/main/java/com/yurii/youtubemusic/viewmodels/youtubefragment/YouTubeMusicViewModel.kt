@@ -22,7 +22,6 @@ import com.yurii.youtubemusic.services.youtube.IYouTubeService
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
-import com.yurii.youtubemusic.videoslist.VideoItemProvider
 import java.lang.Exception
 import java.lang.RuntimeException
 import java.util.ArrayList
@@ -183,25 +182,6 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
                     videosLoader?.onError(error)
                 }
             })
-    }
-
-
-    inner class VideoItemProviderImplementation : VideoItemProvider {
-        override fun download(videoItem: VideoItem) = this@YouTubeMusicViewModel.startDownloadMusic(videoItem)
-
-        override fun downloadAndAddCategories(videoItem: VideoItem, categories: List<Category>) {
-            this@YouTubeMusicViewModel.startDownloadMusic(videoItem, categories.toTypedArray())
-        }
-
-        override fun cancelDownload(videoItem: VideoItem) = this@YouTubeMusicViewModel.stopDownloading(videoItem)
-
-        override fun remove(videoItem: VideoItem) = this@YouTubeMusicViewModel.removeVideoItem(videoItem)
-
-        override fun exists(videoItem: VideoItem): Boolean = this@YouTubeMusicViewModel.exists(videoItem)
-
-        override fun isLoading(videoItem: VideoItem): Boolean = this@YouTubeMusicViewModel.isVideoItemLoading(videoItem)
-
-        override fun getCurrentProgress(videoItem: VideoItem): Progress? = this@YouTubeMusicViewModel.getCurrentProgress(videoItem)
     }
 
     companion object {

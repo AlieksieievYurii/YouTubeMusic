@@ -33,6 +33,7 @@ import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.videoslist.DialogRequests
+import com.yurii.youtubemusic.videoslist.VideoItemProvider
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
@@ -97,7 +98,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initRecyclerView() {
-        videosListAdapter = VideosListAdapter(requireContext(), viewModel.VideoItemProviderImplementation(), this)
+        videosListAdapter = VideosListAdapter(requireContext(), VideoItemProviderCallBacks(), this)
         val recyclerView = binding.videos
 
         val layoutManager = LinearLayoutManager(context)
@@ -273,6 +274,24 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
         SelectCategoriesDialog.create {
             onApplyCategories.invoke(it)
         }.show(requireActivity().supportFragmentManager, "SelectCategoriesDialog")
+    }
+
+    inner class VideoItemProviderCallBacks : VideoItemProvider {
+        override fun download(videoItem: VideoItem) = viewModel.startDownloadMusic(videoItem)
+
+        override fun downloadAndAddCategories(videoItem: VideoItem, categories: List<Category>) {
+            viewModel.startDownloadMusic(videoItem, categories.toTypedArray())
+        }
+
+        override fun cancelDownload(videoItem: VideoItem) = viewModel.stopDownloading(videoItem)
+
+        override fun remove(videoItem: VideoItem) = viewModel.removeVideoItem(videoItem)
+
+        override fun exists(videoItem: VideoItem): Boolean = viewModel.exists(videoItem)
+
+        override fun isLoading(videoItem: VideoItem): Boolean = viewModel.isVideoItemLoading(videoItem)
+
+        override fun getCurrentProgress(videoItem: VideoItem): Progress? = viewModel.getCurrentProgress(videoItem)
     }
 
     companion object {
