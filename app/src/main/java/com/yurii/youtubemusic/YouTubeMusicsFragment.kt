@@ -168,6 +168,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
     override fun onDownloadingFinished(videoItem: VideoItem) {
         videosListAdapter.setFinishedState(videoItem)
+        mainActivityViewModel.notifyVideoItemHasBeenDownloaded(videoItem)
     }
 
     override fun onDownloadingFailed(videoItem: VideoItem, error: Exception) {

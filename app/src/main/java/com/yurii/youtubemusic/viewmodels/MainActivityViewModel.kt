@@ -2,8 +2,10 @@ package com.yurii.youtubemusic.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.yurii.youtubemusic.models.VideoItem
 
 open class Event {
     private var hasBeenHandled = false
@@ -28,6 +30,9 @@ open class DataEvent<out T>(val content: T) {
 }
 
 class MainActivityViewModel : ViewModel() {
+    private val _onVideoItemHasBeenDownloaded: MutableLiveData<DataEvent<VideoItem>> = MutableLiveData()
+    val onVideoItemHasBeenDownloaded: LiveData<DataEvent<VideoItem>> = _onVideoItemHasBeenDownloaded
+
     private val _onMediaItemIsDeleted: MutableLiveData<DataEvent<String>> = MutableLiveData()
     val onMediaItemIsDeleted: LiveData<DataEvent<String>> = _onMediaItemIsDeleted
 
@@ -42,4 +47,6 @@ class MainActivityViewModel : ViewModel() {
     fun logOut() = _logOutEvent.postValue(Event())
 
     fun notifyMediaItemHasBeenDeleted(id: String) = _onMediaItemIsDeleted.postValue(DataEvent(id))
+
+    fun notifyVideoItemHasBeenDownloaded(videoItem: VideoItem) = _onVideoItemHasBeenDownloaded.postValue(DataEvent(videoItem))
 }

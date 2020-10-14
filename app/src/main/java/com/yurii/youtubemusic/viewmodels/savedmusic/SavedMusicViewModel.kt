@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData
 import com.yurii.youtubemusic.mediaservice.CATEGORIES_CONTENT
 import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.VideoItem
 
 class SavedMusicViewModel(application: Application, musicServiceConnection: MusicServiceConnection) : AndroidViewModel(application) {
     private val _categoryItems = MutableLiveData<List<Category>>()
@@ -36,6 +37,7 @@ class SavedMusicViewModel(application: Application, musicServiceConnection: Musi
     }
 
     fun deleteMediaItem(mediaId: String) = musicServiceConnection.requestDeleteMediaItem(mediaId)
+    fun notifyVideoItemHasBeenDownloaded(mediaId: String) = musicServiceConnection.requestAddMediaItem(mediaId)
 
     private val musicServiceConnection = musicServiceConnection.also {
         it.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)

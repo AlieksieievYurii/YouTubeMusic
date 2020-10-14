@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -38,6 +39,11 @@ class MediaItemsFragment : Fragment() {
 
         mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
             mediaItemsAdapterController.removeItemWithId(it.content)
+        })
+
+        mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
+            Toast.makeText(requireContext(), "Dupa ${it.content}", Toast.LENGTH_LONG).show()
+            //TODO(alieksiy) Refresh recycler view
         })
 
         return binding.root
