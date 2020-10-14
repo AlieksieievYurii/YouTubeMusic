@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.activityViewModels
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.playlists.PlayListsDialogFragment
@@ -33,6 +34,7 @@ import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.videoslist.DialogRequests
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
+import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeMusicViewModel
@@ -42,6 +44,7 @@ import java.lang.IllegalArgumentException
 
 
 class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, DialogRequests {
+    private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private lateinit var viewModel: YouTubeMusicViewModel
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videosListAdapter: VideosListAdapter
@@ -65,7 +68,8 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
             onClickOption = {
                 when (it) {
                     R.id.item_log_out -> {
-                        onSignOut()
+                        mainActivityViewModel.logOut()
+                        viewModel.signOut()
                     }
                 }
             }
@@ -89,11 +93,6 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
     private fun getGoogleSignInAccount(): GoogleSignInAccount {
         return this.arguments?.getParcelable(GOOGLE_SIGN_IN)
             ?: throw IllegalArgumentException("GoogleSignIn is required!")
-    }
-
-    private fun onSignOut() {
-        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(MainActivity.createSignOutIntent())
-        viewModel.signOut()
     }
 
     @SuppressLint("ClickableViewAccessibility")

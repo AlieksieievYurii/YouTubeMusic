@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -27,9 +28,15 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
         initActivity()
         showDefaultFragment()
-        viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
+
+        viewModel.logOutAction.observe(this, Observer {
+            it.handle {
+                handleSignOut()
+            }
+        })
     }
 
     private fun showDefaultFragment() {
@@ -132,20 +139,17 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         const val EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC = "com.yurii.youtubemusic.mainactivity.extra.launch.youtubemusic.fragment"
 
         private const val ACTION_USER_SIGNED_IN = "com.yurii.youtubemusic.mainactivity.action.signin"
-        private const val ACTION_USER_SIGNED_OUT = "com.yurii.youtubemusic.mainactivity.action.signout"
 
         private const val EXTRA_GOOGLE_SIGN_IN_ACCOUNT = "com.yurii.youtubemusic.mainactivity.extra.googlesigninaccount"
 
         val BROAD_CAST_RECEIVER_FILTER = IntentFilter().apply {
             addAction(ACTION_USER_SIGNED_IN)
-            addAction(ACTION_USER_SIGNED_OUT)
         }
 
         fun createSignInIntent(account: GoogleSignInAccount): Intent = Intent(ACTION_USER_SIGNED_IN).apply {
             putExtra(EXTRA_GOOGLE_SIGN_IN_ACCOUNT, account)
         }
 
-        fun createSignOutIntent(): Intent = Intent(ACTION_USER_SIGNED_OUT)
     }
 
     private inner class MyBroadCastReceiver : BroadcastReceiver() {
@@ -155,7 +159,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                     val googleSignInAccount = intent.getParcelableExtra(EXTRA_GOOGLE_SIGN_IN_ACCOUNT) as GoogleSignInAccount
                     handleSignIn(googleSignInAccount)
                 }
-                ACTION_USER_SIGNED_OUT -> handleSignOut()
             }
         }
     }
