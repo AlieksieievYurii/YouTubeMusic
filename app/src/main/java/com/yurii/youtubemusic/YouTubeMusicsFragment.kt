@@ -285,7 +285,10 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
         override fun cancelDownload(videoItem: VideoItem) = viewModel.stopDownloading(videoItem)
 
-        override fun remove(videoItem: VideoItem) = viewModel.removeVideoItem(videoItem)
+        override fun remove(videoItem: VideoItem) {
+            viewModel.removeVideoItem(videoItem)
+            mainActivityViewModel.notifyMediaItemHasBeenDeleted(videoItem.videoId)
+        }
 
         override fun exists(videoItem: VideoItem): Boolean = viewModel.exists(videoItem)
 

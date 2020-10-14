@@ -16,7 +16,7 @@ open class Event {
     }
 }
 
-open class DataEvent<out T>(private val content: T) {
+open class DataEvent<out T>(val content: T) {
     private var hasBeenHandled = false
 
     fun handleContent(c: ((content: T) -> Unit)) {
@@ -28,6 +28,9 @@ open class DataEvent<out T>(private val content: T) {
 }
 
 class MainActivityViewModel : ViewModel() {
+    private val _onMediaItemIsDeleted: MutableLiveData<DataEvent<String>> = MutableLiveData()
+    val onMediaItemIsDeleted: LiveData<DataEvent<String>> = _onMediaItemIsDeleted
+
     private val _logInEvent: MutableLiveData<DataEvent<GoogleSignInAccount>> = MutableLiveData()
     val logInEvent: LiveData<DataEvent<GoogleSignInAccount>> = _logInEvent
 
@@ -37,4 +40,6 @@ class MainActivityViewModel : ViewModel() {
     fun signIn(account: GoogleSignInAccount) = _logInEvent.postValue(DataEvent(account))
 
     fun logOut() = _logOutEvent.postValue(Event())
+
+    fun notifyMediaItemHasBeenDeleted(id: String) = _onMediaItemIsDeleted.postValue(DataEvent(id))
 }

@@ -1,10 +1,10 @@
 package com.yurii.youtubemusic
 
 import android.content.Intent
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.google.android.material.tabs.TabLayoutMediator
@@ -14,6 +14,7 @@ import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
 import com.yurii.youtubemusic.utilities.TabParameters
 import com.yurii.youtubemusic.videoslist.CategoriesTabAdapter
+import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.savedmusic.SavedMusicViewModel
 
 
@@ -21,6 +22,7 @@ import com.yurii.youtubemusic.viewmodels.savedmusic.SavedMusicViewModel
  * A simple [Fragment] subclass.
  */
 class SavedMusicFragment : TabFragment() {
+    private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val savedMusicViewModel by viewModels<SavedMusicViewModel> {
         Injector.provideSavedMusicViewModel(requireContext())
     }
@@ -49,6 +51,12 @@ class SavedMusicFragment : TabFragment() {
 
         savedMusicViewModel.categoryItems.observe(viewLifecycleOwner, Observer { categoryItems ->
             initCategoriesLayout(categoryItems)
+        })
+
+        mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
+            it.handleContent { mediaId ->
+                savedMusicViewModel.deleteMediaItem(mediaId)
+            }
         })
     }
 

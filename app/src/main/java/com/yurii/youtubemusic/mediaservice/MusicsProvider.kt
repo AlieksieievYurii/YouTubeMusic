@@ -20,7 +20,7 @@ class MusicsProvider(private val context: Context) {
     }
 
     private val mediaMetadataProvider = MediaMetadataProvider(context)
-    private lateinit var metaDataItems: List<MediaMetaData>
+    private lateinit var metaDataItems: ArrayList<MediaMetaData>
     private val categories: ArrayList<Category> by lazy { retrieveCategories() }
 
     var isMusicsInitialized: Boolean = false
@@ -41,6 +41,12 @@ class MusicsProvider(private val context: Context) {
     fun updateMediaItems() {
         updateCategories()
         updateMetadata()
+    }
+
+    fun deleteMediaItem(mediaId: String) {
+        metaDataItems.find { it.mediaId == mediaId }?.run {
+            metaDataItems.remove(this)
+        }
     }
 
     private fun updateMetadata() {
@@ -98,13 +104,13 @@ class MusicsProvider(private val context: Context) {
 }
 
 private class MusicsLoader(private val context: Context, private val mediaMetadataProvider: MediaMetadataProvider) :
-    AsyncTask<Void, Void, List<MediaMetaData>>() {
-    var onLoadSuccessfully: ((musicItems: List<MediaMetaData>) -> Unit)? = null
+    AsyncTask<Void, Void, ArrayList<MediaMetaData>>() {
+    var onLoadSuccessfully: ((musicItems: ArrayList<MediaMetaData>) -> Unit)? = null
     var onFailedToLoad: ((error: Exception) -> Unit)? = null
 
     private var currentError: Exception? = null
 
-    override fun doInBackground(vararg params: Void?): List<MediaMetaData>? {
+    override fun doInBackground(vararg params: Void?): ArrayList<MediaMetaData>? {
         return try {
             getMetaDataItems()
         } catch (error: Exception) {
@@ -113,7 +119,7 @@ private class MusicsLoader(private val context: Context, private val mediaMetada
         }
     }
 
-    private fun getMetaDataItems(): List<MediaMetaData> {
+    private fun getMetaDataItems(): ArrayList<MediaMetaData> {
         return ArrayList<MediaMetaData>().apply {
             retrieveMusics().forEach { file ->
                 this.add(mediaMetadataProvider.readMetadata(file.nameWithoutExtension))
@@ -123,7 +129,7 @@ private class MusicsLoader(private val context: Context, private val mediaMetada
 
     private fun retrieveMusics(): List<File> = DataStorage.getAllMusicFiles(context)
 
-    override fun onPostExecute(result: List<MediaMetaData>?) {
+    override fun onPostExecute(result: ArrayList<MediaMetaData>?) {
         super.onPostExecute(result)
         if (result != null)
             onLoadSuccessfully?.invoke(result)

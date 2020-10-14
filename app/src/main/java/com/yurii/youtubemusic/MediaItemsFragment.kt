@@ -35,6 +35,11 @@ class MediaItemsFragment : Fragment() {
         val category: Category = requireArguments().getParcelable(EXTRA_CATEGORY)!!
         initRecyclerView(binding.mediaItems)
         initViewModel(category)
+
+        mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
+            mediaItemsAdapterController.removeItemWithId(it.content)
+        })
+
         return binding.root
     }
 
@@ -66,7 +71,7 @@ class MediaItemsFragment : Fragment() {
     }
 
     private fun deleteMediaItem(mediaItem: MediaMetaData) {
-
+        mediaItemsAdapterController.removeItemWithId(mediaItem.mediaId)
     }
 
     private fun openCategoriesEditor(mediaItem: MediaMetaData) {

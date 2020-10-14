@@ -28,10 +28,12 @@ private const val TAG = "MediaBackgroundService"
 const val CATEGORIES_CONTENT = "__youtube_musics_categories__"
 const val EMPTY_CONTENT = "__empty__"
 
+const val REQUEST_COMMAND_DELETE_MEDIA_ITEM = "__request_command_delete_media_item"
 const val REQUEST_COMMAND_UPDATE_MEDIA_ITEMS = "__request_command_update_media_items"
 const val REQUEST_CODE_UPDATE_MEDIA_ITEMS = 1001
 
 const val PLAYBACK_STATE_MEDIA_ITEM = "com.yurii.youtubemusic.playback.state.media.item"
+const val EXTRA_MEDIA_ITEM = "com.yurii.youtubemusic.playback.media.item"
 
 private const val VOLUME_DUCK = 0.2f
 private const val VOLUME_NORMAL = 1.0f
@@ -269,12 +271,25 @@ class MediaService : MediaBrowserServiceCompat() {
         stopSelf()
     }
 
+    private fun deleteMediaItem(mediaId: String) {
+        musicProvider.deleteMediaItem(mediaId)
+        if (queueProvider.queue.getCurrentQueueItem().mediaId == mediaId)
+            handleStopRequest()
+        queueProvider.queue.deleteMediaItemIfExistsInQueue(mediaId)
+    }
+
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
         override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
             super.onCommand(command, extras, cb)
-            if (command == REQUEST_COMMAND_UPDATE_MEDIA_ITEMS) {
-                musicProvider.updateMediaItems()
-                cb?.send(REQUEST_CODE_UPDATE_MEDIA_ITEMS, null)
+            when (command) {
+                REQUEST_COMMAND_DELETE_MEDIA_ITEM -> {
+                    val mediaId = extras!!.getString(EXTRA_MEDIA_ITEM) ?: throw IllegalStateException("MediaId is required")
+                    deleteMediaItem(mediaId)
+                }
+                REQUEST_COMMAND_UPDATE_MEDIA_ITEMS -> {
+                    musicProvider.updateMediaItems()
+                    cb?.send(REQUEST_CODE_UPDATE_MEDIA_ITEMS, null)
+                }
             }
         }
 

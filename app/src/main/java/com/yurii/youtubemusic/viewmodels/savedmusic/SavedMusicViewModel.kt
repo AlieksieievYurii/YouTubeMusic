@@ -35,6 +35,7 @@ class SavedMusicViewModel(application: Application, musicServiceConnection: Musi
         }
     }
 
+    fun deleteMediaItem(mediaId: String) = musicServiceConnection.requestDeleteMediaItem(mediaId)
 
     private val musicServiceConnection = musicServiceConnection.also {
         it.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
