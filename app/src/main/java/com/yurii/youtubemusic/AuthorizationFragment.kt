@@ -25,7 +25,7 @@ class AuthorizationFragment : TabFragment() {
     override fun getTabParameters(): TabParameters {
         return TabParameters(
             layoutId = R.layout.fragment_authorization,
-            title = context!!.getString(R.string.label_fragment_title_youtube_musics)
+            title = requireContext().getString(R.string.label_fragment_title_youtube_musics)
         )
     }
 
@@ -50,7 +50,7 @@ class AuthorizationFragment : TabFragment() {
     }
 
     private fun sendBroadCastThatUserHasSignedIn(account: GoogleSignInAccount) {
-        LocalBroadcastManager.getInstance(context!!).sendBroadcast(MainActivity.createSignInIntent(account))
+        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(MainActivity.createSignInIntent(account))
     }
 
     private fun handleDeclinedSignIn() {
