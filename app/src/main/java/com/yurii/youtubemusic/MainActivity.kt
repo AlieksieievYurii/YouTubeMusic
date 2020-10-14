@@ -8,14 +8,17 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
 import com.yurii.youtubemusic.utilities.*
+import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
+    private lateinit var viewModel: MainActivityViewModel
     private var activeBottomMenuItem: Int = -1
     private val broadCastReceiver = MyBroadCastReceiver()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
@@ -26,6 +29,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         super.onCreate(savedInstanceState)
         initActivity()
         showDefaultFragment()
+        viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
     }
 
     private fun showDefaultFragment() {
