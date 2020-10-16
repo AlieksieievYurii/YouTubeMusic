@@ -157,6 +157,9 @@ class MediaService : MediaBrowserServiceCompat() {
 
         var actions: Long = PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
 
+        if (!queueProvider.queueExists())
+            return actions
+
         if (currentState == PlaybackStateCompat.STATE_PLAYING)
             actions = actions or PlaybackStateCompat.ACTION_PAUSE
 
@@ -287,6 +290,8 @@ class MediaService : MediaBrowserServiceCompat() {
 
         if (queueProvider.queueExists())
             queueProvider.addMediaItemToQueue(mediaId)
+
+        updateCurrentPlaybackState()
     }
 
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {

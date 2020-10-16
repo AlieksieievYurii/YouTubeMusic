@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -42,8 +41,7 @@ class MediaItemsFragment : Fragment() {
         })
 
         mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
-            //TODO(alieksiy) Refresh recycler view
-            binding.mediaItems.adapter!!.notifyDataSetChanged()
+            mediaItemsAdapterController.addNewMediaItem(viewModel.getMetaData(it.content.videoId))
         })
 
         return binding.root

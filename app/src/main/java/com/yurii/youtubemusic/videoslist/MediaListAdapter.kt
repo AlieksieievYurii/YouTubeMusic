@@ -17,6 +17,7 @@ interface MediaListAdapterController {
     fun onChangePlaybackState(mediaMetaData: MediaMetaData, playbackStateCompat: PlaybackStateCompat)
     fun setMediaItems(list: List<MediaMetaData>)
     fun removeItemWithId(id: String)
+    fun addNewMediaItem(mediaItem: MediaMetaData)
 }
 
 class MediaListAdapter(context: Context, private val callback: CallBack) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(),
@@ -42,6 +43,11 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
             notifyItemRemoved(musics.indexOf(this))
             musics.remove(this)
         }
+    }
+
+    override fun addNewMediaItem(mediaItem: MediaMetaData) {
+        musics.add(mediaItem)
+        notifyItemInserted(musics.indexOf(mediaItem))
     }
 
 
