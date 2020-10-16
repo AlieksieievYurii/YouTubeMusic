@@ -39,7 +39,7 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     }
 
     override fun removeItemWithId(id: String) {
-        musics.find { it.mediaId == id }.run {
+        musics.find { it.mediaId == id }?.run {
             notifyItemRemoved(musics.indexOf(this))
             musics.remove(this)
         }

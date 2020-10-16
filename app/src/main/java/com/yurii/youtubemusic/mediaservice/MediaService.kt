@@ -280,7 +280,7 @@ class MediaService : MediaBrowserServiceCompat() {
         if (queueProvider.queueExists()) {
             if (queueProvider.getQueue().getCurrentQueueItem().mediaId == mediaId)
                 handleStopRequest()
-            queueProvider.getQueue().deleteMediaItemIfExistsInQueue(mediaId)
+            queueProvider.deleteMediaItemIfExistsInQueue(mediaId)
         }
     }
 

@@ -41,7 +41,9 @@ class MediaItemsFragment : Fragment() {
         })
 
         mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
-            mediaItemsAdapterController.addNewMediaItem(viewModel.getMetaData(it.content.videoId))
+            val metadata = viewModel.getMetaData(it.content.videoId)
+            if (viewModel.category == Category.ALL || viewModel.category in metadata.categories)
+                mediaItemsAdapterController.addNewMediaItem(metadata)
         })
 
         return binding.root

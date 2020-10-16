@@ -13,11 +13,7 @@ import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 
-class MediaItemsViewModel(
-    private val context: Context,
-    private val category: Category,
-    musicServiceConnection: MusicServiceConnection
-) {
+class MediaItemsViewModel(context: Context, val category: Category, musicServiceConnection: MusicServiceConnection) {
     private val mediaMetadataProvider = MediaMetadataProvider(context)
     private val _mediaItems = MutableLiveData<List<MediaMetaData>>()
     val mediaItems: LiveData<List<MediaMetaData>> = _mediaItems

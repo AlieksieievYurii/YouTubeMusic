@@ -32,10 +32,10 @@ class Queue private constructor(fromItems: List<MediaMetaData>) {
         throw QueueException("Cannot find item: '$mediaId' in the queue")
     }
 
-    fun deleteMediaItemIfExistsInQueue(mediaId: String) {
-        queueItems.find { it.mediaId == mediaId }?.run {
-            queueItems.remove(this)
-        }
+    fun deleteMediaItemFromQueue(mediaId: String) {
+        val currentMediaItem = queueItems[currentPosition]
+        queueItems.find { it.mediaId == mediaId }?.run { queueItems.remove(this) }
+        currentPosition = queueItems.indexOf(currentMediaItem)
     }
 
     fun getCurrentQueueItem() = queueItems[currentPosition]

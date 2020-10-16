@@ -25,6 +25,14 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val mu
 
     fun queueExists(): Boolean = queue != null
 
+    fun deleteMediaItemIfExistsInQueue(mediaId: String) {
+        if (mediaId == getQueue().getCurrentQueueItem().mediaId) {
+            getQueue().deleteMediaItemFromQueue(mediaId)
+            queue = null
+        } else
+            getQueue().deleteMediaItemFromQueue(mediaId)
+    }
+
     fun addMediaItemToQueue(mediaId: String) {
         val metaData = musicsProvider.getMetaDataItem(mediaId)
         if (playingCategory == Category.ALL || playingCategory in metaData.categories)
