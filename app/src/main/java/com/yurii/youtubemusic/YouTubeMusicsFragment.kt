@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.activityViewModels
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.playlists.PlayListsDialogFragment
@@ -32,7 +33,9 @@ import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.videoslist.DialogRequests
+import com.yurii.youtubemusic.videoslist.VideoItemProvider
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
+import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
 import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeMusicViewModel
@@ -42,6 +45,7 @@ import java.lang.IllegalArgumentException
 
 
 class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, DialogRequests {
+    private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private lateinit var viewModel: YouTubeMusicViewModel
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videosListAdapter: VideosListAdapter
@@ -65,7 +69,8 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
             onClickOption = {
                 when (it) {
                     R.id.item_log_out -> {
-                        onSignOut()
+                        mainActivityViewModel.logOut()
+                        viewModel.signOut()
                     }
                 }
             }
@@ -91,14 +96,9 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
             ?: throw IllegalArgumentException("GoogleSignIn is required!")
     }
 
-    private fun onSignOut() {
-        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(MainActivity.createSignOutIntent())
-        viewModel.signOut()
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     private fun initRecyclerView() {
-        videosListAdapter = VideosListAdapter(requireContext(), viewModel.VideoItemProviderImplementation(), this)
+        videosListAdapter = VideosListAdapter(requireContext(), VideoItemProviderCallBacks(), this)
         val recyclerView = binding.videos
 
         val layoutManager = LinearLayoutManager(context)
@@ -168,6 +168,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
     override fun onDownloadingFinished(videoItem: VideoItem) {
         videosListAdapter.setFinishedState(videoItem)
+        mainActivityViewModel.notifyVideoItemHasBeenDownloaded(videoItem)
     }
 
     override fun onDownloadingFailed(videoItem: VideoItem, error: Exception) {
@@ -274,6 +275,27 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
         SelectCategoriesDialog.create {
             onApplyCategories.invoke(it)
         }.show(requireActivity().supportFragmentManager, "SelectCategoriesDialog")
+    }
+
+    inner class VideoItemProviderCallBacks : VideoItemProvider {
+        override fun download(videoItem: VideoItem) = viewModel.startDownloadMusic(videoItem)
+
+        override fun downloadAndAddCategories(videoItem: VideoItem, categories: List<Category>) {
+            viewModel.startDownloadMusic(videoItem, categories.toTypedArray())
+        }
+
+        override fun cancelDownload(videoItem: VideoItem) = viewModel.stopDownloading(videoItem)
+
+        override fun remove(videoItem: VideoItem) {
+            viewModel.removeVideoItem(videoItem)
+            mainActivityViewModel.notifyMediaItemHasBeenDeleted(videoItem.videoId)
+        }
+
+        override fun exists(videoItem: VideoItem): Boolean = viewModel.exists(videoItem)
+
+        override fun isLoading(videoItem: VideoItem): Boolean = viewModel.isVideoItemLoading(videoItem)
+
+        override fun getCurrentProgress(videoItem: VideoItem): Progress? = viewModel.getCurrentProgress(videoItem)
     }
 
     companion object {

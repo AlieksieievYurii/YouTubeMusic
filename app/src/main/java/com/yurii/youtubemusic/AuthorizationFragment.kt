@@ -5,16 +5,17 @@ import android.content.Intent
 
 import android.widget.Toast
 import androidx.databinding.ViewDataBinding
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import androidx.fragment.app.activityViewModels
 import com.google.android.gms.common.api.ApiException
 import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
 import com.yurii.youtubemusic.utilities.DoesNotHaveRequiredScopes
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.utilities.TabFragment
 import com.yurii.youtubemusic.utilities.TabParameters
+import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 
 class AuthorizationFragment : TabFragment() {
+    private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private lateinit var binding: FragmentAuthorizationBinding
 
     override fun onInflatedView(viewDataBinding: ViewDataBinding) {
@@ -25,7 +26,7 @@ class AuthorizationFragment : TabFragment() {
     override fun getTabParameters(): TabParameters {
         return TabParameters(
             layoutId = R.layout.fragment_authorization,
-            title = context!!.getString(R.string.label_fragment_title_youtube_musics)
+            title = requireContext().getString(R.string.label_fragment_title_youtube_musics)
         )
     }
 
@@ -39,7 +40,7 @@ class AuthorizationFragment : TabFragment() {
     private fun handleSignInResult(result: Intent) {
         try {
             val account = GoogleAccount.obtainAccountFromIntent(result)
-            sendBroadCastThatUserHasSignedIn(account)
+            mainActivityViewModel.signIn(account)
         } catch (error: ApiException) {
             Toast.makeText(context, "${error.message}, code:${error.statusCode}", Toast.LENGTH_LONG).show()
             binding.signInButton.isEnabled = true
@@ -49,9 +50,6 @@ class AuthorizationFragment : TabFragment() {
         }
     }
 
-    private fun sendBroadCastThatUserHasSignedIn(account: GoogleSignInAccount) {
-        LocalBroadcastManager.getInstance(context!!).sendBroadcast(MainActivity.createSignInIntent(account))
-    }
 
     private fun handleDeclinedSignIn() {
         binding.signInButton.isEnabled = true

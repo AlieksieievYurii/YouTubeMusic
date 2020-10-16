@@ -6,36 +6,55 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.videoslist.MediaListAdapter
 import com.yurii.youtubemusic.videoslist.MediaListAdapterController
+import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.mediaitems.MediaItemsViewModel
 
 class MediaItemsFragment : Fragment() {
+    private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private lateinit var viewModel: MediaItemsViewModel
     private lateinit var mediaItemsAdapterController: MediaListAdapterController
+    private lateinit var binding: FragmentMediaItemsBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val root = inflater.inflate(R.layout.fragment_media_items, container, false)
-        val mediaItemsRecyclerView: RecyclerView = root.findViewById(R.id.media_items)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_media_items, container, false)
         val category: Category = requireArguments().getParcelable(EXTRA_CATEGORY)!!
-        initRecyclerView(mediaItemsRecyclerView)
+        initRecyclerView(binding.mediaItems)
         initViewModel(category)
-        return root
+
+        mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
+            mediaItemsAdapterController.removeItemWithId(it.content)
+        })
+
+        mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
+            val metadata = viewModel.getMetaData(it.content.videoId)
+            if (viewModel.category == Category.ALL || viewModel.category in metadata.categories)
+                mediaItemsAdapterController.addNewMediaItem(metadata)
+        })
+
+        return binding.root
     }
 
     private fun initViewModel(category: Category) {
         viewModel = Injector.provideMediaItemsViewModel(requireContext(), category)
         viewModel.mediaItems.observe(viewLifecycleOwner, Observer {
             mediaItemsAdapterController.setMediaItems(it)
+            binding.loadingBar.isVisible = false
+            binding.mediaItems.isVisible = true
         })
 
         viewModel.playbackState.observe(viewLifecycleOwner, Observer {
@@ -58,7 +77,7 @@ class MediaItemsFragment : Fragment() {
     }
 
     private fun deleteMediaItem(mediaItem: MediaMetaData) {
-
+        mediaItemsAdapterController.removeItemWithId(mediaItem.mediaId)
     }
 
     private fun openCategoriesEditor(mediaItem: MediaMetaData) {

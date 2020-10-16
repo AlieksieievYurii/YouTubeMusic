@@ -20,7 +20,7 @@ interface MusicDownloaderServiceInterface {
 
 interface DownloadingUpdater {
     fun onProgress(videoItem: VideoItem, progress: Progress)
-    fun onFinished(videoItem: VideoItem, outFile: File, startId: Int)
+    fun onFinished(videoItem: VideoItem, startId: Int)
     fun onError(videoItem: VideoItem, exception: Exception, startId: Int)
 }
 
@@ -68,7 +68,7 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
         })
     }
 
-    override fun onFinished(videoItem: VideoItem, outFile: File, startId: Int) {
+    override fun onFinished(videoItem: VideoItem, startId: Int) {
         stopSelf(startId)
 
         localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_FINISHED_ACTION).also {

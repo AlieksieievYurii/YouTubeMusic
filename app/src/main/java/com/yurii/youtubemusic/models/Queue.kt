@@ -19,6 +19,8 @@ class Queue private constructor(fromItems: List<MediaMetaData>) {
         currentPosition = queueItems.lastIndex
     }
 
+    fun addToQueue(mediaMetaData: MediaMetaData) = queueItems.add(mediaMetaData)
+
     fun setStartItem(mediaId: String) {
         queueItems.forEachIndexed { index, queueMediaItem ->
             if (mediaId == queueMediaItem.mediaId) {
@@ -28,6 +30,12 @@ class Queue private constructor(fromItems: List<MediaMetaData>) {
         }
 
         throw QueueException("Cannot find item: '$mediaId' in the queue")
+    }
+
+    fun deleteMediaItemFromQueue(mediaId: String) {
+        val currentMediaItem = queueItems[currentPosition]
+        queueItems.find { it.mediaId == mediaId }?.run { queueItems.remove(this) }
+        currentPosition = queueItems.indexOf(currentMediaItem)
     }
 
     fun getCurrentQueueItem() = queueItems[currentPosition]

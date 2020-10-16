@@ -11,12 +11,10 @@ import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
 import com.yurii.youtubemusic.models.MediaMetaData
+import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 
-class MediaItemsViewModel(
-    private val context: Context,
-    private val category: Category,
-    musicServiceConnection: MusicServiceConnection
-) {
+class MediaItemsViewModel(context: Context, val category: Category, musicServiceConnection: MusicServiceConnection) {
+    private val mediaMetadataProvider = MediaMetadataProvider(context)
     private val _mediaItems = MutableLiveData<List<MediaMetaData>>()
     val mediaItems: LiveData<List<MediaMetaData>> = _mediaItems
 
@@ -34,6 +32,8 @@ class MediaItemsViewModel(
             //TODO Implement error handling
         }
     }
+
+    fun getMetaData(mediaId: String): MediaMetaData = mediaMetadataProvider.readMetadata(mediaId)
 
     fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat? {
         val currentMediaItem = playbackState.value!!.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)

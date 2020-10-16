@@ -1,31 +1,39 @@
 package com.yurii.youtubemusic
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.databinding.DataBindingUtil
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
 import com.yurii.youtubemusic.utilities.*
+import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
+    private lateinit var viewModel: MainActivityViewModel
     private var activeBottomMenuItem: Int = -1
-    private val broadCastReceiver = MyBroadCastReceiver()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
 
     private lateinit var activityMainBinding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
         initActivity()
         showDefaultFragment()
+
+        viewModel.logInEvent.observe(this, Observer {
+            it.handleContent { googleAccount -> handleSignIn(googleAccount) }
+        })
+
+        viewModel.logOutEvent.observe(this, Observer {
+            it.handle { handleSignOut() }
+        })
     }
 
     private fun showDefaultFragment() {
@@ -97,16 +105,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadCastReceiver, BROAD_CAST_RECEIVER_FILTER)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadCastReceiver)
-    }
-
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent.getStringExtra(EXTRA_LAUNCH_FRAGMENT)?.let { fragmentExtra: String ->
@@ -126,33 +124,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         const val EXTRA_LAUNCH_FRAGMENT = "com.yurii.youtubemusic.mainactivity.extra.launch.fragment"
         const val EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC = "com.yurii.youtubemusic.mainactivity.extra.launch.savedmusic.fragment"
         const val EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC = "com.yurii.youtubemusic.mainactivity.extra.launch.youtubemusic.fragment"
-
-        private const val ACTION_USER_SIGNED_IN = "com.yurii.youtubemusic.mainactivity.action.signin"
-        private const val ACTION_USER_SIGNED_OUT = "com.yurii.youtubemusic.mainactivity.action.signout"
-
-        private const val EXTRA_GOOGLE_SIGN_IN_ACCOUNT = "com.yurii.youtubemusic.mainactivity.extra.googlesigninaccount"
-
-        val BROAD_CAST_RECEIVER_FILTER = IntentFilter().apply {
-            addAction(ACTION_USER_SIGNED_IN)
-            addAction(ACTION_USER_SIGNED_OUT)
-        }
-
-        fun createSignInIntent(account: GoogleSignInAccount): Intent = Intent(ACTION_USER_SIGNED_IN).apply {
-            putExtra(EXTRA_GOOGLE_SIGN_IN_ACCOUNT, account)
-        }
-
-        fun createSignOutIntent(): Intent = Intent(ACTION_USER_SIGNED_OUT)
     }
 
-    private inner class MyBroadCastReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                ACTION_USER_SIGNED_IN -> {
-                    val googleSignInAccount = intent.getParcelableExtra(EXTRA_GOOGLE_SIGN_IN_ACCOUNT) as GoogleSignInAccount
-                    handleSignIn(googleSignInAccount)
-                }
-                ACTION_USER_SIGNED_OUT -> handleSignOut()
-            }
-        }
-    }
 }
