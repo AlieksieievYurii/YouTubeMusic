@@ -11,9 +11,10 @@ import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
 import com.yurii.youtubemusic.models.MediaMetaData
+import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 
-class MediaItemsViewModel(context: Context, val category: Category, musicServiceConnection: MusicServiceConnection) {
+class MediaItemsViewModel(private val context: Context, val category: Category, musicServiceConnection: MusicServiceConnection) {
     private val mediaMetadataProvider = MediaMetadataProvider(context)
     private val _mediaItems = MutableLiveData<List<MediaMetaData>>()
     val mediaItems: LiveData<List<MediaMetaData>> = _mediaItems
@@ -38,6 +39,16 @@ class MediaItemsViewModel(context: Context, val category: Category, musicService
     fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat? {
         val currentMediaItem = playbackState.value!!.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
         return if (mediaItem == currentMediaItem) playbackState.value!! else null
+    }
+
+    fun deleteMediaItem(mediaMetaData: MediaMetaData) {
+        musicServiceConnection.requestDeleteMediaItem(mediaMetaData.mediaId)
+
+        mediaMetaData.mediaId.run {
+            DataStorage.getMusic(context, this).delete()
+            DataStorage.getMetadata(context, this).delete()
+            DataStorage.getThumbnail(context, this).delete()
+        }
     }
 
     fun onClickMediaItem(mediaMetaData: MediaMetaData) {

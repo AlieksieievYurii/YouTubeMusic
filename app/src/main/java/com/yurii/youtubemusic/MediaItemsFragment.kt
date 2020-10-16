@@ -18,6 +18,7 @@ import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
+import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.videoslist.MediaListAdapter
 import com.yurii.youtubemusic.videoslist.MediaListAdapterController
@@ -77,7 +78,16 @@ class MediaItemsFragment : Fragment() {
     }
 
     private fun deleteMediaItem(mediaItem: MediaMetaData) {
-        mediaItemsAdapterController.removeItemWithId(mediaItem.mediaId)
+        ConfirmDeletionDialog.create(
+            titleId = R.string.dialog_confirm_deletion_music_title,
+            messageId = R.string.dialog_confirm_deletion_music_message,
+            onConfirm = {
+                viewModel.deleteMediaItem(mediaItem)
+                mediaItemsAdapterController.removeItemWithId(mediaItem.mediaId)
+                mainActivityViewModel.notifyMediaItemHasBeenDeleted(mediaItem.mediaId)
+            }
+        ).show(requireActivity().supportFragmentManager, "RequestToDeleteMediaItem")
+
     }
 
     private fun openCategoriesEditor(mediaItem: MediaMetaData) {
