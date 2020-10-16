@@ -30,13 +30,22 @@ class VideoItemTask(
 
     override fun run() {
         try {
-            downloadMusic()
-            downloadThumbnail()
-            addMetadata()
+            downloadSource()
         } catch (error: Exception) {
             ThreadPool.completeTask(this)
             downloadingUpdater.onError(videoItem, error, serviceStartId)
         }
+    }
+
+    private fun downloadSource() {
+        try {
+            downloadMusic()
+            downloadThumbnail()
+            addMetadata()
+        } catch (_: InterruptedException) {
+            return
+        }
+        downloadingUpdater.onFinished(videoItem, serviceStartId)
     }
 
     fun cancel() {
@@ -91,7 +100,6 @@ class VideoItemTask(
 
         ThreadPool.completeTask(this)
         setFileName(outputFile)
-        downloadingUpdater.onFinished(videoItem, outputFile, serviceStartId)
     }
 
     private fun checkIfVideoIsLive(video: YoutubeVideo) {
@@ -120,7 +128,7 @@ class VideoItemTask(
                         bos.close()
                         bis.close()
                         outputFile.delete()
-                        return
+                        throw InterruptedException()
                     }
 
                     Log.i("Experiment", "${videoItem.videoId} is downloading")
