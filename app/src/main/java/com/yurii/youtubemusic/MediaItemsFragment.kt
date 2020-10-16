@@ -42,8 +42,8 @@ class MediaItemsFragment : Fragment() {
         })
 
         mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
-            Toast.makeText(requireContext(), "Dupa ${it.content}", Toast.LENGTH_LONG).show()
             //TODO(alieksiy) Refresh recycler view
+            binding.mediaItems.adapter!!.notifyDataSetChanged()
         })
 
         return binding.root

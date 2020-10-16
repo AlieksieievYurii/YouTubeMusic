@@ -19,6 +19,8 @@ class Queue private constructor(fromItems: List<MediaMetaData>) {
         currentPosition = queueItems.lastIndex
     }
 
+    fun addToQueue(mediaMetaData: MediaMetaData) = queueItems.add(mediaMetaData)
+
     fun setStartItem(mediaId: String) {
         queueItems.forEachIndexed { index, queueMediaItem ->
             if (mediaId == queueMediaItem.mediaId) {

@@ -62,6 +62,12 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
         }, null)
     }
 
+    fun requestAddMediaItem(mediaId: String) {
+        mediaController.sendCommand(REQUEST_COMMAND_ADD_NEW_MEDIA_ITEM, Bundle().apply {
+            putString(EXTRA_MEDIA_ITEM, mediaId)
+        }, null)
+    }
+
     private inner class MediaBrowserConnectionCallback(private val context: Context) : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             super.onConnected()

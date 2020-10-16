@@ -38,6 +38,12 @@ class MusicsProvider(private val context: Context) {
         return filterMediaItemsByCategory(category)
     }
 
+    fun addNewMediaItem(mediaId: String) {
+        metaDataItems.add(mediaMetadataProvider.readMetadata(mediaId))
+    }
+
+    fun getMetaDataItem(mediaId: String) = metaDataItems.find { it.mediaId == mediaId }!!
+
     fun updateMediaItems() {
         updateCategories()
         updateMetadata()
