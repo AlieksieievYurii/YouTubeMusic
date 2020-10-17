@@ -16,7 +16,7 @@ import com.yurii.youtubemusic.databinding.DialogSelectCategoriesBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Preferences
 
-private typealias OnApplyCallBack = (categories: List<Category>) -> Unit
+private typealias OnApplyCallBack = (categories: ArrayList<Category>) -> Unit
 
 class SelectCategoriesDialog : DialogFragment() {
     private lateinit var binding: DialogSelectCategoriesBinding
@@ -70,7 +70,7 @@ class SelectCategoriesDialog : DialogFragment() {
 
 private class CategoriesAdapter(context: Context, private val categories: List<Category>) : BaseAdapter() {
     private val layoutInflater = LayoutInflater.from(context)
-    val selectedCategories = mutableListOf<Category>()
+    val selectedCategories = ArrayList<Category>()
 
     @SuppressLint("ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
