@@ -131,10 +131,10 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
 
     fun getCurrentProgress(videoItem: VideoItem) = MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem)
 
-    fun startDownloadMusic(videoItem: VideoItem, categories: Array<Category> = emptyArray()) {
+    fun startDownloadMusic(videoItem: VideoItem, categories: ArrayList<Category> = ArrayList()) {
         context.startService(Intent(context, MusicDownloaderService::class.java).also {
             it.putExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM, videoItem)
-            it.putParcelableArrayListExtra(MusicDownloaderService.EXTRA_CATEGORIES, ArrayList(categories.toMutableList()))
+            it.putParcelableArrayListExtra(MusicDownloaderService.EXTRA_CATEGORIES, categories)
         })
     }
 

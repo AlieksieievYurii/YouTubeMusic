@@ -20,17 +20,6 @@ import kotlin.math.min
 
 
 class DownloadButton(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
-    interface OnClickListener {
-        /**
-         * The method will be involved if the click event has occurred.
-         * @param currentState: the current state of the button:
-         * [STATE_DOWNLOAD] - user has clicked the button to perform downloading
-         * [STATE_DOWNLOADING] - user has clicked the button to perform cancellation the downloading
-         * [STATE_DOWNLOADED] - user has clicked the button to perform deleting
-         */
-        fun onClick(view: View, currentState: Int)
-    }
-
     private var mSize: Int = toPx(50)
         set(value) {
             field = value
@@ -66,7 +55,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     @IntRange(from = 0, to = 100)
     var progress: Int = 0
 
-    private var onClickListener: OnClickListener? = null
+    private var onClickListener: ((view: View) -> Unit)? = null
     private var onLongClickDownloadListener: ((view: View) -> Unit)? = null
 
     private var mViewHolder = Rect(0, 0, mSize, mSize)
@@ -98,7 +87,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     }
 
     private fun invokeClickListenerCallBack() {
-        onClickListener?.onClick(this, state)
+        onClickListener?.invoke(this)
     }
 
 
@@ -113,7 +102,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         }
     }
 
-    fun setOnClickStateListener(onClickListener: OnClickListener) {
+    fun setOnClickStateListener(onClickListener: (view: View) -> Unit) {
         this.onClickListener = onClickListener
     }
 

@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.api.services.youtube.model.PlaylistListResponse
-import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.playlists.PlayListsDialogInterface
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
@@ -32,8 +31,6 @@ import com.yurii.youtubemusic.ui.BottomNavigationBehavior
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
-import com.yurii.youtubemusic.videoslist.DialogRequests
-import com.yurii.youtubemusic.videoslist.VideoItemProvider
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
@@ -44,7 +41,7 @@ import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, DialogRequests {
+class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private lateinit var viewModel: YouTubeMusicViewModel
     private lateinit var binding: FragmentYouTubeMusicsBinding
@@ -59,6 +56,10 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
         initViewModel()
         initRecyclerView()
         setSelectPlayListListener()
+
+        mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
+            videosListAdapter.setDownloadState(it.content)
+        })
     }
 
     override fun getTabParameters(): TabParameters {
@@ -98,7 +99,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initRecyclerView() {
-        videosListAdapter = VideosListAdapter(requireContext(), VideoItemProviderCallBacks(), this)
+        videosListAdapter = VideosListAdapter(requireContext(), VideosListAdapterCallBacks())
         val recyclerView = binding.videos
 
         val layoutManager = LinearLayoutManager(context)
@@ -167,7 +168,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
     }
 
     override fun onDownloadingFinished(videoItem: VideoItem) {
-        videosListAdapter.setFinishedState(videoItem)
+        videosListAdapter.setDownloadedState(videoItem)
         mainActivityViewModel.notifyVideoItemHasBeenDownloaded(videoItem)
     }
 
@@ -253,42 +254,45 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
         ErrorSnackBar.show(binding.root, error.message!!)
     }
 
-    override fun requestConfirmDeletion(onConfirm: () -> Unit) {
-        ConfirmDeletionDialog.create(
-            titleId = R.string.dialog_confirm_deletion_music_title,
-            messageId = R.string.dialog_confirm_deletion_music_message,
-            onConfirm = onConfirm
-        ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")
-    }
 
-    override fun requestFailedToDownloadDialog(videoItem: VideoItem) {
-        ErrorDialog.create(videoItem).addListeners(
-            onTryAgain = {
-                viewModel.startDownloadMusic(videoItem)
-                videosListAdapter.setDownloadingState(videoItem)
-            },
-            onCancel = { videosListAdapter.setDownloadState(videoItem) }
-        ).show(requireActivity().supportFragmentManager, "ErrorDialog")
-    }
-
-    override fun requestDownloadAndAddCategories(videoItem: VideoItem, onApplyCategories: (categories: List<Category>) -> Unit) {
-        SelectCategoriesDialog.create {
-            onApplyCategories.invoke(it)
-        }.show(requireActivity().supportFragmentManager, "SelectCategoriesDialog")
-    }
-
-    inner class VideoItemProviderCallBacks : VideoItemProvider {
-        override fun download(videoItem: VideoItem) = viewModel.startDownloadMusic(videoItem)
-
-        override fun downloadAndAddCategories(videoItem: VideoItem, categories: List<Category>) {
-            viewModel.startDownloadMusic(videoItem, categories.toTypedArray())
+    inner class VideosListAdapterCallBacks : VideosListAdapter.CallBack {
+        override fun onDownload(videoItem: VideoItem) {
+            viewModel.startDownloadMusic(videoItem)
+            videosListAdapter.setDownloadingState(videoItem)
         }
 
-        override fun cancelDownload(videoItem: VideoItem) = viewModel.stopDownloading(videoItem)
+        override fun onDownloadAndAddCategories(videoItem: VideoItem) {
+            SelectCategoriesDialog.create {
+                viewModel.startDownloadMusic(videoItem, it)
+                videosListAdapter.setDownloadingState(videoItem)
+            }.show(requireActivity().supportFragmentManager, "SelectCategoriesDialog")
+        }
 
-        override fun remove(videoItem: VideoItem) {
-            viewModel.removeVideoItem(videoItem)
-            mainActivityViewModel.notifyMediaItemHasBeenDeleted(videoItem.videoId)
+        override fun onCancelDownload(videoItem: VideoItem) {
+            viewModel.stopDownloading(videoItem)
+            videosListAdapter.setDownloadState(videoItem)
+        }
+
+        override fun onNotifyFailedToDownload(videoItem: VideoItem) {
+            ErrorDialog.create(videoItem).addListeners(
+                onTryAgain = {
+                    viewModel.startDownloadMusic(videoItem)
+                    videosListAdapter.setDownloadingState(videoItem)
+                },
+                onCancel = { videosListAdapter.setDownloadState(videoItem) }
+            ).show(requireActivity().supportFragmentManager, "ErrorDialog")
+        }
+
+        override fun onRemove(videoItem: VideoItem) {
+            ConfirmDeletionDialog.create(
+                titleId = R.string.dialog_confirm_deletion_music_title,
+                messageId = R.string.dialog_confirm_deletion_music_message,
+                onConfirm = {
+                    viewModel.removeVideoItem(videoItem)
+                    videosListAdapter.setDownloadState(videoItem)
+                    mainActivityViewModel.notifyMediaItemHasBeenDeleted(videoItem.videoId)
+                }
+            ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")
         }
 
         override fun exists(videoItem: VideoItem): Boolean = viewModel.exists(videoItem)
