@@ -262,10 +262,10 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
         }
 
         override fun onDownloadAndAddCategories(videoItem: VideoItem) {
-            SelectCategoriesDialog.create {
+            SelectCategoriesDialog.selectCategories(requireContext()) {
                 viewModel.startDownloadMusic(videoItem, it)
                 videosListAdapter.setDownloadingState(videoItem)
-            }.show(requireActivity().supportFragmentManager, "SelectCategoriesDialog")
+            }
         }
 
         override fun onCancelDownload(videoItem: VideoItem) {

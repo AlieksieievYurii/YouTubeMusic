@@ -54,4 +54,7 @@
     <string name="label_not_categories">You haven\'t created any category yet</string>
     <string name="label_delete">Delete</string>
     <string name="category">Category</string>
+    <string name="label_ok">Ok</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_categories">Categories</string>
 </resources>
