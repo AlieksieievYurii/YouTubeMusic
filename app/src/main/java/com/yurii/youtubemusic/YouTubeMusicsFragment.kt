@@ -59,6 +59,10 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader, Dial
         initViewModel()
         initRecyclerView()
         setSelectPlayListListener()
+
+        mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
+            //TODO (alieksiy) implement change video item state
+        })
     }
 
     override fun getTabParameters(): TabParameters {
