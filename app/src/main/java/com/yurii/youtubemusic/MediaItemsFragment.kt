@@ -19,6 +19,7 @@ import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
+import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.videoslist.MediaListAdapter
 import com.yurii.youtubemusic.videoslist.MediaListAdapterController
@@ -45,6 +46,20 @@ class MediaItemsFragment : Fragment() {
             val metadata = viewModel.getMetaData(it.content.videoId)
             if (viewModel.category == Category.ALL || viewModel.category in metadata.categories)
                 mediaItemsAdapterController.addNewMediaItem(metadata)
+        })
+
+        mainActivityViewModel.onUpdateMediaItem.observe(viewLifecycleOwner, Observer {
+            val newMediaItem = it.content
+
+            if (viewModel.category == Category.ALL) {
+                mediaItemsAdapterController.updateMediaItem(newMediaItem)
+                return@Observer
+            }
+
+            if (viewModel.category in newMediaItem.categories) {
+                addOrUpdateMediaItem(newMediaItem)
+            } else
+                mediaItemsAdapterController.removeItemWithId(newMediaItem.mediaId)
         })
 
         return binding.root
@@ -77,6 +92,13 @@ class MediaItemsFragment : Fragment() {
         }
     }
 
+    private fun addOrUpdateMediaItem(mediaItem: MediaMetaData) {
+        if (mediaItemsAdapterController.contains(mediaItem.mediaId))
+            mediaItemsAdapterController.updateMediaItem(mediaItem)
+        else
+            mediaItemsAdapterController.addNewMediaItem(mediaItem)
+    }
+
     private fun deleteMediaItem(mediaItem: MediaMetaData) {
         ConfirmDeletionDialog.create(
             titleId = R.string.dialog_confirm_deletion_music_title,
@@ -91,7 +113,11 @@ class MediaItemsFragment : Fragment() {
     }
 
     private fun openCategoriesEditor(mediaItem: MediaMetaData) {
-
+        SelectCategoriesDialog.selectCategories(requireContext(), mediaItem.categories) {
+            mediaItem.categories.clear()
+            mediaItem.categories.addAll(it)
+            mainActivityViewModel.notifyMediaItemHasBeenModified(mediaItem)
+        }
     }
 
     private inner class MediaListAdapterCallBack : MediaListAdapter.CallBack {

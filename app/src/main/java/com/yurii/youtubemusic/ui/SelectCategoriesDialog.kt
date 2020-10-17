@@ -11,13 +11,20 @@ private typealias OnApplyCallBack = (categories: ArrayList<Category>) -> Unit
 
 class SelectCategoriesDialog private constructor(private val context: Context) {
     private var callBack: OnApplyCallBack? = null
+    private var selectedCategories: List<Category>? = null
 
     private fun create(categories: List<Category>) {
         val selectedCategories = ArrayList<Category>()
         val categoriesNames = categories.map { it.name }
+
+        val checkedItems = getCheckedItems(categoriesNames)?.also {checkedItems ->
+            selectedCategories.addAll(categories.filterIndexed { index, _ -> checkedItems[index]})
+        }
+
+
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.label_categories)
-            .setMultiChoiceItems(categoriesNames.toTypedArray(), null) { _, which, isChecked ->
+            .setMultiChoiceItems(categoriesNames.toTypedArray(), checkedItems) { _, which, isChecked ->
                 val category = categories.find { it.name == categoriesNames[which] }!!
                 if (isChecked)
                     selectedCategories.add(category)
@@ -29,11 +36,24 @@ class SelectCategoriesDialog private constructor(private val context: Context) {
             .show()
     }
 
+    private fun getCheckedItems(categoriesNames: List<String>): BooleanArray? {
+        selectedCategories?.run {
+            val checks = BooleanArray(categoriesNames.size)
+            this.forEach {
+                val index = categoriesNames.indexOf(it.name)
+                checks[index] = true
+            }
+            return checks
+        }
+        return null
+    }
+
     companion object {
-        fun selectCategories(context: Context, onApplyCallBack: OnApplyCallBack) {
+        fun selectCategories(context: Context, selectedCategories: List<Category>?, onApplyCallBack: OnApplyCallBack) {
             val categories = Preferences.getMusicCategories(context)
             SelectCategoriesDialog(context).apply {
                 callBack = onApplyCallBack
+                this.selectedCategories = selectedCategories
             }.create(categories)
         }
     }

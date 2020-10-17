@@ -18,6 +18,8 @@ interface MediaListAdapterController {
     fun setMediaItems(list: List<MediaMetaData>)
     fun removeItemWithId(id: String)
     fun addNewMediaItem(mediaItem: MediaMetaData)
+    fun updateMediaItem(mediaItem: MediaMetaData)
+    fun contains(mediaId: String): Boolean
 }
 
 class MediaListAdapter(context: Context, private val callback: CallBack) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(),
@@ -50,6 +52,16 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
         notifyItemInserted(musics.indexOf(mediaItem))
     }
 
+    override fun updateMediaItem(mediaItem: MediaMetaData) {
+        musics.find { it.mediaId == mediaItem.mediaId }?.run {
+            musics[musics.indexOf(this)] = mediaItem
+            findVideoItemView(this) {
+                it.setMusicItem(mediaItem, callback)
+            }
+        }
+    }
+
+    override fun contains(mediaId: String): Boolean = musics.find { it.mediaId == mediaId } != null
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
