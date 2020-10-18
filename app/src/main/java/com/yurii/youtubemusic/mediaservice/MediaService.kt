@@ -30,6 +30,7 @@ const val EMPTY_CONTENT = "__empty__"
 
 const val REQUEST_COMMAND_ADD_NEW_MEDIA_ITEM = "__request_command_add_new_media_item"
 const val REQUEST_COMMAND_DELETE_MEDIA_ITEM = "__request_command_delete_media_item"
+const val REQUEST_COMMAND_UPDATE_MEDIA_ITEM = "__request_command_update_media_item"
 const val REQUEST_COMMAND_UPDATE_MEDIA_ITEMS = "__request_command_update_media_items"
 const val REQUEST_CODE_UPDATE_MEDIA_ITEMS = 1001
 
@@ -284,6 +285,20 @@ class MediaService : MediaBrowserServiceCompat() {
         }
     }
 
+    private fun updateMediaItem(mediaMetaData: MediaMetaData) {
+        musicProvider.updateMediaItem(mediaMetaData)
+        if (queueProvider.queueExists() && queueProvider.getPlayingCategory() != Category.ALL) {
+            if (queueProvider.getQueue().getCurrentQueueItem().mediaId == mediaMetaData.mediaId)
+                handleStopRequest()
+
+            if (queueProvider.getPlayingCategory() in mediaMetaData.categories) {
+                if (!queueProvider.getQueue().contains(mediaMetaData.mediaId))
+                    queueProvider.getQueue().addToQueue(mediaMetaData)
+            } else if (queueProvider.getQueue().contains(mediaMetaData.mediaId))
+                queueProvider.getQueue().deleteMediaItemFromQueue(mediaMetaData.mediaId)
+        }
+    }
+
     private fun addNewItemToQueue(mediaId: String) {
         if (musicProvider.isMusicsInitialized)
             musicProvider.addNewMediaItem(mediaId)
@@ -309,6 +324,11 @@ class MediaService : MediaBrowserServiceCompat() {
                 REQUEST_COMMAND_UPDATE_MEDIA_ITEMS -> {
                     musicProvider.updateMediaItems()
                     cb?.send(REQUEST_CODE_UPDATE_MEDIA_ITEMS, null)
+                }
+                REQUEST_COMMAND_UPDATE_MEDIA_ITEM -> {
+                    val mediaMetaData = extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
+                        ?: throw IllegalStateException("Media metadata is required")
+                    updateMediaItem(mediaMetaData)
                 }
             }
         }

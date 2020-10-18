@@ -25,6 +25,8 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val mu
 
     fun queueExists(): Boolean = queue != null
 
+    fun getPlayingCategory(): Category = playingCategory ?: throw IllegalStateException("Queue is not initialized")
+
     fun deleteMediaItemIfExistsInQueue(mediaId: String) {
         if (mediaId == getQueue().getCurrentQueueItem().mediaId) {
             getQueue().deleteMediaItemFromQueue(mediaId)

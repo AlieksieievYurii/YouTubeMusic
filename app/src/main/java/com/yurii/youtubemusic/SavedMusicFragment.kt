@@ -60,6 +60,10 @@ class SavedMusicFragment : TabFragment() {
         mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
             savedMusicViewModel.notifyVideoItemHasBeenDownloaded(it.content.videoId)
         })
+
+        mainActivityViewModel.onUpdateMediaItem.observe(viewLifecycleOwner, Observer {
+            savedMusicViewModel.updateMediaItem(it.content)
+        })
     }
 
     private fun openCategoriesEditor() {

@@ -44,6 +44,14 @@ class MusicsProvider(private val context: Context) {
 
     fun getMetaDataItem(mediaId: String) = metaDataItems.find { it.mediaId == mediaId }!!
 
+    fun updateMediaItem(mediaMetaData: MediaMetaData) {
+        metaDataItems.find { it.mediaId == mediaMetaData.mediaId }?.run {
+            val index = metaDataItems.indexOf(this)
+            metaDataItems[index] = mediaMetaData
+            mediaMetadataProvider.updateMetaData(mediaMetaData)
+        }
+    }
+
     fun updateMediaItems() {
         updateCategories()
         updateMetadata()

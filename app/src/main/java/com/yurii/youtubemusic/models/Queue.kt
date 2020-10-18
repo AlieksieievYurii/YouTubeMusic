@@ -38,6 +38,8 @@ class Queue private constructor(fromItems: List<MediaMetaData>) {
         currentPosition = queueItems.indexOf(currentMediaItem)
     }
 
+    fun contains(mediaId: String): Boolean = queueItems.find { it.mediaId == mediaId } != null
+
     fun getCurrentQueueItem() = queueItems[currentPosition]
 
     fun isQueueEmpty() = queueItems.isEmpty()
