@@ -162,13 +162,8 @@ class MediaService : MediaBrowserServiceCompat() {
             return actions
 
         if (currentState == PlaybackStateCompat.STATE_PLAYING)
-            actions = actions or PlaybackStateCompat.ACTION_PAUSE
-
-        if (queueProvider.canMoveToPrevious())
-            actions = actions or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-
-        if (queueProvider.canMoveToNext())
-            actions = actions or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+            actions = actions or PlaybackStateCompat.ACTION_PAUSE or
+                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
 
         return actions
     }
