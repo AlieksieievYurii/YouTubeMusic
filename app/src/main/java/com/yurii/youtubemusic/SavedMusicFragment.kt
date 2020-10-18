@@ -54,15 +54,15 @@ class SavedMusicFragment : TabFragment() {
         })
 
         mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
-            savedMusicViewModel.deleteMediaItem(it.content)
+            savedMusicViewModel.deleteMediaItem(it)
         })
 
         mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
-            savedMusicViewModel.notifyVideoItemHasBeenDownloaded(it.content.videoId)
+            savedMusicViewModel.notifyVideoItemHasBeenDownloaded(it.videoId)
         })
 
         mainActivityViewModel.onUpdateMediaItem.observe(viewLifecycleOwner, Observer {
-            savedMusicViewModel.updateMediaItem(it.content)
+            savedMusicViewModel.updateMediaItem(it)
         })
     }
 

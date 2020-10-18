@@ -28,11 +28,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         showDefaultFragment()
 
         viewModel.logInEvent.observe(this, Observer {
-            it.handleContent { googleAccount -> handleSignIn(googleAccount) }
+             handleSignIn(it)
         })
 
         viewModel.logOutEvent.observe(this, Observer {
-            it.handle { handleSignOut() }
+            handleSignOut()
         })
     }
 

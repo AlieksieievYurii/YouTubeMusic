@@ -58,7 +58,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
         setSelectPlayListListener()
 
         mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
-            videosListAdapter.setDownloadState(it.content)
+            videosListAdapter.setDownloadState(it)
         })
     }
 

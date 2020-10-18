@@ -2,6 +2,7 @@ package com.yurii.youtubemusic
 
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,17 +40,18 @@ class MediaItemsFragment : Fragment() {
         initViewModel(category)
 
         mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
-            mediaItemsAdapterController.removeItemWithId(it.content)
+            mediaItemsAdapterController.removeItemWithId(it)
         })
-
+        Log.i("TEST", "onCreateView")
         mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
-            val metadata = viewModel.getMetaData(it.content.videoId)
+            Log.i("TEST", "Category: $category -> ${it.videoId} has been downloaded")
+            val metadata = viewModel.getMetaData(it.videoId)
             if (viewModel.category == Category.ALL || viewModel.category in metadata.categories)
                 mediaItemsAdapterController.addNewMediaItem(metadata)
         })
 
         mainActivityViewModel.onUpdateMediaItem.observe(viewLifecycleOwner, Observer {
-            val newMediaItem = it.content
+            val newMediaItem = it
 
             if (viewModel.category == Category.ALL) {
                 mediaItemsAdapterController.updateMediaItem(newMediaItem)

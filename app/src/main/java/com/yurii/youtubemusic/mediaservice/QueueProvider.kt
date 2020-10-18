@@ -62,7 +62,10 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val mu
     fun deleteMediaItemFromQueue(mediaId: String) {
         val currentMediaItem = queueItems[currentPosition]
         queueItems.find { it.mediaId == mediaId }?.run { queueItems.remove(this) }
-        currentPosition = queueItems.indexOf(currentMediaItem)
+        if (currentMediaItem.mediaId == mediaId)
+            queueItems.clear()
+        else
+            currentPosition = queueItems.indexOf(currentMediaItem)
     }
 
     fun contains(mediaId: String): Boolean = queueItems.find { it.mediaId == mediaId } != null
