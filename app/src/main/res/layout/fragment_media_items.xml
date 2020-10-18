@@ -20,6 +20,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
+
+        <TextView
+            android:id="@+id/no_media_items"
+            style="@style/DescriptionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:drawableTop="@drawable/ic_empty_playlist"
+            android:visibility="gone"
+            android:text="@string/label_no_media_items" />
     </FrameLayout>
 </layout>

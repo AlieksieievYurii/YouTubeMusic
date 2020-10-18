@@ -20,6 +20,7 @@ interface MediaListAdapterController {
     fun addNewMediaItem(mediaItem: MediaMetaData)
     fun updateMediaItem(mediaItem: MediaMetaData)
     fun contains(mediaId: String): Boolean
+    fun isEmptyList(): Boolean
 }
 
 class MediaListAdapter(context: Context, private val callback: CallBack) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(),
@@ -62,6 +63,7 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     }
 
     override fun contains(mediaId: String): Boolean = musics.find { it.mediaId == mediaId } != null
+    override fun isEmptyList(): Boolean = musics.isEmpty()
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)

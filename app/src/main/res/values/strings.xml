@@ -57,4 +57,5 @@
     <string name="label_ok">Ok</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_categories">Categories</string>
+    <string name="label_no_media_items">You have not downloaded any musics yet</string>
 </resources>

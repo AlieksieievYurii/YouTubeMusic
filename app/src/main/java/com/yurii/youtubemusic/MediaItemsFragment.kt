@@ -2,7 +2,6 @@ package com.yurii.youtubemusic
 
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,13 +40,14 @@ class MediaItemsFragment : Fragment() {
 
         mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
             mediaItemsAdapterController.removeItemWithId(it)
+            checkWhetherMediaItemsAreEmpty()
         })
-        Log.i("TEST", "onCreateView")
         mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
-            Log.i("TEST", "Category: $category -> ${it.videoId} has been downloaded")
             val metadata = viewModel.getMetaData(it.videoId)
-            if (viewModel.category == Category.ALL || viewModel.category in metadata.categories)
+            if (viewModel.category == Category.ALL || viewModel.category in metadata.categories) {
                 mediaItemsAdapterController.addNewMediaItem(metadata)
+                checkWhetherMediaItemsAreEmpty()
+            }
         })
 
         mainActivityViewModel.onUpdateMediaItem.observe(viewLifecycleOwner, Observer {
@@ -58,10 +58,11 @@ class MediaItemsFragment : Fragment() {
                 return@Observer
             }
 
-            if (viewModel.category in newMediaItem.categories) {
+            if (viewModel.category in newMediaItem.categories)
                 addOrUpdateMediaItem(newMediaItem)
-            } else
+            else
                 mediaItemsAdapterController.removeItemWithId(newMediaItem.mediaId)
+            checkWhetherMediaItemsAreEmpty()
         })
 
         return binding.root
@@ -70,9 +71,9 @@ class MediaItemsFragment : Fragment() {
     private fun initViewModel(category: Category) {
         viewModel = Injector.provideMediaItemsViewModel(requireContext(), category)
         viewModel.mediaItems.observe(viewLifecycleOwner, Observer {
-            mediaItemsAdapterController.setMediaItems(it)
             binding.loadingBar.isVisible = false
-            binding.mediaItems.isVisible = true
+            mediaItemsAdapterController.setMediaItems(it)
+            checkWhetherMediaItemsAreEmpty()
         })
 
         viewModel.playbackState.observe(viewLifecycleOwner, Observer {
@@ -91,6 +92,16 @@ class MediaItemsFragment : Fragment() {
             this.setHasFixedSize(true)
             this.layoutManager = LinearLayoutManager(requireContext())
             this.adapter = mediaItemsAdapter
+        }
+    }
+
+    private fun checkWhetherMediaItemsAreEmpty() {
+        if (mediaItemsAdapterController.isEmptyList()) {
+            binding.noMediaItems.isVisible = true
+            binding.mediaItems.isVisible = false
+        } else {
+            binding.noMediaItems.isVisible = false
+            binding.mediaItems.isVisible = true
         }
     }
 
