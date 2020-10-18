@@ -279,9 +279,11 @@ class MediaService : MediaBrowserServiceCompat() {
     private fun deleteMediaItem(mediaId: String) {
         musicProvider.deleteMediaItem(mediaId)
         if (queueProvider.queueExists()) {
-            if (queueProvider.getCurrentQueueItem().mediaId == mediaId)
+            if (queueProvider.getCurrentQueueItem().mediaId == mediaId) {
+                queueProvider.deleteQueue()
                 handleStopRequest()
-            queueProvider.deleteMediaItemFromQueue(mediaId)
+            } else
+                queueProvider.deleteMediaItemFromQueue(mediaId)
         }
     }
 
@@ -367,6 +369,9 @@ class MediaService : MediaBrowserServiceCompat() {
         override fun onSkipToNext() {
             super.onSkipToNext()
 
+            if (!queueProvider.queueExists())
+                return
+
             if (queueProvider.canMoveToNext())
                 queueProvider.next()
             else
@@ -377,6 +382,9 @@ class MediaService : MediaBrowserServiceCompat() {
 
         override fun onSkipToPrevious() {
             super.onSkipToPrevious()
+
+            if (!queueProvider.queueExists())
+                return
 
             if (queueProvider.canMoveToPrevious())
                 queueProvider.previous()

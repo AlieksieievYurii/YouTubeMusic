@@ -62,19 +62,21 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val mu
     fun deleteMediaItemFromQueue(mediaId: String) {
         val currentMediaItem = queueItems[currentPosition]
         queueItems.find { it.mediaId == mediaId }?.run { queueItems.remove(this) }
-        if (currentMediaItem.mediaId == mediaId)
-            queueItems.clear()
-        else
-            currentPosition = queueItems.indexOf(currentMediaItem)
+        currentPosition = queueItems.indexOf(currentMediaItem)
+    }
+    fun deleteQueue()  {
+        playingCategory = null
+        currentPosition = -1
+        queueItems.clear()
     }
 
     fun contains(mediaId: String): Boolean = queueItems.find { it.mediaId == mediaId } != null
 
     fun getCurrentQueueItem() = queueItems[currentPosition]
 
-    fun canMoveToNext() = currentPosition < queueItems.lastIndex
+    fun canMoveToNext() = queueExists() && currentPosition < queueItems.lastIndex
 
-    fun canMoveToPrevious() = currentPosition > 0
+    fun canMoveToPrevious() = queueExists() && currentPosition > 0
 
     fun next(): MediaMetaData = queueItems.getOrNull(++currentPosition) ?: throw QueueException("Cannot move to next item")
 
