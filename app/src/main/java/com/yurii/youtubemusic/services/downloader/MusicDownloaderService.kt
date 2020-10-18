@@ -45,8 +45,8 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
         return START_REDELIVER_INTENT
     }
 
-    private fun getCategoriesFromIntent(intent: Intent): Array<Category> {
-        return intent.extras?.getParcelableArrayList<Category>(EXTRA_CATEGORIES)!!.toTypedArray()
+    private fun getCategoriesFromIntent(intent: Intent): ArrayList<Category> {
+        return intent.extras?.getParcelableArrayList<Category>(EXTRA_CATEGORIES)!!
     }
 
     private fun getVideoItemFromIntent(intent: Intent): VideoItem {
@@ -54,7 +54,7 @@ class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, Downl
             ?: throw IOException("You must pass VideoItem object by key $EXTRA_VIDEO_ITEM to perform downloading")
     }
 
-    private fun startDownloading(videoItem: VideoItem, startId: Int, categories: Array<Category>) {
+    private fun startDownloading(videoItem: VideoItem, startId: Int, categories: ArrayList<Category>) {
         Log.i(TAG, "Start downloading: ${videoItem.videoId}. StartId: $startId")
         val task = VideoItemTask(videoItem, categories, baseContext, startId, this, youtubeDownloader, mediaMetadataProvider)
         ThreadPool.execute(task)
