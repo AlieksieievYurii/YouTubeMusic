@@ -17,23 +17,27 @@ class SelectCategoriesDialog private constructor(private val context: Context) {
         val selectedCategories = ArrayList<Category>()
         val categoriesNames = categories.map { it.name }
 
-        val checkedItems = getCheckedItems(categoriesNames)?.also {checkedItems ->
-            selectedCategories.addAll(categories.filterIndexed { index, _ -> checkedItems[index]})
+        val checkedItems = getCheckedItems(categoriesNames)?.also { checkedItems ->
+            selectedCategories.addAll(categories.filterIndexed { index, _ -> checkedItems[index] })
         }
 
 
-        MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.label_categories)
-            .setMultiChoiceItems(categoriesNames.toTypedArray(), checkedItems) { _, which, isChecked ->
-                val category = categories.find { it.name == categoriesNames[which] }!!
-                if (isChecked)
-                    selectedCategories.add(category)
-                else
-                    selectedCategories.remove(category)
+        MaterialAlertDialogBuilder(context).apply {
+            setTitle(R.string.label_categories)
+            if (categories.isEmpty()) {
+                setView(R.layout.layout_no_categories)
+            } else {
+                setMultiChoiceItems(categoriesNames.toTypedArray(), checkedItems) { _, which, isChecked ->
+                    val category = categories.find { it.name == categoriesNames[which] }!!
+                    if (isChecked)
+                        selectedCategories.add(category)
+                    else
+                        selectedCategories.remove(category)
+                }
+                setPositiveButton(R.string.label_ok) { _, _ -> callBack?.invoke(selectedCategories) }
+                setNegativeButton(R.string.label_cancel, null)
             }
-            .setPositiveButton(R.string.label_ok) { _, _ -> callBack?.invoke(selectedCategories) }
-            .setNegativeButton(R.string.label_cancel, null)
-            .show()
+        }.show()
     }
 
     private fun getCheckedItems(categoriesNames: List<String>): BooleanArray? {

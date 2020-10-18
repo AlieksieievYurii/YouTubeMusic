@@ -51,7 +51,7 @@
     <string name="label_create">Create</string>
     <string name="label_add_category">Add category</string>
     <string name="label_apply">Apply</string>
-    <string name="label_not_categories">You haven\'t created any category yet</string>
+    <string name="label_no_categories">You haven\'t created any category yet</string>
     <string name="label_delete">Delete</string>
     <string name="category">Category</string>
     <string name="label_ok">Ok</string>
