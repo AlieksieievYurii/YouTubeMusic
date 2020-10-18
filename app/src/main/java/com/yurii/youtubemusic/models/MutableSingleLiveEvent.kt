@@ -21,7 +21,11 @@ class MutableSingleLiveEvent<T> : SingleLiveEvent<T>() {
         super.call()
     }
 
-    public override fun setValue(value: T) {
+    public override fun setValue(value: T?) {
+        super.setValue(value)
+    }
+
+    fun sendEvent(value: T) {
         super.setValue(value)
     }
 }
@@ -48,7 +52,7 @@ open class SingleLiveEvent<T> : LiveData<T>() {
     }
 
     @MainThread
-    override fun setValue(value: T) {
+    override fun setValue(value: T?) {
         observers.forEach { it.newValue() }
         super.setValue(value)
     }
@@ -58,7 +62,7 @@ open class SingleLiveEvent<T> : LiveData<T>() {
      */
     @MainThread
     protected open fun call() {
-        super.setValue(null)
+        value = null
     }
 
     private class ObserverWrapper<T>(private val observer: Observer<T>) : Observer<T> {

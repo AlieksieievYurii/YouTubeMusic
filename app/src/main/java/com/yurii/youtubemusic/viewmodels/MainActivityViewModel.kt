@@ -20,16 +20,16 @@ class MainActivityViewModel : ViewModel() {
     private val _logInEvent: MutableSingleLiveEvent<GoogleSignInAccount> = MutableSingleLiveEvent()
     val logInEvent: SingleLiveEvent<GoogleSignInAccount> = _logInEvent
 
-    private val _logOutEvent: MutableSingleLiveEvent<Void> = MutableSingleLiveEvent()
-    val logOutEvent: SingleLiveEvent<Void> = _logOutEvent
+    private val _logOutEvent: MutableSingleLiveEvent<String?> = MutableSingleLiveEvent()
+    val logOutEvent: SingleLiveEvent<String?> = _logOutEvent
 
-    fun signIn(account: GoogleSignInAccount) = _logInEvent.setValue(account)
+    fun signIn(account: GoogleSignInAccount) = _logInEvent.sendEvent(account)
 
     fun logOut() = _logOutEvent.call()
 
-    fun notifyMediaItemHasBeenDeleted(id: String) = _onMediaItemIsDeleted.setValue(id)
+    fun notifyMediaItemHasBeenDeleted(id: String) = _onMediaItemIsDeleted.sendEvent(id)
 
-    fun notifyMediaItemHasBeenModified(mediaMetaData: MediaMetaData) = _onUpdateMediaItem.setValue(mediaMetaData)
+    fun notifyMediaItemHasBeenModified(mediaMetaData: MediaMetaData) = _onUpdateMediaItem.sendEvent(mediaMetaData)
 
-    fun notifyVideoItemHasBeenDownloaded(videoItem: VideoItem) = _onVideoItemHasBeenDownloaded.setValue(videoItem)
+    fun notifyVideoItemHasBeenDownloaded(videoItem: VideoItem) = _onVideoItemHasBeenDownloaded.sendEvent(videoItem)
 }
