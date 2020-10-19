@@ -223,7 +223,11 @@ class MediaService : MediaBrowserServiceCompat() {
     private fun handlePlayMusicQueue() {
         tryToGetAudioFocus()
         mediaSession.isActive = true
-        prepareMusicFromQueue()
+        try {
+            prepareMusicFromQueue()
+        } catch (error: Exception) {
+            setErrorState(PlaybackStateCompat.ERROR_CODE_UNKNOWN_ERROR, error.message!!)
+        }
     }
 
     private fun prepareMusicFromQueue() {
