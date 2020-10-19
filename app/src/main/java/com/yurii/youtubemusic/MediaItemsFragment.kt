@@ -88,6 +88,7 @@ class MediaItemsFragment : Fragment() {
         val mediaItemsAdapter = MediaListAdapter(requireContext(), MediaListAdapterCallBack())
         mediaItemsAdapterController = mediaItemsAdapter
         recyclerView.apply {
+            layoutAnimation = android.view.animation.AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.bottom_lifting_animation)
             addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
             this.setHasFixedSize(true)
             this.layoutManager = LinearLayoutManager(requireContext())
