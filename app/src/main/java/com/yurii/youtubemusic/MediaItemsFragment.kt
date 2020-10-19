@@ -19,6 +19,7 @@ import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
+import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.videoslist.MediaListAdapter
 import com.yurii.youtubemusic.videoslist.MediaListAdapterController
@@ -38,13 +39,30 @@ class MediaItemsFragment : Fragment() {
         initViewModel(category)
 
         mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
-            mediaItemsAdapterController.removeItemWithId(it.content)
+            mediaItemsAdapterController.removeItemWithId(it)
+            checkWhetherMediaItemsAreEmpty()
+        })
+        mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
+            val metadata = viewModel.getMetaData(it.videoId)
+            if (viewModel.category == Category.ALL || viewModel.category in metadata.categories) {
+                mediaItemsAdapterController.addNewMediaItem(metadata)
+                checkWhetherMediaItemsAreEmpty()
+            }
         })
 
-        mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
-            val metadata = viewModel.getMetaData(it.content.videoId)
-            if (viewModel.category == Category.ALL || viewModel.category in metadata.categories)
-                mediaItemsAdapterController.addNewMediaItem(metadata)
+        mainActivityViewModel.onUpdateMediaItem.observe(viewLifecycleOwner, Observer {
+            val newMediaItem = it
+
+            if (viewModel.category == Category.ALL) {
+                mediaItemsAdapterController.updateMediaItem(newMediaItem)
+                return@Observer
+            }
+
+            if (viewModel.category in newMediaItem.categories)
+                addOrUpdateMediaItem(newMediaItem)
+            else
+                mediaItemsAdapterController.removeItemWithId(newMediaItem.mediaId)
+            checkWhetherMediaItemsAreEmpty()
         })
 
         return binding.root
@@ -53,9 +71,9 @@ class MediaItemsFragment : Fragment() {
     private fun initViewModel(category: Category) {
         viewModel = Injector.provideMediaItemsViewModel(requireContext(), category)
         viewModel.mediaItems.observe(viewLifecycleOwner, Observer {
-            mediaItemsAdapterController.setMediaItems(it)
             binding.loadingBar.isVisible = false
-            binding.mediaItems.isVisible = true
+            mediaItemsAdapterController.setMediaItems(it)
+            checkWhetherMediaItemsAreEmpty()
         })
 
         viewModel.playbackState.observe(viewLifecycleOwner, Observer {
@@ -70,11 +88,29 @@ class MediaItemsFragment : Fragment() {
         val mediaItemsAdapter = MediaListAdapter(requireContext(), MediaListAdapterCallBack())
         mediaItemsAdapterController = mediaItemsAdapter
         recyclerView.apply {
+            layoutAnimation = android.view.animation.AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.bottom_lifting_animation)
             addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
             this.setHasFixedSize(true)
             this.layoutManager = LinearLayoutManager(requireContext())
             this.adapter = mediaItemsAdapter
         }
+    }
+
+    private fun checkWhetherMediaItemsAreEmpty() {
+        if (mediaItemsAdapterController.isEmptyList()) {
+            binding.noMediaItems.isVisible = true
+            binding.mediaItems.isVisible = false
+        } else {
+            binding.noMediaItems.isVisible = false
+            binding.mediaItems.isVisible = true
+        }
+    }
+
+    private fun addOrUpdateMediaItem(mediaItem: MediaMetaData) {
+        if (mediaItemsAdapterController.contains(mediaItem.mediaId))
+            mediaItemsAdapterController.updateMediaItem(mediaItem)
+        else
+            mediaItemsAdapterController.addNewMediaItem(mediaItem)
     }
 
     private fun deleteMediaItem(mediaItem: MediaMetaData) {
@@ -91,7 +127,11 @@ class MediaItemsFragment : Fragment() {
     }
 
     private fun openCategoriesEditor(mediaItem: MediaMetaData) {
-
+        SelectCategoriesDialog.selectCategories(requireContext(), mediaItem.categories) {
+            mediaItem.categories.clear()
+            mediaItem.categories.addAll(it)
+            mainActivityViewModel.notifyMediaItemHasBeenModified(mediaItem)
+        }
     }
 
     private inner class MediaListAdapterCallBack : MediaListAdapter.CallBack {

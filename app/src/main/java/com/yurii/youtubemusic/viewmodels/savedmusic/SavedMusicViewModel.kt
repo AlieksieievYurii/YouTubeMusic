@@ -3,14 +3,13 @@ package com.yurii.youtubemusic.viewmodels.savedmusic
 import android.app.Application
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.yurii.youtubemusic.mediaservice.CATEGORIES_CONTENT
 import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.models.MediaMetaData
 
 class SavedMusicViewModel(application: Application, musicServiceConnection: MusicServiceConnection) : AndroidViewModel(application) {
     private val _categoryItems = MutableLiveData<List<Category>>()
@@ -37,6 +36,9 @@ class SavedMusicViewModel(application: Application, musicServiceConnection: Musi
     }
 
     fun deleteMediaItem(mediaId: String) = musicServiceConnection.requestDeleteMediaItem(mediaId)
+
+    fun updateMediaItem(mediaMetaData: MediaMetaData) = musicServiceConnection.requestUpdateMediaItem(mediaMetaData)
+
     fun notifyVideoItemHasBeenDownloaded(mediaId: String) = musicServiceConnection.requestAddMediaItem(mediaId)
 
     private val musicServiceConnection = musicServiceConnection.also {

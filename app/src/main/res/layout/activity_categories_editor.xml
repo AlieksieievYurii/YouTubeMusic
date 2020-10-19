@@ -34,7 +34,7 @@
             android:layout_centerInParent="true"
             android:drawableTop="@drawable/ic_empty_categories"
             tools:visibility="gone"
-            android:text="@string/label_not_categories"/>
+            android:text="@string/label_no_categories"/>
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/create"

@@ -18,7 +18,7 @@ import java.net.URL
 
 class VideoItemTask(
     val videoItem: VideoItem,
-    private val categories: Array<Category>,
+    private val categories: ArrayList<Category>,
     private val context: Context,
     private val serviceStartId: Int,
     private val downloadingUpdater: DownloadingUpdater,
@@ -65,7 +65,7 @@ class VideoItemTask(
         saveBitmapToFile(bitmap)
     }
 
-    private fun addMetadata() = mediaMetadataProvider.setMetadata(videoItem, categories.toList())
+    private fun addMetadata() = mediaMetadataProvider.setMetadata(videoItem, categories)
 
     private fun saveBitmapToFile(bitmap: Bitmap) {
         val file = DataStorage.getThumbnail(context, videoItem.videoId).also {

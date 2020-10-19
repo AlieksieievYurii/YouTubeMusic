@@ -44,6 +44,14 @@ class MusicsProvider(private val context: Context) {
 
     fun getMetaDataItem(mediaId: String) = metaDataItems.find { it.mediaId == mediaId }!!
 
+    fun updateMediaItem(mediaMetaData: MediaMetaData) {
+        metaDataItems.find { it.mediaId == mediaMetaData.mediaId }?.run {
+            val index = metaDataItems.indexOf(this)
+            metaDataItems[index] = mediaMetaData
+            mediaMetadataProvider.updateMetaData(mediaMetaData)
+        }
+    }
+
     fun updateMediaItems() {
         updateCategories()
         updateMetadata()
@@ -57,17 +65,25 @@ class MusicsProvider(private val context: Context) {
 
     private fun updateMetadata() {
         metaDataItems.forEach {
-            if (hasNonExistentCategories(it))
-                deleteNonExistentCategories(it)
+            if (hasNotUpdatedCategories(it))
+                updateCategoriesOfMediaItem(it)
         }
     }
 
-    private fun deleteNonExistentCategories(mediaMetaData: MediaMetaData) {
-        mediaMetaData.categories.removeAll { it !in categories }
+    @Suppress("UNCHECKED_CAST")
+    private fun updateCategoriesOfMediaItem(mediaMetaData: MediaMetaData) {
+        val mediaItemsCategoriesCopy = mediaMetaData.categories.clone() as ArrayList<Category>
+        mediaItemsCategoriesCopy.forEachIndexed { index, mediaItemCategory ->
+            val category = categories.find { it.id == mediaItemCategory.id }
+            if (category == null)
+                mediaMetaData.categories.remove(mediaItemCategory)
+            else
+                mediaMetaData.categories[index] = category
+        }
         mediaMetadataProvider.updateMetaData(mediaMetaData)
     }
 
-    private fun hasNonExistentCategories(mediaMetaData: MediaMetaData): Boolean {
+    private fun hasNotUpdatedCategories(mediaMetaData: MediaMetaData): Boolean {
         mediaMetaData.categories.forEach {
             if (it !in categories)
                 return true

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/no_categories"
+    style="@style/DescriptionText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:drawableTop="@drawable/ic_empty_categories"
+    android:text="@string/label_no_categories"
+    android:visibility="visible" />
+

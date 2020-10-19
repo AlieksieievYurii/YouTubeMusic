@@ -1,96 +1,64 @@
 package com.yurii.youtubemusic.ui
 
-import android.annotation.SuppressLint
+
 import android.content.Context
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.CheckedTextView
-import android.widget.ListView
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.DialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.DialogSelectCategoriesBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Preferences
 
 private typealias OnApplyCallBack = (categories: ArrayList<Category>) -> Unit
 
-class SelectCategoriesDialog : DialogFragment() {
-    private lateinit var binding: DialogSelectCategoriesBinding
-    private lateinit var listAdapter: CategoriesAdapter
-    private lateinit var onApplyCallBack: OnApplyCallBack
-    private lateinit var categories: ArrayList<Category>
+class SelectCategoriesDialog private constructor(private val context: Context) {
+    private var callBack: OnApplyCallBack? = null
+    private var selectedCategories: List<Category>? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.dialog_select_categories, container, false)
-        categories = ArrayList(Preferences.getMusicCategories(requireContext()))
-        listAdapter = CategoriesAdapter(requireContext(), categories)
+    private fun create(categories: List<Category>) {
+        val selectedCategories = ArrayList<Category>()
+        val categoriesNames = categories.map { it.name }
 
-        initView()
-        switchLayouts()
-        return binding.root
-    }
-
-    private fun initView() {
-        binding.apply.setOnClickListener {
-            onApplyCallBack.invoke(listAdapter.selectedCategories)
-            dismiss()
+        val checkedItems = getCheckedItems(categoriesNames)?.also { checkedItems ->
+            selectedCategories.addAll(categories.filterIndexed { index, _ -> checkedItems[index] })
         }
 
-        binding.categories.apply {
-            choiceMode = ListView.CHOICE_MODE_MULTIPLE
-            this.adapter = listAdapter
-        }
+
+        MaterialAlertDialogBuilder(context).apply {
+            setTitle(R.string.label_categories)
+            if (categories.isEmpty()) {
+                setView(R.layout.layout_no_categories)
+            } else {
+                setMultiChoiceItems(categoriesNames.toTypedArray(), checkedItems) { _, which, isChecked ->
+                    val category = categories.find { it.name == categoriesNames[which] }!!
+                    if (isChecked)
+                        selectedCategories.add(category)
+                    else
+                        selectedCategories.remove(category)
+                }
+                setPositiveButton(R.string.label_ok) { _, _ -> callBack?.invoke(selectedCategories) }
+                setNegativeButton(R.string.label_cancel, null)
+            }
+        }.show()
     }
 
-    private fun switchLayouts() {
-        if (categories.isEmpty()) {
-            binding.layoutNoCategories.visibility = View.VISIBLE
-            binding.layoutListOfCategories.visibility = View.GONE
-        } else {
-            binding.layoutNoCategories.visibility = View.GONE
-            binding.layoutListOfCategories.visibility = View.VISIBLE
+    private fun getCheckedItems(categoriesNames: List<String>): BooleanArray? {
+        selectedCategories?.run {
+            val checks = BooleanArray(categoriesNames.size)
+            this.forEach {
+                val index = categoriesNames.indexOf(it.name)
+                checks[index] = true
+            }
+            return checks
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, android.R.style.Theme_Holo_Light_Dialog_NoActionBar_MinWidth)
+        return null
     }
 
     companion object {
-        fun create(callBack: OnApplyCallBack) = SelectCategoriesDialog().also {
-            it.onApplyCallBack = callBack
+        fun selectCategories(context: Context, selectedCategories: List<Category>?, onApplyCallBack: OnApplyCallBack) {
+            val categories = Preferences.getMusicCategories(context)
+            SelectCategoriesDialog(context).apply {
+                callBack = onApplyCallBack
+                this.selectedCategories = selectedCategories
+            }.create(categories)
         }
     }
-}
-
-private class CategoriesAdapter(context: Context, private val categories: List<Category>) : BaseAdapter() {
-    private val layoutInflater = LayoutInflater.from(context)
-    val selectedCategories = ArrayList<Category>()
-
-    @SuppressLint("ViewHolder")
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val view: CheckedTextView = layoutInflater.inflate(R.layout.item_choice, parent, false) as CheckedTextView
-        view.text = categories[position].name
-        view.setOnClickListener {
-            (it as CheckedTextView).toggle()
-            categories[position].run {
-                if (selectedCategories.contains(this))
-                    selectedCategories.remove(this)
-                else
-                    selectedCategories.add(this)
-            }
-        }
-        return view
-    }
-
-    override fun getItem(position: Int): Category = categories[position]
-
-    override fun getItemId(position: Int): Long = categories[position].id.toLong()
-
-    override fun getCount(): Int = categories.size
 }

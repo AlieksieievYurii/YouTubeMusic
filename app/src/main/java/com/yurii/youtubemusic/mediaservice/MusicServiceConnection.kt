@@ -11,6 +11,7 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.yurii.youtubemusic.models.MediaMetaData
 
 class MusicServiceConnection(context: Context, serviceComponent: ComponentName) {
     val isConnected = MutableLiveData<Boolean>().apply {
@@ -45,6 +46,12 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
 
     fun unsubscribe(parentId: String, callback: MediaBrowserCompat.SubscriptionCallback) {
         mediaBrowser.unsubscribe(parentId, callback)
+    }
+
+    fun requestUpdateMediaItem(mediaMetaData: MediaMetaData) {
+        mediaController.sendCommand(REQUEST_COMMAND_UPDATE_MEDIA_ITEM, Bundle().apply {
+            putParcelable(PLAYBACK_STATE_MEDIA_ITEM, mediaMetaData)
+        }, null)
     }
 
     fun requestUpdatingMediaItems(onFinishedCallback: (() -> Unit)) {

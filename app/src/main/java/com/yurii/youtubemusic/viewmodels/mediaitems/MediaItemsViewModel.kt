@@ -42,8 +42,6 @@ class MediaItemsViewModel(private val context: Context, val category: Category, 
     }
 
     fun deleteMediaItem(mediaMetaData: MediaMetaData) {
-        musicServiceConnection.requestDeleteMediaItem(mediaMetaData.mediaId)
-
         mediaMetaData.mediaId.run {
             DataStorage.getMusic(context, this).delete()
             DataStorage.getMetadata(context, this).delete()

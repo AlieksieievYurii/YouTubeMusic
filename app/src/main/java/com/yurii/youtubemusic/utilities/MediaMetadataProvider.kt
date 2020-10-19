@@ -15,7 +15,7 @@ class MediaMetadataProvider(private val context: Context) {
         return Gson().fromJson(musicDescriptionFile.reader(), MediaMetaData::class.java)
     }
 
-    fun setMetadata(videoItem: VideoItem, categories: List<Category>) {
+    fun setMetadata(videoItem: VideoItem, categories: ArrayList<Category>) {
         val metadata = MediaMetaData(
             title = videoItem.title,
             mediaId = videoItem.videoId,
@@ -24,7 +24,7 @@ class MediaMetadataProvider(private val context: Context) {
             thumbnail = DataStorage.getThumbnail(context, videoItem.videoId),
             duration = Duration.parse(videoItem.duration).toMillis(),
             mediaFile = DataStorage.getMusic(context, videoItem.videoId),
-            categories = ArrayList(categories) //TODO It's necessary to investigate whether is better way to do it
+            categories = categories
         )
 
         writeToFile(metadata)
