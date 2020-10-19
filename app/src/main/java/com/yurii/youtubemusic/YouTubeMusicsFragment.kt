@@ -270,7 +270,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
 
         override fun onCancelDownload(videoItem: VideoItem) {
             viewModel.stopDownloading(videoItem)
-            videosListAdapter.setDownloadState(videoItem)
+            videosListAdapter.setDownloadState(videoItem.videoId)
         }
 
         override fun onNotifyFailedToDownload(videoItem: VideoItem) {
@@ -279,7 +279,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
                     viewModel.startDownloadMusic(videoItem)
                     videosListAdapter.setDownloadingState(videoItem)
                 },
-                onCancel = { videosListAdapter.setDownloadState(videoItem) }
+                onCancel = { videosListAdapter.setDownloadState(videoItem.videoId) }
             ).show(requireActivity().supportFragmentManager, "ErrorDialog")
         }
 
@@ -289,7 +289,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
                 messageId = R.string.dialog_confirm_deletion_music_message,
                 onConfirm = {
                     viewModel.removeVideoItem(videoItem)
-                    videosListAdapter.setDownloadState(videoItem)
+                    videosListAdapter.setDownloadState(videoItem.videoId)
                     mainActivityViewModel.notifyMediaItemHasBeenDeleted(videoItem.videoId)
                 }
             ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")

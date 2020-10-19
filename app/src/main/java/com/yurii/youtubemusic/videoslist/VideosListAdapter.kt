@@ -92,9 +92,8 @@ class VideosListAdapter(context: Context, private val callback: CallBack) : Recy
         }
     }
 
-    fun setDownloadState(videoItem: VideoItem) = setDownloadState(videoItem.videoId)
-
     fun setDownloadState(videoItemId: String) {
+        videos.find { it.videoId == videoItemId }?.lastError = null
         findVideoItemViewHolder(videoItemId) {
             it.setState(ItemState.DOWNLOAD)
         }

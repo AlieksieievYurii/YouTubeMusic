@@ -70,8 +70,10 @@ class MusicsProvider(private val context: Context) {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun updateCategoriesOfMediaItem(mediaMetaData: MediaMetaData) {
-        mediaMetaData.categories.forEachIndexed { index, mediaItemCategory ->
+        val mediaItemsCategoriesCopy = mediaMetaData.categories.clone() as ArrayList<Category>
+        mediaItemsCategoriesCopy.forEachIndexed { index, mediaItemCategory ->
             val category = categories.find { it.id == mediaItemCategory.id }
             if (category == null)
                 mediaMetaData.categories.remove(mediaItemCategory)
