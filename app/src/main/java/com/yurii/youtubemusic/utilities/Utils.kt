@@ -122,7 +122,7 @@ fun calculateLikeBarValue(likeCount: BigInteger, disLikeCount: BigInteger): Int 
     return if (sum.compareTo(BigInteger.ZERO) == 0) 50 else likeCount.multiply(BigInteger("100")).divide(sum).toInt()
 }
 
-fun createFromPathOrReturnMock(context: Context, path: String): Drawable {
+fun createFromPathOrReturnMock(context: Context, path: String?): Drawable {
     return Drawable.createFromPath(path) ?: context.getDrawable(R.drawable.ic_thumbnail_mock)!!
 }
 
