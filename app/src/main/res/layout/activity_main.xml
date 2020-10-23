@@ -19,8 +19,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <FrameLayout
@@ -29,18 +29,32 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:orientation="vertical"
+            app:layout_anchor="@id/bottom_navigation_view"
+            app:layout_anchorGravity="top|end">
+
+            <FrameLayout
+                android:id="@+id/player_view_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:background="@color/colorAccent"
-            android:foreground="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            app:labelVisibilityMode="selected"
+            android:foreground="?attr/selectableItemBackground"
             app:itemIconTint="@color/nav_item_state"
             app:itemTextColor="@color/nav_item_state"
+            app:labelVisibilityMode="selected"
             app:layout_behavior="com.yurii.youtubemusic.ui.BottomNavigationBehavior"
             app:menu="@menu/navigation_menu" />
 
