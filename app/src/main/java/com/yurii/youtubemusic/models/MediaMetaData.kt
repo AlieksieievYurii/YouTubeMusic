@@ -9,6 +9,7 @@ import androidx.core.net.toFile
 import androidx.core.net.toUri
 import kotlinx.android.parcel.Parcelize
 import java.io.File
+
 @Parcelize
 data class MediaMetaData(
     val mediaId: String,
@@ -33,6 +34,17 @@ data class MediaMetaData(
                 mediaFile = mediaItem.description.mediaUri!!.toFile(),
                 categories = extras.getParcelableArrayList(EXTRA_KEY_CATEGORIES)!!
             )
+        }
+
+        fun createFrom(mediaDescription: MediaMetadataCompat): MediaMetaData {
+            return MediaMetaData(
+                mediaId = mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID),
+                title = mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE),
+                description = mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION),
+                author = mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_AUTHOR),
+                duration = mediaDescription.getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
+                thumbnail = File(mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI)),
+                mediaFile = File(mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI)))
         }
     }
 }

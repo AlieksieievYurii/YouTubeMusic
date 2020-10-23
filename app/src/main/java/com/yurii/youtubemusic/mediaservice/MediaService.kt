@@ -124,6 +124,8 @@ class MediaService : MediaBrowserServiceCompat() {
         }
     }
 
+    private fun updateCurrentMetadata() = mediaSession.setMetadata(queueProvider.getCurrentQueueItem().toMediaMetadataCompat())
+
     private fun updateCurrentPlaybackState() {
         val extras = Bundle().apply {
             if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED)
@@ -232,13 +234,12 @@ class MediaService : MediaBrowserServiceCompat() {
 
     private fun prepareMusicFromQueue() {
         currentState = PlaybackStateCompat.STATE_BUFFERING
-        val metadata: MediaMetaData = queueProvider.getCurrentQueueItem()
         updateCurrentPlaybackState()
-        mediaSession.setMetadata(metadata.toMediaMetadataCompat())
+        updateCurrentMetadata()
         resetOrCreateMediaPlayer()
 
         getMediaPlayer().apply {
-            setDataSource(metadata.mediaFile.absolutePath)
+            setDataSource(queueProvider.getCurrentQueueItem().mediaFile.absolutePath)
             prepareAsync()
         }
     }
