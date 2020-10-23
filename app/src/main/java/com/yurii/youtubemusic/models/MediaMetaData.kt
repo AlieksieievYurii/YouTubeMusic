@@ -74,7 +74,7 @@ fun MediaMetaData.toMediaMetadataCompat(): MediaMetadataCompat = MediaMetadataCo
     it.putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, this.author)
     it.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, this.author)
     it.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, this.description)
-    it.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, this.thumbnail.toURI().toString())
+    it.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, this.thumbnail.absolutePath)
     it.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, this.mediaFile.toString())
     it.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, this.duration)
 }.build()
