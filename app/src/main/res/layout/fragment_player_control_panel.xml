@@ -3,6 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="mediaItem"
+            type="com.yurii.youtubemusic.models.MediaMetaData" />
+
+        <variable
+            name="isPlayingNow"
+            type="Boolean" />
+    </data>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/container"
         android:layout_width="match_parent"
@@ -12,6 +23,7 @@
         android:foreground="?android:attr/selectableItemBackground"
         app:cardBackgroundColor="@color/colorPrimary"
         app:cardCornerRadius="15dp"
+        android:elevation="10dp"
         app:cardUseCompatPadding="true">
 
         <RelativeLayout
@@ -26,7 +38,8 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 app:civ_border_color="@color/white"
-                app:civ_border_width="1dp" />
+                app:civ_border_width="1dp"
+                app:imageSrc="@{mediaItem.thumbnail.absolutePath}" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -42,7 +55,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="ssssssssssssssssssssssssssssssssssssssssssssssssswefwefwfswdfewfwefwefwefwe"
+                    android:text="@{mediaItem.title}"
                     android:textColor="@color/white"
                     tools:text="@tools:sample/lorem/random" />
 
@@ -55,7 +68,7 @@
                         android:id="@+id/hint_where_from_playing"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Playing from 'English'"
+                        android:text="Playing from 'All'"
                         android:textColor="#C6C6C6"
                         android:textSize="12sp" />
 
@@ -80,14 +93,15 @@
 
             <ImageButton
                 android:id="@+id/action_button"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_margin="10dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_pause_48px"
-                tools:ignore="ContentDescription" />
+                android:src="@{isPlayingNow ? @drawable/ic_pause_48px : @drawable/ic_play_48dp}"
+                tools:ignore="ContentDescription"
+                tools:src="@drawable/ic_play_48dp" />
 
         </RelativeLayout>
     </androidx.cardview.widget.CardView>

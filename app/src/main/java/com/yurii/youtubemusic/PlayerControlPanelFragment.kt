@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
 import com.yurii.youtubemusic.utilities.Injector.providePlayerBottomControllerViewModel
 import com.yurii.youtubemusic.viewmodels.PlayerBottomControllerViewModel
@@ -20,7 +21,20 @@ class PlayerControlPanelFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_player_control_panel, container, false)
-        viewModel.test()
+        initView()
         return binding.root
+    }
+
+    private fun initView() {
+        viewModel.playingNow.observe(viewLifecycleOwner, Observer { binding.mediaItem = it })
+
+        viewModel.isNowPlaying.observe(viewLifecycleOwner, Observer { binding.isPlayingNow = it })
+
+        binding.actionButton.setOnClickListener {
+            if (viewModel.isNowPlaying.value!!)
+                viewModel.pausePlaying()
+            else
+                viewModel.continuePlaying()
+        }
     }
 }
