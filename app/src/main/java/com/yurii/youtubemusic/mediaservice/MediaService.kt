@@ -234,8 +234,8 @@ class MediaService : MediaBrowserServiceCompat() {
 
     private fun prepareMusicFromQueue() {
         currentState = PlaybackStateCompat.STATE_BUFFERING
-        updateCurrentPlaybackState()
         updateCurrentMetadata()
+        updateCurrentPlaybackState()
         resetOrCreateMediaPlayer()
 
         getMediaPlayer().apply {

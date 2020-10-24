@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.utilities
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.os.Handler
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -124,6 +125,30 @@ fun calculateLikeBarValue(likeCount: BigInteger, disLikeCount: BigInteger): Int 
 
 fun createFromPathOrReturnMock(context: Context, path: String?): Drawable {
     return Drawable.createFromPath(path) ?: context.getDrawable(R.drawable.ic_thumbnail_mock)!!
+}
+
+class TimeCounter(private val onRun: (time: Long) -> Unit) : Runnable {
+    private val handler = Handler()
+    private var currentTimePosition = 0L
+
+    override fun run() {
+        currentTimePosition += 1000L
+        onRun.invoke(currentTimePosition)
+        handler.postDelayed(this, 1000)
+    }
+
+    fun start(currentPosition: Long) {
+        stop()
+        currentTimePosition = currentPosition
+        run()
+    }
+
+    fun reset() {
+        stop()
+        currentTimePosition = 0
+    }
+
+    fun stop() = handler.removeCallbacks(this)
 }
 
 

@@ -18,9 +18,11 @@ class PlayerBottomControllerViewModel(application: Application, private val musi
             null
     }
 
-    val isNowPlaying: LiveData<Boolean> = Transformations.map(musicServiceConnection.playbackState) {
-        it.state == PlaybackStateCompat.STATE_PLAYING || it.state == PlaybackStateCompat.STATE_BUFFERING
-    }
+    val currentPlaybackState: LiveData<PlaybackStateCompat> = musicServiceConnection.playbackState
+
+    fun isPlaying(): Boolean = currentPlaybackState.value?.state?.run {
+        this == PlaybackStateCompat.STATE_PLAYING || this == PlaybackStateCompat.STATE_BUFFERING
+    } ?: false
 
     fun pausePlaying() = musicServiceConnection.transportControls.pause()
 

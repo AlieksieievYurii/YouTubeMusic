@@ -5,9 +5,15 @@
 
     <data>
 
+        <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
+
         <variable
             name="mediaItem"
             type="com.yurii.youtubemusic.models.MediaMetaData" />
+
+        <variable
+            name="currentTimePosition"
+            type="Long" />
 
         <variable
             name="isPlayingNow"
@@ -19,11 +25,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
+        android:elevation="10dp"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
         app:cardBackgroundColor="@color/colorPrimary"
         app:cardCornerRadius="15dp"
-        android:elevation="10dp"
         app:cardUseCompatPadding="true">
 
         <RelativeLayout
@@ -83,7 +89,7 @@
                         android:id="@+id/time_progress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1:46 / 3:15"
+                        android:text="@{@string/label_duration_progress(UtilsKt.parseDurationToHumanView(currentTimePosition), UtilsKt.parseDurationToHumanView(mediaItem.duration))}"
                         android:textColor="#C6C6C6"
                         android:textSize="12sp" />
                 </LinearLayout>

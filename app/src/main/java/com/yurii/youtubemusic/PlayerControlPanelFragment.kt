@@ -1,6 +1,8 @@
 package com.yurii.youtubemusic
 
 import android.os.Bundle
+import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
 import com.yurii.youtubemusic.utilities.Injector.providePlayerBottomControllerViewModel
+import com.yurii.youtubemusic.utilities.TimeCounter
 import com.yurii.youtubemusic.viewmodels.PlayerBottomControllerViewModel
 
 class PlayerControlPanelFragment : Fragment() {
@@ -17,6 +20,7 @@ class PlayerControlPanelFragment : Fragment() {
         providePlayerBottomControllerViewModel(requireContext())
     }
     private lateinit var binding: FragmentPlayerControlPanelBinding
+    private val timeCounter = TimeCounter { binding.currentTimePosition = it }
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -26,12 +30,20 @@ class PlayerControlPanelFragment : Fragment() {
     }
 
     private fun initView() {
-        viewModel.playingNow.observe(viewLifecycleOwner, Observer { binding.mediaItem = it })
+        viewModel.playingNow.observe(viewLifecycleOwner, Observer { mediaItem -> binding.mediaItem = mediaItem })
 
-        viewModel.isNowPlaying.observe(viewLifecycleOwner, Observer { binding.isPlayingNow = it })
+        viewModel.currentPlaybackState.observe(viewLifecycleOwner, Observer { playback ->
+            binding.isPlayingNow = viewModel.isPlaying()
+
+            when (playback.state) {
+                PlaybackStateCompat.STATE_BUFFERING -> timeCounter.reset()
+                PlaybackStateCompat.STATE_PLAYING -> timeCounter.start(playback.position)
+                PlaybackStateCompat.STATE_PAUSED -> timeCounter.stop()
+            }
+        })
 
         binding.actionButton.setOnClickListener {
-            if (viewModel.isNowPlaying.value!!)
+            if (viewModel.isPlaying())
                 viewModel.pausePlaying()
             else
                 viewModel.continuePlaying()
