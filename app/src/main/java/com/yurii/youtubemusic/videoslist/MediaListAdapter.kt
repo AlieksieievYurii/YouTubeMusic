@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.videoslist
 
 import android.content.Context
+import android.graphics.Color
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
@@ -139,6 +140,7 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
         }
 
         fun setNoneState() {
+            itemMusicBinding.container.setCardBackgroundColor(Color.WHITE)
             itemMusicBinding.thumbnailState.apply {
                 isVisible = false
             }
@@ -155,16 +157,18 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
             val context = itemMusicBinding.root.context
             itemMusicBinding.thumbnailState.apply {
                 isVisible = true
-                setImageDrawable(context.getDrawable(R.drawable.ic_play_24dp))
+                setImageDrawable(context.getDrawable(R.drawable.ic_pause_24px))
             }
+            itemMusicBinding.container.setCardBackgroundColor(Color.LTGRAY)
         }
 
         private fun setPausedState() {
             val context = itemMusicBinding.root.context
             itemMusicBinding.thumbnailState.apply {
                 isVisible = true
-                setImageDrawable(context.getDrawable(R.drawable.ic_pause_24px))
+                setImageDrawable(context.getDrawable(R.drawable.ic_play_24dp))
             }
+            itemMusicBinding.container.setCardBackgroundColor(Color.LTGRAY)
         }
     }
 }
