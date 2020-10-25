@@ -16,6 +16,7 @@ import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.ui.DownloadButton
+import com.yurii.youtubemusic.ui.getValueAnimator
 import com.yurii.youtubemusic.utilities.*
 import java.lang.Exception
 import java.lang.IllegalStateException

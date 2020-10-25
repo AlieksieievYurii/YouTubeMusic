@@ -16,9 +16,9 @@ import androidx.lifecycle.Observer
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
 import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
 import com.yurii.youtubemusic.models.MediaMetaData
+import com.yurii.youtubemusic.ui.startValueAnimation
 import com.yurii.youtubemusic.utilities.Injector.providePlayerBottomControllerViewModel
 import com.yurii.youtubemusic.utilities.TimeCounter
-import com.yurii.youtubemusic.utilities.startValueAnimation
 import com.yurii.youtubemusic.viewmodels.PlayerBottomControllerViewModel
 import kotlin.math.abs
 
