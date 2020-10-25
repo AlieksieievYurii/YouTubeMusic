@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        app:cardBackgroundColor="#FFCCCCCC"
+        app:cardBackgroundColor="@color/white"
         android:foreground="?android:attr/selectableItemBackground">
 
         <RelativeLayout
@@ -49,7 +49,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:adjustViewBounds="false"
-                    android:background="#77C6C6C6"
+                    android:background="@color/grayTransparent"
                     android:visibility="gone"
                     app:shapeAppearanceOverlay="@style/roundedImageView"
                     tools:ignore="ContentDescription" />

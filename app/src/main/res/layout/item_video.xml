@@ -132,7 +132,7 @@
                         android:layout_below="@id/btn_download"
                         android:layout_centerHorizontal="true"
                         android:text="@{@string/label_size_progress(progress.currentSizeInMb, progress.totalSizeInMb)}"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorAccent"
                         android:textSize="9sp"
                         android:visibility="@{progress != null ? View.VISIBLE : View.GONE}"
                         tools:ignore="SmallSp"

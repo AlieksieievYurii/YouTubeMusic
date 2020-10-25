@@ -1,11 +1,11 @@
 package com.yurii.youtubemusic.adapters
 
 import android.content.Context
-import android.graphics.Color
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -156,7 +156,7 @@ class MediaListAdapter(context: Context, private val category: Category, private
 
         fun setNoneState() {
             itemMusicBinding.hintPlayingCategory.isVisible = false
-            itemMusicBinding.container.setCardBackgroundColor(Color.WHITE)
+            itemMusicBinding.container.setCardBackgroundColor(ContextCompat.getColor(itemMusicBinding.container.context, R.color.white))
             itemMusicBinding.thumbnailState.apply {
                 isVisible = false
             }
@@ -184,7 +184,7 @@ class MediaListAdapter(context: Context, private val category: Category, private
                 isVisible = true
                 setImageDrawable(context.getDrawable(R.drawable.ic_pause_24px))
             }
-            itemMusicBinding.container.setCardBackgroundColor(Color.LTGRAY)
+            itemMusicBinding.container.setCardBackgroundColor(ContextCompat.getColor(context, R.color.lightGray))
         }
 
         private fun setPausedState() {
@@ -193,7 +193,7 @@ class MediaListAdapter(context: Context, private val category: Category, private
                 isVisible = true
                 setImageDrawable(context.getDrawable(R.drawable.ic_play_24dp))
             }
-            itemMusicBinding.container.setCardBackgroundColor(Color.LTGRAY)
+            itemMusicBinding.container.setCardBackgroundColor(ContextCompat.getColor(context, R.color.lightGray))
         }
     }
 }

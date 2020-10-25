@@ -1,9 +1,9 @@
 package com.yurii.youtubemusic.playlists
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.api.services.youtube.model.Playlist
@@ -70,11 +70,9 @@ class PlayListsAdapter(private val onClickPlayListListener: OnClickPlayListListe
         val binding = DataBindingUtil.getBinding<ItemPlaylistBinding>(playListItem)
         fun bind(playList: Playlist, onClickPlayListListener: OnClickPlayListListener, isAlreadySelected: Boolean) {
             binding?.apply {
+                val context = this.root.context
                 this.playlist = playList
-                if (isAlreadySelected)
-                    root.setBackgroundColor(Color.GRAY)
-                else
-                    root.setBackgroundColor(Color.WHITE)
+                root.setBackgroundColor(ContextCompat.getColor(context, if(isAlreadySelected) R.color.lightGray else  R.color.white))
                 root.setOnClickListener {
                     onClickPlayListListener.onClickPlayList(playList)
                 }
