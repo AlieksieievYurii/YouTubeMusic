@@ -1,12 +1,10 @@
-package com.yurii.youtubemusic.viewmodels.youtubefragment
+package com.yurii.youtubemusic.viewmodels
 
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItemListResponse
@@ -23,6 +21,7 @@ import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import java.lang.Exception
+import java.lang.IllegalStateException
 import java.lang.RuntimeException
 import java.util.ArrayList
 
@@ -187,4 +186,14 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     companion object {
         private const val LOG_TAG: String = "YouTubeViewModel"
     }
+}
+
+@Suppress("UNCHECKED_CAST")
+class YouTubeViewModelFactory(private val application: Application, private val googleSignInAccount: GoogleSignInAccount) : ViewModelProvider.Factory {
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
+            return YouTubeMusicViewModel(application, googleSignInAccount) as T
+        throw IllegalStateException("Given the model class is not assignable from YouTuneViewModel class")
+    }
+
 }

@@ -15,7 +15,7 @@ import com.yurii.youtubemusic.utilities.TabFragment
 import com.yurii.youtubemusic.utilities.TabParameters
 import com.yurii.youtubemusic.videoslist.CategoriesTabAdapter
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
-import com.yurii.youtubemusic.viewmodels.savedmusic.SavedMusicViewModel
+import com.yurii.youtubemusic.viewmodels.SavedMusicViewModel
 
 
 /**

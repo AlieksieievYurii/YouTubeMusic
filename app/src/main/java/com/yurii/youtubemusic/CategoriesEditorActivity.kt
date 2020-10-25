@@ -14,7 +14,7 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.AddEditCategoryDialog
 import com.yurii.youtubemusic.utilities.Injector
-import com.yurii.youtubemusic.viewmodels.categorieseditor.CategoriesEditorViewModel
+import com.yurii.youtubemusic.viewmodels.CategoriesEditorViewModel
 
 class CategoriesEditorActivity : AppCompatActivity() {
     private val viewModel by viewModels<CategoriesEditorViewModel> {

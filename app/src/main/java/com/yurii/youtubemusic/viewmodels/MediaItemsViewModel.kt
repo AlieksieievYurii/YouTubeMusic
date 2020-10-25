@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.viewmodels.mediaitems
+package com.yurii.youtubemusic.viewmodels
 
 import android.content.Context
 import android.os.Bundle

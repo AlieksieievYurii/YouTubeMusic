@@ -1,9 +1,7 @@
-package com.yurii.youtubemusic.viewmodels.categorieseditor
+package com.yurii.youtubemusic.viewmodels
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Preferences
 import java.lang.IllegalStateException
@@ -72,5 +70,14 @@ class CategoriesEditorViewModel(application: Application) : AndroidViewModel(app
     fun saveChanges() {
         if (areChanges)
             Preferences.setCategories(getApplication(), categoriesList)
+    }
+}
+
+@Suppress("UNCHECKED_CAST")
+class CategoriesEditorViewModelFactory(private val application: Application): ViewModelProvider.Factory {
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CategoriesEditorViewModel::class.java))
+            return CategoriesEditorViewModel(application) as T
+        throw IllegalStateException("Given the model class is not assignable from CategoriesEditorViewModel class")
     }
 }

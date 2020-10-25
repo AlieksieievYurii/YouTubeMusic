@@ -22,7 +22,7 @@ import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.videoslist.MediaListAdapter
 import com.yurii.youtubemusic.videoslist.MediaListAdapterController
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
-import com.yurii.youtubemusic.viewmodels.mediaitems.MediaItemsViewModel
+import com.yurii.youtubemusic.viewmodels.MediaItemsViewModel
 
 class MediaItemsFragment : Fragment() {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()

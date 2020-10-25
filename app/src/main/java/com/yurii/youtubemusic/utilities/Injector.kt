@@ -7,9 +7,9 @@ import com.yurii.youtubemusic.mediaservice.MediaService
 import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.viewmodels.PlayerBottomControllerFactory
-import com.yurii.youtubemusic.viewmodels.categorieseditor.CategoriesEditorViewModelFactory
-import com.yurii.youtubemusic.viewmodels.mediaitems.MediaItemsViewModel
-import com.yurii.youtubemusic.viewmodels.savedmusic.SavedMusicViewModelFactory
+import com.yurii.youtubemusic.viewmodels.CategoriesEditorViewModelFactory
+import com.yurii.youtubemusic.viewmodels.MediaItemsViewModel
+import com.yurii.youtubemusic.viewmodels.SavedMusicViewModelFactory
 
 object Injector {
 

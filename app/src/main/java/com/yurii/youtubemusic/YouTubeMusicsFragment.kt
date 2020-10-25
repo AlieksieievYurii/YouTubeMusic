@@ -33,15 +33,16 @@ import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.videoslist.VideosListAdapter
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
-import com.yurii.youtubemusic.viewmodels.youtubefragment.VideoItemChange
-import com.yurii.youtubemusic.viewmodels.youtubefragment.VideosLoader
-import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeMusicViewModel
-import com.yurii.youtubemusic.viewmodels.youtubefragment.YouTubeViewModelFactory
+import com.yurii.youtubemusic.viewmodels.VideoItemChange
+import com.yurii.youtubemusic.viewmodels.VideosLoader
+import com.yurii.youtubemusic.viewmodels.YouTubeMusicViewModel
+import com.yurii.youtubemusic.viewmodels.YouTubeViewModelFactory
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
+class YouTubeMusicsFragment : TabFragment(), VideoItemChange,
+    VideosLoader {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private lateinit var viewModel: YouTubeMusicViewModel
     private lateinit var binding: FragmentYouTubeMusicsBinding
@@ -80,7 +81,8 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
 
     private fun initViewModel() {
         val googleSignInAccount = getGoogleSignInAccount()
-        val viewModelFactory = YouTubeViewModelFactory(requireActivity().application, googleSignInAccount)
+        val viewModelFactory =
+            YouTubeViewModelFactory(requireActivity().application, googleSignInAccount)
         viewModel = ViewModelProvider(this, viewModelFactory).get(YouTubeMusicViewModel::class.java)
         viewModel.videoItemChange = this
         viewModel.videosLoader = this
