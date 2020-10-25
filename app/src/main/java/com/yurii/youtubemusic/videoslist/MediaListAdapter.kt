@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemMusicBinding
 import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
+import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.BaseViewHolder
 
@@ -25,8 +27,8 @@ interface MediaListAdapterController {
     fun isEmptyList(): Boolean
 }
 
-class MediaListAdapter(context: Context, private val callback: CallBack) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(),
-    MediaListAdapterController {
+class MediaListAdapter(context: Context, private val category: Category, private val callback: CallBack) :
+    RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(), MediaListAdapterController {
     interface CallBack {
         fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat?
         fun onOptionsClick(mediaItem: MediaMetaData, view: View)
@@ -53,6 +55,12 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     override fun addNewMediaItem(mediaItem: MediaMetaData) {
         musics.add(mediaItem)
         notifyItemInserted(musics.indexOf(mediaItem))
+        findVideoItemView(mediaItem) {
+            callback.getPlaybackState(mediaItem)?.run {
+                it.setPlaybackState(this)
+                it.setHintPlayingCategory(category, this)
+            }
+        }
     }
 
     override fun updateMediaItem(mediaItem: MediaMetaData) {
@@ -81,7 +89,10 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     override fun onBindViewHolder(holder: MusicViewHolder, position: Int) {
         val mediaItem = musics[position]
         holder.setMusicItem(mediaItem, callback)
-        callback.getPlaybackState(mediaItem)?.run { holder.setPlaybackState(this) } ?: holder.setNoneState()
+        callback.getPlaybackState(mediaItem)?.run {
+            holder.setPlaybackState(this)
+            holder.setHintPlayingCategory(category, this)
+        } ?: holder.setNoneState()
 
     }
 
@@ -121,7 +132,10 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     override fun onChangePlaybackState(playbackStateCompat: PlaybackStateCompat) {
         resetItemsState()
         playbackStateCompat.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)?.run {
-            findVideoItemView(this) { it.setPlaybackState(playbackStateCompat) }
+            findVideoItemView(this) {
+                it.setPlaybackState(playbackStateCompat)
+                it.setHintPlayingCategory(category, playbackStateCompat)
+            }
         }
     }
 
@@ -141,6 +155,7 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
         }
 
         fun setNoneState() {
+            itemMusicBinding.hintPlayingCategory.isVisible = false
             itemMusicBinding.container.setCardBackgroundColor(Color.WHITE)
             itemMusicBinding.thumbnailState.apply {
                 isVisible = false
@@ -152,6 +167,15 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
                 PlaybackStateCompat.STATE_PLAYING -> setPlayingState()
                 PlaybackStateCompat.STATE_PAUSED -> setPausedState()
             }
+        }
+
+        fun setHintPlayingCategory(category: Category, playbackStateCompat: PlaybackStateCompat) {
+            val categoryName = playbackStateCompat.extras?.getString(PLAYBACK_STATE_PLAYING_CATEGORY_NAME)
+            if (category.name != categoryName)
+                itemMusicBinding.hintPlayingCategory.apply {
+                    isVisible = true
+                    text = itemMusicBinding.container.context.getString(R.string.label_playing_from, categoryName)
+                }
         }
 
         private fun setPlayingState() {

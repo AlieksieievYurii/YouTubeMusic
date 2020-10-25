@@ -32,9 +32,8 @@ class MediaItemsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_media_items, container, false)
-        val category: Category = requireArguments().getParcelable(EXTRA_CATEGORY)!!
+        initViewModel(requireArguments().getParcelable(EXTRA_CATEGORY)!!)
         initRecyclerView(binding.mediaItems)
-        initViewModel(category)
 
         mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
             mediaItemsAdapterController.removeItemWithId(it)
@@ -82,11 +81,10 @@ class MediaItemsFragment : Fragment() {
     }
 
     private fun initRecyclerView(recyclerView: RecyclerView) {
-        val mediaItemsAdapter = MediaListAdapter(requireContext(), MediaListAdapterCallBack())
+        val mediaItemsAdapter = MediaListAdapter(requireContext(), viewModel.category, MediaListAdapterCallBack())
         mediaItemsAdapterController = mediaItemsAdapter
         recyclerView.apply {
             layoutAnimation = android.view.animation.AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.bottom_lifting_animation)
-            //addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
             this.setHasFixedSize(true)
             this.layoutManager = LinearLayoutManager(requireContext())
             this.adapter = mediaItemsAdapter

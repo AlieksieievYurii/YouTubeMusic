@@ -37,8 +37,8 @@ class MediaItemsViewModel(private val context: Context, val category: Category, 
     fun getMetaData(mediaId: String): MediaMetaData = mediaMetadataProvider.readMetadata(mediaId)
 
     fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat? {
-        val currentMediaItem = playbackState.value!!.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
-        return if (mediaItem == currentMediaItem) playbackState.value!! else null
+        val currentMediaItem = playbackState.value?.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
+        return if (mediaItem.mediaId == currentMediaItem?.mediaId) playbackState.value else null
     }
 
     fun deleteMediaItem(mediaMetaData: MediaMetaData) {
