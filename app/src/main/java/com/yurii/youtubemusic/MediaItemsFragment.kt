@@ -14,7 +14,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
-import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
@@ -76,9 +75,8 @@ class MediaItemsFragment : Fragment() {
         })
 
         viewModel.playbackState.observe(viewLifecycleOwner, Observer {
-            if (it.state == PlaybackStateCompat.STATE_PLAYING || it.state == PlaybackStateCompat.STATE_PAUSED) {
-                val mediaMetaData = it.extras!!.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)!!
-                mediaItemsAdapterController.onChangePlaybackState(mediaMetaData, it)
+            if (it.state == PlaybackStateCompat.STATE_PLAYING || it.state == PlaybackStateCompat.STATE_PAUSED || it.state == PlaybackStateCompat.STATE_STOPPED) {
+                mediaItemsAdapterController.onChangePlaybackState(it)
             }
         })
     }

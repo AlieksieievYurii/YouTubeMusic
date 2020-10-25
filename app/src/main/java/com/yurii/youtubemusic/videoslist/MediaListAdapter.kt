@@ -11,11 +11,12 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemMusicBinding
+import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.BaseViewHolder
 
 interface MediaListAdapterController {
-    fun onChangePlaybackState(mediaMetaData: MediaMetaData, playbackStateCompat: PlaybackStateCompat)
+    fun onChangePlaybackState(playbackStateCompat: PlaybackStateCompat)
     fun setMediaItems(list: List<MediaMetaData>)
     fun removeItemWithId(id: String)
     fun addNewMediaItem(mediaItem: MediaMetaData)
@@ -117,10 +118,10 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
         }
     }
 
-    override fun onChangePlaybackState(mediaMetaData: MediaMetaData, playbackStateCompat: PlaybackStateCompat) {
+    override fun onChangePlaybackState(playbackStateCompat: PlaybackStateCompat) {
         resetItemsState()
-        findVideoItemView(mediaMetaData) {
-            it.setPlaybackState(playbackStateCompat)
+        playbackStateCompat.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)?.run {
+            findVideoItemView(this) { it.setPlaybackState(playbackStateCompat) }
         }
     }
 
