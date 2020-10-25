@@ -16,6 +16,7 @@
     <string name="content_description_likes">Likes</string>
     <string name="label_size_progress">%1$.1f / %2$.1f M</string>
     <string name="label_duration_progress">%1s / %2s</string>
+    <string name="label_playing_from">Playing from \'%s\'</string>
     <string name="content_description_dislikes">Dislikes</string>
     <string name="select">Select</string>
     <string name="content_description_remove_music">Remove a downloaded music</string>

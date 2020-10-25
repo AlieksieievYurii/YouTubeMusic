@@ -16,6 +16,10 @@
             type="Long" />
 
         <variable
+            name="playingCategory"
+            type="String" />
+
+        <variable
             name="isPlayingNow"
             type="Boolean" />
     </data>
@@ -73,26 +77,29 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/hint_where_from_playing"
+                        android:id="@+id/hint_playing_category"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Playing from 'All'"
+                        android:text="@{@string/label_playing_from(playingCategory)}"
+                        tools:text="@tools:sample/lorem/random"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:maxLength="30"
                         android:textColor="#C6C6C6"
                         android:textSize="12sp" />
-
                     <View
                         android:layout_width="5dp"
                         android:layout_height="5dp"
                         android:layout_gravity="center_vertical"
                         android:layout_margin="5dp"
                         android:background="@drawable/circle" />
-
                     <TextView
                         android:id="@+id/time_progress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@{@string/label_duration_progress(UtilsKt.parseDurationToHumanView(currentTimePosition), UtilsKt.parseDurationToHumanView(mediaItem.duration))}"
                         android:textColor="#C6C6C6"
+                        tools:text="1:04 / 5:34"
                         android:textSize="12sp" />
                 </LinearLayout>
 
