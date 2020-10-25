@@ -8,7 +8,7 @@
 
         <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
 
-        <import type="com.yurii.youtubemusic.videoslist.ItemState" />
+        <import type="com.yurii.youtubemusic.adapters.ItemState" />
 
         <import type="android.view.View" />
 

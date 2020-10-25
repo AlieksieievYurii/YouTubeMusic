@@ -19,8 +19,8 @@ import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
-import com.yurii.youtubemusic.videoslist.MediaListAdapter
-import com.yurii.youtubemusic.videoslist.MediaListAdapterController
+import com.yurii.youtubemusic.adapters.MediaListAdapter
+import com.yurii.youtubemusic.adapters.MediaListAdapterController
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.MediaItemsViewModel
 

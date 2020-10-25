@@ -31,7 +31,7 @@ import com.yurii.youtubemusic.ui.BottomNavigationBehavior
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
-import com.yurii.youtubemusic.videoslist.VideosListAdapter
+import com.yurii.youtubemusic.adapters.VideosListAdapter
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.VideoItemChange
 import com.yurii.youtubemusic.viewmodels.VideosLoader

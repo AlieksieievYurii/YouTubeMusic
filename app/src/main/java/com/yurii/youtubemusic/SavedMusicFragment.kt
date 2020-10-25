@@ -13,7 +13,7 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
 import com.yurii.youtubemusic.utilities.TabParameters
-import com.yurii.youtubemusic.videoslist.CategoriesTabAdapter
+import com.yurii.youtubemusic.utilities.CategoriesTabAdapter
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.SavedMusicViewModel
 
