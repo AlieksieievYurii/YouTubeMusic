@@ -3,8 +3,8 @@ package com.yurii.youtubemusic.utilities
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
-import com.yurii.youtubemusic.mediaservice.MediaService
-import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
+import com.yurii.youtubemusic.services.mediaservice.MediaService
+import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.viewmodels.PlayerBottomControllerFactory
 import com.yurii.youtubemusic.viewmodels.CategoriesEditorViewModelFactory

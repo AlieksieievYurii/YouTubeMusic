@@ -37,7 +37,7 @@
             android:name=".services.downloader.MusicDownloaderService"
             android:exported="false" />
         <service
-            android:name=".mediaservice.MediaService"
+            android:name="com.yurii.youtubemusic.services.mediaservice.MediaService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />

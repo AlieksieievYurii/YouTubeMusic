@@ -5,8 +5,8 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import androidx.lifecycle.*
-import com.yurii.youtubemusic.mediaservice.CATEGORIES_CONTENT
-import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
+import com.yurii.youtubemusic.services.mediaservice.CATEGORIES_CONTENT
+import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
 import java.lang.IllegalStateException

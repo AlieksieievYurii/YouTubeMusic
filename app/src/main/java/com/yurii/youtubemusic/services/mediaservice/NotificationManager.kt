@@ -1,8 +1,7 @@
-package com.yurii.youtubemusic.mediaservice
+package com.yurii.youtubemusic.services.mediaservice
 
 import android.app.Notification
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.media.MediaMetadata
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat

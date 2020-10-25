@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.mediaservice
+package com.yurii.youtubemusic.services.mediaservice
 
 import android.content.ComponentName
 import android.content.Context

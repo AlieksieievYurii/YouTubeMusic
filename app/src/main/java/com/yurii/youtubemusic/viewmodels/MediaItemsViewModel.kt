@@ -6,8 +6,8 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
-import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
+import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
+import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
 import com.yurii.youtubemusic.models.MediaMetaData
