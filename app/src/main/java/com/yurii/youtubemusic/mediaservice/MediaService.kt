@@ -158,7 +158,7 @@ class MediaService : MediaBrowserServiceCompat() {
         if (!musicProvider.isMusicsInitialized || musicProvider.isEmptyMusicsList())
             return PlaybackStateCompat.ACTION_PREPARE
 
-        var actions: Long = PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
+        var actions: Long = PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID or PlaybackStateCompat.ACTION_STOP
 
         if (!queueProvider.queueExists())
             return actions

@@ -24,6 +24,8 @@ class PlayerBottomControllerViewModel(application: Application, private val musi
         this == PlaybackStateCompat.STATE_PLAYING || this == PlaybackStateCompat.STATE_BUFFERING
     } ?: false
 
+    fun stopPlaying() = musicServiceConnection.transportControls.stop()
+
     fun pausePlaying() = musicServiceConnection.transportControls.pause()
 
     fun continuePlaying() = musicServiceConnection.transportControls.play()

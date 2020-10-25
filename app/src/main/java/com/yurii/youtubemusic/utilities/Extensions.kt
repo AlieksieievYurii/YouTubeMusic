@@ -2,6 +2,8 @@ package com.yurii.youtubemusic.utilities
 
 import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
+import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.core.animation.addListener
 
 inline fun getValueAnimator(
     forward: Boolean = true,
@@ -15,4 +17,14 @@ inline fun getValueAnimator(
     animator.interpolator = interpolator
 
     return animator
+}
+
+inline fun startValueAnimation(start: Float, end: Float, crossinline onEnd: () -> Unit = {}, crossinline update: (value: Float) -> Unit) {
+    val valueAnimator = ValueAnimator.ofFloat(start, end)
+    valueAnimator.interpolator = AccelerateDecelerateInterpolator()
+    valueAnimator.addUpdateListener {
+        update.invoke(it.animatedValue as Float)
+    }
+    valueAnimator.addListener(onEnd = { onEnd.invoke() })
+    valueAnimator.start()
 }

@@ -28,9 +28,11 @@
         android:elevation="10dp"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
+        android:visibility="gone"
         app:cardBackgroundColor="@color/colorPrimary"
         app:cardCornerRadius="15dp"
-        app:cardUseCompatPadding="true">
+        app:cardUseCompatPadding="true"
+        tools:visibility="visible">
 
         <RelativeLayout
             android:layout_width="match_parent"
