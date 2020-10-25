@@ -18,23 +18,7 @@ data class VideoItem(
     val normalThumbnail: String
 ) : Serializable {
     var lastError: Exception? = null
-
     fun hasErrors(): Boolean = lastError != null
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as VideoItem
-
-        if (videoId != other.videoId) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return videoId.hashCode()
-    }
 
     companion object {
         fun createFrom(video: Video): VideoItem =
