@@ -6,10 +6,7 @@ import android.content.Context
 import com.yurii.youtubemusic.services.mediaservice.MediaService
 import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.viewmodels.PlayerBottomControllerFactory
-import com.yurii.youtubemusic.viewmodels.CategoriesEditorViewModelFactory
-import com.yurii.youtubemusic.viewmodels.MediaItemsViewModel
-import com.yurii.youtubemusic.viewmodels.SavedMusicViewModelFactory
+import com.yurii.youtubemusic.viewmodels.*
 
 object Injector {
 
@@ -22,7 +19,7 @@ object Injector {
         return MediaItemsViewModel(context, category, musicServiceConnection)
     }
 
-    fun providePlayerBottomControllerViewModel(context: Context): PlayerBottomControllerFactory {
+    fun providePlayerControllerViewModel(context: Context): PlayerBottomControllerFactory {
         val applicationContext = context.applicationContext
         val musicServiceConnection = provideMusicServiceConnection(context)
         return PlayerBottomControllerFactory(applicationContext, musicServiceConnection)
