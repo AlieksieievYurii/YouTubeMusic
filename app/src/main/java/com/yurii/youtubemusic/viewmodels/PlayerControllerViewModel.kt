@@ -41,7 +41,7 @@ class PlayerControllerViewModel(application: Application, private val musicServi
 
     fun moveToNextTrack() = musicServiceConnection.transportControls.skipToNext()
 
-    fun moveToPreviousTrack() = musicServiceConnection.transportControls.skipToNext()
+    fun moveToPreviousTrack() = musicServiceConnection.transportControls.skipToPrevious()
 
     private fun updateTimeCounter(playbackState: Int) {
         when (playbackState) {
