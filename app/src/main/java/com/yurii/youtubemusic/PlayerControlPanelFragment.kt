@@ -30,6 +30,7 @@ class PlayerControlPanelFragment : Fragment() {
 
     private lateinit var binding: FragmentPlayerControlPanelBinding
     private var clickX = 0f
+    private var hasBeenClicked = false
     private var displayWidth = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -75,7 +76,6 @@ class PlayerControlPanelFragment : Fragment() {
             handleCardContainerTouchEvent(event)
             false
         }
-        binding.container.setOnClickListener { openPlayerActivity() }
     }
 
     private fun openPlayerActivity() {
@@ -84,9 +84,22 @@ class PlayerControlPanelFragment : Fragment() {
 
     private fun handleCardContainerTouchEvent(event: MotionEvent) {
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> clickX = event.x
-            MotionEvent.ACTION_MOVE -> binding.container.x = binding.container.x + (event.x - clickX)
-            MotionEvent.ACTION_UP -> if (abs(binding.container.x) >= binding.container.width / 2) handleStopRequest() else returnViewToCenter()
+            MotionEvent.ACTION_DOWN -> {
+                clickX = event.x
+                hasBeenClicked = true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                hasBeenClicked = false
+                binding.container.x = binding.container.x + (event.x - clickX)
+            }
+
+            MotionEvent.ACTION_UP -> {
+                when {
+                    hasBeenClicked -> openPlayerActivity()
+                    abs(binding.container.x) >= binding.container.width / 2 -> handleStopRequest()
+                    else -> returnViewToCenter()
+                }
+            }
         }
     }
 
