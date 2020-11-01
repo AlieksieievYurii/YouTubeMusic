@@ -22,7 +22,6 @@ import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import java.lang.Exception
 import java.lang.IllegalStateException
-import java.lang.RuntimeException
 import java.util.ArrayList
 
 interface VideosLoader {
@@ -142,27 +141,9 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     }
 
     fun removeVideoItem(videoItem: VideoItem) {
-        deleteMusic(videoItem)
-        deleteMetadata(videoItem)
-        deleteThumbnail(videoItem)
-    }
-
-    private fun deleteMusic(videoItem: VideoItem) {
-        val musicFile = DataStorage.getMusic(context, videoItem.videoId)
-        if (!musicFile.delete())
-            throw RuntimeException("Cannot remove the music file $musicFile")
-    }
-
-    private fun deleteMetadata(videoItem: VideoItem) {
-        val metadataFile = DataStorage.getMetadata(context, videoItem.videoId)
-        if (!metadataFile.delete())
-            throw RuntimeException("Cannot remove the metadata file $metadataFile")
-    }
-
-    private fun deleteThumbnail(videoItem: VideoItem) {
-        val thumbnail = DataStorage.getThumbnail(context, videoItem.videoId)
-        if (!thumbnail.delete())
-            throw RuntimeException("Cannot remove the thumbnail $thumbnail")
+        DataStorage.getMusic(context, videoItem.videoId).delete()
+        DataStorage.getMetadata(context, videoItem.videoId).delete()
+        DataStorage.getThumbnail(context, videoItem.videoId).delete()
     }
 
     fun isVideoPageLast() = nextPageToken.isNullOrEmpty()
