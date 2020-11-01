@@ -405,7 +405,7 @@ class MediaService : MediaBrowserServiceCompat() {
 
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
-            Log.i(TAG, "OnSeek to $pos")
+            mediaPlayer?.seekTo(pos.toInt())
         }
     }
 

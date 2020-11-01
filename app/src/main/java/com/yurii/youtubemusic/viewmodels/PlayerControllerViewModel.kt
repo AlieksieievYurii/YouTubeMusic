@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Handler
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.annotation.IntRange
 import androidx.lifecycle.*
 import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.services.mediaservice.NOTHING_PLAYING
@@ -42,6 +43,13 @@ class PlayerControllerViewModel(application: Application, private val musicServi
     fun moveToNextTrack() = musicServiceConnection.transportControls.skipToNext()
 
     fun moveToPreviousTrack() = musicServiceConnection.transportControls.skipToPrevious()
+
+
+    fun onSeek(@IntRange(from = 0, to = 1000) value: Int) {
+        val duration = playingNow.value?.duration ?: 0
+        val pos = value * duration / 1000
+        musicServiceConnection.transportControls.seekTo(pos)
+    }
 
     private fun updateTimeCounter(playbackState: Int) {
         when (playbackState) {
