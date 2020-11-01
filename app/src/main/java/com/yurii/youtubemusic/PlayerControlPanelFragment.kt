@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.DisplayMetrics
@@ -17,19 +18,17 @@ import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
 import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.startValueAnimation
-import com.yurii.youtubemusic.utilities.Injector.providePlayerBottomControllerViewModel
-import com.yurii.youtubemusic.utilities.TimeCounter
-import com.yurii.youtubemusic.viewmodels.PlayerBottomControllerViewModel
+import com.yurii.youtubemusic.utilities.Injector.providePlayerControllerViewModel
+import com.yurii.youtubemusic.viewmodels.PlayerControllerViewModel
 import kotlin.math.abs
 
 
 class PlayerControlPanelFragment : Fragment() {
-    private val viewModel: PlayerBottomControllerViewModel by viewModels {
-        providePlayerBottomControllerViewModel(requireContext())
+    private val viewModel: PlayerControllerViewModel by viewModels {
+        providePlayerControllerViewModel(requireContext())
     }
 
     private lateinit var binding: FragmentPlayerControlPanelBinding
-    private val timeCounter = TimeCounter { binding.currentTimePosition = it }
     private var clickX = 0f
     private var displayWidth = 0
 
@@ -59,10 +58,11 @@ class PlayerControlPanelFragment : Fragment() {
             binding.isPlayingNow = viewModel.isPlaying()
             playback.extras?.getString(PLAYBACK_STATE_PLAYING_CATEGORY_NAME)?.run { binding.playingCategory = this }
 
-            updateTimeCounterState(playback)
             if (playback.state == PlaybackStateCompat.STATE_STOPPED)
                 swipeViewAway()
         })
+
+        viewModel.currentProgressTime.observe(viewLifecycleOwner, Observer { binding.currentTimePosition = it })
 
         binding.actionButton.setOnClickListener {
             if (viewModel.isPlaying())
@@ -75,14 +75,11 @@ class PlayerControlPanelFragment : Fragment() {
             handleCardContainerTouchEvent(event)
             false
         }
+        binding.container.setOnClickListener { openPlayerActivity() }
     }
 
-    private fun updateTimeCounterState(playbackState: PlaybackStateCompat) {
-        when (playbackState.state) {
-            PlaybackStateCompat.STATE_BUFFERING -> timeCounter.reset()
-            PlaybackStateCompat.STATE_PLAYING -> timeCounter.start(playbackState.position)
-            PlaybackStateCompat.STATE_PAUSED -> timeCounter.stop()
-        }
+    private fun openPlayerActivity() {
+        startActivity(Intent(requireContext(), PlayerActivity::class.java))
     }
 
     private fun handleCardContainerTouchEvent(event: MotionEvent) {
@@ -114,10 +111,5 @@ class PlayerControlPanelFragment : Fragment() {
     private fun swipeViewAway() {
         val end = if (binding.container.x > 0) binding.container.x + binding.container.width else binding.container.x - binding.container.width
         startValueAnimation(binding.container.x, end, onEnd = { hideMusicPlayerPanel() }) { binding.container.x = it }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        timeCounter.stop()
     }
 }

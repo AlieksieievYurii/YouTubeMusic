@@ -127,29 +127,4 @@ fun createFromPathOrReturnMock(context: Context, path: String?): Drawable {
     return Drawable.createFromPath(path) ?: context.getDrawable(R.drawable.ic_thumbnail_mock)!!
 }
 
-class TimeCounter(private val onRun: (time: Long) -> Unit) : Runnable {
-    private val handler = Handler()
-    private var currentTimePosition = 0L
-
-    override fun run() {
-        currentTimePosition += 1000L
-        onRun.invoke(currentTimePosition)
-        handler.postDelayed(this, 1000)
-    }
-
-    fun start(currentPosition: Long) {
-        stop()
-        currentTimePosition = currentPosition
-        run()
-    }
-
-    fun reset() {
-        stop()
-        currentTimePosition = 0
-    }
-
-    fun stop() = handler.removeCallbacks(this)
-}
-
-
 

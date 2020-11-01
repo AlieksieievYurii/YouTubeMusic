@@ -32,11 +32,13 @@ const val REQUEST_COMMAND_ADD_NEW_MEDIA_ITEM = "__request_command_add_new_media_
 const val REQUEST_COMMAND_DELETE_MEDIA_ITEM = "__request_command_delete_media_item"
 const val REQUEST_COMMAND_UPDATE_MEDIA_ITEM = "__request_command_update_media_item"
 const val REQUEST_COMMAND_UPDATE_MEDIA_ITEMS = "__request_command_update_media_items"
+const val REQUEST_MEDIA_ITEM_TIME_POSITION = "__request_command_get_media_time_position"
 const val REQUEST_CODE_UPDATE_MEDIA_ITEMS = 1001
 
 const val PLAYBACK_STATE_PLAYING_CATEGORY_NAME = "com.yurii.youtubemusic.playback.state.playing.category.name"
 const val PLAYBACK_STATE_MEDIA_ITEM = "com.yurii.youtubemusic.playback.state.media.item"
 const val EXTRA_MEDIA_ITEM = "com.yurii.youtubemusic.playback.media.item"
+const val EXTRA_CURRENT_TIME_POSITION = "com.yurii.youtubemusic.current.time.position"
 
 private const val VOLUME_DUCK = 0.2f
 private const val VOLUME_NORMAL = 1.0f
@@ -335,6 +337,11 @@ class MediaService : MediaBrowserServiceCompat() {
                         ?: throw IllegalStateException("Media metadata is required")
                     updateMediaItem(mediaMetaData)
                 }
+                REQUEST_MEDIA_ITEM_TIME_POSITION -> cb?.send(0, Bundle().apply {
+                    putLong(EXTRA_CURRENT_TIME_POSITION, mediaPlayer?.currentPosition?.toLong() ?: 0)
+                    Log.i("TEST", "Current P: ${mediaPlayer?.currentPosition?.toLong()}")
+                    Log.i("TEST", "Current D: ${mediaPlayer?.duration}")
+                })
             }
         }
 
