@@ -10,12 +10,12 @@ import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.playlists.PlayListsDialogFragment
 import com.yurii.youtubemusic.utilities.*
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -41,10 +41,12 @@ import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment : TabFragment(), VideoItemChange,
-    VideosLoader {
+class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    private lateinit var viewModel: YouTubeMusicViewModel
+    private val viewModel: YouTubeMusicViewModel by viewModels {
+        YouTubeViewModelFactory(requireActivity().application, getGoogleSignInAccount())
+    }
+
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videosListAdapter: VideosListAdapter
     private var isLoadingNewVideoItems = true
@@ -80,10 +82,6 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange,
     }
 
     private fun initViewModel() {
-        val googleSignInAccount = getGoogleSignInAccount()
-        val viewModelFactory =
-            YouTubeViewModelFactory(requireActivity().application, googleSignInAccount)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(YouTubeMusicViewModel::class.java)
         viewModel.videoItemChange = this
         viewModel.videosLoader = this
         viewModel.selectedPlaylist.observe(this, Observer { playList ->
@@ -95,8 +93,7 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange,
     }
 
     private fun getGoogleSignInAccount(): GoogleSignInAccount {
-        return this.arguments?.getParcelable(GOOGLE_SIGN_IN)
-            ?: throw IllegalArgumentException("GoogleSignIn is required!")
+        return this.arguments?.getParcelable(GOOGLE_SIGN_IN) ?: throw IllegalArgumentException("GoogleSignIn is required!")
     }
 
     @SuppressLint("ClickableViewAccessibility")

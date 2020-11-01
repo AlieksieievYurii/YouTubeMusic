@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.utilities
 
-import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import com.yurii.youtubemusic.services.mediaservice.MediaService
@@ -9,10 +8,6 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.viewmodels.*
 
 object Injector {
-
-    fun provideCategoriesViewModel(application: Application): CategoriesEditorViewModelFactory {
-        return CategoriesEditorViewModelFactory(application)
-    }
 
     fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel {
         val musicServiceConnection = provideMusicServiceConnection(context)
