@@ -234,24 +234,7 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
                     it.mkdirs()
             }
 
-            return getFreeFileName(outDir)
-        }
-
-        private fun getFreeFileName(outDir: File): File {
-            var id = 0
-
-            while (true) {
-                val extension = if (id != 0) "downloading($id)" else "downloading"
-                val fileName = "${videoItem.videoId}.$extension"
-                val file = File(outDir, fileName)
-
-                if (file.exists()) {
-                    id++
-                    continue
-                }
-
-                return file
-            }
+            return File(outDir, "${videoItem.videoId}.downloading")
         }
 
         override fun toString(): String = "VideoItemTask(videoItem=${videoItem.videoId}, progress=$progress)"

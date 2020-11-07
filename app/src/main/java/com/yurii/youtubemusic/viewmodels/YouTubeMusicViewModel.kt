@@ -12,7 +12,6 @@ import com.google.api.services.youtube.model.VideoListResponse
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.youtube.ICanceler
-import com.yurii.youtubemusic.services.youtube.IYouTubeService
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
 import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
@@ -25,28 +24,31 @@ interface VideosLoader {
 }
 
 class YouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount) : AndroidViewModel(application) {
-    private val youTubeService: IYouTubeService
     private val context: Context = getApplication<Application>().baseContext
+    private val credential = GoogleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount, context)
+    private val youTubeService = YouTubeService(credential)
+
     private val _selectedPlayList: MutableLiveData<Playlist?> = MutableLiveData()
-    val selectedPlaylist: LiveData<Playlist?> get() = _selectedPlayList
+    val selectedPlaylist: LiveData<Playlist?> = _selectedPlayList.also {
+        val currentSelectedPlaylist = Preferences.getSelectedPlayList(context)
+        _selectedPlayList.value = currentSelectedPlaylist
+    }
+
     private var videoLoadingCanceler: ICanceler? = null
     private var nextPageToken: String? = null
 
     var videosLoader: VideosLoader? = null
 
     init {
-        val credential = GoogleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount, context)
-        youTubeService = YouTubeService(credential)
-
-        loadVideosIfAlreadySelectedPlaylist()
+        deleteUnFinishedJobs()
+        if (_selectedPlayList.value != null)
+            loadVideos(null)
     }
 
-    private fun loadVideosIfAlreadySelectedPlaylist() {
-        val currentSelectedPlaylist = Preferences.getSelectedPlayList(context)
-        _selectedPlayList.value = currentSelectedPlaylist
-
-        if (currentSelectedPlaylist != null)
-            loadVideos(null)
+    private fun deleteUnFinishedJobs() {
+        DataStorage.getMusicStorage(context).walk().filter { it.extension == "downloading" }.forEach {
+            it.delete()
+        }
     }
 
     fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null): ICanceler {
@@ -124,7 +126,8 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
 }
 
 @Suppress("UNCHECKED_CAST")
-class YouTubeViewModelFactory(private val application: Application, private val googleSignInAccount: GoogleSignInAccount) : ViewModelProvider.Factory {
+class YouTubeViewModelFactory(private val application: Application, private val googleSignInAccount: GoogleSignInAccount) :
+    ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
             return YouTubeMusicViewModel(application, googleSignInAccount) as T
