@@ -76,7 +76,7 @@ class NotificationManager(private val context: Context, private val sessionToken
                 .setMediaSession(sessionToken)
         )
         setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        setSmallIcon(R.mipmap.ic_launcher)
+        setSmallIcon(R.drawable.ic_playing_music_24px)
         setContentIntent(mediaController.sessionActivity)
         setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_STOP))
 
