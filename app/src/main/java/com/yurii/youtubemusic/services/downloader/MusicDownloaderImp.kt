@@ -74,6 +74,14 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
 
     override fun getError(videoItem: VideoItem): Exception? = findFailedTask(videoItem)?.lastError
 
+    override fun getCompletedProgress(): Int {
+        var sum = 0
+        executionTasks.forEach { task -> sum += task.progress.progress }
+        return sum / executionTasks.size
+    }
+
+    override fun isQueueEmpty() = executionTasks.isEmpty()
+
     override fun getProgress(videoItem: VideoItem): Progress? = findExecutingTask(videoItem)?.progress
 
     private fun findExecutingTask(videoItem: VideoItem): Task? = executionTasks.find { it.videoItem.videoId == videoItem.videoId }
@@ -102,10 +110,12 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
                 downloadMusic()
                 downloadThumbnail()
                 addMetadata()
-                callBack.onFinished(videoItem)
             } catch (_: InterruptedException) {
+                executionTasks.remove(this)
                 return
             }
+            executionTasks.remove(this)
+            callBack.onFinished(videoItem)
         }
 
         fun interruptTask() {

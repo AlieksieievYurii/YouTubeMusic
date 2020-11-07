@@ -14,12 +14,15 @@ const val TAG = "MusicDownloadService"
 
 class MusicDownloaderService : Service() {
     private lateinit var downloader: MusicDownloaderAbstract
+    private lateinit var notificationManager: NotificationManager
     private var serviceConnectionCallback: ServiceConnection.CallBack? = null
     private lateinit var handler: Handler
+    private var isForeground = false
 
     override fun onCreate() {
         super.onCreate()
         downloader = MusicDownloaderImp(this, MusicDownloaderCallBacks())
+        notificationManager = NotificationManager(this)
         handler = Handler(applicationContext.mainLooper)
         Log.i(TAG, "The service has been created")
     }
@@ -39,16 +42,33 @@ class MusicDownloaderService : Service() {
         Log.i(TAG, "The service has been destroyed")
     }
 
+    private fun startAsForegroundService() {
+        if (!isForeground) {
+            startForeground(NotificationManager.NOTIFICATION_ID, notificationManager.buildNotification(0))
+            isForeground = true
+        }
+    }
+
+    private fun stopAsForegroundIfQueueIsEmpty() {
+        if (isForeground && downloader.isQueueEmpty()) {
+            stopForeground(true)
+            isForeground = false
+        }
+    }
+
     private inner class MusicDownloaderCallBacks : MusicDownloaderAbstract.CallBack {
         override fun onFinished(videoItem: VideoItem) {
+            stopAsForegroundIfQueueIsEmpty()
             handler.post { serviceConnectionCallback?.onFinished(videoItem) }
         }
 
         override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
+            notificationManager.updateProgress(downloader.getCompletedProgress())
             handler.post { serviceConnectionCallback?.onProgress(videoItem, progress) }
         }
 
         override fun onErrorOccurred(videoItem: VideoItem, error: Exception) {
+            stopAsForegroundIfQueueIsEmpty()
             handler.post { serviceConnectionCallback?.onError(videoItem, error) }
         }
 
@@ -60,15 +80,18 @@ class MusicDownloaderService : Service() {
         }
 
         fun downloadMusicFrom(videoItem: VideoItem, categories: List<Category>) {
+            startAsForegroundService()
             downloader.download(videoItem, categories)
         }
 
         fun retryToDownload(videoItem: VideoItem) {
+            startAsForegroundService()
             downloader.retryToDownload(videoItem)
         }
 
         fun cancelDownloading(videoItem: VideoItem) {
             downloader.cancel(videoItem)
+            stopAsForegroundIfQueueIsEmpty()
         }
 
         fun isItemDownloading(videoItem: VideoItem) = downloader.isItemDownloading(videoItem)

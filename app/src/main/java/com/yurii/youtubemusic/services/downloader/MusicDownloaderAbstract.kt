@@ -1,6 +1,6 @@
 package com.yurii.youtubemusic.services.downloader
 
-import android.content.Context
+import androidx.annotation.IntRange
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.VideoItem
 import java.lang.Exception
@@ -18,5 +18,10 @@ abstract class MusicDownloaderAbstract {
     abstract fun isItemDownloading(videoItem: VideoItem): Boolean
     abstract fun isDownloadingFailed(videoItem: VideoItem): Boolean
     abstract fun getError(videoItem: VideoItem): Exception?
+
+    @IntRange(from = 0, to = 100)
+    abstract fun getCompletedProgress(): Int
+    abstract fun isQueueEmpty(): Boolean
+
     abstract fun getProgress(videoItem: VideoItem): Progress?
 }
