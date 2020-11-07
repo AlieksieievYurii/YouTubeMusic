@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.models.VideoItem
+import java.lang.Exception
 
 typealias CallTryAgain = (videoItem: VideoItem) -> Unit
 typealias CallCancel = (videoItem: VideoItem) -> Unit
@@ -17,6 +18,7 @@ class ErrorDialog private constructor() : DialogFragment() {
     private lateinit var videoItem: VideoItem
     private var onTryAgain: CallTryAgain? = null
     private var onCancel: CallCancel? = null
+    private var error: Exception? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_error, container, false).also {
@@ -32,7 +34,7 @@ class ErrorDialog private constructor() : DialogFragment() {
 
     private fun setErrorMessage(view: View) {
         view.findViewById<TextView>(R.id.tv_error_message).apply {
-            text = videoItem.lastError?.message
+            text = this@ErrorDialog.error?.message
         }
     }
     private fun setOnClickListeners(view: View) {
@@ -55,9 +57,10 @@ class ErrorDialog private constructor() : DialogFragment() {
     }
 
     companion object {
-        fun create(videoItem: VideoItem): ErrorDialog {
+        fun create(videoItem: VideoItem, error: Exception?): ErrorDialog {
             return ErrorDialog().apply {
                 this.videoItem = videoItem
+                this.error = error
             }
         }
     }

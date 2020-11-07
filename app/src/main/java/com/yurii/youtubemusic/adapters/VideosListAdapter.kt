@@ -18,7 +18,6 @@ import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.ui.getValueAnimator
 import com.yurii.youtubemusic.utilities.*
-import java.lang.Exception
 import java.lang.IllegalStateException
 
 enum class ItemState {
@@ -35,6 +34,7 @@ class VideosListAdapter(context: Context, private val callback: CallBack) : Recy
         fun onRemove(videoItem: VideoItem)
         fun exists(videoItem: VideoItem): Boolean
         fun isLoading(videoItem: VideoItem): Boolean
+        fun isDownloadingFailed(videoItem: VideoItem): Boolean
         fun getCurrentProgress(videoItem: VideoItem): Progress?
     }
 
@@ -86,15 +86,13 @@ class VideosListAdapter(context: Context, private val callback: CallBack) : Recy
         }
     }
 
-    fun setFailedState(videoItem: VideoItem, error: Exception) {
-        videos.find { it == videoItem }?.lastError = error
+    fun setFailedState(videoItem: VideoItem) {
         findVideoItemViewHolder(videoItem.videoId) {
             it.setState(ItemState.FAILED)
         }
     }
 
     fun setDownloadState(videoItemId: String) {
-        videos.find { it.videoId == videoItemId }?.lastError = null
         findVideoItemViewHolder(videoItemId) {
             it.setState(ItemState.DOWNLOAD)
         }
@@ -210,7 +208,7 @@ class VideosListAdapter(context: Context, private val callback: CallBack) : Recy
         when {
             callback.exists(videoItem) -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOADED)
             callback.isLoading(videoItem) -> videoViewHolder.setData(videoItem, callback.getCurrentProgress(videoItem), ItemState.DOWNLOADING)
-            videoItem.hasErrors() -> videoViewHolder.setData(videoItem, state = ItemState.FAILED)
+            callback.isDownloadingFailed(videoItem) -> videoViewHolder.setData(videoItem, state = ItemState.FAILED)
             else -> videoViewHolder.setData(videoItem, state = ItemState.DOWNLOAD)
         }
     }

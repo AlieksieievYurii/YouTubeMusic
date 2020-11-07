@@ -1,10 +1,6 @@
 package com.yurii.youtubemusic
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -16,14 +12,12 @@ import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.playlists.PlayListsDialogFragment
 import com.yurii.youtubemusic.utilities.*
 import androidx.lifecycle.Observer
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.yurii.youtubemusic.playlists.PlayListsDialogInterface
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.services.youtube.ICanceler
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
@@ -32,8 +26,8 @@ import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.adapters.VideosListAdapter
+import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
-import com.yurii.youtubemusic.viewmodels.VideoItemChange
 import com.yurii.youtubemusic.viewmodels.VideosLoader
 import com.yurii.youtubemusic.viewmodels.YouTubeMusicViewModel
 import com.yurii.youtubemusic.viewmodels.YouTubeViewModelFactory
@@ -41,7 +35,7 @@ import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
+class YouTubeMusicsFragment : TabFragment(), VideosLoader {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val viewModel: YouTubeMusicViewModel by viewModels {
         YouTubeViewModelFactory(requireActivity().application, getGoogleSignInAccount())
@@ -50,11 +44,13 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
     private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videosListAdapter: VideosListAdapter
     private var isLoadingNewVideoItems = true
-    private val broadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) = viewModel.onReceive(intent)
-    }
+    private lateinit var downloaderServiceConnection: ServiceConnection
 
     override fun onInflatedView(viewDataBinding: ViewDataBinding) {
+        downloaderServiceConnection = ServiceConnection(requireContext())
+        downloaderServiceConnection.setCallbacks(DownloaderServiceCallBack())
+        downloaderServiceConnection.connect()
+
         binding = viewDataBinding as FragmentYouTubeMusicsBinding
         initViewModel()
         initRecyclerView()
@@ -82,7 +78,6 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
     }
 
     private fun initViewModel() {
-        viewModel.videoItemChange = this
         viewModel.videosLoader = this
         viewModel.selectedPlaylist.observe(this, Observer { playList ->
             if (playList != null)
@@ -162,19 +157,6 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
         binding.videos.visibility = View.GONE
     }
 
-    override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
-        videosListAdapter.setProgress(videoItem, progress)
-    }
-
-    override fun onDownloadingFinished(videoItem: VideoItem) {
-        videosListAdapter.setDownloadedState(videoItem)
-        mainActivityViewModel.notifyVideoItemHasBeenDownloaded(videoItem)
-    }
-
-    override fun onDownloadingFailed(videoItem: VideoItem, error: Exception) {
-        videosListAdapter.setFailedState(videoItem, error)
-    }
-
     private fun setNewVideoItems(videoItems: List<VideoItem>) {
         videosListAdapter.setNewVideoItems(videoItems)
         slideUpBottomNavigationMenu()
@@ -202,20 +184,6 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
             isLoadingNewVideoItems = false
         }
         videosListAdapter.addVideoItems(videoItems)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(broadcastReceiver, IntentFilter().also {
-            it.addAction(MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION)
-            it.addAction(MusicDownloaderService.DOWNLOADING_FINISHED_ACTION)
-            it.addAction(MusicDownloaderService.DOWNLOADING_FAILED_ACTION)
-        })
-    }
-
-    override fun onStop() {
-        super.onStop()
-        LocalBroadcastManager.getInstance(requireActivity()).unregisterReceiver(broadcastReceiver)
     }
 
     private fun alterSelectionPlayListButton(): Unit =
@@ -253,33 +221,50 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
         ErrorSnackBar.show(binding.root, error.message!!)
     }
 
+    private inner class DownloaderServiceCallBack : ServiceConnection.CallBack {
+        override fun onFinished(videoItem: VideoItem) {
+            videosListAdapter.setDownloadedState(videoItem)
+            mainActivityViewModel.notifyVideoItemHasBeenDownloaded(videoItem)
+        }
+
+        override fun onProgress(videoItem: VideoItem, progress: Progress) {
+            videosListAdapter.setProgress(videoItem, progress)
+        }
+
+        override fun onError(videoItem: VideoItem, error: Exception) {
+            videosListAdapter.setFailedState(videoItem)
+        }
+    }
 
     inner class VideosListAdapterCallBacks : VideosListAdapter.CallBack {
         override fun onDownload(videoItem: VideoItem) {
-            viewModel.startDownloadMusic(videoItem)
+            downloaderServiceConnection.download(videoItem, emptyList())
             videosListAdapter.setDownloadingState(videoItem)
         }
 
         override fun onDownloadAndAddCategories(videoItem: VideoItem) {
             SelectCategoriesDialog.selectCategories(requireContext(), null) {
-                viewModel.startDownloadMusic(videoItem, it)
+                downloaderServiceConnection.download(videoItem, it)
                 videosListAdapter.setDownloadingState(videoItem)
             }
         }
 
         override fun onCancelDownload(videoItem: VideoItem) {
-            viewModel.stopDownloading(videoItem)
+            downloaderServiceConnection.cancelDownloading(videoItem)
             videosListAdapter.setDownloadState(videoItem.videoId)
         }
 
         override fun onNotifyFailedToDownload(videoItem: VideoItem) {
-            ErrorDialog.create(videoItem).addListeners(
+            val error = downloaderServiceConnection.getError(videoItem)
+            ErrorDialog.create(videoItem, error).addListeners(
                 onTryAgain = {
-                    viewModel.startDownloadMusic(videoItem)
+                    downloaderServiceConnection.retryToDownload(it)
                     videosListAdapter.setDownloadingState(videoItem)
                 },
-                onCancel = { videosListAdapter.setDownloadState(videoItem.videoId) }
-            ).show(requireActivity().supportFragmentManager, "ErrorDialog")
+                onCancel = {
+                    downloaderServiceConnection.cancelDownloading(it)
+                    videosListAdapter.setDownloadState(videoItem.videoId)
+                }).show(requireActivity().supportFragmentManager, "ErrorDialog")
         }
 
         override fun onRemove(videoItem: VideoItem) {
@@ -294,11 +279,13 @@ class YouTubeMusicsFragment : TabFragment(), VideoItemChange, VideosLoader {
             ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")
         }
 
-        override fun exists(videoItem: VideoItem): Boolean = viewModel.exists(videoItem)
+        override fun exists(videoItem: VideoItem) = viewModel.exists(videoItem)
 
-        override fun isLoading(videoItem: VideoItem): Boolean = viewModel.isVideoItemLoading(videoItem)
+        override fun isLoading(videoItem: VideoItem) = downloaderServiceConnection.isItemDownloading(videoItem)
 
-        override fun getCurrentProgress(videoItem: VideoItem): Progress? = viewModel.getCurrentProgress(videoItem)
+        override fun isDownloadingFailed(videoItem: VideoItem) =  downloaderServiceConnection.isDownloadingFailed(videoItem)
+
+        override fun getCurrentProgress(videoItem: VideoItem): Progress? = downloaderServiceConnection.getProgress(videoItem)
     }
 
     companion object {

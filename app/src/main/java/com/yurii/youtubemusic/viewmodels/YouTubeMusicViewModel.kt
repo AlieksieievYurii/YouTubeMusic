@@ -2,7 +2,6 @@ package com.yurii.youtubemusic.viewmodels
 
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.*
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -10,11 +9,8 @@ import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
-import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
-import com.yurii.youtubemusic.services.downloader.Progress
 import com.yurii.youtubemusic.services.youtube.ICanceler
 import com.yurii.youtubemusic.services.youtube.IYouTubeService
 import com.yurii.youtubemusic.services.youtube.YouTubeObserver
@@ -22,17 +18,10 @@ import com.yurii.youtubemusic.services.youtube.YouTubeService
 import com.yurii.youtubemusic.utilities.*
 import java.lang.Exception
 import java.lang.IllegalStateException
-import java.util.ArrayList
 
 interface VideosLoader {
     fun onResult(newVideos: List<VideoItem>)
     fun onError(error: Exception)
-}
-
-interface VideoItemChange {
-    fun onChangeProgress(videoItem: VideoItem, progress: Progress)
-    fun onDownloadingFinished(videoItem: VideoItem)
-    fun onDownloadingFailed(videoItem: VideoItem, error: Exception)
 }
 
 class YouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount) : AndroidViewModel(application) {
@@ -44,7 +33,6 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     private var nextPageToken: String? = null
 
     var videosLoader: VideosLoader? = null
-    var videoItemChange: VideoItemChange? = null
 
     init {
         val credential = GoogleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount, context)
@@ -59,25 +47,6 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
 
         if (currentSelectedPlaylist != null)
             loadVideos(null)
-    }
-
-    fun onReceive(intent: Intent) {
-        when (intent.action) {
-            MusicDownloaderService.DOWNLOADING_PROGRESS_ACTION -> {
-                val videoItem: VideoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
-                val progress: Progress = intent.getSerializableExtra(MusicDownloaderService.EXTRA_PROGRESS) as Progress
-                videoItemChange?.onChangeProgress(videoItem, progress)
-            }
-            MusicDownloaderService.DOWNLOADING_FINISHED_ACTION -> {
-                val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
-                videoItemChange?.onDownloadingFinished(videoItem)
-            }
-            MusicDownloaderService.DOWNLOADING_FAILED_ACTION -> {
-                val videoItem = intent.getSerializableExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM) as VideoItem
-                val error = intent.getSerializableExtra(MusicDownloaderService.EXTRA_ERROR) as Exception
-                videoItemChange?.onDownloadingFailed(videoItem, error)
-            }
-        }
     }
 
     fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null): ICanceler {
@@ -124,21 +93,6 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     }
 
     fun exists(videoItem: VideoItem): Boolean = DataStorage.getMusic(context, videoItem.videoId).exists()
-
-    fun isVideoItemLoading(videoItem: VideoItem): Boolean = MusicDownloaderService.Instance.serviceInterface?.isLoading(videoItem) ?: false
-
-    fun getCurrentProgress(videoItem: VideoItem) = MusicDownloaderService.Instance.serviceInterface?.getProgress(videoItem)
-
-    fun startDownloadMusic(videoItem: VideoItem, categories: ArrayList<Category> = ArrayList()) {
-        context.startService(Intent(context, MusicDownloaderService::class.java).also {
-            it.putExtra(MusicDownloaderService.EXTRA_VIDEO_ITEM, videoItem)
-            it.putParcelableArrayListExtra(MusicDownloaderService.EXTRA_CATEGORIES, categories)
-        })
-    }
-
-    fun stopDownloading(videoItem: VideoItem) {
-        MusicDownloaderService.Instance.serviceInterface?.cancel(videoItem)
-    }
 
     fun removeVideoItem(videoItem: VideoItem) {
         DataStorage.getMusic(context, videoItem.videoId).delete()

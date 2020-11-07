@@ -2,7 +2,6 @@ package com.yurii.youtubemusic.models
 
 import com.google.api.services.youtube.model.Video
 import java.io.Serializable
-import java.lang.Exception
 import java.math.BigInteger
 
 data class VideoItem(
@@ -17,8 +16,6 @@ data class VideoItem(
     val thumbnail: String,
     val normalThumbnail: String
 ) : Serializable {
-    var lastError: Exception? = null
-    fun hasErrors(): Boolean = lastError != null
 
     companion object {
         fun createFrom(video: Video): VideoItem =
