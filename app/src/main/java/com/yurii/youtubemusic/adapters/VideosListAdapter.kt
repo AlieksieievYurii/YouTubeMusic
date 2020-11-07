@@ -250,6 +250,7 @@ class VideosListAdapter(context: Context, private val callback: CallBack) : Recy
                 ItemState.DOWNLOADED -> DownloadButton.STATE_DOWNLOADED
                 ItemState.FAILED -> DownloadButton.STATE_FAILED
             }
+            videoItemVideoBinding.state = state
         }
 
         fun setData(videoItem: VideoItem, progress: Progress? = null, state: ItemState = ItemState.DOWNLOAD) {
