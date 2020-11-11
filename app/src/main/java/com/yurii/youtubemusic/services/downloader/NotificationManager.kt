@@ -21,7 +21,7 @@ class NotificationManager(private val context: Context) {
     fun buildNotification(@IntRange(from = 0, to = 100) progress: Int): Notification {
         notificationBuilder.apply {
             setContentTitle(context.getString(R.string.label_downloading_music))
-            setContentText("$progress %")
+            setContentText(context.getString(R.string.label_percentage, progress))
             setSmallIcon(R.drawable.ic_downloading)
             setContentIntent(sessionActivityPendingIntent)
             setProgress(100, progress, false)
