@@ -1,8 +1,7 @@
-package com.yurii.youtubemusic.mediaservice
+package com.yurii.youtubemusic.services.mediaservice
 
 import android.app.Notification
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.media.MediaMetadata
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -77,7 +76,7 @@ class NotificationManager(private val context: Context, private val sessionToken
                 .setMediaSession(sessionToken)
         )
         setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        setSmallIcon(R.mipmap.ic_launcher)
+        setSmallIcon(R.drawable.ic_playing_music_24px)
         setContentIntent(mediaController.sessionActivity)
         setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_STOP))
 

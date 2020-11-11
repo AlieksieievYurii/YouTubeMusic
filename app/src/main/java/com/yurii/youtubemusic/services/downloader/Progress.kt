@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic.services.downloader
 
+import androidx.annotation.IntRange
 import java.io.Serializable
 
 /**
@@ -8,7 +9,7 @@ import java.io.Serializable
  * [currentSize] - Current loaded size in bytes. [currentSizeInMb] returns [currentSize] in megabytes
  * [totalSize] - Total size of downloading item in bytes. [totalSizeInMb] returns [totalSize] in megabytes
  */
-data class Progress(var progress: Int, var currentSize: Int, var totalSize: Int) : Serializable {
+data class Progress(@IntRange(from = 0, to = 100) var progress: Int, var currentSize: Int, var totalSize: Int) : Serializable {
     val currentSizeInMb: Double
         get() = currentSize.toDouble() / 1000_000
     val totalSizeInMb: Double

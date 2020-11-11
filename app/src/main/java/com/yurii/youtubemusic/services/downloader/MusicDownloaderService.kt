@@ -2,117 +2,104 @@ package com.yurii.youtubemusic.services.downloader
 
 import android.app.Service
 import android.content.Intent
+import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.github.kiulian.downloader.YoutubeDownloader
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.utilities.MediaMetadataProvider
-import java.io.*
 import java.lang.Exception
 
-interface MusicDownloaderServiceInterface {
-    fun isLoading(videoItem: VideoItem): Boolean
-    fun getProgress(videoItem: VideoItem): Progress?
-    fun cancel(videoItem: VideoItem)
-}
+const val TAG = "MusicDownloadService"
 
-interface DownloadingUpdater {
-    fun onProgress(videoItem: VideoItem, progress: Progress)
-    fun onFinished(videoItem: VideoItem, startId: Int)
-    fun onError(videoItem: VideoItem, exception: Exception, startId: Int)
-}
-
-class MusicDownloaderService : Service(), MusicDownloaderServiceInterface, DownloadingUpdater {
-    private lateinit var localBroadcastManager: LocalBroadcastManager
-    private val youtubeDownloader = YoutubeDownloader()
-    private lateinit var mediaMetadataProvider: MediaMetadataProvider
+class MusicDownloaderService : Service() {
+    private lateinit var downloader: MusicDownloaderAbstract
+    private lateinit var notificationManager: NotificationManager
+    private var serviceConnectionCallback: ServiceConnection.CallBack? = null
+    private lateinit var handler: Handler
+    private var isForeground = false
 
     override fun onCreate() {
         super.onCreate()
-        Log.i(TAG, "Service has been created")
-        mediaMetadataProvider = MediaMetadataProvider(baseContext)
-        Instance.serviceInterface = this
-        localBroadcastManager = LocalBroadcastManager.getInstance(applicationContext)
+        downloader = MusicDownloaderImp(this, MusicDownloaderCallBacks())
+        notificationManager = NotificationManager(this)
+        handler = Handler(applicationContext.mainLooper)
+        Log.i(TAG, "The service has been created")
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        val videoItem = getVideoItemFromIntent(intent)
-        val categories = getCategoriesFromIntent(intent)
-        startDownloading(videoItem, startId, categories)
-
-        return START_REDELIVER_INTENT
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.i(TAG, "The service has called onStarCommand")
+        return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun getCategoriesFromIntent(intent: Intent): ArrayList<Category> {
-        return intent.extras?.getParcelableArrayList<Category>(EXTRA_CATEGORIES)!!
+    override fun onBind(intent: Intent?): IBinder? {
+        Log.i(TAG, "The service has been bind")
+        return ServiceInterface()
     }
-
-    private fun getVideoItemFromIntent(intent: Intent): VideoItem {
-        return intent.extras?.getSerializable(EXTRA_VIDEO_ITEM) as? VideoItem
-            ?: throw IOException("You must pass VideoItem object by key $EXTRA_VIDEO_ITEM to perform downloading")
-    }
-
-    private fun startDownloading(videoItem: VideoItem, startId: Int, categories: ArrayList<Category>) {
-        Log.i(TAG, "Start downloading: ${videoItem.videoId}. StartId: $startId")
-        val task = VideoItemTask(videoItem, categories, baseContext, startId, this, youtubeDownloader, mediaMetadataProvider)
-        ThreadPool.execute(task)
-    }
-
-    override fun onProgress(videoItem: VideoItem, progress: Progress) {
-        Log.i(TAG, "Progress: ${videoItem.videoId}. Progress: $progress")
-        localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_PROGRESS_ACTION).also {
-            it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
-            it.putExtra(EXTRA_PROGRESS, progress)
-        })
-    }
-
-    override fun onFinished(videoItem: VideoItem, startId: Int) {
-        stopSelf(startId)
-
-        localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_FINISHED_ACTION).also {
-            it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
-        })
-    }
-
-    override fun onError(videoItem: VideoItem, exception: Exception, startId: Int) {
-        stopSelf(startId)
-        localBroadcastManager.sendBroadcast(Intent(DOWNLOADING_FAILED_ACTION).also {
-            it.putExtra(EXTRA_VIDEO_ITEM, videoItem)
-            it.putExtra(EXTRA_ERROR, exception)
-        })
-    }
-
-
-    override fun cancel(videoItem: VideoItem) {
-        ThreadPool.cancel(videoItem)
-    }
-
-    override fun isLoading(videoItem: VideoItem): Boolean = ThreadPool.findTask(videoItem) != null
-
-    override fun getProgress(videoItem: VideoItem): Progress? = ThreadPool.findTask(videoItem)?.progress
 
     override fun onDestroy() {
         super.onDestroy()
-        Instance.serviceInterface = null
+        Log.i(TAG, "The service has been destroyed")
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
-
-    object Instance {
-        var serviceInterface: MusicDownloaderServiceInterface? = null
+    private fun startAsForegroundService() {
+        if (!isForeground) {
+            startForeground(NotificationManager.NOTIFICATION_ID, notificationManager.buildNotification(0))
+            isForeground = true
+        }
     }
 
-    companion object {
-        const val EXTRA_VIDEO_ITEM: String = "com.yurii.youtubemusic.download.item"
-        const val EXTRA_CATEGORIES: String = "com.yurii.youtubemusic.download.item.categories"
-        const val DOWNLOADING_PROGRESS_ACTION: String = "com.yurii.youtubemusic.downloading.currentProgress.action"
-        const val DOWNLOADING_FINISHED_ACTION: String = "com.yurii.youtubemusic.downloading.finished.action"
-        const val DOWNLOADING_FAILED_ACTION: String = "com.yurii.youtubemusic.downloading.failed.action"
-        const val EXTRA_PROGRESS: String = "com.yurii.youtubemusic.video.currentProgress"
-        const val EXTRA_ERROR: String = "com.yurii.youtubemusic.video.error"
+    private fun stopAsForegroundIfQueueIsEmpty() {
+        if (isForeground && downloader.isQueueEmpty()) {
+            stopForeground(true)
+            isForeground = false
+        }
+    }
 
-        const val TAG = "YouTubeMusicDownloader"
+    private inner class MusicDownloaderCallBacks : MusicDownloaderAbstract.CallBack {
+        override fun onFinished(videoItem: VideoItem) {
+            stopAsForegroundIfQueueIsEmpty()
+            handler.post { serviceConnectionCallback?.onFinished(videoItem) }
+        }
+
+        override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
+            notificationManager.updateProgress(downloader.getCompletedProgress())
+            handler.post { serviceConnectionCallback?.onProgress(videoItem, progress) }
+        }
+
+        override fun onErrorOccurred(videoItem: VideoItem, error: Exception) {
+            stopAsForegroundIfQueueIsEmpty()
+            handler.post { serviceConnectionCallback?.onError(videoItem, error) }
+        }
+
+    }
+
+    inner class ServiceInterface : Binder() {
+        fun setCallBacks(callBacks: ServiceConnection.CallBack?) {
+            serviceConnectionCallback = callBacks
+        }
+
+        fun downloadMusicFrom(videoItem: VideoItem, categories: List<Category>) {
+            startAsForegroundService()
+            downloader.download(videoItem, categories)
+        }
+
+        fun retryToDownload(videoItem: VideoItem) {
+            startAsForegroundService()
+            downloader.retryToDownload(videoItem)
+        }
+
+        fun cancelDownloading(videoItem: VideoItem) {
+            downloader.cancel(videoItem)
+            stopAsForegroundIfQueueIsEmpty()
+        }
+
+        fun isItemDownloading(videoItem: VideoItem) = downloader.isItemDownloading(videoItem)
+
+        fun isDownloadingFailed(videoItem: VideoItem) = downloader.isDownloadingFailed(videoItem)
+
+        fun getLastError(videoItem: VideoItem) = downloader.getError(videoItem)
+
+        fun getProgress(videoItem: VideoItem) = downloader.getProgress(videoItem)
     }
 }

@@ -8,13 +8,17 @@
 
         <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
 
-        <import type="com.yurii.youtubemusic.videoslist.ItemState" />
+        <import type="com.yurii.youtubemusic.adapters.ItemState" />
 
         <import type="android.view.View" />
 
         <variable
             name="videoItem"
             type="com.yurii.youtubemusic.models.VideoItem" />
+
+        <variable
+            name="state"
+            type="ItemState" />
 
         <variable
             name="progress"
@@ -111,9 +115,9 @@
                     android:id="@+id/options"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:layout_alignBottom="@id/thumbnail"
                     android:layout_alignParentTop="true"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignBottom="@id/thumbnail">
+                    android:layout_alignParentEnd="true">
 
                     <com.yurii.youtubemusic.ui.DownloadButton
                         android:id="@+id/btn_download"
@@ -132,9 +136,9 @@
                         android:layout_below="@id/btn_download"
                         android:layout_centerHorizontal="true"
                         android:text="@{@string/label_size_progress(progress.currentSizeInMb, progress.totalSizeInMb)}"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorAccent"
                         android:textSize="9sp"
-                        android:visibility="@{progress != null ? View.VISIBLE : View.GONE}"
+                        android:visibility="@{state == ItemState.DOWNLOADING ? View.VISIBLE : View.GONE}"
                         tools:ignore="SmallSp"
                         tools:text="10.2 / 50.2 M" />
 

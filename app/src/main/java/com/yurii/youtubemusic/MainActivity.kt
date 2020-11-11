@@ -28,12 +28,14 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         showDefaultFragment()
 
         viewModel.logInEvent.observe(this, Observer {
-             handleSignIn(it)
+            handleSignIn(it)
         })
 
         viewModel.logOutEvent.observe(this, Observer {
             handleSignOut()
         })
+
+        supportFragmentManager.beginTransaction().replace(R.id.player_view_holder, PlayerControlPanelFragment()).commit()
     }
 
     private fun showDefaultFragment() {

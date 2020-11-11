@@ -45,7 +45,7 @@ object GoogleAccount {
 
 
     fun startSignInActivity(fragment: Fragment) {
-        val client = getClient(fragment.context!!)
+        val client = getClient(fragment.requireContext())
         fragment.startActivityForResult(client.signInIntent, REQUEST_SIGN_IN)
     }
 

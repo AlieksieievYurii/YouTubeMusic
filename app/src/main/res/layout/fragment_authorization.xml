@@ -25,7 +25,7 @@
             android:text="@string/sign_in_with_google"
             android:textAllCaps="false"
             android:backgroundTint="@color/white"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/colorAccent"
             android:drawableLeft="@drawable/ic_icons8_google"
             android:layout_below="@id/tv_description"
             android:layout_centerHorizontal="true"

@@ -13,12 +13,12 @@ import com.yurii.youtubemusic.databinding.ActivityCategoriesEditorBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.AddEditCategoryDialog
-import com.yurii.youtubemusic.utilities.Injector
-import com.yurii.youtubemusic.viewmodels.categorieseditor.CategoriesEditorViewModel
+import com.yurii.youtubemusic.viewmodels.CategoriesEditorViewModel
+import com.yurii.youtubemusic.viewmodels.CategoriesEditorViewModelFactory
 
 class CategoriesEditorActivity : AppCompatActivity() {
     private val viewModel by viewModels<CategoriesEditorViewModel> {
-        Injector.provideCategoriesViewModel(application)
+        CategoriesEditorViewModelFactory(application)
     }
     private lateinit var binding: ActivityCategoriesEditorBinding
 

@@ -1,20 +1,24 @@
-package com.yurii.youtubemusic.videoslist
+package com.yurii.youtubemusic.adapters
 
 import android.content.Context
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemMusicBinding
+import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
+import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.BaseViewHolder
 
 interface MediaListAdapterController {
-    fun onChangePlaybackState(mediaMetaData: MediaMetaData, playbackStateCompat: PlaybackStateCompat)
+    fun onChangePlaybackState(playbackStateCompat: PlaybackStateCompat)
     fun setMediaItems(list: List<MediaMetaData>)
     fun removeItemWithId(id: String)
     fun addNewMediaItem(mediaItem: MediaMetaData)
@@ -23,8 +27,8 @@ interface MediaListAdapterController {
     fun isEmptyList(): Boolean
 }
 
-class MediaListAdapter(context: Context, private val callback: CallBack) : RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(),
-    MediaListAdapterController {
+class MediaListAdapter(context: Context, private val category: Category, private val callback: CallBack) :
+    RecyclerView.Adapter<MediaListAdapter.MusicViewHolder>(), MediaListAdapterController {
     interface CallBack {
         fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat?
         fun onOptionsClick(mediaItem: MediaMetaData, view: View)
@@ -51,6 +55,12 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     override fun addNewMediaItem(mediaItem: MediaMetaData) {
         musics.add(mediaItem)
         notifyItemInserted(musics.indexOf(mediaItem))
+        findVideoItemView(mediaItem) {
+            callback.getPlaybackState(mediaItem)?.run {
+                it.setPlaybackState(this)
+                it.setHintPlayingCategory(category, this)
+            }
+        }
     }
 
     override fun updateMediaItem(mediaItem: MediaMetaData) {
@@ -79,7 +89,10 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
     override fun onBindViewHolder(holder: MusicViewHolder, position: Int) {
         val mediaItem = musics[position]
         holder.setMusicItem(mediaItem, callback)
-        callback.getPlaybackState(mediaItem)?.run { holder.setPlaybackState(this) } ?: holder.setNoneState()
+        callback.getPlaybackState(mediaItem)?.run {
+            holder.setPlaybackState(this)
+            holder.setHintPlayingCategory(category, this)
+        } ?: holder.setNoneState()
 
     }
 
@@ -116,10 +129,13 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
         }
     }
 
-    override fun onChangePlaybackState(mediaMetaData: MediaMetaData, playbackStateCompat: PlaybackStateCompat) {
+    override fun onChangePlaybackState(playbackStateCompat: PlaybackStateCompat) {
         resetItemsState()
-        findVideoItemView(mediaMetaData) {
-            it.setPlaybackState(playbackStateCompat)
+        playbackStateCompat.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)?.run {
+            findVideoItemView(this) {
+                it.setPlaybackState(playbackStateCompat)
+                it.setHintPlayingCategory(category, playbackStateCompat)
+            }
         }
     }
 
@@ -139,6 +155,8 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
         }
 
         fun setNoneState() {
+            itemMusicBinding.hintPlayingCategory.isVisible = false
+            itemMusicBinding.container.setCardBackgroundColor(ContextCompat.getColor(itemMusicBinding.container.context, R.color.white))
             itemMusicBinding.thumbnailState.apply {
                 isVisible = false
             }
@@ -151,20 +169,31 @@ class MediaListAdapter(context: Context, private val callback: CallBack) : Recyc
             }
         }
 
+        fun setHintPlayingCategory(category: Category, playbackStateCompat: PlaybackStateCompat) {
+            val categoryName = playbackStateCompat.extras?.getString(PLAYBACK_STATE_PLAYING_CATEGORY_NAME)
+            if (category.name != categoryName)
+                itemMusicBinding.hintPlayingCategory.apply {
+                    isVisible = true
+                    text = itemMusicBinding.container.context.getString(R.string.label_playing_from, categoryName)
+                }
+        }
+
         private fun setPlayingState() {
             val context = itemMusicBinding.root.context
             itemMusicBinding.thumbnailState.apply {
                 isVisible = true
-                setImageDrawable(context.getDrawable(R.drawable.ic_play_24dp))
+                setImageDrawable(context.getDrawable(R.drawable.ic_pause_24px))
             }
+            itemMusicBinding.container.setCardBackgroundColor(ContextCompat.getColor(context, R.color.lightGray))
         }
 
         private fun setPausedState() {
             val context = itemMusicBinding.root.context
             itemMusicBinding.thumbnailState.apply {
                 isVisible = true
-                setImageDrawable(context.getDrawable(R.drawable.ic_pause_24px))
+                setImageDrawable(context.getDrawable(R.drawable.ic_play_24dp))
             }
+            itemMusicBinding.container.setCardBackgroundColor(ContextCompat.getColor(context, R.color.lightGray))
         }
     }
 }

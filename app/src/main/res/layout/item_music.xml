@@ -15,10 +15,12 @@
 
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
+        app:cardBackgroundColor="@color/white"
         android:foreground="?android:attr/selectableItemBackground">
 
         <RelativeLayout
@@ -47,7 +49,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:adjustViewBounds="false"
-                    android:background="#77C6C6C6"
+                    android:background="@color/grayTransparent"
                     android:visibility="gone"
                     app:shapeAppearanceOverlay="@style/roundedImageView"
                     tools:ignore="ContentDescription" />
@@ -85,6 +87,21 @@
                     android:textSize="10sp"
                     tools:ignore="SmallSp"
                     tools:text="@tools:sample/lorem/random" />
+
+                <TextView
+                    android:id="@+id/hint_playing_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{musicItem.author}"
+                    android:textSize="10sp"
+                    tools:ignore="SmallSp"
+                    android:textStyle="italic"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:textColor="#3F51B5"
+                    tools:text="Playing from 'English'" />
             </LinearLayout>
 
             <TextView

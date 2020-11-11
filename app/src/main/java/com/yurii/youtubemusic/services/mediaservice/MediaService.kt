@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.mediaservice
+package com.yurii.youtubemusic.services.mediaservice
 
 import android.app.PendingIntent
 import android.content.*
@@ -28,14 +28,18 @@ private const val TAG = "MediaBackgroundService"
 const val CATEGORIES_CONTENT = "__youtube_musics_categories__"
 const val EMPTY_CONTENT = "__empty__"
 
-const val REQUEST_COMMAND_ADD_NEW_MEDIA_ITEM = "__request_command_add_new_media_item"
-const val REQUEST_COMMAND_DELETE_MEDIA_ITEM = "__request_command_delete_media_item"
-const val REQUEST_COMMAND_UPDATE_MEDIA_ITEM = "__request_command_update_media_item"
-const val REQUEST_COMMAND_UPDATE_MEDIA_ITEMS = "__request_command_update_media_items"
+const val REQUEST_COMMAND_ADD_NEW_MEDIA_ITEM = "__request_command_add_new_media_item__"
+const val REQUEST_COMMAND_DELETE_MEDIA_ITEM = "__request_command_delete_media_item__"
+const val REQUEST_COMMAND_UPDATE_MEDIA_ITEM = "__request_command_update_media_item__"
+const val REQUEST_COMMAND_UPDATE_MEDIA_ITEMS = "__request_command_update_media_items__"
+const val REQUEST_MEDIA_ITEM_TIME_POSITION = "__request_command_get_media_time_position__"
 const val REQUEST_CODE_UPDATE_MEDIA_ITEMS = 1001
 
+const val PLAYBACK_STATE_PLAYING_CATEGORY_NAME = "com.yurii.youtubemusic.playback.state.playing.category.name"
 const val PLAYBACK_STATE_MEDIA_ITEM = "com.yurii.youtubemusic.playback.state.media.item"
+
 const val EXTRA_MEDIA_ITEM = "com.yurii.youtubemusic.playback.media.item"
+const val EXTRA_CURRENT_TIME_POSITION = "com.yurii.youtubemusic.current.time.position"
 
 private const val VOLUME_DUCK = 0.2f
 private const val VOLUME_NORMAL = 1.0f
@@ -124,10 +128,14 @@ class MediaService : MediaBrowserServiceCompat() {
         }
     }
 
+    private fun updateCurrentMetadata() = mediaSession.setMetadata(queueProvider.getCurrentQueueItem().toMediaMetadataCompat())
+
     private fun updateCurrentPlaybackState() {
         val extras = Bundle().apply {
-            if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED)
+            if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED) {
                 putParcelable(PLAYBACK_STATE_MEDIA_ITEM, queueProvider.getCurrentQueueItem())
+                putString(PLAYBACK_STATE_PLAYING_CATEGORY_NAME, queueProvider.getPlayingCategory().name)
+            }
         }
         val currentPlaybackState = getCurrentPlaybackStateBuilder().apply {
             setExtras(extras)
@@ -156,7 +164,7 @@ class MediaService : MediaBrowserServiceCompat() {
         if (!musicProvider.isMusicsInitialized || musicProvider.isEmptyMusicsList())
             return PlaybackStateCompat.ACTION_PREPARE
 
-        var actions: Long = PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
+        var actions: Long = PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID or PlaybackStateCompat.ACTION_STOP
 
         if (!queueProvider.queueExists())
             return actions
@@ -232,13 +240,12 @@ class MediaService : MediaBrowserServiceCompat() {
 
     private fun prepareMusicFromQueue() {
         currentState = PlaybackStateCompat.STATE_BUFFERING
-        val metadata: MediaMetaData = queueProvider.getCurrentQueueItem()
+        updateCurrentMetadata()
         updateCurrentPlaybackState()
-        mediaSession.setMetadata(metadata.toMediaMetadataCompat())
         resetOrCreateMediaPlayer()
 
         getMediaPlayer().apply {
-            setDataSource(metadata.mediaFile.absolutePath)
+            setDataSource(queueProvider.getCurrentQueueItem().mediaFile.absolutePath)
             prepareAsync()
         }
     }
@@ -331,6 +338,9 @@ class MediaService : MediaBrowserServiceCompat() {
                         ?: throw IllegalStateException("Media metadata is required")
                     updateMediaItem(mediaMetaData)
                 }
+                REQUEST_MEDIA_ITEM_TIME_POSITION -> cb?.send(0, Bundle().apply {
+                    putLong(EXTRA_CURRENT_TIME_POSITION, mediaPlayer?.currentPosition?.toLong() ?: 0)
+                })
             }
         }
 
@@ -395,7 +405,7 @@ class MediaService : MediaBrowserServiceCompat() {
 
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
-            Log.i(TAG, "OnSeek to $pos")
+            mediaPlayer?.seekTo(pos.toInt())
         }
     }
 
@@ -406,7 +416,7 @@ class MediaService : MediaBrowserServiceCompat() {
         }
 
         override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
-            Toast.makeText(applicationContext, "Error has been occured", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, "Error has been occurred: $what", Toast.LENGTH_LONG).show()
             return true
         }
 

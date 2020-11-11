@@ -40,6 +40,7 @@
             android:layout_toEndOf="@id/iv_thumb_up"
             app:layout_constraintBottom_toTopOf="@+id/likes"
             app:layout_constraintStart_toEndOf="@+id/iv_thumb_up"
+            android:textSize="12sp"
             app:layout_constraintTop_toTopOf="parent"
             android:text="@{UtilsKt.bigIntegerToShortCutSuffix(likesCount)}"
             tools:text="212" />
@@ -65,6 +66,7 @@
             app:layout_constraintBottom_toTopOf="@+id/likes"
             app:layout_constraintEnd_toEndOf="@+id/likes"
             app:layout_constraintTop_toTopOf="parent"
+            android:textSize="12sp"
             android:text="@{UtilsKt.bigIntegerToShortCutSuffix(dislikesCount)}"
             tools:text="212" />
 

@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.mediaservice
+package com.yurii.youtubemusic.services.mediaservice
 
 import android.content.ComponentName
 import android.content.Context
@@ -67,6 +67,14 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
         mediaController.sendCommand(REQUEST_COMMAND_DELETE_MEDIA_ITEM, Bundle().apply {
             putString(EXTRA_MEDIA_ITEM, mediaId)
         }, null)
+    }
+
+    fun requestCurrentMediaTimePosition(onCurrentTimePosition: (position: Long) -> Unit) {
+        mediaController.sendCommand(REQUEST_MEDIA_ITEM_TIME_POSITION, null, object : ResultReceiver(Handler()) {
+            override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                onCurrentTimePosition.invoke(resultData?.getLong(EXTRA_CURRENT_TIME_POSITION, 0) ?: 0)
+            }
+        })
     }
 
     fun requestAddMediaItem(mediaId: String) {

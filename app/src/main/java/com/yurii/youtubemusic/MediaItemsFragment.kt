@@ -11,20 +11,18 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
-import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
-import com.yurii.youtubemusic.videoslist.MediaListAdapter
-import com.yurii.youtubemusic.videoslist.MediaListAdapterController
+import com.yurii.youtubemusic.adapters.MediaListAdapter
+import com.yurii.youtubemusic.adapters.MediaListAdapterController
 import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
-import com.yurii.youtubemusic.viewmodels.mediaitems.MediaItemsViewModel
+import com.yurii.youtubemusic.viewmodels.MediaItemsViewModel
 
 class MediaItemsFragment : Fragment() {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
@@ -34,9 +32,8 @@ class MediaItemsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_media_items, container, false)
-        val category: Category = requireArguments().getParcelable(EXTRA_CATEGORY)!!
+        initViewModel(requireArguments().getParcelable(EXTRA_CATEGORY)!!)
         initRecyclerView(binding.mediaItems)
-        initViewModel(category)
 
         mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
             mediaItemsAdapterController.removeItemWithId(it)
@@ -77,19 +74,17 @@ class MediaItemsFragment : Fragment() {
         })
 
         viewModel.playbackState.observe(viewLifecycleOwner, Observer {
-            if (it.state == PlaybackStateCompat.STATE_PLAYING || it.state == PlaybackStateCompat.STATE_PAUSED) {
-                val mediaMetaData = it.extras!!.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)!!
-                mediaItemsAdapterController.onChangePlaybackState(mediaMetaData, it)
+            if (it.state == PlaybackStateCompat.STATE_PLAYING || it.state == PlaybackStateCompat.STATE_PAUSED || it.state == PlaybackStateCompat.STATE_STOPPED) {
+                mediaItemsAdapterController.onChangePlaybackState(it)
             }
         })
     }
 
     private fun initRecyclerView(recyclerView: RecyclerView) {
-        val mediaItemsAdapter = MediaListAdapter(requireContext(), MediaListAdapterCallBack())
+        val mediaItemsAdapter = MediaListAdapter(requireContext(), viewModel.category, MediaListAdapterCallBack())
         mediaItemsAdapterController = mediaItemsAdapter
         recyclerView.apply {
             layoutAnimation = android.view.animation.AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.bottom_lifting_animation)
-            addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
             this.setHasFixedSize(true)
             this.layoutManager = LinearLayoutManager(requireContext())
             this.adapter = mediaItemsAdapter

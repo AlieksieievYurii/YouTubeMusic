@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.viewmodels.mediaitems
+package com.yurii.youtubemusic.viewmodels
 
 import android.content.Context
 import android.os.Bundle
@@ -6,8 +6,8 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.yurii.youtubemusic.mediaservice.MusicServiceConnection
-import com.yurii.youtubemusic.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
+import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
+import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
 import com.yurii.youtubemusic.models.MediaMetaData
@@ -37,8 +37,8 @@ class MediaItemsViewModel(private val context: Context, val category: Category, 
     fun getMetaData(mediaId: String): MediaMetaData = mediaMetadataProvider.readMetadata(mediaId)
 
     fun getPlaybackState(mediaItem: MediaMetaData): PlaybackStateCompat? {
-        val currentMediaItem = playbackState.value!!.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
-        return if (mediaItem == currentMediaItem) playbackState.value!! else null
+        val currentMediaItem = playbackState.value?.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
+        return if (mediaItem.mediaId == currentMediaItem?.mediaId) playbackState.value else null
     }
 
     fun deleteMediaItem(mediaMetaData: MediaMetaData) {

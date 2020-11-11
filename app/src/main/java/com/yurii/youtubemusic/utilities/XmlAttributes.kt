@@ -15,6 +15,6 @@ fun loadImage(view: ImageView, url: String) {
 }
 
 @BindingAdapter("imageSrc")
-fun decodeImage(view: ImageView, path: String) {
+fun decodeImage(view: ImageView, path: String?) {
     view.setImageDrawable(createFromPathOrReturnMock(view.context, path))
 }
