@@ -6,9 +6,9 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.IntRange
 import com.yurii.youtubemusic.R
 import kotlin.math.asin
 import kotlin.math.cos
@@ -34,6 +34,12 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
     private val markerPointPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
     }
+
+    interface CallBack {
+        fun onDialChange(@IntRange(from = 0, to = 100) value: Int)
+    }
+
+    var listener: CallBack? = null
 
 
     init {
@@ -87,7 +93,6 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val a = -(getAngle(event.x, event.y) - 200).toFloat()
-        Log.i("TEST", a.toString())
         if (a < 0 && a > -70 && angle != -140f)
             angle = 0f
         else if (a > -140 && -70 >= a && angle != 0f)
@@ -96,7 +101,16 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
             angle = a
         }
         invalidate()
+
+        invokeCallBack()
         return true
+    }
+
+    private fun invokeCallBack() {
+        if (angle in 0.0..200.0)
+            listener?.onDialChange((angle * 0.4).toInt())
+        else if (angle in -160.0..-140.0)
+            listener?.onDialChange(angle.toInt() + 240)
     }
 
     /**
