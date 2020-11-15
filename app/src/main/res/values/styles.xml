@@ -44,4 +44,15 @@
         <item name="cornerSize">15%</item>
     </style>
 
+    <style name="AppBarSwitch" parent="Theme.AppCompat.Light">
+        <!-- active thumb & track color -->
+        <item name="colorControlActivated">@android:color/holo_green_light</item>
+
+        <!-- inactive thumb color -->
+        <item name="colorSwitchThumbNormal">@color/white</item>
+
+        <!-- inactive track color -->
+        <item name="android:colorForeground">@color/gray</item>
+    </style>
+
 </resources>
