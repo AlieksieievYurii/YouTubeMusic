@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EqualizerActivity">
+
+    <com.yurii.youtubemusic.ui.EqualizerView
+        android:id="@+id/equalizer"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_margin="10dp"
+        android:background="@color/white"
+        app:connectorColor="@color/colorPrimaryDark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:progressDrawable="@drawable/seekbar_style"
+        app:thumb="@drawable/seekbar_thumb" />
+
+    <com.yurii.youtubemusic.ui.TwisterController
+        android:id="@+id/bass_boost"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@id/equalizer"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="46dp"
+        app:color="@color/colorPrimary"
+        app:layout_constraintEnd_toStartOf="@+id/virtualizer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/select_mode"
+        app:markerColor="@color/white" />
+
+    <com.yurii.youtubemusic.ui.TwisterController
+        android:id="@+id/virtualizer"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@id/equalizer"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        app:color="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/bass_boost"
+        app:layout_constraintTop_toBottomOf="@+id/select_mode"
+        app:markerColor="@color/white" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/bass_boost"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/bass_boost"
+        app:layout_constraintStart_toStartOf="@+id/bass_boost"
+        app:layout_constraintTop_toBottomOf="@+id/bass_boost" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/virtualizer"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/virtualizer"
+        app:layout_constraintStart_toStartOf="@+id/virtualizer"
+        app:layout_constraintTop_toBottomOf="@+id/virtualizer" />
+
+    <Button
+        android:id="@+id/select_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Bass"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/equalizer" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
