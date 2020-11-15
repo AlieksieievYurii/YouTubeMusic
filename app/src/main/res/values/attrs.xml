@@ -18,4 +18,9 @@
         <attr name="thumb" format="reference" />
         <attr name="connectorColor" format="color" />
     </declare-styleable>
+    <declare-styleable name="TwisterController">
+        <attr name="color" format="color" />
+        <attr name="markerColor" format="color" />
+        <attr name="text" format="string" />
+    </declare-styleable>
 </resources>
