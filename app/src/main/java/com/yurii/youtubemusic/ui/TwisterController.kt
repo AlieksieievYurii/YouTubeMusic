@@ -27,34 +27,52 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
         private const val STEP = ANGLE_L / (POSITION_COUNT - 1)
     }
 
-    private val dialPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.GRAY
+    private var enableDialColor = Color.LTGRAY
+    private var enableMarkerPointColor = Color.DKGRAY
+
+    private var disableDialColor = Color.GRAY
+    private var disableMarkerPointColor = Color.WHITE
+
+    private var isEnable = true
+
+    private val dialPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val markerPointPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    var listener: ((value: Int) -> Unit)? = null
+
+    private var angle = 0f
+    private val marginOfInnerCircle = 30f
+    private val marginDialPointsFromInnerCircle = 10f
+
+    fun setValue(@IntRange(from = 0, to = 100) value: Int) {
+        angle = if (value in 0..80) (value / 0.4).toFloat() else (value - 240).toFloat()
+        invalidate()
     }
 
-    private val markerPointPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
+    fun setEnable(enable: Boolean) {
+        isEnable = enable
+        if (enable) {
+            dialPaint.color = enableDialColor
+            markerPointPaint.color = enableMarkerPointColor
+        } else {
+            dialPaint.color = disableDialColor
+            markerPointPaint.color = disableMarkerPointColor
+        }
+        invalidate()
     }
-
-    interface CallBack {
-        fun onDialChange(@IntRange(from = 0, to = 100) value: Int)
-    }
-
-    var listener: CallBack? = null
-
 
     init {
         attributeSet.let {
             val typedArray = context.theme.obtainStyledAttributes(attributeSet, R.styleable.TwisterController, 0, 0)
-            dialPaint.color = typedArray.getColor(R.styleable.TwisterController_color, Color.GRAY)
-            markerPointPaint.color = typedArray.getColor(R.styleable.TwisterController_markerColor, Color.RED)
+            disableMarkerPointColor = typedArray.getColor(R.styleable.TwisterController_disableMarkerColor, Color.WHITE)
+            disableDialColor = typedArray.getColor(R.styleable.TwisterController_disableColor, Color.GRAY)
+            enableDialColor = typedArray.getColor(R.styleable.TwisterController_color, Color.LTGRAY)
+            enableMarkerPointColor = typedArray.getColor(R.styleable.TwisterController_markerColor, Color.DKGRAY)
+            isEnable = typedArray.getBoolean(R.styleable.TwisterController_enabled, true)
             typedArray.recycle()
         }
+        setEnable(isEnable)
     }
-
-    private var angle = 0f
-
-    private val marginOfInnerCircle = 30f
-    private val marginDialPointsFromInnerCircle = 10f
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -92,6 +110,9 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!isEnable)
+            return false
+
         val a = -(getAngle(event.x, event.y) - 200).toFloat()
         if (a < 0 && a > -70 && angle != -140f)
             angle = 0f
@@ -108,9 +129,9 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
 
     private fun invokeCallBack() {
         if (angle in 0.0..200.0)
-            listener?.onDialChange((angle * 0.4).toInt())
+            listener?.invoke((angle * 0.4).toInt())
         else if (angle in -160.0..-140.0)
-            listener?.onDialChange(angle.toInt() + 240)
+            listener?.invoke(angle.toInt() + 240)
     }
 
     /**
