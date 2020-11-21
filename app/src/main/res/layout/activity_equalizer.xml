@@ -81,10 +81,10 @@
             app:layout_constraintTop_toBottomOf="@+id/virtualizer" />
 
         <Button
-            android:id="@+id/select_mode"
+            android:id="@+id/select_presets"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bass"
+            tools:text="Bass"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
@@ -96,7 +96,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="@+id/bass_boost"
             app:layout_constraintStart_toStartOf="@+id/bass_boost"
-            app:layout_constraintTop_toBottomOf="@+id/select_mode" />
+            app:layout_constraintTop_toBottomOf="@+id/select_presets" />
 
         <Switch
             android:id="@+id/enable_virtualizer"
@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="@+id/virtualizer"
             app:layout_constraintStart_toStartOf="@+id/virtualizer"
-            app:layout_constraintTop_toBottomOf="@+id/select_mode" />
+            app:layout_constraintTop_toBottomOf="@+id/select_presets" />
 
         <Switch
             android:id="@+id/enable_equalizer"

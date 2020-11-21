@@ -13,7 +13,8 @@ data class AudioEffectsData(
     var bands: ArrayList<Int>,
     var bandsLevels: HashMap<Int, Int>,
     var bassBoost: Int,
-    var virtualizer: Int
+    var virtualizer: Int,
+    var currentPreset: String
 ) {
     companion object {
         fun create(): AudioEffectsData {
@@ -33,7 +34,8 @@ data class AudioEffectsData(
                 bands = listOfCenterFreq,
                 bandsLevels = bandsLevels,
                 bassBoost = 0,
-                virtualizer = 0
+                virtualizer = 0,
+                currentPreset = "Custom"
             )
         }
     }

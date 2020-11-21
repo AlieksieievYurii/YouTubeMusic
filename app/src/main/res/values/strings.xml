@@ -66,4 +66,6 @@
     <string name="virtualizer">Virtualizer</string>
     <string name="label_equalizer">Equalizer</string>
     <string name="label_audio_effects">Audio Effects</string>
+    <string name="label_presets">Presets</string>
+    <string name="label_custom">Custom</string>
 </resources>

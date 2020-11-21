@@ -3,10 +3,12 @@ package com.yurii.youtubemusic
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import com.yurii.youtubemusic.databinding.ActivityEqualizerBinding
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.viewmodels.EqualizerViewModel
+
 
 class EqualizerActivity : AppCompatActivity() {
     private val viewModel: EqualizerViewModel by viewModels {
@@ -23,6 +25,7 @@ class EqualizerActivity : AppCompatActivity() {
 
         binding.enableEqualizer.setOnCheckedChangeListener { _, isChecked ->
             viewModel.audioEffectManager.setEnableEqualizer(isChecked)
+            binding.selectPresets.isEnabled = isChecked
             binding.equalizer.setEnable(isChecked)
         }
         binding.enableBassBoost.setOnCheckedChangeListener { _, isChecked ->
@@ -38,14 +41,18 @@ class EqualizerActivity : AppCompatActivity() {
         binding.virtualizer.listener = { viewModel.audioEffectManager.setVirtualizer(it) }
 
         binding.equalizer.setBandListener { bandId, level, fromUser ->
-            if (fromUser)
+            if (fromUser) {
                 viewModel.audioEffectManager.setBandLevel(bandId, level)
+                binding.selectPresets.text = getString(R.string.label_custom)
+            }
+
         }
 
         viewModel.audioEffectManager.data.also { audioEffectsData ->
             binding.enableEqualizer.isChecked = audioEffectsData.enableEqualizer
             binding.enableBassBoost.isChecked = audioEffectsData.enableBassBoost
             binding.enableVirtualizer.isChecked = audioEffectsData.enableVirtualizer
+            binding.selectPresets.text = audioEffectsData.currentPreset
 
             binding.bassBoost.apply {
                 setValue(audioEffectsData.bassBoost)
@@ -54,6 +61,11 @@ class EqualizerActivity : AppCompatActivity() {
             binding.virtualizer.apply {
                 setValue(audioEffectsData.virtualizer)
                 setEnable(audioEffectsData.enableVirtualizer)
+            }
+
+            binding.selectPresets.apply {
+                setOnClickListener { openDialogToSelectPreset() }
+                isEnabled = audioEffectsData.enableEqualizer
             }
 
             binding.equalizer.apply {
@@ -67,6 +79,24 @@ class EqualizerActivity : AppCompatActivity() {
         }
     }
 
+    private fun openDialogToSelectPreset() {
+        val dialog = AlertDialog.Builder(this).apply {
+            setTitle(R.string.label_presets)
+            val presets = viewModel.audioEffectManager.getPresets()
+            setItems(presets) { _, which ->
+                binding.selectPresets.text = presets[which]
+                viewModel.audioEffectManager.setPreset(which)
+                val bandLevels = viewModel.audioEffectManager.getBandLevelsForPreset(which)
+                viewModel.audioEffectManager.data.apply {
+                    bandsLevels = bandLevels
+                    currentPreset = presets[which]
+                }
+                binding.equalizer.setBandSettings(bandLevels)
+            }
+        }.create()
+
+        dialog.show()
+    }
 
     override fun onBackPressed() {
         super.onBackPressed()

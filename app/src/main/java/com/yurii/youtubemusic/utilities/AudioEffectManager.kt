@@ -59,10 +59,31 @@ class AudioEffectManager(private val context: Context) {
 
     }
 
+    fun getPresets(): Array<String> {
+        val eq = equalizer ?: getDefaultEqualizer()
+        return (0 until eq.numberOfPresets).map { eq.getPresetName(it.toShort()) }.toTypedArray()
+    }
+
     fun setBandLevel(band: Int, level: Int) {
         equalizer?.setBandLevel(band.toShort(), level.toShort())
         data.bandsLevels[band] = level
     }
+
+    fun setPreset(id: Int) {
+        equalizer?.usePreset(id.toShort())
+    }
+
+    fun getBandLevelsForPreset(presetId: Int): HashMap<Int, Int> {
+        val eq = equalizer ?: getDefaultEqualizer()
+        eq.usePreset(presetId.toShort())
+        val res = HashMap<Int, Int>()
+        (0 until eq.numberOfBands).forEach {
+            res[it] = eq.getBandLevel(it.toShort()).toInt()
+        }
+        return res
+    }
+
+    private fun getDefaultEqualizer(): Equalizer = Equalizer(0, 0).apply { enabled = false }
 
     fun setBassBoost(@IntRange(from = 0, to = 1000) strength: Int) {
         data.bassBoost = strength
