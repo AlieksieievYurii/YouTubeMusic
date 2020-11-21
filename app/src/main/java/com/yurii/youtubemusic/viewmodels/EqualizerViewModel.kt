@@ -3,14 +3,13 @@ package com.yurii.youtubemusic.viewmodels
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
+import com.yurii.youtubemusic.models.AudioEffectsData
 import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
 import java.lang.IllegalStateException
 
 class EqualizerViewModel(application: Application, musicServiceConnection: MusicServiceConnection) : AndroidViewModel(application) {
-
+    val audioEffectManager = musicServiceConnection.audioEffectManager
 }
 
 @Suppress("UNCHECKED_CAST")

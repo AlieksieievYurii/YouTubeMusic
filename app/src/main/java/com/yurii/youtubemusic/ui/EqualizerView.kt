@@ -8,13 +8,13 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import com.yurii.youtubemusic.R
 import kotlin.collections.ArrayList
+import kotlin.math.abs
+
+
+typealias EventListener = (bandId: Int, level: Int, fromUser: Boolean) -> Unit
 
 class EqualizerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0, defStyleRes: Int = 0) :
     ViewGroup(context, attrs, defStyle, defStyleRes), SeekBar.OnSeekBarChangeListener {
-
-    interface EventListener {
-        fun onBandLevelChanged(bandId: Int, level: Int, fromUser: Boolean)
-    }
 
     companion object {
         private const val DEFAULT_BAND_SIZE = 3
@@ -22,14 +22,14 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
         private const val BAND_PADDING = 20
     }
 
-
+    var minValue = -1500
+    var maxValue = 1500
     private var bandSize = 0
     private var progressDrawable = 0
     private var connectorColor = 0
     private var thumb = 0
     private var maxBand = 50
     private var bandNames: ArrayList<Int>? = null
-    private var bandLevels: Map<String, Int>? = null
 
     var listener: EventListener? = null
 
@@ -59,9 +59,8 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
         }
     }
 
-    fun setBandSettings(levels: Map<String, Int>) {
-        bandList.forEach { it.progress = (levels[it.id.toString()] ?: maxBand / 2) }
-            .apply { bandLevels = levels }
+    fun setBandSettings(levels: Map<Int, Int>) = bandList.forEach {
+        it.progress = (levels.getValue(it.id) - minValue) * maxBand / (maxValue - minValue)
     }
 
     fun setBandLevel(band: Int, level: Int) {
@@ -73,10 +72,6 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
         listener = bandListener
     }
 
-    fun setMax(max: Int) {
-        maxBand = max
-    }
-
     fun draw() {
         setup()
     }
@@ -84,6 +79,8 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
     private fun setup() {
         if (bandSize == 0)
             return
+
+        maxBand = abs(minValue) + abs(maxValue)
 
         setWillNotDraw(false)
 
@@ -181,8 +178,10 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
     override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean) {
         bandConnectorLayout?.connect(bandList)
         bandConnectorShadowView?.draw(bandList)
-        listener?.onBandLevelChanged(seekbar?.id!!, progress, fromUser)
+        listener?.invoke(seekbar?.id!!, convertProgressToValue(progress), fromUser)
     }
+
+    private fun convertProgressToValue(progress: Int): Int = progress * (maxValue - minValue) / maxBand + minValue
 
     override fun onStartTrackingTouch(seekbar: SeekBar?) {
         //Not used
