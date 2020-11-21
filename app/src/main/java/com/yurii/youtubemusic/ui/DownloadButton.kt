@@ -116,7 +116,6 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
             vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
         else
             vibrator.vibrate(50)
-
     }
 
     override fun onAttachedToWindow() {

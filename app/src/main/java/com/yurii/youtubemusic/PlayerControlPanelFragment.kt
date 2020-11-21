@@ -1,8 +1,12 @@
 package com.yurii.youtubemusic
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -124,5 +128,14 @@ class PlayerControlPanelFragment : Fragment() {
     private fun swipeViewAway() {
         val end = if (binding.container.x > 0) binding.container.x + binding.container.width else binding.container.x - binding.container.width
         startValueAnimation(binding.container.x, end, onEnd = { hideMusicPlayerPanel() }) { binding.container.x = it }
+        vibrationEffect()
+    }
+
+    private fun vibrationEffect() {
+        val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= 26)
+            vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
+        else
+            vibrator.vibrate(40)
     }
 }

@@ -3,5 +3,5 @@
     <item android:id="@+id/item_add_edit_categories"
         android:title="@string/label_add_edit_categories"/>
     <item android:id="@+id/item_open_equalizer"
-        android:title="@string/label_equalizer"/>
+        android:title="@string/label_audio_effects"/>
 </menu>
