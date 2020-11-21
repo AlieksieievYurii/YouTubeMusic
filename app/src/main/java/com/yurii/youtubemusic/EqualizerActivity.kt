@@ -43,7 +43,10 @@ class EqualizerActivity : AppCompatActivity() {
         binding.equalizer.setBandListener { bandId, level, fromUser ->
             if (fromUser) {
                 viewModel.audioEffectManager.setBandLevel(bandId, level)
-                binding.selectPresets.text = getString(R.string.label_custom)
+                getString(R.string.label_custom).apply {
+                    binding.selectPresets.text = this
+                    viewModel.audioEffectManager.data.currentPreset = this
+                }
             }
 
         }

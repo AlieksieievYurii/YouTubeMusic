@@ -40,7 +40,7 @@
     <string name="label_action_previous">Previous</string>
     <string name="content_description_more_options">More options for music item</string>
     <string name="sign_in_with_google">Sign in with Google</string>
-    <string name="label_add_edit_categories">Add/Edit categories</string>
+    <string name="label_add_edit_categories">Edit categories</string>
     <string name="label_edit_categories">Categories Editor</string>
     <string name="dialog_confirm_deletion_category_title">Delete category</string>
     <string name="dialog_confirm_deletion_category_message">Are you sure you want to delete this category?</string>
