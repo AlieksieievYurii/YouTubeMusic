@@ -33,8 +33,6 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
     private var disableDialColor = Color.GRAY
     private var disableMarkerPointColor = Color.WHITE
 
-    private var isEnable = true
-
     private val dialPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val markerPointPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
@@ -50,7 +48,7 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
     }
 
     fun setEnable(enable: Boolean) {
-        isEnable = enable
+        isEnabled = enable
         if (enable) {
             dialPaint.color = enableDialColor
             markerPointPaint.color = enableMarkerPointColor
@@ -68,10 +66,10 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
             disableDialColor = typedArray.getColor(R.styleable.TwisterController_disableColor, Color.GRAY)
             enableDialColor = typedArray.getColor(R.styleable.TwisterController_color, Color.LTGRAY)
             enableMarkerPointColor = typedArray.getColor(R.styleable.TwisterController_markerColor, Color.DKGRAY)
-            isEnable = typedArray.getBoolean(R.styleable.TwisterController_enabled, true)
+            isEnabled = typedArray.getBoolean(R.styleable.TwisterController_enabled, true)
             typedArray.recycle()
         }
-        setEnable(isEnable)
+        setEnable(isEnabled)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -110,7 +108,7 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!isEnable)
+        if (!isEnabled)
             return false
 
         val a = -(getAngle(event.x, event.y) - 200).toFloat()
