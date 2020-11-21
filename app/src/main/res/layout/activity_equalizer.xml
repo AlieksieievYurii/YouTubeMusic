@@ -15,6 +15,9 @@
             android:layout_margin="10dp"
             android:background="@color/white"
             app:connectorColor="@color/colorPrimaryDark"
+            app:disableConnectorColor="@color/lightGray"
+            app:disableThumb="@drawable/disabled_seekbar_thumb"
+            app:enabledEqualizer="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.476"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,6 +35,8 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="46dp"
             app:color="@color/colorPrimary"
+            app:disableColor="@color/lightGray"
+            app:enabled="false"
             app:layout_constraintEnd_toStartOf="@+id/virtualizer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/enable_bass_boost"
@@ -46,6 +51,8 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             app:color="@color/colorPrimary"
+            app:disableColor="@color/lightGray"
+            app:enabled="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/bass_boost"
             app:layout_constraintTop_toBottomOf="@+id/enable_virtualizer"
@@ -77,11 +84,11 @@
             android:id="@+id/select_mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Bass"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/equalizer"
-            android:text="Bass" />
+            app:layout_constraintTop_toBottomOf="@+id/equalizer" />
 
         <Switch
             android:id="@+id/enable_bass_boost"

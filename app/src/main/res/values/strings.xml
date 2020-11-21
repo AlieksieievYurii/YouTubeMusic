@@ -65,4 +65,5 @@
     <string name="bass_boost">Bass Boost</string>
     <string name="virtualizer">Virtualizer</string>
     <string name="label_equalizer">Equalizer</string>
+    <string name="label_audio_effects">Audio Effects</string>
 </resources>

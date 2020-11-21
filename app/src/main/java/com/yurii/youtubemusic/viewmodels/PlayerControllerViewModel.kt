@@ -11,7 +11,7 @@ import com.yurii.youtubemusic.services.mediaservice.NOTHING_PLAYING
 import com.yurii.youtubemusic.models.MediaMetaData
 import java.lang.IllegalStateException
 
-class PlayerControllerViewModel(application: Application, private val musicServiceConnection: MusicServiceConnection) :
+class PlayerControllerViewModel(application: Application, val musicServiceConnection: MusicServiceConnection) :
     AndroidViewModel(application) {
     private val timeUpdater = TimeUpdater()
 
