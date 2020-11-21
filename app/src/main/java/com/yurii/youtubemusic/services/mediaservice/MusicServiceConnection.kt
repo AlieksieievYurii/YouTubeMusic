@@ -11,12 +11,16 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import com.yurii.youtubemusic.models.MediaMetaData
+import com.yurii.youtubemusic.utilities.AudioEffectManager
 
 class MusicServiceConnection(context: Context, serviceComponent: ComponentName) {
     val isConnected = MutableLiveData<Boolean>().apply {
         postValue(false)
     }
+
+    val audioEffectManager = AudioEffectManager(context)
 
     val rootMediaId: String get() = mediaBrowser.root
     private val mediaBrowserConnectionCallback = MediaBrowserConnectionCallback(context)
@@ -30,7 +34,11 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
     private val _playbackState = MutableLiveData<PlaybackStateCompat>().apply {
         postValue(EMPTY_PLAYBACK_STATE)
     }
-    val playbackState: LiveData<PlaybackStateCompat> = _playbackState
+    val playbackState: LiveData<PlaybackStateCompat> = Transformations.map(_playbackState) {
+        if (it.state == PlaybackStateCompat.STATE_PLAYING)
+            audioEffectManager.applyLastChanges(it.extras!!.getInt(PLAYBACK_STATE_SESSION_ID))
+         it
+    }
 
     val nowPlaying = MutableLiveData<MediaMetadataCompat>()
         .apply { postValue(NOTHING_PLAYING) }

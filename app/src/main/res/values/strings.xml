@@ -62,4 +62,10 @@
     <string name="label_no_media_items">You have not downloaded any musics yet</string>
     <string name="label_downloading_music">Downloading musics</string>
     <string name="label_percentage">%d %%</string>
+    <string name="bass_boost">Bass Boost</string>
+    <string name="virtualizer">Virtualizer</string>
+    <string name="label_equalizer">Equalizer</string>
+    <string name="label_audio_effects">Audio Effects</string>
+    <string name="label_presets">Presets</string>
+    <string name="label_custom">Custom</string>
 </resources>

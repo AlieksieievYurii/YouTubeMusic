@@ -3,13 +3,13 @@ package com.yurii.youtubemusic.utilities
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.os.Handler
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.model.Playlist
 import com.google.gson.Gson
 import com.yurii.youtubemusic.R
+import com.yurii.youtubemusic.models.AudioEffectsData
 import com.yurii.youtubemusic.models.Category
 import org.threeten.bp.Duration
 import java.io.File
@@ -20,8 +20,24 @@ import java.util.concurrent.TimeUnit
 const val DEFAULT_SHARED_PREFERENCES_FILE: String = "com.yurii.youtubemusic.shared.preferences"
 const val SHARED_PREFERENCES_SELECTED_PLAY_LIST: String = "com.yurii.youtubemusic.shared.preferences.selected.play.list"
 const val SH_KEY_MUSICS_CATEGORIES: String = "com.yurii.youtubemusic.shared.preferences.music.categories"
+const val SH_KEY_AUDIO_EFFECTS_DATA: String = "com.yurii.youtubemusic.shared.preferences.audio.effects.data"
 
 object Preferences {
+
+    fun getAudioEffectsData(context: Context): AudioEffectsData {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val audioEffectsDataJson = sharedPreferences.getString(SH_KEY_AUDIO_EFFECTS_DATA, null) ?: return AudioEffectsData.create()
+        return Gson().fromJson(audioEffectsDataJson, AudioEffectsData::class.java)
+    }
+
+    fun setAudioEffectsData(context: Context, audioEffectsData: AudioEffectsData) {
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putString(SH_KEY_AUDIO_EFFECTS_DATA, Gson().toJson(audioEffectsData))
+            apply()
+        }
+    }
+
     fun getMusicCategories(context: Context): List<Category> {
         val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         val categoriesJson: String = sharedPreferences.getString(SH_KEY_MUSICS_CATEGORIES, null) ?: return emptyList()

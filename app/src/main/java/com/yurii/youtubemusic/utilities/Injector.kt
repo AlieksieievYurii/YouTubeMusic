@@ -9,6 +9,11 @@ import com.yurii.youtubemusic.viewmodels.*
 
 object Injector {
 
+    fun provideEqualizerViewModel(context: Context): EqualizerViewModelFactory {
+        val musicServiceConnection = provideMusicServiceConnection(context)
+        return EqualizerViewModelFactory(context.applicationContext, musicServiceConnection)
+    }
+
     fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel {
         val musicServiceConnection = provideMusicServiceConnection(context)
         return MediaItemsViewModel(context, category, musicServiceConnection)

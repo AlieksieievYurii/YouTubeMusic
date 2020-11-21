@@ -2,7 +2,6 @@ package com.yurii.youtubemusic
 
 import android.content.Intent
 import android.view.View
-import androidx.fragment.app.Fragment
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -18,9 +17,6 @@ import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.SavedMusicViewModel
 
 
-/**
- * A simple [Fragment] subclass.
- */
 class SavedMusicFragment : TabFragment() {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val savedMusicViewModel by viewModels<SavedMusicViewModel> {
@@ -36,9 +32,8 @@ class SavedMusicFragment : TabFragment() {
             optionMenuId = R.menu.saved_musics_fragment_menu,
             onClickOption = {
                 when (it) {
-                    R.id.item_add_edit_categories -> {
-                        openCategoriesEditor()
-                    }
+                    R.id.item_add_edit_categories -> openCategoriesEditor()
+                    R.id.item_open_equalizer -> openEqualizerActivity()
                 }
             }
         )
@@ -64,6 +59,10 @@ class SavedMusicFragment : TabFragment() {
         mainActivityViewModel.onUpdateMediaItem.observe(viewLifecycleOwner, Observer {
             savedMusicViewModel.updateMediaItem(it)
         })
+    }
+
+    private fun openEqualizerActivity() {
+        startActivity(Intent(requireContext(), EqualizerActivity::class.java))
     }
 
     private fun openCategoriesEditor() {
