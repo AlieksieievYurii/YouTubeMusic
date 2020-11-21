@@ -159,6 +159,18 @@
             app:layout_constraintTop_toTopOf="@+id/action_button"
             app:layout_constraintVertical_bias="0.458"
             tools:ignore="ContentDescription" />
+
+        <ImageButton
+            android:id="@+id/open_audio_effects"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/move_to_previous"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView2"
+            app:layout_constraintVertical_bias="0.16000003"
+            app:srcCompat="@drawable/ic_baseline_equalizer_24" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

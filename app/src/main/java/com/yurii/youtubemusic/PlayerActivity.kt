@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.SeekBar
@@ -33,6 +34,10 @@ class PlayerActivity : AppCompatActivity() {
                 viewModel.pausePlaying()
             else
                 viewModel.continuePlaying()
+        }
+
+        binding.openAudioEffects.setOnClickListener {
+            startActivity(Intent(this, EqualizerActivity::class.java))
         }
 
         viewModel.currentProgressTime.observe(this, Observer {
