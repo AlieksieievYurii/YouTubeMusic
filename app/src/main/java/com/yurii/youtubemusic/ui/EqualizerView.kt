@@ -27,9 +27,14 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
     private var bandSize = 0
     private var progressDrawable = 0
     private var connectorColor = 0
+    private var enabledConnectorColor = 0
+    private var disableConnectorColor = 0
     private var thumb = 0
+    private var enabledThumb = 0
+    private var disableThumb = 0
     private var maxBand = 50
     private var bandNames: ArrayList<Int>? = null
+    private var levels: Map<Int, Int>? = null
 
     var listener: EventListener? = null
 
@@ -41,15 +46,17 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
     init {
         attrs?.let {
             val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.EqualizerView, 0, 0)
-
+            isEnabled = typedArray.getBoolean(R.styleable.EqualizerView_enabledEqualizer, true)
             bandSize = typedArray.getInteger(R.styleable.EqualizerView_bands, DEFAULT_BAND_SIZE)
-            connectorColor = typedArray.getColor(R.styleable.EqualizerView_connectorColor, Color.GREEN)
+            enabledConnectorColor = typedArray.getColor(R.styleable.EqualizerView_connectorColor, Color.GREEN)
+            disableConnectorColor = typedArray.getColor(R.styleable.EqualizerView_disableConnectorColor, Color.DKGRAY)
             progressDrawable = typedArray.getResourceId(R.styleable.EqualizerView_progressDrawable, R.drawable.seekbar_style)
-            thumb = typedArray.getResourceId(R.styleable.EqualizerView_thumb, R.drawable.seekbar_thumb)
+            enabledThumb = typedArray.getResourceId(R.styleable.EqualizerView_thumb, R.drawable.seekbar_thumb)
+            disableThumb = typedArray.getResourceId(R.styleable.EqualizerView_disableThumb, R.drawable.disabled_seekbar_thumb)
             typedArray.recycle()
-
-            setup()
         }
+        setEnable(isEnabled)
+        setup()
     }
 
     fun setBands(bands: ArrayList<Int>) {
@@ -59,13 +66,24 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
         }
     }
 
-    fun setBandSettings(levels: Map<Int, Int>) = bandList.forEach {
-        it.progress = (levels.getValue(it.id) - minValue) * maxBand / (maxValue - minValue)
+    fun setBandSettings(levels: Map<Int, Int>) {
+        this.levels = levels
+        bandList.forEach {
+            it.progress = (levels.getValue(it.id) - minValue) * maxBand / (maxValue - minValue)
+        }
     }
 
-    fun setBandLevel(band: Int, level: Int) {
-        val bv = bandList.find { band == it.id }
-        bv?.progress = level
+    fun setEnable(enable: Boolean) {
+        isEnabled = enable
+        bandList.forEach { it.isEnabled = enable }
+        if (isEnabled) {
+            connectorColor = enabledConnectorColor
+            thumb = enabledThumb
+        } else {
+            connectorColor = disableConnectorColor
+            thumb = disableThumb
+        }
+        draw()
     }
 
     fun setBandListener(bandListener: EventListener) {
@@ -92,10 +110,11 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
             bv.progressDrawable = resources.getDrawable(progressDrawable, null)
             bv.thumb = resources.getDrawable(thumb, null)
             bv.max = maxBand
-            bv.progress = maxBand / 2
+            bv.progress = levels?.get(index)?.run { (this - minValue) * maxBand / (maxValue - minValue) } ?: maxBand / 2
             bv.id = index
             bv.setPadding(toPx(BAND_PADDING), 0, toPx(BAND_PADDING), 0)
             bv.setOnSeekBarChangeListener(this)
+            bv.isEnabled = isEnabled
             bandList.add(bv)
             addView(bv)
         }

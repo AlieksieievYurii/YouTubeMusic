@@ -15,7 +15,4 @@
     <color name="gray">#3C3F41</color>
     <color name="grayTransparent">#613C3F41</color>
     <color name="lightGray">#CCCCCC</color>
-
-    <color name="seekbar_progress">@android:color/transparent</color>
-    <color name="seekbar_thumb">@color/colorPrimaryDark</color>
 </resources>
