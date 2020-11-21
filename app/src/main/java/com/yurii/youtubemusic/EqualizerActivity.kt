@@ -2,11 +2,9 @@ package com.yurii.youtubemusic
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
 import com.yurii.youtubemusic.databinding.ActivityEqualizerBinding
-import com.yurii.youtubemusic.ui.EqualizerView
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.viewmodels.EqualizerViewModel
 
@@ -21,9 +19,12 @@ class EqualizerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_equalizer)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.title = "Audio Effects"
+        supportActionBar!!.title = getString(R.string.label_audio_effects)
 
-        binding.enableEqualizer.setOnCheckedChangeListener { _, isChecked -> viewModel.audioEffectManager.setEnableEqualizer(isChecked) }
+        binding.enableEqualizer.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.audioEffectManager.setEnableEqualizer(isChecked)
+            binding.equalizer.setEnable(isChecked)
+        }
         binding.enableBassBoost.setOnCheckedChangeListener { _, isChecked ->
             binding.bassBoost.setEnable(isChecked)
             viewModel.audioEffectManager.setEnableBassBoost(isChecked)
@@ -37,30 +38,31 @@ class EqualizerActivity : AppCompatActivity() {
         binding.virtualizer.listener = { viewModel.audioEffectManager.setVirtualizer(it) }
 
         binding.equalizer.setBandListener { bandId, level, fromUser ->
-            Log.i("TEST", "FromUser: $fromUser; Level: ${level}")
-            viewModel.audioEffectManager.setBandLevel(bandId, level)
+            if (fromUser)
+                viewModel.audioEffectManager.setBandLevel(bandId, level)
         }
 
-        viewModel.audioEffectManager.data.also {
-            binding.enableEqualizer.isChecked = it.enableEqualizer
-            binding.enableBassBoost.isChecked = it.enableBassBoost
-            binding.enableVirtualizer.isChecked = it.enableVirtualizer
+        viewModel.audioEffectManager.data.also { audioEffectsData ->
+            binding.enableEqualizer.isChecked = audioEffectsData.enableEqualizer
+            binding.enableBassBoost.isChecked = audioEffectsData.enableBassBoost
+            binding.enableVirtualizer.isChecked = audioEffectsData.enableVirtualizer
 
             binding.bassBoost.apply {
-                setValue(it.bassBoost)
-                setEnable(it.enableBassBoost)
+                setValue(audioEffectsData.bassBoost)
+                setEnable(audioEffectsData.enableBassBoost)
             }
             binding.virtualizer.apply {
-                setValue(it.virtualizer)
-                setEnable(it.enableVirtualizer)
+                setValue(audioEffectsData.virtualizer)
+                setEnable(audioEffectsData.enableVirtualizer)
             }
 
             binding.equalizer.apply {
-                setBands(it.bands)
-                minValue = it.lowestBandLevel.toInt()
-                maxValue = it.highestBandLevel.toInt()
+                setEnable(audioEffectsData.enableEqualizer)
+                setBands(audioEffectsData.bands)
+                minValue = audioEffectsData.lowestBandLevel.toInt()
+                maxValue = audioEffectsData.highestBandLevel.toInt()
                 draw()
-                setBandSettings(it.bandsLevels)
+                setBandSettings(audioEffectsData.bandsLevels)
             }
         }
     }
