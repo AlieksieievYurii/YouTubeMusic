@@ -19,7 +19,7 @@ class SelectCategoriesDialog private constructor(private val context: Context) {
         val categoriesNames = categories.map { it.name }
 
         MaterialAlertDialogBuilder(context).apply {
-            setTitle(R.string.label_categories)
+            setTitle(R.string.label_playlists)
             if (categories.isEmpty()) {
                 setView(R.layout.layout_no_categories)
             } else {
