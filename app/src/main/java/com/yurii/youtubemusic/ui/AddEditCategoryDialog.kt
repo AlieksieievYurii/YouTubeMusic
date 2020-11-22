@@ -76,7 +76,7 @@ class AddEditCategoryDialog : DialogFragment() {
             val categoryName = getAndValidateCategoryName()
             callBack.invoke(categoryName.trim())
         } catch (error: EmptyCategoryNameException) {
-            edtCategoryName.error = requireContext().getString(R.string.label_category_name_cannot_be_empty)
+            edtCategoryName.error = requireContext().getString(R.string.label_playlist_name_cannot_be_empty)
         } catch (error: CategoryNameAlreadyExistsException) {
             edtCategoryName.error = requireContext().getString(R.string.label_category_already_exists)
         }

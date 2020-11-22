@@ -8,6 +8,6 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
     android:drawableTop="@drawable/ic_empty_categories"
-    android:text="@string/label_no_categories"
+    android:text="@string/label_no_playlist"
     android:visibility="visible" />
 

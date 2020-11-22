@@ -12,7 +12,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/category"
+        android:text="@string/label_playlist"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
 
     <com.google.android.material.textfield.TextInputLayout

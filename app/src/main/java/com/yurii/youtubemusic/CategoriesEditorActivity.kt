@@ -24,8 +24,8 @@ class CategoriesEditorActivity : AppCompatActivity() {
 
     private val onDeleteClick = View.OnClickListener {
         ConfirmDeletionDialog.create(
-            titleId = R.string.dialog_confirm_deletion_category_title,
-            messageId = R.string.dialog_confirm_deletion_category_message,
+            titleId = R.string.dialog_confirm_deletion_playlist_title,
+            messageId = R.string.dialog_confirm_deletion_playlist_message,
             onConfirm = { removeCategory(it) }
         ).show(supportFragmentManager, "DeleteCategoryDialog")
     }
@@ -104,7 +104,7 @@ class CategoriesEditorActivity : AppCompatActivity() {
 
     private fun initActionBar() {
         supportActionBar?.let {
-            it.title = getString(R.string.label_edit_categories)
+            it.title = getString(R.string.label_edit_playlists)
             it.setHomeButtonEnabled(true)
             it.setDisplayHomeAsUpEnabled(true)
         }
