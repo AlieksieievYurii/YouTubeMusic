@@ -3,7 +3,6 @@ package com.yurii.youtubemusic.services.downloader
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import com.github.kiulian.downloader.YoutubeDownloader
 import com.github.kiulian.downloader.YoutubeException
 import com.github.kiulian.downloader.model.YoutubeVideo
@@ -212,8 +211,7 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
                             outputFile.delete()
                             throw InterruptedException()
                         }
-
-                        Log.i("Experiment", "${videoItem.videoId} is downloading")
+                        
                         bos.write(buffer, 0, count)
                         total += count.toDouble()
 

@@ -22,7 +22,6 @@ class MusicServiceConnection(context: Context, serviceComponent: ComponentName) 
 
     val audioEffectManager = AudioEffectManager(context)
 
-    val rootMediaId: String get() = mediaBrowser.root
     private val mediaBrowserConnectionCallback = MediaBrowserConnectionCallback(context)
     private val mediaBrowser = MediaBrowserCompat(
         context,

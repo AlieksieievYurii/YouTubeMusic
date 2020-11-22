@@ -5,12 +5,10 @@ import android.content.Intent
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
-import android.util.Log
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.VideoItem
 import java.lang.Exception
 
-const val TAG = "MusicDownloadService"
 
 class MusicDownloaderService : Service() {
     private lateinit var downloader: MusicDownloaderAbstract
@@ -24,22 +22,10 @@ class MusicDownloaderService : Service() {
         downloader = MusicDownloaderImp(this, MusicDownloaderCallBacks())
         notificationManager = NotificationManager(this)
         handler = Handler(applicationContext.mainLooper)
-        Log.i(TAG, "The service has been created")
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i(TAG, "The service has called onStarCommand")
-        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        Log.i(TAG, "The service has been bind")
         return ServiceInterface()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.i(TAG, "The service has been destroyed")
     }
 
     private fun startAsForegroundService() {

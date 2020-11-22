@@ -23,25 +23,17 @@
         android:textColor="@android:color/black"
         android:textSize="20sp" />
 
-    <TextView
-        android:id="@+id/tv_error_label"
-        style="@style/TextAppearance.AppCompat.Caption"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/title"
-        android:layout_centerHorizontal="true"
-        android:text="@string/label_error_message"
-        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/tv_error_message"
         style="@style/TextAppearance.AppCompat.Caption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_error_label"
+        android:layout_below="@+id/title"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
+        android:layout_marginTop="5dp"
         android:maxHeight="100dp"
         android:textAlignment="center"
         android:textSize="12sp"
