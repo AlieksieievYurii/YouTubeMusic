@@ -1,5 +1,5 @@
 # YouTube Music
-Quite simple Android application to download and playing music from YouTube. 
+Quite simple Android application to download and play music from YouTube. 
 The application consists of two main parts: the first part is Saved Music and the second part is YouTube Music where you can download music from YouTube, but first of all, you need to log in.
 
 <img src="gitRes/6.jpg" width=200>&nbsp;
