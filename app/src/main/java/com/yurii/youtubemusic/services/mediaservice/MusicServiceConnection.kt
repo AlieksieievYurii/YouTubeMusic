@@ -14,13 +14,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.AudioEffectManager
+import com.yurii.youtubemusic.utilities.ServiceLocator
 
 class MusicServiceConnection(context: Context, serviceComponent: ComponentName) {
     val isConnected = MutableLiveData<Boolean>().apply {
         postValue(false)
     }
 
-    val audioEffectManager = AudioEffectManager(context)
+    val audioEffectManager = AudioEffectManager(ServiceLocator.providePreferences(context))
 
     private val mediaBrowserConnectionCallback = MediaBrowserConnectionCallback(context)
     private val mediaBrowser = MediaBrowserCompat(

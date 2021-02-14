@@ -38,7 +38,7 @@ import java.lang.IllegalArgumentException
 class YouTubeMusicsFragment : TabFragment(), VideosLoader {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val viewModel: YouTubeMusicViewModel by viewModels {
-        YouTubeViewModelFactory(requireActivity().application, getGoogleSignInAccount())
+        YouTubeViewModelFactory(requireActivity().application, getGoogleSignInAccount(), ServiceLocator.providePreferences(requireContext()))
     }
 
     private lateinit var binding: FragmentYouTubeMusicsBinding
