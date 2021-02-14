@@ -18,6 +18,7 @@ class CategoriesEditorViewModel(private val preferences: IPreferences) : ViewMod
     }
 
     var areChanges = false
+        private set
 
     fun getCategoryByName(name: String): Category =
         categoriesList.find { it.name == name } ?: throw IllegalStateException("Cannot find category with name $name")
