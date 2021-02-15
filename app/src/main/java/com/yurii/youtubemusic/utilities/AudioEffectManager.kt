@@ -1,14 +1,13 @@
 package com.yurii.youtubemusic.utilities
 
-import android.content.Context
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import androidx.annotation.IntRange
 import com.yurii.youtubemusic.models.AudioEffectsData
 
-class AudioEffectManager(private val context: Context) {
-    val data: AudioEffectsData = Preferences.getAudioEffectsData(context)
+class AudioEffectManager(private  val preferences: IPreferences) {
+    val data: AudioEffectsData =  preferences.getAudioEffectsData()
     private var sessionId: Int? = null
 
     private var bassBoost: BassBoost? = null
@@ -96,5 +95,5 @@ class AudioEffectManager(private val context: Context) {
     }
 
     private fun convertToAudioEffectRange(value: Int): Short = (value * 10).toShort()
-    fun saveChanges() = Preferences.setAudioEffectsData(context, data)
+    fun saveChanges() = preferences.setAudioEffectsData(data)
 }

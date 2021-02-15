@@ -23,14 +23,15 @@ interface VideosLoader {
     fun onError(error: Exception)
 }
 
-class YouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount) : AndroidViewModel(application) {
+class YouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount, private val preferences: IPreferences) :
+    AndroidViewModel(application) {
     private val context: Context = getApplication<Application>().baseContext
     private val credential = GoogleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount, context)
     private val youTubeService = YouTubeService(credential)
 
     private val _selectedPlayList: MutableLiveData<Playlist?> = MutableLiveData()
     val selectedPlaylist: LiveData<Playlist?> = _selectedPlayList.also {
-        val currentSelectedPlaylist = Preferences.getSelectedPlayList(context)
+        val currentSelectedPlaylist = preferences.getSelectedPlayList()
         _selectedPlayList.value = currentSelectedPlaylist
     }
 
@@ -62,13 +63,13 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     }
 
     private fun cleanData() {
-        Preferences.setSelectedPlayList(context, null)
+        preferences.setSelectedPlayList(null)
         videoLoadingCanceler?.cancel()
     }
 
     fun setNewPlayList(playlist: Playlist) {
         if (playlist != _selectedPlayList.value) {
-            Preferences.setSelectedPlayList(context, playlist)
+            preferences.setSelectedPlayList(playlist)
             _selectedPlayList.value = playlist
             nextPageToken = null
             loadVideos(nextPageToken)
@@ -126,11 +127,15 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
 }
 
 @Suppress("UNCHECKED_CAST")
-class YouTubeViewModelFactory(private val application: Application, private val googleSignInAccount: GoogleSignInAccount) :
+class YouTubeViewModelFactory(
+    private val application: Application,
+    private val googleSignInAccount: GoogleSignInAccount,
+    private val preferences: IPreferences
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
-            return YouTubeMusicViewModel(application, googleSignInAccount) as T
+            return YouTubeMusicViewModel(application, googleSignInAccount, preferences) as T
         throw IllegalStateException("Given the model class is not assignable from YouTuneViewModel class")
     }
 

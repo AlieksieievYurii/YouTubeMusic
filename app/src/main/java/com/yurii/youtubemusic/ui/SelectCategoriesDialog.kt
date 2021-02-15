@@ -5,7 +5,7 @@ import android.content.Context
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.utilities.Preferences
+import com.yurii.youtubemusic.utilities.ServiceLocator
 
 private typealias OnApplyCallBack = (categories: ArrayList<Category>) -> Unit
 
@@ -53,7 +53,7 @@ class SelectCategoriesDialog private constructor(private val context: Context) {
         fun selectCategories(context: Context, alreadySelectedCategories: List<Category>?, onApplyCallBack: OnApplyCallBack) {
             SelectCategoriesDialog(context).apply {
                 callBack = onApplyCallBack
-                this.categories = Preferences.getMusicCategories(context)
+                this.categories =  ServiceLocator.providePreferences(context).getMusicCategories()
                 this.alreadySelectedCategories = alreadySelectedCategories
             }.create()
         }

@@ -1,24 +1,24 @@
 package com.yurii.youtubemusic.viewmodels
 
-import android.app.Application
 import androidx.lifecycle.*
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.utilities.Preferences
+import com.yurii.youtubemusic.utilities.IPreferences
 import java.lang.IllegalStateException
 import java.util.*
 
-class CategoriesEditorViewModel(application: Application) : AndroidViewModel(application) {
+class CategoriesEditorViewModel(private val preferences: IPreferences) : ViewModel() {
     private val categoriesList = mutableListOf<Category>()
     private var nextId = -1
 
     private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
     val categories: LiveData<List<Category>> = _categories.also {
-        categoriesList.addAll(Preferences.getMusicCategories(application).toMutableList())
+        categoriesList.addAll(preferences.getMusicCategories().toMutableList())
         it.postValue(categoriesList)
         nextId = initLastAvailableId()
     }
 
     var areChanges = false
+        private set
 
     fun getCategoryByName(name: String): Category =
         categoriesList.find { it.name == name } ?: throw IllegalStateException("Cannot find category with name $name")
@@ -69,15 +69,15 @@ class CategoriesEditorViewModel(application: Application) : AndroidViewModel(app
 
     fun saveChanges() {
         if (areChanges)
-            Preferences.setCategories(getApplication(), categoriesList)
+            preferences.setCategories(categoriesList)
     }
 }
 
 @Suppress("UNCHECKED_CAST")
-class CategoriesEditorViewModelFactory(private val application: Application): ViewModelProvider.Factory {
+class CategoriesEditorViewModelFactory(private val preferences: IPreferences): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CategoriesEditorViewModel::class.java))
-            return CategoriesEditorViewModel(application) as T
+            return CategoriesEditorViewModel(preferences) as T
         throw IllegalStateException("Given the model class is not assignable from CategoriesEditorViewModel class")
     }
 }

@@ -6,7 +6,7 @@ import android.support.v4.media.MediaBrowserCompat
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
-import com.yurii.youtubemusic.utilities.Preferences
+import com.yurii.youtubemusic.utilities.ServiceLocator
 import java.io.File
 import java.lang.Exception
 import java.lang.IllegalStateException
@@ -100,7 +100,7 @@ class MusicsProvider(private val context: Context) {
     private fun retrieveCategories(): ArrayList<Category> =
         ArrayList<Category>().apply {
             add(Category.ALL)
-            addAll(Preferences.getMusicCategories(context))
+            addAll(ServiceLocator.providePreferences(context).getMusicCategories())
         }
 
     private fun filterMediaItemsByCategory(category: Category): List<MediaMetaData> {
