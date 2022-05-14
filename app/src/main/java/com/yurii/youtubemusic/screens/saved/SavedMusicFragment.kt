@@ -6,7 +6,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.google.android.material.tabs.TabLayoutMediator
-import com.yurii.youtubemusic.CategoriesEditorActivity
+import com.yurii.youtubemusic.screens.categories.CategoriesEditorActivity
 import com.yurii.youtubemusic.EqualizerActivity
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
