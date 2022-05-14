@@ -9,7 +9,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.yurii.youtubemusic.PlayerControlPanelFragment
+import com.yurii.youtubemusic.screens.player.PlayerControlPanelFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
 import com.yurii.youtubemusic.utilities.*

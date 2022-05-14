@@ -23,7 +23,7 @@
             android:name=".screens.equalizer.EqualizerActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PlayerActivity"
+            android:name=".screens.player.PlayerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

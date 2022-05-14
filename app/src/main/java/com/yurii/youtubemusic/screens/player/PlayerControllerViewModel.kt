@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.viewmodels
+package com.yurii.youtubemusic.screens.player
 
 import android.app.Application
 import android.content.Context
@@ -71,14 +71,14 @@ class PlayerControllerViewModel(application: Application, val musicServiceConnec
         fun start() = run()
         fun stop() = handler.removeCallbacks(this)
     }
-}
 
-@Suppress("UNCHECKED_CAST")
-class PlayerBottomControllerFactory(private val context: Context, private val musicServiceConnection: MusicServiceConnection) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(PlayerControllerViewModel::class.java))
-            return PlayerControllerViewModel(context as Application, musicServiceConnection) as T
-        throw IllegalStateException("Given the model class is not assignable from PlayerBottomControllerViewModel class")
+    @Suppress("UNCHECKED_CAST")
+    class Factory(private val context: Context, private val musicServiceConnection: MusicServiceConnection) :
+        ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(PlayerControllerViewModel::class.java))
+                return PlayerControllerViewModel(context as Application, musicServiceConnection) as T
+            throw IllegalStateException("Given the model class is not assignable from PlayerBottomControllerViewModel class")
+        }
     }
 }

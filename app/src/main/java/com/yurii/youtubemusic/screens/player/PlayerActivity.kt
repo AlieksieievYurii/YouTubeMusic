@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.screens.player
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -7,10 +7,10 @@ import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.utilities.Injector
-import com.yurii.youtubemusic.viewmodels.PlayerControllerViewModel
 
 class PlayerActivity : AppCompatActivity() {
     private val viewModel: PlayerControllerViewModel by viewModels {
