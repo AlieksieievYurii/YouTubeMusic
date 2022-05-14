@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.screens.saved
 
 import android.content.Intent
 import android.view.View
@@ -7,43 +7,33 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.google.android.material.tabs.TabLayoutMediator
+import com.yurii.youtubemusic.CategoriesEditorActivity
+import com.yurii.youtubemusic.EqualizerActivity
+import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
-import com.yurii.youtubemusic.utilities.TabParameters
 import com.yurii.youtubemusic.utilities.CategoriesTabAdapter
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
-import com.yurii.youtubemusic.viewmodels.SavedMusicViewModel
 
 
-class SavedMusicFragment : TabFragment() {
+class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
+    layoutId = R.layout.fragment_saved_music,
+    titleStringId = R.string.label_fragment_title_saved_music,
+    optionMenuId = R.menu.saved_musics_fragment_menu
+) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    private val savedMusicViewModel by viewModels<SavedMusicViewModel> {
-        Injector.provideSavedMusicViewModel(requireContext())
+    private val savedMusicViewModel: SavedMusicViewModel by viewModels { Injector.provideSavedMusicViewModel(requireContext()) }
+
+    override fun onClickOption(id: Int) {
+        when (id) {
+            R.id.item_add_edit_categories -> openCategoriesEditor()
+            R.id.item_open_equalizer -> openEqualizerActivity()
+        }
     }
-
-    private lateinit var viewPagerAdapter: CategoriesTabAdapter
-
-    override fun getTabParameters(): TabParameters {
-        return TabParameters(
-            layoutId = R.layout.fragment_saved_music,
-            title = requireContext().getString(R.string.label_fragment_title_saved_music),
-            optionMenuId = R.menu.saved_musics_fragment_menu,
-            onClickOption = {
-                when (it) {
-                    R.id.item_add_edit_categories -> openCategoriesEditor()
-                    R.id.item_open_equalizer -> openEqualizerActivity()
-                }
-            }
-        )
-    }
-
-    private lateinit var binding: FragmentSavedMusicBinding
 
     override fun onInflatedView(viewDataBinding: ViewDataBinding) {
-        binding = viewDataBinding as FragmentSavedMusicBinding
-
         savedMusicViewModel.categoryItems.observe(viewLifecycleOwner, Observer { categoryItems ->
             initCategoriesLayout(categoryItems)
         })
@@ -71,8 +61,7 @@ class SavedMusicFragment : TabFragment() {
     }
 
     private fun initCategoriesLayout(categories: List<Category>) {
-        viewPagerAdapter = CategoriesTabAdapter(this, categories)
-        binding.viewpager.adapter = viewPagerAdapter
+        binding.viewpager.adapter = CategoriesTabAdapter(this, categories)
         TabLayoutMediator(binding.categories, binding.viewpager) { tab, position ->
             tab.text = categories[position].name
         }.attach()
