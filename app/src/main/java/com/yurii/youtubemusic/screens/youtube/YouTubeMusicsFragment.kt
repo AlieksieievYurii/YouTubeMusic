@@ -35,23 +35,25 @@ import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment : TabFragment(), VideosLoader {
+class YouTubeMusicsFragment : TabFragment<FragmentYouTubeMusicsBinding>(
+    layoutId = R.layout.fragment_you_tube_musics,
+    titleStringId = R.string.label_fragment_title_youtube_musics,
+    optionMenuId = R.menu.youtube_music_fragment_menu
+), VideosLoader {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val viewModel: YouTubeMusicViewModel by viewModels {
         YouTubeViewModelFactory(requireActivity().application, getGoogleSignInAccount(), ServiceLocator.providePreferences(requireContext()))
     }
 
-    private lateinit var binding: FragmentYouTubeMusicsBinding
     private lateinit var videosListAdapter: VideosListAdapter
     private var isLoadingNewVideoItems = true
     private lateinit var downloaderServiceConnection: ServiceConnection
 
-    override fun onInflatedView(viewDataBinding: ViewDataBinding) {
+    override fun onInflatedView(viewDataBinding: FragmentYouTubeMusicsBinding) {
         downloaderServiceConnection = ServiceConnection(requireContext())
         downloaderServiceConnection.setCallbacks(DownloaderServiceCallBack())
         downloaderServiceConnection.connect()
 
-        binding = viewDataBinding as FragmentYouTubeMusicsBinding
         initViewModel()
         initRecyclerView()
         setSelectPlayListListener()
@@ -61,20 +63,13 @@ class YouTubeMusicsFragment : TabFragment(), VideosLoader {
         })
     }
 
-    override fun getTabParameters(): TabParameters {
-        return TabParameters(
-            layoutId = R.layout.fragment_you_tube_musics,
-            title = requireContext().getString(R.string.label_fragment_title_youtube_musics),
-            optionMenuId = R.menu.youtube_music_fragment_menu,
-            onClickOption = {
-                when (it) {
-                    R.id.item_log_out -> {
-                        mainActivityViewModel.logOut()
-                        viewModel.signOut()
-                    }
-                }
+    override fun onClickOption(id: Int) {
+        when (id) {
+            R.id.item_log_out -> {
+                mainActivityViewModel.logOut()
+                viewModel.signOut()
             }
-        )
+        }
     }
 
     private fun initViewModel() {
@@ -283,7 +278,7 @@ class YouTubeMusicsFragment : TabFragment(), VideosLoader {
 
         override fun isLoading(videoItem: VideoItem) = downloaderServiceConnection.isItemDownloading(videoItem)
 
-        override fun isDownloadingFailed(videoItem: VideoItem) =  downloaderServiceConnection.isDownloadingFailed(videoItem)
+        override fun isDownloadingFailed(videoItem: VideoItem) = downloaderServiceConnection.isDownloadingFailed(videoItem)
 
         override fun getCurrentProgress(videoItem: VideoItem): Progress? = downloaderServiceConnection.getProgress(videoItem)
     }
