@@ -34,6 +34,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    buildFeatures {
+        viewBinding true
+    }
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
@@ -59,6 +63,7 @@ dependencies {
     implementation "com.google.android.material:material:$material_version"
     implementation "com.google.android.gms:play-services-auth:$play_services_auth"
     implementation "com.otaliastudios:nestedscrollcoordinatorlayout:$nestedscrollcoordinatorlayout_version"
+    implementation "com.github.yogacp:android-viewbinding:$view_biding_delegate_version"
 
     implementation("com.google.api-client:google-api-client-android:$google_api_client_android_version") {
         exclude group: 'org.apache.httpcomponents'
