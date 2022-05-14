@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.screens.main
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -9,9 +9,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.yurii.youtubemusic.PlayerControlPanelFragment
+import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
 import com.yurii.youtubemusic.utilities.*
-import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
 import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {

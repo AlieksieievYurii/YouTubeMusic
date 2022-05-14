@@ -17,7 +17,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
-import com.yurii.youtubemusic.MainActivity
+import com.yurii.youtubemusic.screens.main.MainActivity
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
 import com.yurii.youtubemusic.models.MediaMetaData

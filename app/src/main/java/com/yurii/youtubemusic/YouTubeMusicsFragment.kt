@@ -27,7 +27,7 @@ import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.adapters.VideosListAdapter
 import com.yurii.youtubemusic.services.downloader.ServiceConnection
-import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
+import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.viewmodels.VideosLoader
 import com.yurii.youtubemusic.viewmodels.YouTubeMusicViewModel
 import com.yurii.youtubemusic.viewmodels.YouTubeViewModelFactory

@@ -12,7 +12,7 @@ import com.yurii.youtubemusic.utilities.DoesNotHaveRequiredScopes
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.utilities.TabFragment
 import com.yurii.youtubemusic.utilities.TabParameters
-import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
+import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 
 class AuthorizationFragment : TabFragment() {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()

@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.viewmodels
+package com.yurii.youtubemusic.screens.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
