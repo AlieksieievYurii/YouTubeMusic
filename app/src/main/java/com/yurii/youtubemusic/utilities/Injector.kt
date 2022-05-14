@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.utilities
 
-import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -8,15 +7,16 @@ import com.yurii.youtubemusic.services.mediaservice.MediaService
 import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.categories.CategoriesEditorViewModel
+import com.yurii.youtubemusic.screens.equalizer.EqualizerViewModel
 import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
 import com.yurii.youtubemusic.viewmodels.*
 
 object Injector {
 
-    fun provideEqualizerViewModel(context: Context): EqualizerViewModelFactory {
+    fun provideEqualizerViewModel(context: Context): EqualizerViewModel.Factory {
         val musicServiceConnection = provideMusicServiceConnection(context)
-        return EqualizerViewModelFactory(context.applicationContext, musicServiceConnection)
+        return EqualizerViewModel.Factory(context.applicationContext, musicServiceConnection)
     }
 
     fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel {

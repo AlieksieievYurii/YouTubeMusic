@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
+import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.viewmodels.PlayerControllerViewModel
 

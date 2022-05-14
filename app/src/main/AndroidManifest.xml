@@ -20,7 +20,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
-            android:name=".EqualizerActivity"
+            android:name=".screens.equalizer.EqualizerActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".PlayerActivity"
