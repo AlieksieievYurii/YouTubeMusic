@@ -153,25 +153,35 @@
                 android:paddingEnd="@dimen/mediumPadding"
                 android:visibility="visible">
 
-                <FrameLayout
-                    android:id="@+id/layout_thumbs"
+                <ImageView
+                    android:id="@+id/iv_thumb_up"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginBottom="@dimen/mediumMargin">
+                    android:contentDescription="@string/content_description_likes"
+                    android:src="@drawable/ic_thumb_up_black_24dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <include
-                        layout="@layout/layout_thumbs"
-                        app:dislikesCount="@{videoItem.disLikeCount}"
-                        app:likesCount="@{videoItem.likeCount}" />
-
-                </FrameLayout>
+                <TextView
+                    android:id="@+id/tv_count_likes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/iv_thumb_up"
+                    android:layout_alignParentTop="true"
+                    android:textAlignment="gravity"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="5dp"
+                    android:layout_toEndOf="@+id/iv_thumb_up"
+                    android:text="@{UtilsKt.bigIntegerToShortCutSuffix(videoItem.likeCount)}"
+                    android:textSize="12sp"
+                    tools:text="212K" />
 
                 <TextView
                     android:id="@+id/tv_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/layout_thumbs"
+                    android:layout_below="@+id/iv_thumb_up"
+                    android:layout_marginTop="5dp"
                     android:text="@{videoItem.description}"
                     android:textAppearance="@style/TextAppearance.AppCompat.Caption"
                     android:visibility="@{videoItem.description.empty ? View.GONE : View.VISIBLE}"
