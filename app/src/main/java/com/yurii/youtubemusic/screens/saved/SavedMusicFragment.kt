@@ -2,7 +2,6 @@ package com.yurii.youtubemusic.screens.saved
 
 import android.content.Intent
 import android.view.View
-import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -11,7 +10,6 @@ import com.yurii.youtubemusic.CategoriesEditorActivity
 import com.yurii.youtubemusic.EqualizerActivity
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
-import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
