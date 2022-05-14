@@ -1,6 +1,5 @@
-package com.yurii.youtubemusic.viewmodels
+package com.yurii.youtubemusic.screens.youtube
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.*
@@ -23,9 +22,8 @@ interface VideosLoader {
     fun onError(error: Exception)
 }
 
-class YouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount, private val preferences: IPreferences) :
-    AndroidViewModel(application) {
-    private val context: Context = getApplication<Application>().baseContext
+class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: GoogleSignInAccount, private val preferences: IPreferences) :
+    ViewModel() {
     private val credential = GoogleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount, context)
     private val youTubeService = YouTubeService(credential)
 
@@ -124,19 +122,20 @@ class YouTubeMusicViewModel(application: Application, googleSignInAccount: Googl
     companion object {
         private const val LOG_TAG: String = "YouTubeViewModel"
     }
-}
 
-@Suppress("UNCHECKED_CAST")
-class YouTubeViewModelFactory(
-    private val application: Application,
-    private val googleSignInAccount: GoogleSignInAccount,
-    private val preferences: IPreferences
-) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
-            return YouTubeMusicViewModel(application, googleSignInAccount, preferences) as T
-        throw IllegalStateException("Given the model class is not assignable from YouTuneViewModel class")
+    @Suppress("UNCHECKED_CAST")
+    class Factory(
+        private val context: Context,
+        private val googleSignInAccount: GoogleSignInAccount,
+        private val preferences: IPreferences
+    ) :
+        ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
+                return YouTubeMusicViewModel(context, googleSignInAccount, preferences) as T
+            throw IllegalStateException("Given the model class is not assignable from YouTuneViewModel class")
+        }
+
     }
-
 }
+

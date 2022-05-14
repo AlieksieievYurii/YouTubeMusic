@@ -1,11 +1,14 @@
 package com.yurii.youtubemusic.utilities
 
+import android.app.Application
 import android.content.ComponentName
 import android.content.Context
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.services.mediaservice.MediaService
 import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel
+import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
 import com.yurii.youtubemusic.viewmodels.*
 
 object Injector {
@@ -30,6 +33,11 @@ object Injector {
         val applicationContext = context.applicationContext
         val musicServiceConnection = provideMusicServiceConnection(context)
         return SavedMusicViewModel.Factory(applicationContext, musicServiceConnection)
+    }
+
+    fun provideYouTubeMusicViewModel(context: Context, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
+        val preferences = ServiceLocator.providePreferences(context)
+        return YouTubeMusicViewModel.Factory(context, googleSignInAccount, preferences)
     }
 
     private fun provideMusicServiceConnection(context: Context): MusicServiceConnection {
