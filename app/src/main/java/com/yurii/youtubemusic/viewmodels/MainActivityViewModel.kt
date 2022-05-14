@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.models.MutableSingleLiveEvent
@@ -32,4 +33,14 @@ class MainActivityViewModel : ViewModel() {
     fun notifyMediaItemHasBeenModified(mediaMetaData: MediaMetaData) = _onUpdateMediaItem.sendEvent(mediaMetaData)
 
     fun notifyVideoItemHasBeenDownloaded(videoItem: VideoItem) = _onVideoItemHasBeenDownloaded.sendEvent(videoItem)
+
+    class MainActivityViewModelFactory : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(MainActivityViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return MainActivityViewModel() as T
+            }
+            throw IllegalArgumentException("Unable to construct viewModel")
+        }
+    }
 }
