@@ -4,8 +4,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -17,42 +17,26 @@ import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private val viewModel: MainActivityViewModel by viewModels { MainActivityViewModel.MainActivityViewModelFactory() }
-    private var activeBottomMenuItem: Int = -1
+    private val activityMainBinding: ActivityMainBinding by viewBinding()
+    private var activeBottomMenuItem: Int = R.id.item_saved_music
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
-
-    private lateinit var activityMainBinding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initActivity()
-        showDefaultFragment()
-
-        viewModel.logInEvent.observe(this, Observer {
-            handleSignIn(it)
-        })
-
-        viewModel.logOutEvent.observe(this, Observer {
-            handleSignOut()
-        })
-
-        supportFragmentManager.beginTransaction().replace(R.id.player_view_holder, PlayerControlPanelFragment()).commit()
-    }
-
-    private fun showDefaultFragment() {
-        activeBottomMenuItem = R.id.item_saved_music
-        fragmentHelper.showSavedMusicFragment(animated = false)
-    }
-
-    private fun initActivity() {
-        activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         setSupportActionBar(activityMainBinding.toolbar)
         setupBottomNavigationMenu(activityMainBinding)
+
+        fragmentHelper.showSavedMusicFragment(animated = false)
+
+        viewModel.logInEvent.observe(this, Observer { handleSignIn(it) })
+        viewModel.logOutEvent.observe(this, Observer { handleSignOut() })
+
+        supportFragmentManager.beginTransaction().replace(R.id.player_view_holder, PlayerControlPanelFragment()).commit()
     }
 
     private fun setupBottomNavigationMenu(activityMainBinding: ActivityMainBinding) {
         activityMainBinding.bottomNavigationView.setOnNavigationItemSelectedListener(this)
     }
-
 
     private fun initAndOpenYouTubeMusicFragment() {
         try {
