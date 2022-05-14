@@ -1,12 +1,12 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.screens.authorization
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 
 import android.widget.Toast
-import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.activityViewModels
 import com.google.android.gms.common.api.ApiException
+import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
 import com.yurii.youtubemusic.utilities.DoesNotHaveRequiredScopes
 import com.yurii.youtubemusic.utilities.GoogleAccount
@@ -19,11 +19,7 @@ class AuthorizationFragment : TabFragment<FragmentAuthorizationBinding>(
 ) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
 
-    override fun onInflatedView(viewDataBinding: ViewDataBinding) {
-        initSignInButton()
-    }
-
-    private fun initSignInButton() {
+    override fun onInflatedView(viewDataBinding: FragmentAuthorizationBinding) {
         binding.signInButton.setOnClickListener {
             binding.signInButton.isEnabled = false
             GoogleAccount.startSignInActivity(this)
