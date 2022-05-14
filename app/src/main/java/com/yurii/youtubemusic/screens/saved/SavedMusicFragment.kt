@@ -11,6 +11,7 @@ import com.yurii.youtubemusic.CategoriesEditorActivity
 import com.yurii.youtubemusic.EqualizerActivity
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
+import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
@@ -33,7 +34,7 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
         }
     }
 
-    override fun onInflatedView(viewDataBinding: ViewDataBinding) {
+    override fun onInflatedView(viewDataBinding: FragmentSavedMusicBinding) {
         savedMusicViewModel.categoryItems.observe(viewLifecycleOwner, Observer { categoryItems ->
             initCategoriesLayout(categoryItems)
         })

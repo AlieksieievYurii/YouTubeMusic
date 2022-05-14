@@ -11,23 +11,16 @@ import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
 import com.yurii.youtubemusic.utilities.DoesNotHaveRequiredScopes
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.utilities.TabFragment
-import com.yurii.youtubemusic.utilities.TabParameters
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 
-class AuthorizationFragment : TabFragment() {
+class AuthorizationFragment : TabFragment<FragmentAuthorizationBinding>(
+    layoutId = R.layout.fragment_authorization,
+    titleStringId = R.string.label_fragment_title_youtube_musics
+) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    private lateinit var binding: FragmentAuthorizationBinding
 
     override fun onInflatedView(viewDataBinding: ViewDataBinding) {
-        binding = viewDataBinding as FragmentAuthorizationBinding
         initSignInButton()
-    }
-
-    override fun getTabParameters(): TabParameters {
-        return TabParameters(
-            layoutId = R.layout.fragment_authorization,
-            title = requireContext().getString(R.string.label_fragment_title_youtube_musics)
-        )
     }
 
     private fun initSignInButton() {

@@ -16,7 +16,7 @@ abstract class TabFragment<T: ViewDataBinding>(private val layoutId: Int,
     private lateinit var toolbar: Toolbar
     lateinit var binding: T
 
-    abstract fun onInflatedView(viewDataBinding: ViewDataBinding)
+    abstract fun onInflatedView(viewDataBinding: T)
 
     open fun onClickOption(id: Int) {
         // Should be implemented if the tab has options menu
