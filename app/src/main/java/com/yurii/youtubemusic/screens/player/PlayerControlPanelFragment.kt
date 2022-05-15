@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.screens.player
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,39 +9,33 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.DisplayMetrics
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
+import android.viewbinding.library.fragment.viewBinding
 import androidx.core.view.isVisible
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
 import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.startValueAnimation
-import com.yurii.youtubemusic.utilities.Injector.providePlayerControllerViewModel
-import com.yurii.youtubemusic.viewmodels.PlayerControllerViewModel
+import com.yurii.youtubemusic.utilities.Injector
 import kotlin.math.abs
 
 
-class PlayerControlPanelFragment : Fragment() {
-    private val viewModel: PlayerControllerViewModel by viewModels {
-        providePlayerControllerViewModel(requireContext())
-    }
+class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_panel) {
+    private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(requireContext()) }
+    private val binding: FragmentPlayerControlPanelBinding by viewBinding()
 
-    private lateinit var binding: FragmentPlayerControlPanelBinding
     private var clickX = 0f
     private var hasBeenClicked = false
     private var displayWidth = 0
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_player_control_panel, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         signDisplaySize()
         initView()
-        return binding.root
     }
 
     private fun signDisplaySize() {

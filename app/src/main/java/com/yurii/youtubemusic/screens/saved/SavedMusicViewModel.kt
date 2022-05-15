@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.viewmodels
+package com.yurii.youtubemusic.screens.saved
 
 import android.app.Application
 import android.content.Context
@@ -44,14 +44,14 @@ class SavedMusicViewModel(application: Application, musicServiceConnection: Musi
     private val musicServiceConnection = musicServiceConnection.also {
         it.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
     }
-}
 
-@Suppress("UNCHECKED_CAST")
-class SavedMusicViewModelFactory(private val context: Context, private val musicServiceConnection: MusicServiceConnection) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SavedMusicViewModel::class.java))
-            return SavedMusicViewModel(context as Application, musicServiceConnection) as T
-        throw IllegalStateException("Given the model class is not assignable from SavedMusicViewModel class")
+    @Suppress("UNCHECKED_CAST")
+    class Factory(private val context: Context, private val musicServiceConnection: MusicServiceConnection) :
+        ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(SavedMusicViewModel::class.java))
+                return SavedMusicViewModel(context as Application, musicServiceConnection) as T
+            throw IllegalStateException("Given the model class is not assignable from SavedMusicViewModel class")
+        }
     }
 }

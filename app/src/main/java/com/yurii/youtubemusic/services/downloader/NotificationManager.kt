@@ -7,7 +7,7 @@ import androidx.annotation.IntRange
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.yurii.youtubemusic.Application
-import com.yurii.youtubemusic.MainActivity
+import com.yurii.youtubemusic.screens.main.MainActivity
 import com.yurii.youtubemusic.R
 
 class NotificationManager(private val context: Context) {

@@ -20,17 +20,17 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
-            android:name=".EqualizerActivity"
+            android:name=".screens.equalizer.EqualizerActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PlayerActivity"
+            android:name=".screens.player.PlayerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".CategoriesEditorActivity"
+            android:name=".screens.categories.CategoriesEditorActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".MainActivity"
+            android:name=".screens.main.MainActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">

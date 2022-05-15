@@ -1,25 +1,21 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.screens.equalizer
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.databinding.DataBindingUtil
+import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityEqualizerBinding
 import com.yurii.youtubemusic.utilities.Injector
-import com.yurii.youtubemusic.viewmodels.EqualizerViewModel
 
 
 class EqualizerActivity : AppCompatActivity() {
-    private val viewModel: EqualizerViewModel by viewModels {
-        Injector.provideEqualizerViewModel(this)
-    }
-
-    private lateinit var binding: ActivityEqualizerBinding
+    private val viewModel: EqualizerViewModel by viewModels { Injector.provideEqualizerViewModel(this) }
+    private val binding: ActivityEqualizerBinding by viewBinding()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_equalizer)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.title = getString(R.string.label_audio_effects)
 

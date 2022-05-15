@@ -10,44 +10,41 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.yurii.youtubemusic.R
 
-data class TabParameters(val layoutId: Int, val title: String, val optionMenuId: Int? = null, val onClickOption: ((id: Int) -> Unit)? = null)
+abstract class TabFragment<T: ViewDataBinding>(private val layoutId: Int,
+                                               private val titleStringId: Int,
+                                               private val optionMenuId: Int? = null) : Fragment() {
+    private lateinit var toolbar: Toolbar
+    lateinit var binding: T
 
-abstract class TabFragment : Fragment() {
-    protected lateinit var toolbar: Toolbar
-    private lateinit var tabParameters: TabParameters
+    abstract fun onInflatedView(viewDataBinding: T)
 
-    abstract fun onInflatedView(viewDataBinding: ViewDataBinding)
-
-    abstract fun getTabParameters(): TabParameters
+    open fun onClickOption(id: Int) {
+        // Should be implemented if the tab has options menu
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        tabParameters = getTabParameters()
-        val viewDataBinding: ViewDataBinding = DataBindingUtil.inflate(inflater, tabParameters.layoutId, container, false)
+        binding = DataBindingUtil.inflate(inflater, layoutId, container, false)
         initToolBar()
-        onInflatedView(viewDataBinding)
         setHasOptionsMenu(true)
 
-        return viewDataBinding.root
+        onInflatedView(binding)
+        return binding.root
     }
 
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        setTitle()
+        toolbar.title = requireContext().getString(titleStringId)
         inflateOptionsMenuIfRequired(menu, inflater)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     private fun inflateOptionsMenuIfRequired(menu: Menu, inflater: MenuInflater) {
-        tabParameters.optionMenuId?.run { inflater.inflate(this, menu) }
+        optionMenuId?.run { inflater.inflate(this, menu) }
         toolbar.setOnMenuItemClickListener {
-            tabParameters.onClickOption?.run { this(it.itemId) }
+            this.onClickOption(it.itemId)
             true
         }
-    }
-
-    private fun setTitle() {
-        toolbar.title = tabParameters.title
     }
 
     private fun initToolBar() {

@@ -1,18 +1,17 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.screens.saved.mediaitems
 
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.viewbinding.library.fragment.viewBinding
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
@@ -21,17 +20,15 @@ import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.adapters.MediaListAdapter
 import com.yurii.youtubemusic.adapters.MediaListAdapterController
-import com.yurii.youtubemusic.viewmodels.MainActivityViewModel
-import com.yurii.youtubemusic.viewmodels.MediaItemsViewModel
+import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 
-class MediaItemsFragment : Fragment() {
+class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private lateinit var viewModel: MediaItemsViewModel
     private lateinit var mediaItemsAdapterController: MediaListAdapterController
-    private lateinit var binding: FragmentMediaItemsBinding
+    private val binding: FragmentMediaItemsBinding by viewBinding()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_media_items, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initViewModel(requireArguments().getParcelable(EXTRA_CATEGORY)!!)
         initRecyclerView(binding.mediaItems)
 
@@ -61,8 +58,6 @@ class MediaItemsFragment : Fragment() {
                 mediaItemsAdapterController.removeItemWithId(newMediaItem.mediaId)
             checkWhetherMediaItemsAreEmpty()
         })
-
-        return binding.root
     }
 
     private fun initViewModel(category: Category) {

@@ -1,27 +1,24 @@
-package com.yurii.youtubemusic
+package com.yurii.youtubemusic.screens.categories
 
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.google.android.material.chip.Chip
+import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityCategoriesEditorBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.AddEditCategoryDialog
-import com.yurii.youtubemusic.utilities.ServiceLocator
-import com.yurii.youtubemusic.viewmodels.CategoriesEditorViewModel
-import com.yurii.youtubemusic.viewmodels.CategoriesEditorViewModelFactory
+import com.yurii.youtubemusic.utilities.Injector
 
 class CategoriesEditorActivity : AppCompatActivity() {
-    private val viewModel by viewModels<CategoriesEditorViewModel> {
-        CategoriesEditorViewModelFactory(ServiceLocator.providePreferences(this))
-    }
-    private lateinit var binding: ActivityCategoriesEditorBinding
+    private val viewModel by viewModels<CategoriesEditorViewModel> { Injector.provideCategoriesEditorViewMode(this) }
+    private val binding: ActivityCategoriesEditorBinding by viewBinding()
 
     private val onDeleteClick = View.OnClickListener {
         ConfirmDeletionDialog.create(
@@ -44,8 +41,6 @@ class CategoriesEditorActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_categories_editor)
-
         initActionBar()
         initCategoryChips()
     }

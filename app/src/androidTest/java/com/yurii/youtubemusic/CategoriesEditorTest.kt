@@ -13,6 +13,7 @@ import androidx.test.filters.MediumTest
 import com.google.android.material.chip.Chip
 import com.yurii.youtubemusic.data.PreferencesFakeData
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.screens.categories.CategoriesEditorActivity
 import com.yurii.youtubemusic.utilities.ServiceLocator
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.Matchers.hasSize
