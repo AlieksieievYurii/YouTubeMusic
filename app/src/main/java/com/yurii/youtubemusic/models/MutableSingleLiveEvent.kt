@@ -45,10 +45,9 @@ open class SingleLiveEvent<T> : LiveData<T>() {
         super.removeObservers(owner)
     }
 
-    @MainThread
     override fun removeObserver(observer: Observer<in T>) {
-        observers.remove(observer)
         super.removeObserver(observer)
+        //observers.remove(observer)
     }
 
     @MainThread

@@ -8,7 +8,7 @@ apply plugin: 'kotlin-android-extensions'
 
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.yurii.youtubemusic"
@@ -64,6 +64,10 @@ dependencies {
     implementation "com.google.android.gms:play-services-auth:$play_services_auth"
     implementation "com.otaliastudios:nestedscrollcoordinatorlayout:$nestedscrollcoordinatorlayout_version"
     implementation "com.github.yogacp:android-viewbinding:$view_biding_delegate_version"
+
+    def paging_version = "3.1.1"
+
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
 
     implementation("com.google.api-client:google-api-client-android:$google_api_client_android_version") {
         exclude group: 'org.apache.httpcomponents'

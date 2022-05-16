@@ -8,6 +8,7 @@ import com.yurii.youtubemusic.*
 import com.yurii.youtubemusic.screens.authorization.AuthorizationFragment
 import com.yurii.youtubemusic.screens.saved.SavedMusicFragment
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicsFragment
+import com.yurii.youtubemusic.screens.youtube.YouTubeMusicsFragment2
 import java.lang.Exception
 
 
@@ -35,7 +36,7 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
     fun initYouTubeMusicFragment(googleSignInAccount: GoogleSignInAccount) {
         raiseExceptionIfYouTubeFragmentAlreadyExists()
 
-        val youTubeMusicsFragment: Fragment = YouTubeMusicsFragment.createInstance(googleSignInAccount)
+        val youTubeMusicsFragment: Fragment = YouTubeMusicsFragment2.createInstance(googleSignInAccount)
         fragmentManager.beginTransaction().run {
             add(R.id.frameLayout, youTubeMusicsFragment, TAG_YOUTUBE_MUSIC_FRAGMENT)
             hide(youTubeMusicsFragment)
