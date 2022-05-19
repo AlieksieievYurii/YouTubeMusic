@@ -31,13 +31,15 @@ buildscript {
         robolectric_version = "4.3.1"
         androidx_test_core_version = "1.2.0"
         espresso_contrib_version = "3.2.0-beta01"
-        view_biding_delegate_version="1.0.3"
+        view_biding_delegate_version = "1.0.3"
+        swiperefreshlayout_version = "1.1.0"
+        paging_version = "3.1.1"
     }
 
     repositories {
         google()
         jcenter()
-        
+
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.1'
@@ -52,7 +54,7 @@ allprojects {
         google()
         jcenter()
         maven { url 'https://jitpack.io' }
-        
+
     }
 }
 
