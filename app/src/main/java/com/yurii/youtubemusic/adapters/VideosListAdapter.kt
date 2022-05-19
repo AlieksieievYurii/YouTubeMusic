@@ -194,13 +194,13 @@ class VideosListAdapter(context: Context, private val callback: CallBack) : Recy
         }
 
         videoViewHolder.downloadButton.setOnClickStateListener {
-            when (videoViewHolder.downloadButton.state) {
-                DownloadButton.STATE_DOWNLOAD -> callback.onDownload(videoItem)
-                DownloadButton.STATE_DOWNLOADING -> callback.onCancelDownload(videoItem)
-                DownloadButton.STATE_DOWNLOADED -> callback.onRemove(videoItem)
-                DownloadButton.STATE_FAILED -> callback.onNotifyFailedToDownload(videoItem)
-                else -> throw IllegalStateException("Unhandled state")
-            }
+            //when (videoViewHolder.downloadButton.state) {
+//                DownloadButton.STATE_DOWNLOAD -> callback.onDownload(videoItem)
+//                DownloadButton.STATE_DOWNLOADING -> callback.onCancelDownload(videoItem)
+//                DownloadButton.STATE_DOWNLOADED -> callback.onRemove(videoItem)
+//                DownloadButton.STATE_FAILED -> callback.onNotifyFailedToDownload(videoItem)
+                //else -> throw IllegalStateException("Unhandled state")
+            //}
         }
     }
 
@@ -244,12 +244,12 @@ class VideosListAdapter(context: Context, private val callback: CallBack) : Recy
         }
 
         fun setState(state: ItemState) {
-            downloadButton.state = when (state) {
-                ItemState.DOWNLOAD -> DownloadButton.STATE_DOWNLOAD
-                ItemState.DOWNLOADING -> DownloadButton.STATE_DOWNLOADING
-                ItemState.DOWNLOADED -> DownloadButton.STATE_DOWNLOADED
-                ItemState.FAILED -> DownloadButton.STATE_FAILED
-            }
+            //downloadButton.state = when (state) {
+//                ItemState.DOWNLOAD -> DownloadButton.STATE_DOWNLOAD
+//                ItemState.DOWNLOADING -> DownloadButton.STATE_DOWNLOADING
+//                ItemState.DOWNLOADED -> DownloadButton.STATE_DOWNLOADED
+//                ItemState.FAILED -> DownloadButton.STATE_FAILED
+            //}
             videoItemVideoBinding.state = state
         }
 
