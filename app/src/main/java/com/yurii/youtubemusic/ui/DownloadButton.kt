@@ -22,7 +22,7 @@ import kotlin.math.min
 class DownloadButton(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
     sealed class State {
         object Download : State()
-        data class Downloading(val progress: Float, val size: Float) : State()
+        data class Downloading(val progress: Int, val size: Float) : State()
         data class Downloaded(val size: Float) : State()
         object Failed : State()
     }
