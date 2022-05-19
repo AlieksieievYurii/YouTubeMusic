@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,6 +18,7 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.DialogPlayListsBinding
 import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class PlaylistsDialogFragment private constructor() : DialogFragment() {
     private lateinit var binding: DialogPlayListsBinding
@@ -27,20 +30,33 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.dialog_play_lists, null, false)
-        playlistsAdapter = PlaylistsAdapter(currentPlayList, onSelectedPlaylist)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        playlistsAdapter = PlaylistsAdapter(currentPlayList) {selectedPlaylist ->
+            onSelectedPlaylist.invoke(selectedPlaylist)
+            dismiss()
+        }
+
         binding.rvPlayLists.apply {
             adapter = playlistsAdapter
             layoutManager = LinearLayoutManager(context)
         }
 
         lifecycleScope.launchWhenCreated {
-            Pager(config = PagingConfig(pageSize = 10), pagingSourceFactory = { PlaylistPagingSource(youTubeAPI) }).flow.collectLatest {
-                playlistsAdapter.submitData(it)
+            launch {
+                Pager(config = PagingConfig(pageSize = 10), pagingSourceFactory = { PlaylistPagingSource(youTubeAPI) }).flow.collectLatest {
+                    playlistsAdapter.submitData(it)
+                }
+            }
+            launch {
+                playlistsAdapter.loadStateFlow.collectLatest {
+                    binding.progressBar.isVisible = it.refresh is LoadState.Loading
+                    binding.rvPlayLists.isVisible = it.refresh is LoadState.NotLoading
+                }
             }
         }
     }
