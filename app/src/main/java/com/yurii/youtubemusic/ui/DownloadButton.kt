@@ -20,20 +20,27 @@ import kotlin.math.min
 
 
 class DownloadButton(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
-    private var mSize: Int = toPx(50)
+    sealed class State {
+        object Download : State()
+        data class Downloading(val progress: Float, val size: Float) : State()
+        data class Downloaded(val size: Float) : State()
+        object Failed : State()
+    }
+
+    private var size: Int = toPx(50)
         set(value) {
             field = value
             mProgressBarRect.left = mProgressBarPadding
             mProgressBarRect.top = mProgressBarPadding
-            mProgressBarRect.right = mSize - mProgressBarPadding
-            mProgressBarRect.bottom = mSize - mProgressBarPadding
+            mProgressBarRect.right = size - mProgressBarPadding
+            mProgressBarRect.bottom = size - mProgressBarPadding
 
-            mProgressBarStrokeWidth = mSize * 0.07f
-            mIconStrokeWidth = mSize * 0.07f
-            mProgressBarPadding = mSize * 0.07f
+            mProgressBarStrokeWidth = size * 0.07f
+            mIconStrokeWidth = size * 0.07f
+            mProgressBarPadding = size * 0.07f
 
-            mViewHolder.bottom = mSize
-            mViewHolder.right = mSize
+            mViewHolder.bottom = size
+            mViewHolder.right = size
         }
 
     private var mBackgroundColor = DEFAULT_BACKGROUND_COLOR
@@ -46,7 +53,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
 
     private var mIsHover = false
 
-    var state: Int = STATE_DOWNLOAD
+    var state: State = State.Download
         set(value) {
             field = value
             invalidate()
@@ -58,11 +65,11 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     private var onClickListener: ((view: View) -> Unit)? = null
     private var onLongClickDownloadListener: ((view: View) -> Unit)? = null
 
-    private var mViewHolder = Rect(0, 0, mSize, mSize)
+    private var mViewHolder = Rect(0, 0, size, size)
 
     private var mStartProgressAngle = 0f
 
-    private var mProgressBarRect = RectF(mProgressBarPadding, mProgressBarPadding, mSize - mProgressBarPadding, mSize - mProgressBarPadding)
+    private var mProgressBarRect = RectF(mProgressBarPadding, mProgressBarPadding, size - mProgressBarPadding, size - mProgressBarPadding)
     private val mPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var mPath = Path()
 
@@ -75,7 +82,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
 
         override fun onLongPress(e: MotionEvent?) {
             super.onLongPress(e)
-            if (state == STATE_DOWNLOAD)
+            if (state == State.Download)
                 onLongClickDownloadListener?.invoke(this@DownloadButton).also {
                     vibrationEffect()
                 }
@@ -150,7 +157,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         mIconColor = typedArray.getColor(R.styleable.DownloadButton_iconColor, DEFAULT_ICON_COLOR)
 
         progress = typedArray.getInt(R.styleable.DownloadButton_progress, 0)
-        state = typedArray.getInt(R.styleable.DownloadButton_state, STATE_DOWNLOAD)
+        //typedArray.getInt(R.styleable.DownloadButton_state, 0)
 
         typedArray.recycle()
     }
@@ -165,10 +172,10 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
             val width = MeasureSpec.getSize(widthMeasureSpec)
             val height = MeasureSpec.getSize(heightMeasureSpec)
 
-            mSize = min(width, height)
+            size = min(width, height)
         }
 
-        setMeasuredDimension(mSize, mSize)
+        setMeasuredDimension(size, size + 40)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -176,10 +183,10 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         drawCircle(canvas)
 
         when (state) {
-            STATE_DOWNLOAD -> drawDownloadIcon(canvas)
-            STATE_DOWNLOADING -> drawCancelIconWithProgress(canvas)
-            STATE_DOWNLOADED -> drawDeleteIcon(canvas)
-            STATE_FAILED -> drawFailIcon(canvas)
+            is State.Download -> drawDownloadIcon(canvas)
+            is State.Downloading -> drawCancelIconWithProgress(canvas, state as State.Downloading)
+            is State.Downloaded -> drawDeleteIcon(canvas, state as State.Downloaded)
+            is State.Failed -> drawFailIcon(canvas)
         }
 
         if (mIsHover)
@@ -192,35 +199,46 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         mPaint.strokeWidth = mIconStrokeWidth * 0.75f
 
         mPaint.style = Paint.Style.FILL
-        canvas.drawCircle(mSize * 0.5f, mSize * 0.62f, mIconStrokeWidth * 0.75f / 2, mPaint)
+        canvas.drawCircle(size * 0.5f, size * 0.62f, mIconStrokeWidth * 0.75f / 2, mPaint)
 
         mPaint.style = Paint.Style.STROKE
 
         mPath.reset()
-        mPath.moveTo(mSize * 0.5f, mSize * 0.2f)
-        mPath.lineTo(mSize * 0.75f, mSize * 0.7f)
+        mPath.moveTo(size * 0.5f, size * 0.2f)
+        mPath.lineTo(size * 0.75f, size * 0.7f)
 
-        mPath.moveTo(mSize * 0.5f, mSize * 0.2f)
-        mPath.lineTo(mSize * 0.25f, mSize * 0.7f)
+        mPath.moveTo(size * 0.5f, size * 0.2f)
+        mPath.lineTo(size * 0.25f, size * 0.7f)
 
-        mPath.moveTo(mSize * 0.25f, mSize * 0.7f)
-        mPath.lineTo(mSize * 0.75f, mSize * 0.7f)
+        mPath.moveTo(size * 0.25f, size * 0.7f)
+        mPath.lineTo(size * 0.75f, size * 0.7f)
 
         canvas.drawPath(mPath, mPaint)
 
         mPath.reset()
         mPaint.strokeWidth = mIconStrokeWidth * 0.5f
 
-        mPath.moveTo(mSize * 0.5f, mSize * 0.4f)
-        mPath.lineTo(mSize * 0.5f, mSize * 0.55f)
+        mPath.moveTo(size * 0.5f, size * 0.4f)
+        mPath.lineTo(size * 0.5f, size * 0.55f)
 
 
         canvas.drawPath(mPath, mPaint)
     }
 
-    private fun drawCancelIconWithProgress(canvas: Canvas) {
+    private fun drawCancelIconWithProgress(canvas: Canvas, downloadingState: State.Downloading) {
         drawProgress(canvas)
         drawCancelIcon(canvas)
+        drawText(canvas, "${downloadingState.progress}/${downloadingState.size} M")
+    }
+
+    private fun drawText(canvas: Canvas, text: String) {
+        mPaint.color = mBackgroundColor
+        mPaint.style = Paint.Style.FILL
+        mPaint.textSize = 25f
+        mPaint.typeface = Typeface.DEFAULT_BOLD
+        mPaint.textAlign = Paint.Align.CENTER
+
+        canvas.drawText(text, size / 2f, size + 35f, mPaint)
     }
 
     private fun drawCancelIcon(canvas: Canvas) {
@@ -231,16 +249,18 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
 
         mPath.reset()
 
-        mPath.moveTo(mSize * 0.3f, mSize * 0.3f)
-        mPath.lineTo(mSize * 0.7f, mSize * 0.7f)
+        mPath.moveTo(size * 0.3f, size * 0.3f)
+        mPath.lineTo(size * 0.7f, size * 0.7f)
 
-        mPath.moveTo(mSize * 0.7f, mSize * 0.3f)
-        mPath.lineTo(mSize * 0.3f, mSize * 0.7f)
+        mPath.moveTo(size * 0.7f, size * 0.3f)
+        mPath.lineTo(size * 0.3f, size * 0.7f)
 
         canvas.drawPath(mPath, mPaint)
     }
 
-    private fun drawDeleteIcon(canvas: Canvas) {
+    private fun drawDeleteIcon(canvas: Canvas, downloadedState: State.Downloaded) {
+        drawText(canvas, "${downloadedState.size} M")
+
         mPaint.color = mIconColor
         mPaint.style = Paint.Style.STROKE
         mPaint.strokeCap = Paint.Cap.ROUND
@@ -248,39 +268,39 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
 
         mPath.reset()
 
-        mPath.moveTo(mSize * 0.30f, mSize * 0.35f)
-        mPath.lineTo(mSize * 0.70f, mSize * 0.35f)
+        mPath.moveTo(size * 0.30f, size * 0.35f)
+        mPath.lineTo(size * 0.70f, size * 0.35f)
 
-        mPath.moveTo(mSize * 0.35f, mSize * 0.35f)
-        mPath.lineTo(mSize * 0.35f, mSize * 0.75f)
+        mPath.moveTo(size * 0.35f, size * 0.35f)
+        mPath.lineTo(size * 0.35f, size * 0.75f)
 
-        mPath.moveTo(mSize * 0.35f, mSize * 0.75f)
-        mPath.lineTo(mSize * 0.65f, mSize * 0.75f)
+        mPath.moveTo(size * 0.35f, size * 0.75f)
+        mPath.lineTo(size * 0.65f, size * 0.75f)
 
-        mPath.moveTo(mSize * 0.65f, mSize * 0.75f)
-        mPath.lineTo(mSize * 0.65f, mSize * 0.35f)
+        mPath.moveTo(size * 0.65f, size * 0.75f)
+        mPath.lineTo(size * 0.65f, size * 0.35f)
 
-        mPath.moveTo(mSize * 0.45f, mSize * 0.35f)
-        mPath.lineTo(mSize * 0.45f, mSize * 0.30f)
+        mPath.moveTo(size * 0.45f, size * 0.35f)
+        mPath.lineTo(size * 0.45f, size * 0.30f)
 
-        mPath.moveTo(mSize * 0.45f, mSize * 0.30f)
-        mPath.lineTo(mSize * 0.55f, mSize * 0.30f)
+        mPath.moveTo(size * 0.45f, size * 0.30f)
+        mPath.lineTo(size * 0.55f, size * 0.30f)
 
-        mPath.moveTo(mSize * 0.55f, mSize * 0.30f)
-        mPath.lineTo(mSize * 0.55f, mSize * 0.35f)
+        mPath.moveTo(size * 0.55f, size * 0.30f)
+        mPath.lineTo(size * 0.55f, size * 0.35f)
 
         canvas.drawPath(mPath, mPaint)
 
         mPaint.strokeWidth = mIconStrokeWidth * 0.75f
 
-        mPath.moveTo(mSize * 0.5f, mSize * 0.45f)
-        mPath.lineTo(mSize * 0.5f, mSize * 0.65f)
+        mPath.moveTo(size * 0.5f, size * 0.45f)
+        mPath.lineTo(size * 0.5f, size * 0.65f)
 
-        mPath.moveTo(mSize * 0.43f, mSize * 0.45f)
-        mPath.lineTo(mSize * 0.43f, mSize * 0.65f)
+        mPath.moveTo(size * 0.43f, size * 0.45f)
+        mPath.lineTo(size * 0.43f, size * 0.65f)
 
-        mPath.moveTo(mSize * 0.57f, mSize * 0.45f)
-        mPath.lineTo(mSize * 0.57f, mSize * 0.65f)
+        mPath.moveTo(size * 0.57f, size * 0.45f)
+        mPath.lineTo(size * 0.57f, size * 0.65f)
 
         canvas.drawPath(mPath, mPaint)
 
@@ -293,14 +313,14 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         mPaint.strokeWidth = mIconStrokeWidth
 
         mPath.reset()
-        mPath.moveTo(mSize * 0.5f, mSize * 0.3f)
-        mPath.lineTo(mSize * 0.5f, mSize * 0.7f)
+        mPath.moveTo(size * 0.5f, size * 0.3f)
+        mPath.lineTo(size * 0.5f, size * 0.7f)
 
-        mPath.moveTo(mSize * 0.5f, mSize * 0.7f)
-        mPath.lineTo(mSize * 0.3f, mSize * 0.5f)
+        mPath.moveTo(size * 0.5f, size * 0.7f)
+        mPath.lineTo(size * 0.3f, size * 0.5f)
 
-        mPath.moveTo(mSize * 0.5f, mSize * 0.7f)
-        mPath.lineTo(mSize * 0.7f, mSize * 0.5f)
+        mPath.moveTo(size * 0.5f, size * 0.7f)
+        mPath.lineTo(size * 0.7f, size * 0.5f)
 
 
         canvas.drawPath(mPath, mPaint)
