@@ -17,6 +17,7 @@ import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.DialogPlayListsBinding
 import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
+import com.yurii.youtubemusic.utilities.EmptyListException
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -36,7 +37,7 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        playlistsAdapter = PlaylistsAdapter(currentPlayList) {selectedPlaylist ->
+        playlistsAdapter = PlaylistsAdapter(currentPlayList) { selectedPlaylist ->
             onSelectedPlaylist.invoke(selectedPlaylist)
             dismiss()
         }
@@ -44,6 +45,10 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
         binding.rvPlayLists.apply {
             adapter = playlistsAdapter
             layoutManager = LinearLayoutManager(context)
+        }
+
+        binding.refresh.setOnClickListener {
+            playlistsAdapter.retry()
         }
 
         lifecycleScope.launchWhenCreated {
@@ -54,11 +59,50 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
             }
             launch {
                 playlistsAdapter.loadStateFlow.collectLatest {
-                    binding.progressBar.isVisible = it.refresh is LoadState.Loading
-                    binding.rvPlayLists.isVisible = it.refresh is LoadState.NotLoading
+                    when (it.refresh) {
+                        is LoadState.Loading -> showLoadingLayout()
+                        is LoadState.NotLoading -> showListItemsLayout()
+                        is LoadState.Error -> {
+                            val loadStateError = it.refresh as LoadState.Error
+                            if (loadStateError.error is EmptyListException)
+                                showEmptyListLayout()
+                            else
+                                showErrorLayout(loadStateError.error.message ?: "None")
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private fun showListItemsLayout() = binding.apply {
+        hintListIsEmpty.isVisible = false
+        layoutError.isVisible = false
+        progressBar.isVisible = false
+        rvPlayLists.isVisible = true
+    }
+
+    private fun showLoadingLayout() = binding.apply {
+        rvPlayLists.isVisible = false
+        hintListIsEmpty.isVisible = false
+        layoutError.isVisible = false
+        progressBar.isVisible = true
+    }
+
+    private fun showErrorLayout(errorMessage: String) = binding.apply {
+        rvPlayLists.isVisible = false
+        progressBar.isVisible = false
+        hintListIsEmpty.isVisible = false
+        layoutError.isVisible = true
+        tvError.text = "Error: $errorMessage"
+        //TODO Make it as a text resource
+    }
+
+    private fun showEmptyListLayout() = binding.apply {
+        rvPlayLists.isVisible = false
+        progressBar.isVisible = false
+        layoutError.isVisible = false
+        hintListIsEmpty.isVisible = true
     }
 
     companion object {
