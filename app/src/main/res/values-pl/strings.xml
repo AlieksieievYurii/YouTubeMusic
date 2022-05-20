@@ -33,7 +33,7 @@
     <string name="label_log_out">Wyloguj się</string>
     <string name="broken_robot">Zepsuty robot</string>
     <string name="label_failed_to_download">Nie udało się pobrać</string>
-    <string name="label_try_again">Ponów próbę</string>
+    <string name="label_retry">Ponów próbę</string>
     <string name="label_action_pause">Pauza</string>
     <string name="label_action_play">Play</string>
     <string name="label_action_next">Następny</string>
@@ -68,4 +68,5 @@
     <string name="label_audio_effects">Efekty Dźwiękowe</string>
     <string name="label_presets">Presets</string>
     <string name="label_custom">Customowe</string>
+    <string name="label_try_again">Sprobuj znowy</string>
 </resources>

@@ -32,7 +32,7 @@
     <string name="label_log_out">Log out</string>
     <string name="broken_robot">A broken robot</string>
     <string name="label_failed_to_download">Failed to download</string>
-    <string name="label_try_again">Retry</string>
+    <string name="label_retry">Retry</string>
     <string name="label_action_pause">Pause</string>
     <string name="label_action_play">Play</string>
     <string name="label_action_next">Next</string>
@@ -67,4 +67,5 @@
     <string name="label_audio_effects">Audio Effects</string>
     <string name="label_presets">Presets</string>
     <string name="label_custom">Custom</string>
+    <string name="label_try_again">Try again</string>
 </resources>
