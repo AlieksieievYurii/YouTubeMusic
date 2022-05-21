@@ -29,8 +29,8 @@ import java.lang.IllegalStateException
 
 abstract class VideoItemStatus(open val videoItemId: String) {
     class Download(override val videoItemId: String) : VideoItemStatus(videoItemId)
-    class Downloaded(override val videoItemId: String, val size: Float) : VideoItemStatus(videoItemId)
-    class Downloading(override val videoItemId: String, val progress: Int, val size: Float) : VideoItemStatus(videoItemId)
+    class Downloaded(override val videoItemId: String, val size: Long) : VideoItemStatus(videoItemId)
+    class Downloading(override val videoItemId: String, val currentSize: Long, val size: Long) : VideoItemStatus(videoItemId)
     class Failed(override val videoItemId: String) : VideoItemStatus(videoItemId)
 }
 
@@ -64,13 +64,20 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         downloaderServiceConnection.setCallbacks(object : ServiceConnection.CallBack {
             override fun onFinished(videoItem: VideoItem) {
                 viewModelScope.launch {
-                    _videoItemStatus.send(VideoItemStatus.Downloaded(videoItem.videoId, 100f))
+                    val musicFile = DataStorage.getMusic(context, videoItem.videoId)
+                    _videoItemStatus.send(VideoItemStatus.Downloaded(videoItem.videoId, musicFile.length()))
                 }
             }
 
             override fun onProgress(videoItem: VideoItem, progress: Progress) {
                 viewModelScope.launch {
-                    _videoItemStatus.send(VideoItemStatus.Downloading(videoItem.videoId, progress.progress, progress.totalSizeInMb.toFloat()))
+                    _videoItemStatus.send(
+                        VideoItemStatus.Downloading(
+                            videoItem.videoId,
+                            progress.currentSize.toLong(),
+                            progress.totalSize.toLong()
+                        )
+                    ) //TODO Replace with Long
                 }
             }
 
@@ -90,7 +97,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
 
     fun download(item: VideoItem, categories: List<Category> = emptyList()) {
         downloaderServiceConnection.download(item, categories)
-        sendVideoItemStatus(VideoItemStatus.Downloading(item.videoId, 0, 0f))
+        sendVideoItemStatus(VideoItemStatus.Downloading(item.videoId, 0, 0))
     }
 
     fun cancelDownloading(item: VideoItem) {
@@ -113,21 +120,21 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         _event.send(Event.SelectCategories(item))
     }
 
-    private fun exists(videoItem: VideoItem): Boolean = DataStorage.getMusic(context, videoItem.videoId).exists()
+    fun getItemStatus(videoItem: VideoItem): VideoItemStatus {
+        val musicFile = DataStorage.getMusic(context, videoItem.videoId)
 
-    fun getItemStatus(item: VideoItem): VideoItemStatus {
-        if (exists(item))
-            return VideoItemStatus.Downloaded(item.videoId, 300f)
+        if (musicFile.exists())
+            return VideoItemStatus.Downloaded(videoItem.videoId, musicFile.length())
 
-        if (downloaderServiceConnection.isDownloadingFailed(item)) {
-            val p = downloaderServiceConnection.getProgress(item) ?: Progress.create()
-            return VideoItemStatus.Downloading(item.videoId, p.progress, p.totalSizeInMb.toFloat())
+        if (downloaderServiceConnection.isDownloadingFailed(videoItem)) {
+            val p = downloaderServiceConnection.getProgress(videoItem) ?: Progress.create()
+            return VideoItemStatus.Downloading(videoItem.videoId, p.currentSize.toLong(), p.totalSize.toLong())
         }
 
-        if (downloaderServiceConnection.isDownloadingFailed(item))
-            return VideoItemStatus.Failed(item.videoId)
+        if (downloaderServiceConnection.isDownloadingFailed(videoItem))
+            return VideoItemStatus.Failed(videoItem.videoId)
 
-        return VideoItemStatus.Download(item.videoId)
+        return VideoItemStatus.Download(videoItem.videoId)
     }
 
     private fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {

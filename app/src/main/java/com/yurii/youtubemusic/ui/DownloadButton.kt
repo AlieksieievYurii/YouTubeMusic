@@ -22,8 +22,8 @@ import kotlin.math.min
 class DownloadButton(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
     sealed class State {
         object Download : State()
-        data class Downloading(val progress: Int, val size: Float) : State()
-        data class Downloaded(val size: Float) : State()
+        data class Downloading(val currentSize: Long, val size: Long) : State()
+        data class Downloaded(val size: Long) : State()
         object Failed : State()
     }
 
@@ -58,9 +58,6 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
             field = value
             invalidate()
         }
-
-    @IntRange(from = 0, to = 100)
-    var progress: Int = 0
 
     private var onClickListener: ((view: View) -> Unit)? = null
     private var onLongClickDownloadListener: ((view: View) -> Unit)? = null
@@ -156,9 +153,6 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         mProgressColor = typedArray.getColor(R.styleable.DownloadButton_progressColor, DEFAULT_PROGRESS_COLOR)
         mIconColor = typedArray.getColor(R.styleable.DownloadButton_iconColor, DEFAULT_ICON_COLOR)
 
-        progress = typedArray.getInt(R.styleable.DownloadButton_progress, 0)
-        //typedArray.getInt(R.styleable.DownloadButton_state, 0)
-
         typedArray.recycle()
     }
 
@@ -226,9 +220,12 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     }
 
     private fun drawCancelIconWithProgress(canvas: Canvas, downloadingState: State.Downloading) {
-        drawProgress(canvas)
+        val progress = if (downloadingState.size == 0L) 0 else downloadingState.currentSize * 100 / downloadingState.size
+        val currentSizeInMb: Float = downloadingState.currentSize / 1000_000F
+        val sizeInMb: Float = downloadingState.size / 1000_000F
+        drawProgress(canvas, progress.toInt())
         drawCancelIcon(canvas)
-        drawText(canvas, "${downloadingState.progress}/${downloadingState.size} M")
+        drawText(canvas, "%.1f/%.1f M".format(currentSizeInMb, sizeInMb))
     }
 
     private fun drawText(canvas: Canvas, text: String) {
@@ -259,7 +256,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     }
 
     private fun drawDeleteIcon(canvas: Canvas, downloadedState: State.Downloaded) {
-        drawText(canvas, "${downloadedState.size} M")
+        drawText(canvas, "%.1f M".format(downloadedState.size / 1000_000F))
 
         mPaint.color = mIconColor
         mPaint.style = Paint.Style.STROKE
@@ -326,7 +323,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         canvas.drawPath(mPath, mPaint)
     }
 
-    private fun drawProgress(canvas: Canvas) {
+    private fun drawProgress(canvas: Canvas, @IntRange(from = 0, to = 100) progress: Int) {
         mPaint.color = mProgressColor
         mPaint.style = Paint.Style.STROKE
         mPaint.strokeWidth = mProgressBarStrokeWidth

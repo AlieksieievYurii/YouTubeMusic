@@ -81,7 +81,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
             binding.btnDownload.state = when (videoItemStatus) {
                 is VideoItemStatus.Download -> DownloadButton.State.Download
                 is VideoItemStatus.Downloaded -> DownloadButton.State.Downloaded(videoItemStatus.size)
-                is VideoItemStatus.Downloading -> DownloadButton.State.Downloading(videoItemStatus.progress, videoItemStatus.size)
+                is VideoItemStatus.Downloading -> DownloadButton.State.Downloading(videoItemStatus.currentSize, videoItemStatus.size)
                 is VideoItemStatus.Failed -> DownloadButton.State.Failed
                 else -> throw IllegalStateException("Unhandled status: $videoItemStatus")
             }
