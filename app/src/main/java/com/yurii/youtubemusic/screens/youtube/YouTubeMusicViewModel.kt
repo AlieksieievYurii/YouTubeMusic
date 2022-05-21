@@ -60,6 +60,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     private val downloaderServiceConnection = ServiceConnection(context)
 
     init {
+        deleteUnFinishedJobs()
         _currentPlaylistId.value?.let { loadVideoItems(it) }
         downloaderServiceConnection.setCallbacks(object : ServiceConnection.CallBack {
             override fun onFinished(videoItem: VideoItem) {
@@ -135,6 +136,12 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
             return VideoItemStatus.Failed(videoItem.videoId)
 
         return VideoItemStatus.Download(videoItem.videoId)
+    }
+
+    private fun deleteUnFinishedJobs() {
+        DataStorage.getMusicStorage(context).walk().filter { it.extension == "downloading" }.forEach {
+            it.delete()
+        }
     }
 
     private fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {
