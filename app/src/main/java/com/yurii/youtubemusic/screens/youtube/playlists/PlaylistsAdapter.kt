@@ -6,9 +6,9 @@ import androidx.core.content.ContextCompat
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemPlaylistBinding
+import com.yurii.youtubemusic.screens.youtube.models.Playlist
 
 class PlaylistsAdapter(private val selectedPlaylist: Playlist?, private val onSelectedPlaylist: (Playlist) -> Unit) :
     PagingDataAdapter<Playlist, PlaylistsAdapter.PlaylistViewHolder>(Comparator) {

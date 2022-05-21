@@ -13,10 +13,10 @@ import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.DialogPlayListsBinding
 import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
+import com.yurii.youtubemusic.screens.youtube.models.Playlist
 import com.yurii.youtubemusic.utilities.EmptyListException
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -53,7 +53,7 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
 
         lifecycleScope.launchWhenCreated {
             launch {
-                Pager(config = PagingConfig(pageSize = 10), pagingSourceFactory = { PlaylistPagingSource(youTubeAPI) }).flow.collectLatest {
+                Pager(config = PagingConfig(pageSize = 10), pagingSourceFactory = { PlaylistsPagingSource(youTubeAPI) }).flow.collectLatest {
                     playlistsAdapter.submitData(it)
                 }
             }

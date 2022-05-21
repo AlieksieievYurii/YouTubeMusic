@@ -2,15 +2,14 @@ package com.yurii.youtubemusic.screens.youtube.playlists
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.google.api.services.youtube.model.Playlist
 import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
+import com.yurii.youtubemusic.screens.youtube.models.Playlist
+import com.yurii.youtubemusic.screens.youtube.models.toPlaylist
 import com.yurii.youtubemusic.utilities.EmptyListException
 import java.lang.Exception
 
-class PlaylistPagingSource(private val youTubeAPI: YouTubeAPI) : PagingSource<String, Playlist>() {
-    override fun getRefreshKey(state: PagingState<String, Playlist>): String? {
-        TODO("Not yet implemented")
-    }
+class PlaylistsPagingSource(private val youTubeAPI: YouTubeAPI) : PagingSource<String, Playlist>() {
+    override fun getRefreshKey(state: PagingState<String, Playlist>): String? = null
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Playlist> {
         try {
@@ -20,7 +19,7 @@ class PlaylistPagingSource(private val youTubeAPI: YouTubeAPI) : PagingSource<St
                 return LoadResult.Error(EmptyListException())
 
             return LoadResult.Page(
-                data = playlists.items,
+                data = playlists.items.map { it.toPlaylist() },
                 nextKey = playlists.nextPageToken,
                 prevKey = playlists.prevPageToken
             )
