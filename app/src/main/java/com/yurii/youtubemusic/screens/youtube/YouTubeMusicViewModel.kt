@@ -38,7 +38,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     ViewModel() {
     sealed class Event {
         data class SelectCategories(val videoItem: VideoItem) : Event()
-        data class DeleteItem(val videoItem: VideoItem): Event()
+        data class DeleteItem(val videoItem: VideoItem) : Event()
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
         object SignOut : Event()
     }
@@ -75,13 +75,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
 
             override fun onProgress(videoItem: VideoItem, progress: Progress) {
                 viewModelScope.launch {
-                    _videoItemStatus.send(
-                        VideoItemStatus.Downloading(
-                            videoItem.videoId,
-                            progress.currentSize.toLong(),
-                            progress.totalSize.toLong()
-                        )
-                    ) //TODO Replace with Long
+                    _videoItemStatus.send(VideoItemStatus.Downloading(videoItem.videoId, progress.currentSize, progress.totalSize))
                 }
             }
 
@@ -150,7 +144,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
 
         if (downloaderServiceConnection.isItemDownloading(videoItem)) {
             val progress = downloaderServiceConnection.getProgress(videoItem) ?: Progress.create()
-            return VideoItemStatus.Downloading(videoItem.videoId, progress.currentSize.toLong(), progress.totalSize.toLong())
+            return VideoItemStatus.Downloading(videoItem.videoId, progress.currentSize, progress.totalSize)
         }
 
         if (downloaderServiceConnection.isDownloadingFailed(videoItem))

@@ -31,7 +31,7 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
     private val keepAliveTime = 1L
     private val keepAliveTimeUnit = TimeUnit.SECONDS
     private var numberOfCores = Runtime.getRuntime().availableProcessors()
-    private val decodeWorkQueue: BlockingQueue<Runnable> = LinkedBlockingQueue<Runnable>()
+    private val decodeWorkQueue: BlockingQueue<Runnable> = LinkedBlockingQueue()
     private val executionTasks: MutableList<Task> = mutableListOf()
     private val failedTasks: MutableList<Task> = mutableListOf()
     private val decodeThreadPool: ThreadPoolExecutor = ThreadPoolExecutor(
@@ -233,7 +233,7 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
                         val newProgress = ((total / totalSize) * 100).toInt()
                         if (newProgress > progress) {
                             progress = newProgress
-                            this.progress.update(progress, total.toInt(), totalSize.toInt())
+                            this.progress.update(progress, total.toLong(), totalSize)
                             callBack.onChangeProgress(videoItem, this.progress)
                         }
                     }
