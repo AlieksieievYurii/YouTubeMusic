@@ -148,9 +148,9 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         if (musicFile.exists())
             return VideoItemStatus.Downloaded(videoItem.videoId, musicFile.length())
 
-        if (downloaderServiceConnection.isDownloadingFailed(videoItem)) {
-            val p = downloaderServiceConnection.getProgress(videoItem) ?: Progress.create()
-            return VideoItemStatus.Downloading(videoItem.videoId, p.currentSize.toLong(), p.totalSize.toLong())
+        if (downloaderServiceConnection.isItemDownloading(videoItem)) {
+            val progress = downloaderServiceConnection.getProgress(videoItem) ?: Progress.create()
+            return VideoItemStatus.Downloading(videoItem.videoId, progress.currentSize.toLong(), progress.totalSize.toLong())
         }
 
         if (downloaderServiceConnection.isDownloadingFailed(videoItem))
