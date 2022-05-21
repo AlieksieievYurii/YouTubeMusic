@@ -8,8 +8,6 @@
 
         <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
 
-        <import type="com.yurii.youtubemusic.adapters.ItemState" />
-
         <import type="android.view.View" />
 
         <variable
@@ -117,9 +115,7 @@
                         android:layout_height="50dp"
                         android:layout_centerInParent="true"
                         android:layout_marginEnd="@dimen/mediumMargin"
-                        app:backgroundColor="@color/colorAccent"
-                        app:progress="0"
-                        app:state="download" />
+                        app:backgroundColor="@color/colorAccent" />
 
                     <TextView
                         android:id="@+id/size_progress"

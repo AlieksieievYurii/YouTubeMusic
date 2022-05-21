@@ -11,7 +11,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.yurii.youtubemusic.databinding.ItemVideo2Binding
+import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
 import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.ui.getValueAnimator
@@ -53,7 +53,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
         this.recyclerView = recyclerView
     }
 
-    inner class MyViewHolder(val binding: ItemVideo2Binding) : RecyclerView.ViewHolder(binding.root) {
+    inner class MyViewHolder(val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(videoItem: VideoItem) {
             binding.videoItem = videoItem
             updateStatus(viewModel.getItemStatus(videoItem))
@@ -136,6 +136,6 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        return MyViewHolder(ItemVideo2Binding.inflate(LayoutInflater.from(parent.context), parent, false))
+        return MyViewHolder(ItemVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 }
