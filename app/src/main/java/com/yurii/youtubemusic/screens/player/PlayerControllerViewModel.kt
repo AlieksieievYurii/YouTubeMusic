@@ -34,11 +34,15 @@ class PlayerControllerViewModel(application: Application, val musicServiceConnec
         this == PlaybackStateCompat.STATE_PLAYING || this == PlaybackStateCompat.STATE_BUFFERING
     } ?: false
 
+    fun onPauseOrPlay() {
+        if(isPlaying()) pausePlaying() else continuePlaying()
+    }
+
     fun stopPlaying() = musicServiceConnection.transportControls.stop()
 
-    fun pausePlaying() = musicServiceConnection.transportControls.pause()
+    private fun pausePlaying() = musicServiceConnection.transportControls.pause()
 
-    fun continuePlaying() = musicServiceConnection.transportControls.play()
+    private fun continuePlaying() = musicServiceConnection.transportControls.play()
 
     fun moveToNextTrack() = musicServiceConnection.transportControls.skipToNext()
 

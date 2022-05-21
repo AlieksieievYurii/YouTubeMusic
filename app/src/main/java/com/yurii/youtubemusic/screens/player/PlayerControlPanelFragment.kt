@@ -15,7 +15,6 @@ import android.viewbinding.library.fragment.viewBinding
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
 import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
@@ -47,28 +46,23 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initView() {
-        viewModel.playingNow.observe(viewLifecycleOwner, Observer { mediaItem: MediaMetaData? ->
+        viewModel.playingNow.observe(viewLifecycleOwner) { mediaItem: MediaMetaData? ->
             binding.mediaItem = mediaItem
             if (mediaItem != null && !binding.container.isVisible)
                 showMusicPlayerPanel()
-        })
+        }
 
-        viewModel.currentPlaybackState.observe(viewLifecycleOwner, Observer { playback ->
+        viewModel.currentPlaybackState.observe(viewLifecycleOwner) { playback ->
             binding.isPlayingNow = viewModel.isPlaying()
             playback.extras?.getString(PLAYBACK_STATE_PLAYING_CATEGORY_NAME)?.run { binding.playingCategory = this }
 
             if (playback.state == PlaybackStateCompat.STATE_STOPPED)
                 swipeViewAway()
-        })
-
-        viewModel.currentProgressTime.observe(viewLifecycleOwner, Observer { binding.currentTimePosition = it })
-
-        binding.actionButton.setOnClickListener {
-            if (viewModel.isPlaying())
-                viewModel.pausePlaying()
-            else
-                viewModel.continuePlaying()
         }
+
+        viewModel.currentProgressTime.observe(viewLifecycleOwner)  { binding.currentTimePosition = it }
+
+        binding.actionButton.setOnClickListener { viewModel.onPauseOrPlay() }
 
         binding.container.setOnTouchListener { _, event ->
             handleCardContainerTouchEvent(event)
