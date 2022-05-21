@@ -92,6 +92,8 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         downloaderServiceConnection.connect()
     }
 
+    fun getAllCategories() = preferences.getMusicCategories()
+
     fun signOut() {
         GoogleAccount.signOut(context)
         preferences.setCurrentPlaylist(null)
