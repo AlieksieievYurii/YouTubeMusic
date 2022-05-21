@@ -24,7 +24,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel2, lifec
 
     init {
         lifecycleCoroutineScope.launchWhenCreated {
-            viewModel.status.collect { status ->
+            viewModel.videoItemStatus.collect { status ->
                 findVisibleViewHolder(status.videoItemId)?.updateStatus(status)
             }
         }
@@ -77,13 +77,13 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel2, lifec
             }
         }
 
-        fun updateStatus(status: Status) {
-            binding.btnDownload.state = when (status) {
-                is Status.Download -> DownloadButton.State.Download
-                is Status.Downloaded -> DownloadButton.State.Downloaded(status.size)
-                is Status.Downloading -> DownloadButton.State.Downloading(status.progress, status.size)
-                is Status.Failed -> DownloadButton.State.Failed
-                else -> throw IllegalStateException("Unhandled status: $status")
+        fun updateStatus(videoItemStatus: VideoItemStatus) {
+            binding.btnDownload.state = when (videoItemStatus) {
+                is VideoItemStatus.Download -> DownloadButton.State.Download
+                is VideoItemStatus.Downloaded -> DownloadButton.State.Downloaded(videoItemStatus.size)
+                is VideoItemStatus.Downloading -> DownloadButton.State.Downloading(videoItemStatus.progress, videoItemStatus.size)
+                is VideoItemStatus.Failed -> DownloadButton.State.Failed
+                else -> throw IllegalStateException("Unhandled status: $videoItemStatus")
             }
         }
 
