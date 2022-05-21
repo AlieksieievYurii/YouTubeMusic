@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.screens.youtube
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -38,6 +39,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     ViewModel() {
     sealed class Event {
         data class SelectCategories(val videoItem: VideoItem) : Event()
+        object SignOut : Event()
     }
 
     private val credential = GoogleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount, context)
@@ -88,6 +90,14 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
 
         })
         downloaderServiceConnection.connect()
+    }
+
+    fun signOut() {
+        GoogleAccount.signOut(context)
+        preferences.setCurrentPlaylist(null)
+        viewModelScope.launch {
+            _event.send(Event.SignOut)
+        }
     }
 
     fun setPlaylist(playlist: Playlist) {
@@ -157,6 +167,11 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
                     _videoItems.emit(it)
                 }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.i("TEST", "CLEAR")
     }
 
     @Suppress("UNCHECKED_CAST")

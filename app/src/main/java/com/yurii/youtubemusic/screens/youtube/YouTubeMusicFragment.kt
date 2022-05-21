@@ -14,6 +14,8 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.screens.youtube.models.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
+import com.yurii.youtubemusic.ui.SelectCategoriesDialog
+import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
@@ -38,9 +40,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
 
     override fun onClickOption(id: Int) {
         when (id) {
-            R.id.item_log_out -> {
-                mainActivityViewModel.logOut()
-            }
+            R.id.item_log_out -> viewModel.signOut()
         }
     }
 
@@ -54,6 +54,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             launch { startHandlingCurrentPlaylist() }
             launch { viewModel.videoItems.collectLatest { listAdapter.submitData(it) } }
             launch { startHandlingListLoadState() }
+            launch { startHandlingEvents() }
         }
 
         binding.apply {
@@ -61,6 +62,14 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             btnSelectPlayList.setOnClickListener { openDialogToSelectPlaylist(viewModel.currentPlaylistId.value) }
             btnSelectPlayListFirst.setOnClickListener { openDialogToSelectPlaylist(null) }
             refresh.setOnRefreshListener { listAdapter.refresh() }
+        }
+    }
+
+    private suspend fun startHandlingEvents() = viewModel.event.collectLatest {event ->
+        when (event) {
+            is YouTubeMusicViewModel.Event.SelectCategories -> {}
+
+            is YouTubeMusicViewModel.Event.SignOut -> mainActivityViewModel.logOut()
         }
     }
 
