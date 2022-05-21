@@ -71,7 +71,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
                 when (binding.btnDownload.state) {
                     is DownloadButton.State.Download -> viewModel.download(videoItem)
                     is DownloadButton.State.Downloading -> viewModel.cancelDownloading(videoItem)
-                    is DownloadButton.State.Downloaded -> viewModel.delete(videoItem)
+                    is DownloadButton.State.Downloaded -> viewModel.askToDelete(videoItem)
                     is DownloadButton.State.Failed -> viewModel.openIssue(videoItem)
                 }
             }

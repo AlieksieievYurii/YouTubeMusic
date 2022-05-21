@@ -39,6 +39,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     ViewModel() {
     sealed class Event {
         data class SelectCategories(val videoItem: VideoItem) : Event()
+        data class DeleteItem(val videoItem: VideoItem): Event()
         object SignOut : Event()
     }
 
@@ -118,11 +119,15 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         sendVideoItemStatus(VideoItemStatus.Download(item.videoId))
     }
 
-    fun delete(item: VideoItem) {
-        DataStorage.getMusic(context, item.videoId).delete()
-        DataStorage.getMetadata(context, item.videoId).delete()
-        DataStorage.getThumbnail(context, item.videoId).delete()
-        sendVideoItemStatus(VideoItemStatus.Download(item.videoId))
+    fun askToDelete(videoItem: VideoItem) = viewModelScope.launch {
+        _event.send(Event.DeleteItem(videoItem))
+    }
+
+    fun delete(videoItem: VideoItem) {
+        DataStorage.getMusic(context, videoItem.videoId).delete()
+        DataStorage.getMetadata(context, videoItem.videoId).delete()
+        DataStorage.getThumbnail(context, videoItem.videoId).delete()
+        sendVideoItemStatus(VideoItemStatus.Download(videoItem.videoId))
     }
 
     fun openIssue(item: VideoItem) {

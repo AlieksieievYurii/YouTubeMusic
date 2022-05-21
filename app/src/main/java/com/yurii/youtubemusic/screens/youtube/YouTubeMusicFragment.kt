@@ -14,6 +14,7 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.screens.youtube.models.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
+import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -64,13 +65,18 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         }
     }
 
-    private suspend fun startHandlingEvents() = viewModel.event.collectLatest {event ->
+    private suspend fun startHandlingEvents() = viewModel.event.collectLatest { event ->
         when (event) {
             is YouTubeMusicViewModel.Event.SelectCategories ->
                 SelectCategoriesDialog2(requireContext(), viewModel.getAllCategories(), emptyList()) {
                     viewModel.download(event.videoItem, it)
                 }.show()
             is YouTubeMusicViewModel.Event.SignOut -> mainActivityViewModel.logOut()
+            is YouTubeMusicViewModel.Event.DeleteItem -> ConfirmDeletionDialog.create(
+                titleId = R.string.dialog_confirm_deletion_music_title,
+                messageId = R.string.dialog_confirm_deletion_music_message,
+                onConfirm = { viewModel.delete(event.videoItem) }
+            ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")
         }
     }
 
