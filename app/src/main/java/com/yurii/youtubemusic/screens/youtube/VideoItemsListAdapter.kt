@@ -17,7 +17,7 @@ import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.ui.getValueAnimator
 import kotlinx.coroutines.flow.collect
 
-class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel2, lifecycleCoroutineScope: LifecycleCoroutineScope) :
+class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecycleCoroutineScope: LifecycleCoroutineScope) :
     PagingDataAdapter<VideoItem, VideoItemsListAdapter.MyViewHolder>(Comparator) {
     private var expandedItem: VideoItem? = null
     private lateinit var recyclerView: RecyclerView

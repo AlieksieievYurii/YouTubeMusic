@@ -7,7 +7,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.yurii.youtubemusic.databinding.FragmentYoutubeMusicsBinding
+import com.yurii.youtubemusic.databinding.FragmentYoutubeMusicBinding
 import com.yurii.youtubemusic.utilities.*
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.R
@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment2 : TabFragment<FragmentYoutubeMusicsBinding>(
-    layoutId = R.layout.fragment_youtube_musics,
+class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
+    layoutId = R.layout.fragment_youtube_music,
     titleStringId = R.string.label_fragment_title_youtube_musics,
     optionMenuId = R.menu.youtube_music_fragment_menu
 ) {
@@ -33,13 +33,7 @@ class YouTubeMusicsFragment2 : TabFragment<FragmentYoutubeMusicsBinding>(
     }
 
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    private val viewModel: YouTubeMusicViewModel2 by viewModels {
-        YouTubeMusicViewModel2.Factory(
-            requireContext(),
-            getGoogleSignInAccount(),
-            Preferences2(requireContext())
-        )
-    }
+    private val viewModel: YouTubeMusicViewModel by viewModels { Injector.provideYouTubeMusicViewModel(requireContext(), getGoogleSignInAccount()) }
     private val listAdapter: VideoItemsListAdapter by lazy { VideoItemsListAdapter(viewModel, viewLifecycleOwner.lifecycleScope) }
 
     override fun onClickOption(id: Int) {
@@ -50,7 +44,7 @@ class YouTubeMusicsFragment2 : TabFragment<FragmentYoutubeMusicsBinding>(
         }
     }
 
-    override fun onInflatedView(viewDataBinding: FragmentYoutubeMusicsBinding) {
+    override fun onInflatedView(viewDataBinding: FragmentYoutubeMusicBinding) {
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = listAdapter
@@ -115,8 +109,8 @@ class YouTubeMusicsFragment2 : TabFragment<FragmentYoutubeMusicsBinding>(
     companion object {
         private const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
 
-        fun createInstance(googleSignInAccount: GoogleSignInAccount): YouTubeMusicsFragment2 {
-            val youTubeMusicsFragment = YouTubeMusicsFragment2()
+        fun createInstance(googleSignInAccount: GoogleSignInAccount): YouTubeMusicFragment {
+            val youTubeMusicsFragment = YouTubeMusicFragment()
 
             youTubeMusicsFragment.arguments = Bundle().apply {
                 this.putParcelable(GOOGLE_SIGN_IN, googleSignInAccount)

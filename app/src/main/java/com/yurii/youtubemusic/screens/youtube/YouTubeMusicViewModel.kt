@@ -34,7 +34,7 @@ abstract class VideoItemStatus(open val videoItemId: String) {
     class Failed(override val videoItemId: String) : VideoItemStatus(videoItemId)
 }
 
-class YouTubeMusicViewModel2(private val context: Context, googleSignInAccount: GoogleSignInAccount, private val preferences: Preferences2) :
+class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: GoogleSignInAccount, private val preferences: Preferences2) :
     ViewModel() {
     sealed class Event {
         data class SelectCategories(val videoItem: VideoItem) : Event()
@@ -149,8 +149,8 @@ class YouTubeMusicViewModel2(private val context: Context, googleSignInAccount: 
     class Factory(private val context: Context, private val googleSignInAccount: GoogleSignInAccount, private val preferences: Preferences2) :
         ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(YouTubeMusicViewModel2::class.java))
-                return YouTubeMusicViewModel2(context, googleSignInAccount, preferences) as T
+            if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
+                return YouTubeMusicViewModel(context, googleSignInAccount, preferences) as T
             throw IllegalStateException("Given the model class is not assignable from YouTuneViewModel class")
         }
 
