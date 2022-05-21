@@ -49,7 +49,10 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     override fun onInflatedView(viewDataBinding: FragmentYoutubeMusicBinding) {
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = listAdapter
+            adapter = listAdapter.apply {
+                val loader = LoaderViewHolder()
+                withLoadStateHeaderAndFooter(loader, loader)
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenCreated {

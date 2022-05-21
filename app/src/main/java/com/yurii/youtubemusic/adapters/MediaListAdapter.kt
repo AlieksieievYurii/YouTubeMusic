@@ -15,7 +15,6 @@ import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
-import com.yurii.youtubemusic.utilities.BaseViewHolder
 
 interface MediaListAdapterController {
     fun onChangePlaybackState(playbackStateCompat: PlaybackStateCompat)
@@ -139,7 +138,7 @@ class MediaListAdapter(context: Context, private val category: Category, private
         }
     }
 
-    class MusicViewHolder(private val itemMusicBinding: ItemMusicBinding) : BaseViewHolder(itemMusicBinding.root) {
+    class MusicViewHolder(private val itemMusicBinding: ItemMusicBinding) : RecyclerView.ViewHolder(itemMusicBinding.root) {
         fun setMusicItem(mediaItem: MediaMetaData, callBack: CallBack) {
             itemMusicBinding.apply {
                 this.musicItem = mediaItem

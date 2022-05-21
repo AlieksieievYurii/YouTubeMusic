@@ -15,6 +15,7 @@ import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.DialogPlayListsBinding
+import com.yurii.youtubemusic.screens.youtube.LoaderViewHolder
 import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
 import com.yurii.youtubemusic.screens.youtube.models.Playlist
 import com.yurii.youtubemusic.utilities.EmptyListException
@@ -43,7 +44,10 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
         }
 
         binding.rvPlayLists.apply {
-            adapter = playlistsAdapter
+            adapter = playlistsAdapter.apply {
+                val loader = LoaderViewHolder()
+                withLoadStateHeaderAndFooter(loader, loader)
+            }
             layoutManager = LinearLayoutManager(context)
         }
 
@@ -53,7 +57,9 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
 
         lifecycleScope.launchWhenCreated {
             launch {
-                Pager(config = PagingConfig(pageSize = 10), pagingSourceFactory = { PlaylistsPagingSource(youTubeAPI) }).flow.collectLatest {
+                Pager(
+                    config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+                    pagingSourceFactory = { PlaylistsPagingSource(youTubeAPI) }).flow.collectLatest {
                     playlistsAdapter.submitData(it)
                 }
             }

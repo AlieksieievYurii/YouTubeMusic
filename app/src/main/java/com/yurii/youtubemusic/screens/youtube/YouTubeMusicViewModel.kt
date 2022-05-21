@@ -166,7 +166,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     private fun loadVideoItems(playlist: Playlist) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            Pager(config = PagingConfig(pageSize = 10),
+            Pager(config = PagingConfig(pageSize = 10, enablePlaceholders = false),
                 pagingSourceFactory = { VideosPagingSource(youTubeAPI, playlist.id) }).flow.cachedIn(viewModelScope)
                 .collectLatest {
                     _videoItems.emit(it)
