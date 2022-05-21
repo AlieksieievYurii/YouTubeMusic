@@ -69,18 +69,25 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
 
     private suspend fun startHandlingEvents() = viewModel.event.collectLatest { event ->
         when (event) {
-            is YouTubeMusicViewModel.Event.SelectCategories ->
-                SelectCategoriesDialog2(requireContext(), viewModel.getAllCategories(), emptyList()) {
-                    viewModel.download(event.videoItem, it)
-                }.show()
+            is YouTubeMusicViewModel.Event.SelectCategories -> showDialogToSelectCategories(event.videoItem)
             is YouTubeMusicViewModel.Event.SignOut -> mainActivityViewModel.logOut()
-            is YouTubeMusicViewModel.Event.DeleteItem -> ConfirmDeletionDialog.create(
-                titleId = R.string.dialog_confirm_deletion_music_title,
-                messageId = R.string.dialog_confirm_deletion_music_message,
-                onConfirm = { viewModel.delete(event.videoItem) }
-            ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")
+            is YouTubeMusicViewModel.Event.DeleteItem -> showConfirmationDialogToDeleteVideoItem(event.videoItem)
             is YouTubeMusicViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(event.videoItem, event.error)
         }
+    }
+
+    private fun showDialogToSelectCategories(videoItem: VideoItem) {
+        SelectCategoriesDialog2(requireContext(), viewModel.getAllCategories(), emptyList()) { categories ->
+            viewModel.download(videoItem, categories)
+        }.show()
+    }
+
+    private fun showConfirmationDialogToDeleteVideoItem(videoItem: VideoItem) {
+        ConfirmDeletionDialog.create(
+            titleId = R.string.dialog_confirm_deletion_music_title,
+            messageId = R.string.dialog_confirm_deletion_music_message,
+            onConfirm = { viewModel.delete(videoItem) }
+        ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")
     }
 
     private fun showFailedVideoItem(videoItem: VideoItem, error: Exception?) {
