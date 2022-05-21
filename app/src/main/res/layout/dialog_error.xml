@@ -68,7 +68,7 @@
             android:layout_marginBottom="10dp"
             android:layout_marginEnd="12dp"
             android:layout_weight="1"
-            android:text="@string/label_try_again" />
+            android:text="@string/label_retry" />
 
     </LinearLayout>
 

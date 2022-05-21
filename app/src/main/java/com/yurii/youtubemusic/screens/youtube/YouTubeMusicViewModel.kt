@@ -31,7 +31,7 @@ abstract class VideoItemStatus(open val videoItemId: String) {
     class Download(override val videoItemId: String) : VideoItemStatus(videoItemId)
     class Downloaded(override val videoItemId: String, val size: Long) : VideoItemStatus(videoItemId)
     class Downloading(override val videoItemId: String, val currentSize: Long, val size: Long) : VideoItemStatus(videoItemId)
-    class Failed(override val videoItemId: String) : VideoItemStatus(videoItemId)
+    class Failed(override val videoItemId: String, error: Exception?) : VideoItemStatus(videoItemId)
 }
 
 class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: GoogleSignInAccount, private val preferences: Preferences2) :
@@ -80,7 +80,9 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
             }
 
             override fun onError(videoItem: VideoItem, error: Exception) {
-                throw error
+                viewModelScope.launch {
+                    _videoItemStatus.send(VideoItemStatus.Failed(videoItem.videoId, error))
+                }
             }
 
         })
@@ -148,7 +150,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         }
 
         if (downloaderServiceConnection.isDownloadingFailed(videoItem))
-            return VideoItemStatus.Failed(videoItem.videoId)
+            return VideoItemStatus.Failed(videoItem.videoId, downloaderServiceConnection.getError(videoItem))
 
         return VideoItemStatus.Download(videoItem.videoId)
     }
