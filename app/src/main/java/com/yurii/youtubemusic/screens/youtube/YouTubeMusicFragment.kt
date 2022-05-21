@@ -7,7 +7,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.yurii.youtubemusic.databinding.FragmentYouTubeMusicsBinding
+import com.yurii.youtubemusic.databinding.FragmentYoutubeMusicsBinding
 import com.yurii.youtubemusic.utilities.*
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.R
@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
 
-class YouTubeMusicsFragment2 : TabFragment<FragmentYouTubeMusicsBinding>(
-    layoutId = R.layout.fragment_you_tube_musics,
+class YouTubeMusicsFragment2 : TabFragment<FragmentYoutubeMusicsBinding>(
+    layoutId = R.layout.fragment_youtube_musics,
     titleStringId = R.string.label_fragment_title_youtube_musics,
     optionMenuId = R.menu.youtube_music_fragment_menu
 ) {
@@ -50,7 +50,7 @@ class YouTubeMusicsFragment2 : TabFragment<FragmentYouTubeMusicsBinding>(
         }
     }
 
-    override fun onInflatedView(viewDataBinding: FragmentYouTubeMusicsBinding) {
+    override fun onInflatedView(viewDataBinding: FragmentYoutubeMusicsBinding) {
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = listAdapter
