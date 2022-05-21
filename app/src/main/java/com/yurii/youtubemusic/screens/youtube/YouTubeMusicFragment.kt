@@ -13,8 +13,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.screens.youtube.models.Playlist
+import com.yurii.youtubemusic.screens.youtube.models.VideoItem
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
+import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -77,7 +79,15 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
                 messageId = R.string.dialog_confirm_deletion_music_message,
                 onConfirm = { viewModel.delete(event.videoItem) }
             ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")
+            is YouTubeMusicViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(event.videoItem, event.error)
         }
+    }
+
+    private fun showFailedVideoItem(videoItem: VideoItem, error: Exception?) {
+        ErrorDialog.create(videoItem, error).addListeners(
+            onTryAgain = { viewModel.tryToDownloadAgain(videoItem) },
+            onCancel = { viewModel.cancelDownloading(videoItem) })
+            .show(requireActivity().supportFragmentManager, "ErrorDialog")
     }
 
     private suspend fun startHandlingCurrentPlaylist() = viewModel.currentPlaylistId.collectLatest {

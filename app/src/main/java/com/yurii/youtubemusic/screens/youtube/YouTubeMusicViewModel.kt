@@ -1,7 +1,6 @@
 package com.yurii.youtubemusic.screens.youtube
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -40,6 +39,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     sealed class Event {
         data class SelectCategories(val videoItem: VideoItem) : Event()
         data class DeleteItem(val videoItem: VideoItem): Event()
+        data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
         object SignOut : Event()
     }
 
@@ -114,6 +114,10 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         sendVideoItemStatus(VideoItemStatus.Downloading(item.videoId, 0, 0))
     }
 
+    fun tryToDownloadAgain(videoItem: VideoItem) {
+        downloaderServiceConnection.retryToDownload(videoItem)
+    }
+
     fun cancelDownloading(item: VideoItem) {
         downloaderServiceConnection.cancelDownloading(item)
         sendVideoItemStatus(VideoItemStatus.Download(item.videoId))
@@ -130,8 +134,8 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         sendVideoItemStatus(VideoItemStatus.Download(videoItem.videoId))
     }
 
-    fun openIssue(item: VideoItem) {
-
+    fun showFailedItemDetails(videoItem: VideoItem) = viewModelScope.launch {
+        _event.send(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
     }
 
     fun downloadAndAddToCategories(item: VideoItem) = viewModelScope.launch {
@@ -174,11 +178,6 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
                     _videoItems.emit(it)
                 }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.i("TEST", "CLEAR")
     }
 
     @Suppress("UNCHECKED_CAST")
