@@ -15,7 +15,7 @@ import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
 import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.ui.getValueAnimator
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 
 class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecycleCoroutineScope: LifecycleCoroutineScope) :
     PagingDataAdapter<VideoItem, VideoItemsListAdapter.MyViewHolder>(Comparator) {
@@ -24,7 +24,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
 
     init {
         lifecycleCoroutineScope.launchWhenCreated {
-            viewModel.videoItemStatus.collect { status ->
+            viewModel.videoItemStatus.collectLatest { status ->
                 findVisibleViewHolder(status.videoItemId)?.updateStatus(status)
             }
         }
@@ -33,7 +33,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
     private fun findVisibleViewHolder(videoId: String): MyViewHolder? {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
         (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
-            if (getItem(it)?.videoId == videoId) {
+            if (it != -1 && getItem(it)?.videoId == videoId) {
                 return recyclerView.findViewHolderForLayoutPosition(it) as MyViewHolder
             }
         }
