@@ -13,6 +13,8 @@ import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel
 import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsViewModel
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
 
+//import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
+
 object Injector {
 
     fun provideEqualizerViewModel(context: Context): EqualizerViewModel.Factory {
@@ -38,8 +40,7 @@ object Injector {
     }
 
     fun provideYouTubeMusicViewModel(context: Context, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
-        val preferences = ServiceLocator.providePreferences(context)
-        return YouTubeMusicViewModel.Factory(context, googleSignInAccount, preferences)
+        return YouTubeMusicViewModel.Factory(context, googleSignInAccount, Preferences2(context))
     }
 
     fun provideCategoriesEditorViewMode(context: Context): CategoriesEditorViewModel.Factory {

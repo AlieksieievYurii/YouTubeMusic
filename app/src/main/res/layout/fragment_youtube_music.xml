@@ -8,9 +8,9 @@
 
         <variable
             name="viewState"
-            type="com.yurii.youtubemusic.screens.youtube.YouTubeMusicsFragment2.ViewState" />
+            type="com.yurii.youtubemusic.screens.youtube.YouTubeMusicsFragment.ViewState" />
 
-        <import type="com.yurii.youtubemusic.screens.youtube.YouTubeMusicsFragment2.ViewState" />
+        <import type="com.yurii.youtubemusic.screens.youtube.YouTubeMusicsFragment.ViewState" />
     </data>
 
     <com.otaliastudios.nestedscrollcoordinatorlayout.NestedScrollCoordinatorLayout
