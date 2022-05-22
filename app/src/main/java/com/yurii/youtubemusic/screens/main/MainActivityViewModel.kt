@@ -2,37 +2,41 @@ package com.yurii.youtubemusic.screens.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.models.MediaMetaData
-import com.yurii.youtubemusic.models.MutableSingleLiveEvent
-import com.yurii.youtubemusic.models.SingleLiveEvent
-import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.screens.youtube.models.Item
+import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 
 class MainActivityViewModel : ViewModel() {
-    private val _onUpdateMediaItem: MutableSingleLiveEvent<MediaMetaData> = MutableSingleLiveEvent()
-    val onUpdateMediaItem: SingleLiveEvent<MediaMetaData> = _onUpdateMediaItem
+    sealed class Event {
+        object LogOutEvent : Event()
+        data class LogInEvent(val account: GoogleSignInAccount) : Event()
+        data class ItemHasBeenDownloaded(val videoItem: VideoItem) : Event()
+        data class ItemHasBeenDeleted(val item: Item) : Event()
+        data class ItemHasBeenModified(val item: MediaMetaData) : Event()
 
-    private val _onVideoItemHasBeenDownloaded: MutableSingleLiveEvent<VideoItem> = MutableSingleLiveEvent()
-    val onVideoItemHasBeenDownloaded: SingleLiveEvent<VideoItem> = _onVideoItemHasBeenDownloaded
+    }
 
-    private val _onMediaItemIsDeleted: MutableSingleLiveEvent<String> = MutableSingleLiveEvent()
-    val onMediaItemIsDeleted: SingleLiveEvent<String> = _onMediaItemIsDeleted
+    private val _event = MutableSharedFlow<Event>()
+    val event: SharedFlow<Event> = _event
 
-    private val _logInEvent: MutableSingleLiveEvent<GoogleSignInAccount> = MutableSingleLiveEvent()
-    val logInEvent: SingleLiveEvent<GoogleSignInAccount> = _logInEvent
+    fun signIn(account: GoogleSignInAccount) = sendEvent(Event.LogInEvent(account))
 
-    private val _logOutEvent: MutableSingleLiveEvent<String?> = MutableSingleLiveEvent()
-    val logOutEvent: SingleLiveEvent<String?> = _logOutEvent
+    fun logOut() = sendEvent(Event.LogOutEvent)
 
-    fun signIn(account: GoogleSignInAccount) = _logInEvent.sendEvent(account)
+    fun notifyMediaItemHasBeenDeleted(item: Item) = sendEvent(Event.ItemHasBeenDeleted(item))
 
-    fun logOut() = _logOutEvent.call()
+    fun notifyMediaItemHasBeenModified(mediaMetaData: MediaMetaData) = sendEvent(Event.ItemHasBeenModified(mediaMetaData))
 
-    fun notifyMediaItemHasBeenDeleted(id: String) = _onMediaItemIsDeleted.sendEvent(id)
+    fun notifyVideoItemHasBeenDownloaded(videoItem: VideoItem) = sendEvent(Event.ItemHasBeenDownloaded(videoItem))
 
-    fun notifyMediaItemHasBeenModified(mediaMetaData: MediaMetaData) = _onUpdateMediaItem.sendEvent(mediaMetaData)
-
-    fun notifyVideoItemHasBeenDownloaded(videoItem: VideoItem) = _onVideoItemHasBeenDownloaded.sendEvent(videoItem)
+    private fun sendEvent(event: Event) = viewModelScope.launch {
+        _event.emit(event)
+    }
 
     class MainActivityViewModelFactory : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
