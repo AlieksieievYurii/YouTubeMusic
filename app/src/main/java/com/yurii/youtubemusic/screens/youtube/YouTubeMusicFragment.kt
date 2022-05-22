@@ -76,6 +76,8 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             is YouTubeMusicViewModel.Event.SignOut -> mainActivityViewModel.logOut()
             is YouTubeMusicViewModel.Event.DeleteItem -> showConfirmationDialogToDeleteVideoItem(event.videoItem)
             is YouTubeMusicViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(event.videoItem, event.error)
+            is YouTubeMusicViewModel.Event.NotifyVideoItemHasBeenDeleted -> mainActivityViewModel.notifyMediaItemHasBeenDeleted(event.videoItem)
+            is YouTubeMusicViewModel.Event.NotifyVideoItemHasBeenDownloaded -> mainActivityViewModel.notifyVideoItemHasBeenDownloaded(event.videoItem)
         }
     }
 
