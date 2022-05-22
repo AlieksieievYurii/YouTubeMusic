@@ -17,7 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
-import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
+import com.yurii.youtubemusic.screens.saved.service.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.startValueAnimation
 import com.yurii.youtubemusic.utilities.Injector

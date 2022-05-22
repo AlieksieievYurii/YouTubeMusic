@@ -11,8 +11,8 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemMusicBinding
-import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
-import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
+import com.yurii.youtubemusic.screens.saved.service.PLAYBACK_STATE_MEDIA_ITEM
+import com.yurii.youtubemusic.screens.saved.service.PLAYBACK_STATE_PLAYING_CATEGORY_NAME
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaMetaData
 

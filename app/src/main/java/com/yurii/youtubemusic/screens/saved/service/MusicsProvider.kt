@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.services.mediaservice
+package com.yurii.youtubemusic.screens.saved.service
 
 import android.content.Context
 import android.os.AsyncTask

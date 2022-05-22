@@ -6,8 +6,8 @@ import android.os.Handler
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.IntRange
 import androidx.lifecycle.*
-import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
-import com.yurii.youtubemusic.services.mediaservice.NOTHING_PLAYING
+import com.yurii.youtubemusic.screens.saved.service.MusicServiceConnection
+import com.yurii.youtubemusic.screens.saved.service.NOTHING_PLAYING
 import com.yurii.youtubemusic.models.MediaMetaData
 import java.lang.IllegalStateException
 

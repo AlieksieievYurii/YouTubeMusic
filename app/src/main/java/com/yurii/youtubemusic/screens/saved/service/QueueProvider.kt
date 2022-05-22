@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.services.mediaservice
+package com.yurii.youtubemusic.screens.saved.service
 
 import android.support.v4.media.session.MediaSessionCompat
 import com.yurii.youtubemusic.models.Category

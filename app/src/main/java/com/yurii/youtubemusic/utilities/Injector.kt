@@ -3,8 +3,8 @@ package com.yurii.youtubemusic.utilities
 import android.content.ComponentName
 import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.yurii.youtubemusic.services.mediaservice.MediaService
-import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
+import com.yurii.youtubemusic.screens.saved.service.MediaService
+import com.yurii.youtubemusic.screens.saved.service.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.categories.CategoriesEditorViewModel
 import com.yurii.youtubemusic.screens.equalizer.EqualizerViewModel

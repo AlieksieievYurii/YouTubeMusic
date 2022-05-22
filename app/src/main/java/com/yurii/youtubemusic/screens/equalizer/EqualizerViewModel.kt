@@ -3,7 +3,7 @@ package com.yurii.youtubemusic.screens.equalizer
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.*
-import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
+import com.yurii.youtubemusic.screens.saved.service.MusicServiceConnection
 import java.lang.IllegalStateException
 
 class EqualizerViewModel(application: Application, musicServiceConnection: MusicServiceConnection) : AndroidViewModel(application) {
