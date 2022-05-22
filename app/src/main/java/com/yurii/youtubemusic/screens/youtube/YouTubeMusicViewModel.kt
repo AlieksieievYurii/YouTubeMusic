@@ -35,6 +35,8 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     sealed class Event {
         data class SelectCategories(val videoItem: VideoItem) : Event()
         data class DeleteItem(val videoItem: VideoItem) : Event()
+        data class NotifyVideoItemHasBeenDeleted(val videoItem: VideoItem) : Event()
+        data class NotifyVideoItemHasBeenDownloaded(val videoItem: VideoItem) : Event()
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
         object SignOut : Event()
     }
@@ -65,6 +67,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
             override fun onFinished(videoItem: VideoItem) {
                 val musicFile = DataStorage.getMusic(context, videoItem.videoId)
                 sendVideoItemStatus(VideoItemStatus.Downloaded(videoItem, musicFile.length()))
+                sendEvent(Event.NotifyVideoItemHasBeenDownloaded(videoItem))
             }
 
             override fun onProgress(videoItem: VideoItem, progress: Progress) {
@@ -84,9 +87,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     fun signOut() {
         GoogleAccount.signOut(context)
         preferences.setCurrentPlaylist(null)
-        viewModelScope.launch {
-            _event.emit(Event.SignOut)
-        }
+        sendEvent(Event.SignOut)
     }
 
     fun setPlaylist(playlist: Playlist) {
@@ -109,24 +110,19 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         sendVideoItemStatus(VideoItemStatus.Download(item))
     }
 
-    fun askToDelete(videoItem: VideoItem) = viewModelScope.launch {
-        _event.emit(Event.DeleteItem(videoItem))
-    }
+    fun askToDelete(videoItem: VideoItem) = sendEvent(Event.DeleteItem(videoItem))
 
     fun delete(videoItem: VideoItem) {
         DataStorage.getMusic(context, videoItem.videoId).delete()
         DataStorage.getMetadata(context, videoItem.videoId).delete()
         DataStorage.getThumbnail(context, videoItem.videoId).delete()
         sendVideoItemStatus(VideoItemStatus.Download(videoItem))
+        sendEvent(Event.NotifyVideoItemHasBeenDeleted(videoItem))
     }
 
-    fun showFailedItemDetails(videoItem: VideoItem) = viewModelScope.launch {
-        _event.emit(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
-    }
+    fun showFailedItemDetails(videoItem: VideoItem) = sendEvent(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
 
-    fun downloadAndAddToCategories(item: VideoItem) = viewModelScope.launch {
-        _event.emit(Event.SelectCategories(item))
-    }
+    fun downloadAndAddToCategories(item: VideoItem) = sendEvent(Event.SelectCategories(item))
 
     fun getItemStatus(videoItem: VideoItem): VideoItemStatus {
         val musicFile = DataStorage.getMusic(context, videoItem.videoId)
@@ -153,6 +149,10 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
 
     private fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {
         _videoItemStatus.emit(videoItemStatus)
+    }
+
+    private fun sendEvent(event: Event) = viewModelScope.launch {
+        _event.emit(event)
     }
 
     private fun loadVideoItems(playlist: Playlist) {
