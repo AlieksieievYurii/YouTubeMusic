@@ -9,10 +9,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.yurii.youtubemusic.screens.youtube.models.Category
-import com.yurii.youtubemusic.screens.youtube.models.Playlist
-import com.yurii.youtubemusic.screens.youtube.models.Progress
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.screens.youtube.models.*
 import com.yurii.youtubemusic.screens.youtube.service.ServiceConnection
 import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.utilities.GoogleAccount
@@ -23,8 +20,8 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.lang.IllegalStateException
 
-abstract class VideoItemStatus(open val videoItem: VideoItem) {
-    class Download(override val videoItem: VideoItem) : VideoItemStatus(videoItem)
+abstract class VideoItemStatus(open val videoItem: Item) {
+    class Download(override val videoItem: Item) : VideoItemStatus(videoItem)
     class Downloaded(override val videoItem: VideoItem, val size: Long) : VideoItemStatus(videoItem)
     class Downloading(override val videoItem: VideoItem, val currentSize: Long, val size: Long) : VideoItemStatus(videoItem)
     class Failed(override val videoItem: VideoItem, val error: Exception?) : VideoItemStatus(videoItem)
@@ -147,7 +144,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         }
     }
 
-    private fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {
+    fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {
         _videoItemStatus.emit(videoItemStatus)
     }
 

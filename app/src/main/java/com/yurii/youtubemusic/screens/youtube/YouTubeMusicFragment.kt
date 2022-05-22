@@ -19,6 +19,7 @@ import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
@@ -60,6 +61,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             launch { viewModel.videoItems.collectLatest { listAdapter.submitData(it) } }
             launch { startHandlingListLoadState() }
             launch { startHandlingEvents() }
+            launch { startListeningDeletedItems() }
         }
 
         binding.apply {
@@ -69,6 +71,11 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             refresh.setOnRefreshListener { listAdapter.refresh() }
         }
     }
+
+    private suspend fun startListeningDeletedItems() =
+        mainActivityViewModel.event.filterIsInstance<MainActivityViewModel.Event.ItemHasBeenDeleted>().collectLatest {
+            viewModel.sendVideoItemStatus(VideoItemStatus.Download(it.item))
+        }
 
     private suspend fun startHandlingEvents() = viewModel.event.collectLatest { event ->
         when (event) {
