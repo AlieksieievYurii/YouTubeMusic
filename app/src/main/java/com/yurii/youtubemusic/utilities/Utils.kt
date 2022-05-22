@@ -3,11 +3,14 @@ package com.yurii.youtubemusic.utilities
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.os.Parcelable
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
 import com.yurii.youtubemusic.R
 import org.threeten.bp.Duration
 import java.io.File
+import java.lang.IllegalStateException
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -82,6 +85,10 @@ fun calculateLikeBarValue(likeCount: BigInteger, disLikeCount: BigInteger): Int 
 
 fun createFromPathOrReturnMock(context: Context, path: String?): Drawable {
     return Drawable.createFromPath(path) ?: context.getDrawable(R.drawable.ic_thumbnail_mock)!!
+}
+
+fun <T : Parcelable> Bundle.requireParcelable(key: String): T {
+    return this.getParcelable(key) ?: throw IllegalStateException("This bundle argument is required: $key")
 }
 
 

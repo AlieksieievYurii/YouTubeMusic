@@ -9,6 +9,7 @@ import android.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,16 +25,19 @@ import com.yurii.youtubemusic.adapters.MediaListAdapter
 import com.yurii.youtubemusic.adapters.MediaListAdapterController
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.screens.youtube.models.Item
+import com.yurii.youtubemusic.utilities.requireParcelable
 import kotlinx.coroutines.flow.collectLatest
 
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    private lateinit var viewModel: MediaItemsViewModel
+    private val viewModel: MediaItemsViewModel by viewModels {
+        Injector.provideMediaItemsViewModel(requireContext(), requireArguments().requireParcelable(EXTRA_CATEGORY))
+    }
     private lateinit var mediaItemsAdapterController: MediaListAdapterController
     private val binding: FragmentMediaItemsBinding by viewBinding()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        initViewModel(requireArguments().getParcelable(EXTRA_CATEGORY)!!)
+        initViewModel()
         initRecyclerView(binding.mediaItems)
 
         lifecycleScope.launchWhenCreated {
@@ -51,6 +55,9 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
                         }
                     }
                     is MainActivityViewModel.Event.ItemHasBeenModified -> updateMediaItem(it.item)
+                    else -> {
+                        //nothing
+                    }
                 }
             }
         }
@@ -69,8 +76,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
         checkWhetherMediaItemsAreEmpty()
     }
 
-    private fun initViewModel(category: Category) {
-        viewModel = Injector.provideMediaItemsViewModel(requireContext(), category)
+    private fun initViewModel() {
         viewModel.mediaItems.observe(viewLifecycleOwner, Observer {
             binding.loadingBar.isVisible = false
             mediaItemsAdapterController.setMediaItems(it)

@@ -6,6 +6,8 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.services.mediaservice.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
@@ -13,8 +15,9 @@ import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
+import java.lang.IllegalStateException
 
-class MediaItemsViewModel(private val context: Context, val category: Category, musicServiceConnection: MusicServiceConnection) {
+class MediaItemsViewModel(private val context: Context, val category: Category, musicServiceConnection: MusicServiceConnection) : ViewModel() {
     private val mediaMetadataProvider = MediaMetadataProvider(context)
     private val _mediaItems = MutableLiveData<List<MediaMetaData>>()
     val mediaItems: LiveData<List<MediaMetaData>> = _mediaItems
@@ -66,5 +69,15 @@ class MediaItemsViewModel(private val context: Context, val category: Category, 
 
     private val musicServiceConnection = musicServiceConnection.also {
         it.subscribe(category.id.toString(), mediaItemsSubscription)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    class Factory(private val context: Context, private val category: Category, private val musicServiceConnection: MusicServiceConnection) :
+        ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(MediaItemsViewModel::class.java))
+                return MediaItemsViewModel(context, category, musicServiceConnection) as T
+            throw IllegalStateException("Given the model class is not assignable from SavedMusicViewModel class")
+        }
     }
 }

@@ -22,9 +22,9 @@ object Injector {
         return EqualizerViewModel.Factory(context.applicationContext, musicServiceConnection)
     }
 
-    fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel {
+    fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel.Factory {
         val musicServiceConnection = provideMusicServiceConnection(context)
-        return MediaItemsViewModel(context, category, musicServiceConnection)
+        return MediaItemsViewModel.Factory(context, category, musicServiceConnection)
     }
 
     fun providePlayerControllerViewModel(context: Context): PlayerControllerViewModel.Factory {
