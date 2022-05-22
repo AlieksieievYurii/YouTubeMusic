@@ -21,7 +21,6 @@ import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
-import com.yurii.youtubemusic.adapters.MediaListAdapter
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.utilities.requireParcelable
 import kotlinx.coroutines.flow.collectLatest
