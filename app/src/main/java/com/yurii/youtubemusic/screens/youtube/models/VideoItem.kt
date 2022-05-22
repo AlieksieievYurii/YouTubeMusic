@@ -14,7 +14,7 @@ data class VideoItem(
     val likeCount: BigInteger,
     val thumbnail: String,
     val normalThumbnail: String
-) : Serializable {
+) : Item(videoId), Serializable {
 
     companion object {
         fun createFrom(video: Video): VideoItem =
@@ -29,8 +29,5 @@ data class VideoItem(
                 thumbnail = video.snippet.thumbnails.default.url,
                 normalThumbnail = video.snippet.thumbnails.medium.url
             )
-
-        fun createMock(): VideoItem =
-            VideoItem("", "", "", "", "", BigInteger.ZERO, BigInteger.ZERO, "", "")
     }
 }

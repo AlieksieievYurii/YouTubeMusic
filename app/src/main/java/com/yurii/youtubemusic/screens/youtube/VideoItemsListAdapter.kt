@@ -25,7 +25,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
     init {
         lifecycleCoroutineScope.launchWhenCreated {
             viewModel.videoItemStatus.collectLatest { status ->
-                findVisibleViewHolder(status.videoItem.videoId)?.updateStatus(status)
+                findVisibleViewHolder(status.videoItem.id)?.updateStatus(status)
             }
         }
     }

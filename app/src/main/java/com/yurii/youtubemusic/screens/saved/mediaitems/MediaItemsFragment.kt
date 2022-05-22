@@ -2,6 +2,7 @@ package com.yurii.youtubemusic.screens.saved.mediaitems
 
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.view.View
 import android.viewbinding.library.fragment.viewBinding
 import android.widget.PopupMenu
@@ -9,6 +10,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
@@ -21,6 +23,8 @@ import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.adapters.MediaListAdapter
 import com.yurii.youtubemusic.adapters.MediaListAdapterController
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
+import com.yurii.youtubemusic.screens.youtube.models.Item
+import kotlinx.coroutines.flow.collectLatest
 
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
@@ -32,32 +36,37 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
         initViewModel(requireArguments().getParcelable(EXTRA_CATEGORY)!!)
         initRecyclerView(binding.mediaItems)
 
-        mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
-            mediaItemsAdapterController.removeItemWithId(it)
-            checkWhetherMediaItemsAreEmpty()
-        })
-        mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
-            val metadata = viewModel.getMetaData(it.videoId)
-            if (viewModel.category == Category.ALL || viewModel.category in metadata.categories) {
-                mediaItemsAdapterController.addNewMediaItem(metadata)
-                checkWhetherMediaItemsAreEmpty()
+        lifecycleScope.launchWhenCreated {
+            mainActivityViewModel.event.collectLatest {
+                when (it) {
+                    is MainActivityViewModel.Event.ItemHasBeenDeleted -> {
+                        mediaItemsAdapterController.removeItemWithId(it.item.id)
+                        checkWhetherMediaItemsAreEmpty()
+                    }
+                    is MainActivityViewModel.Event.ItemHasBeenDownloaded -> {
+                        val metadata = viewModel.getMetaData(it.videoItem.id)
+                        if (viewModel.category == Category.ALL || viewModel.category in metadata.categories) {
+                            mediaItemsAdapterController.addNewMediaItem(metadata)
+                            checkWhetherMediaItemsAreEmpty()
+                        }
+                    }
+                    is MainActivityViewModel.Event.ItemHasBeenModified -> updateMediaItem(it.item)
+                }
             }
-        })
+        }
+    }
 
-        mainActivityViewModel.onUpdateMediaItem.observe(viewLifecycleOwner, Observer {
-            val newMediaItem = it
+    private fun updateMediaItem(mediaItem: MediaMetaData) {
+        if (viewModel.category == Category.ALL) {
+            mediaItemsAdapterController.updateMediaItem(mediaItem)
+            return
+        }
 
-            if (viewModel.category == Category.ALL) {
-                mediaItemsAdapterController.updateMediaItem(newMediaItem)
-                return@Observer
-            }
-
-            if (viewModel.category in newMediaItem.categories)
-                addOrUpdateMediaItem(newMediaItem)
-            else
-                mediaItemsAdapterController.removeItemWithId(newMediaItem.mediaId)
-            checkWhetherMediaItemsAreEmpty()
-        })
+        if (viewModel.category in mediaItem.categories)
+            addOrUpdateMediaItem(mediaItem)
+        else
+            mediaItemsAdapterController.removeItemWithId(mediaItem.mediaId)
+        checkWhetherMediaItemsAreEmpty()
     }
 
     private fun initViewModel(category: Category) {
@@ -110,7 +119,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             onConfirm = {
                 viewModel.deleteMediaItem(mediaItem)
                 mediaItemsAdapterController.removeItemWithId(mediaItem.mediaId)
-                mainActivityViewModel.notifyMediaItemHasBeenDeleted(mediaItem.mediaId)
+                mainActivityViewModel.notifyMediaItemHasBeenDeleted(mediaItem)
             }
         ).show(requireActivity().supportFragmentManager, "RequestToDeleteMediaItem")
 

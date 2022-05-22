@@ -7,6 +7,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.yurii.youtubemusic.screens.youtube.models.Item
 import kotlinx.android.parcel.Parcelize
 import java.io.File
 
@@ -20,7 +21,7 @@ data class MediaMetaData(
     val thumbnail: File,
     val mediaFile: File,
     val categories: ArrayList<Category> = ArrayList()
-) : Parcelable {
+) : Item(mediaId), Parcelable {
     companion object {
         fun createFrom(mediaItem: MediaBrowserCompat.MediaItem): MediaMetaData {
             val extras = mediaItem.description.extras!!
@@ -44,7 +45,8 @@ data class MediaMetaData(
                 author = mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_AUTHOR),
                 duration = mediaDescription.getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
                 thumbnail = File(mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI)),
-                mediaFile = File(mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI)))
+                mediaFile = File(mediaDescription.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI))
+            )
         }
     }
 }
