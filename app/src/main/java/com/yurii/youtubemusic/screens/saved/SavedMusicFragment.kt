@@ -1,10 +1,12 @@
 package com.yurii.youtubemusic.screens.saved
 
 import android.content.Intent
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yurii.youtubemusic.screens.categories.CategoriesEditorActivity
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
@@ -15,6 +17,7 @@ import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
 import com.yurii.youtubemusic.utilities.CategoriesTabAdapter
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 
 class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
@@ -37,17 +40,21 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
             initCategoriesLayout(categoryItems)
         })
 
-        mainActivityViewModel.onMediaItemIsDeleted.observe(viewLifecycleOwner, Observer {
-            savedMusicViewModel.deleteMediaItem(it)
-        })
-
-        mainActivityViewModel.onVideoItemHasBeenDownloaded.observe(viewLifecycleOwner, Observer {
-            savedMusicViewModel.notifyVideoItemHasBeenDownloaded(it.videoId)
-        })
-
-        mainActivityViewModel.onUpdateMediaItem.observe(viewLifecycleOwner, Observer {
-            savedMusicViewModel.updateMediaItem(it)
-        })
+        lifecycleScope.launchWhenCreated {
+            mainActivityViewModel.event.collectLatest {
+                when (it) {
+                    is MainActivityViewModel.Event.ItemHasBeenDeleted -> savedMusicViewModel.deleteMediaItem(it.item.id)
+                    is MainActivityViewModel.Event.ItemHasBeenDownloaded -> savedMusicViewModel.notifyVideoItemHasBeenDownloaded(it.videoItem.id)
+                    is MainActivityViewModel.Event.ItemHasBeenModified -> savedMusicViewModel.updateMediaItem(it.item)
+                    is MainActivityViewModel.Event.LogInEvent -> {
+                        //Not supposed to be handled here
+                    }
+                    is MainActivityViewModel.Event.LogOutEvent -> {
+                        //Not supposed to be handled here
+                    }
+                }
+            }
+        }
     }
 
     private fun openEqualizerActivity() {
@@ -65,6 +72,11 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
             tab.text = categories[position].name
         }.attach()
         binding.categories.visibility = View.VISIBLE
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("TEST", "Saved onresume")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

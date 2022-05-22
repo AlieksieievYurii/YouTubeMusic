@@ -6,13 +6,14 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.yurii.youtubemusic.screens.player.PlayerControlPanelFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
 import com.yurii.youtubemusic.utilities.*
+import kotlinx.coroutines.flow.collectLatest
 import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
@@ -28,8 +29,14 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
         fragmentHelper.showSavedMusicFragment(animated = false)
 
-        viewModel.logInEvent.observe(this, Observer { handleSignIn(it) })
-        viewModel.logOutEvent.observe(this, Observer { handleSignOut() })
+        lifecycleScope.launchWhenCreated {
+            viewModel.event.collectLatest {
+                if (it is MainActivityViewModel.Event.LogInEvent)
+                    handleSignIn(it.account)
+                else if (it is MainActivityViewModel.Event.LogOutEvent)
+                    handleSignOut()
+            }
+        }
 
         supportFragmentManager.beginTransaction().replace(R.id.player_view_holder, PlayerControlPanelFragment()).commit()
     }
