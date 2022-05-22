@@ -22,19 +22,20 @@ import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.adapters.MediaListAdapter
-import com.yurii.youtubemusic.adapters.MediaListAdapterController
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
-import com.yurii.youtubemusic.screens.youtube.models.Item
 import com.yurii.youtubemusic.utilities.requireParcelable
 import kotlinx.coroutines.flow.collectLatest
 
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val viewModel: MediaItemsViewModel by viewModels {
-        Injector.provideMediaItemsViewModel(requireContext(), requireArguments().requireParcelable(EXTRA_CATEGORY))
+        Injector.provideMediaItemsViewModel(
+            requireContext(),
+            requireArguments().requireParcelable(EXTRA_CATEGORY)
+        )
     }
-    private lateinit var mediaItemsAdapterController: MediaListAdapterController
     private val binding: FragmentMediaItemsBinding by viewBinding()
+    private val mediaListAdapter: MediaListAdapter by lazy { MediaListAdapter(requireContext(), viewModel.category, MediaListAdapterCallBack()) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initViewModel()
@@ -44,13 +45,13 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             mainActivityViewModel.event.collectLatest {
                 when (it) {
                     is MainActivityViewModel.Event.ItemHasBeenDeleted -> {
-                        mediaItemsAdapterController.removeItemWithId(it.item.id)
+                        mediaListAdapter.removeItemWithId(it.item.id)
                         checkWhetherMediaItemsAreEmpty()
                     }
                     is MainActivityViewModel.Event.ItemHasBeenDownloaded -> {
                         val metadata = viewModel.getMetaData(it.videoItem.id)
                         if (viewModel.category == Category.ALL || viewModel.category in metadata.categories) {
-                            mediaItemsAdapterController.addNewMediaItem(metadata)
+                            mediaListAdapter.addNewMediaItem(metadata)
                             checkWhetherMediaItemsAreEmpty()
                         }
                     }
@@ -65,44 +66,42 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
 
     private fun updateMediaItem(mediaItem: MediaMetaData) {
         if (viewModel.category == Category.ALL) {
-            mediaItemsAdapterController.updateMediaItem(mediaItem)
+            mediaListAdapter.updateMediaItem(mediaItem)
             return
         }
 
         if (viewModel.category in mediaItem.categories)
             addOrUpdateMediaItem(mediaItem)
         else
-            mediaItemsAdapterController.removeItemWithId(mediaItem.mediaId)
+            mediaListAdapter.removeItemWithId(mediaItem.mediaId)
         checkWhetherMediaItemsAreEmpty()
     }
 
     private fun initViewModel() {
         viewModel.mediaItems.observe(viewLifecycleOwner, Observer {
             binding.loadingBar.isVisible = false
-            mediaItemsAdapterController.setMediaItems(it)
+            mediaListAdapter.setMediaItems(it)
             checkWhetherMediaItemsAreEmpty()
         })
 
         viewModel.playbackState.observe(viewLifecycleOwner, Observer {
             if (it.state == PlaybackStateCompat.STATE_PLAYING || it.state == PlaybackStateCompat.STATE_PAUSED || it.state == PlaybackStateCompat.STATE_STOPPED) {
-                mediaItemsAdapterController.onChangePlaybackState(it)
+                mediaListAdapter.onChangePlaybackState(it)
             }
         })
     }
 
     private fun initRecyclerView(recyclerView: RecyclerView) {
-        val mediaItemsAdapter = MediaListAdapter(requireContext(), viewModel.category, MediaListAdapterCallBack())
-        mediaItemsAdapterController = mediaItemsAdapter
         recyclerView.apply {
             layoutAnimation = android.view.animation.AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.bottom_lifting_animation)
             this.setHasFixedSize(true)
             this.layoutManager = LinearLayoutManager(requireContext())
-            this.adapter = mediaItemsAdapter
+            this.adapter = mediaListAdapter
         }
     }
 
     private fun checkWhetherMediaItemsAreEmpty() {
-        if (mediaItemsAdapterController.isEmptyList()) {
+        if (mediaListAdapter.isEmptyList()) {
             binding.noMediaItems.isVisible = true
             binding.mediaItems.isVisible = false
         } else {
@@ -112,10 +111,10 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
 
     private fun addOrUpdateMediaItem(mediaItem: MediaMetaData) {
-        if (mediaItemsAdapterController.contains(mediaItem.mediaId))
-            mediaItemsAdapterController.updateMediaItem(mediaItem)
+        if (mediaListAdapter.contains(mediaItem.mediaId))
+            mediaListAdapter.updateMediaItem(mediaItem)
         else
-            mediaItemsAdapterController.addNewMediaItem(mediaItem)
+            mediaListAdapter.addNewMediaItem(mediaItem)
     }
 
     private fun deleteMediaItem(mediaItem: MediaMetaData) {
@@ -124,7 +123,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             messageId = R.string.dialog_confirm_deletion_music_message,
             onConfirm = {
                 viewModel.deleteMediaItem(mediaItem)
-                mediaItemsAdapterController.removeItemWithId(mediaItem.mediaId)
+                mediaListAdapter.removeItemWithId(mediaItem.mediaId)
                 mainActivityViewModel.notifyMediaItemHasBeenDeleted(mediaItem)
             }
         ).show(requireActivity().supportFragmentManager, "RequestToDeleteMediaItem")
