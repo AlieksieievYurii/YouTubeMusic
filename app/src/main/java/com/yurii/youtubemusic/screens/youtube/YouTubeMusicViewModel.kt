@@ -23,11 +23,11 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.lang.IllegalStateException
 
-abstract class VideoItemStatus(open val videoItemId: String) {
-    class Download(override val videoItemId: String) : VideoItemStatus(videoItemId)
-    class Downloaded(override val videoItemId: String, val size: Long) : VideoItemStatus(videoItemId)
-    class Downloading(override val videoItemId: String, val currentSize: Long, val size: Long) : VideoItemStatus(videoItemId)
-    class Failed(override val videoItemId: String, val error: Exception?) : VideoItemStatus(videoItemId)
+abstract class VideoItemStatus(open val videoItem: VideoItem) {
+    class Download(override val videoItem: VideoItem) : VideoItemStatus(videoItem)
+    class Downloaded(override val videoItem: VideoItem, val size: Long) : VideoItemStatus(videoItem)
+    class Downloading(override val videoItem: VideoItem, val currentSize: Long, val size: Long) : VideoItemStatus(videoItem)
+    class Failed(override val videoItem: VideoItem, val error: Exception?) : VideoItemStatus(videoItem)
 }
 
 class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: GoogleSignInAccount, private val preferences: Preferences2) :
@@ -64,15 +64,15 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         downloaderServiceConnection.setCallbacks(object : ServiceConnection.CallBack {
             override fun onFinished(videoItem: VideoItem) {
                 val musicFile = DataStorage.getMusic(context, videoItem.videoId)
-                sendVideoItemStatus(VideoItemStatus.Downloaded(videoItem.videoId, musicFile.length()))
+                sendVideoItemStatus(VideoItemStatus.Downloaded(videoItem, musicFile.length()))
             }
 
             override fun onProgress(videoItem: VideoItem, progress: Progress) {
-                sendVideoItemStatus(VideoItemStatus.Downloading(videoItem.videoId, progress.currentSize, progress.totalSize))
+                sendVideoItemStatus(VideoItemStatus.Downloading(videoItem, progress.currentSize, progress.totalSize))
             }
 
             override fun onError(videoItem: VideoItem, error: Exception) {
-                sendVideoItemStatus(VideoItemStatus.Failed(videoItem.videoId, error))
+                sendVideoItemStatus(VideoItemStatus.Failed(videoItem, error))
             }
 
         })
@@ -97,7 +97,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
 
     fun download(item: VideoItem, categories: List<Category> = emptyList()) {
         downloaderServiceConnection.download(item, categories)
-        sendVideoItemStatus(VideoItemStatus.Downloading(item.videoId, 0, 0))
+        sendVideoItemStatus(VideoItemStatus.Downloading(item, 0, 0))
     }
 
     fun tryToDownloadAgain(videoItem: VideoItem) {
@@ -106,7 +106,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
 
     fun cancelDownloading(item: VideoItem) {
         downloaderServiceConnection.cancelDownloading(item)
-        sendVideoItemStatus(VideoItemStatus.Download(item.videoId))
+        sendVideoItemStatus(VideoItemStatus.Download(item))
     }
 
     fun askToDelete(videoItem: VideoItem) = viewModelScope.launch {
@@ -117,7 +117,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         DataStorage.getMusic(context, videoItem.videoId).delete()
         DataStorage.getMetadata(context, videoItem.videoId).delete()
         DataStorage.getThumbnail(context, videoItem.videoId).delete()
-        sendVideoItemStatus(VideoItemStatus.Download(videoItem.videoId))
+        sendVideoItemStatus(VideoItemStatus.Download(videoItem))
     }
 
     fun showFailedItemDetails(videoItem: VideoItem) = viewModelScope.launch {
@@ -132,17 +132,17 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         val musicFile = DataStorage.getMusic(context, videoItem.videoId)
 
         if (musicFile.exists())
-            return VideoItemStatus.Downloaded(videoItem.videoId, musicFile.length())
+            return VideoItemStatus.Downloaded(videoItem, musicFile.length())
 
         if (downloaderServiceConnection.isItemDownloading(videoItem)) {
             val progress = downloaderServiceConnection.getProgress(videoItem) ?: Progress.create()
-            return VideoItemStatus.Downloading(videoItem.videoId, progress.currentSize, progress.totalSize)
+            return VideoItemStatus.Downloading(videoItem, progress.currentSize, progress.totalSize)
         }
 
         if (downloaderServiceConnection.isDownloadingFailed(videoItem))
-            return VideoItemStatus.Failed(videoItem.videoId, downloaderServiceConnection.getError(videoItem))
+            return VideoItemStatus.Failed(videoItem, downloaderServiceConnection.getError(videoItem))
 
-        return VideoItemStatus.Download(videoItem.videoId)
+        return VideoItemStatus.Download(videoItem)
     }
 
     private fun deleteUnFinishedJobs() {
