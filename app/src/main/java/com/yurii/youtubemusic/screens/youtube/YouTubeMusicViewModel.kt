@@ -18,11 +18,7 @@ import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.utilities.Preferences2
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.lang.IllegalStateException
@@ -31,7 +27,7 @@ abstract class VideoItemStatus(open val videoItemId: String) {
     class Download(override val videoItemId: String) : VideoItemStatus(videoItemId)
     class Downloaded(override val videoItemId: String, val size: Long) : VideoItemStatus(videoItemId)
     class Downloading(override val videoItemId: String, val currentSize: Long, val size: Long) : VideoItemStatus(videoItemId)
-    class Failed(override val videoItemId: String, error: Exception?) : VideoItemStatus(videoItemId)
+    class Failed(override val videoItemId: String, val error: Exception?) : VideoItemStatus(videoItemId)
 }
 
 class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: GoogleSignInAccount, private val preferences: Preferences2) :
@@ -52,11 +48,11 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     private val _currentPlaylistId: MutableStateFlow<Playlist?> = MutableStateFlow(preferences.getCurrentPlaylist())
     val currentPlaylistId: StateFlow<Playlist?> = _currentPlaylistId
 
-    private val _videoItemStatus = Channel<VideoItemStatus>()
-    val videoItemStatus = _videoItemStatus.receiveAsFlow()
+    private val _videoItemStatus = MutableSharedFlow<VideoItemStatus>()
+    val videoItemStatus: SharedFlow<VideoItemStatus> = _videoItemStatus
 
-    private val _event = Channel<Event>()
-    val event = _event.receiveAsFlow()
+    private val _event = MutableSharedFlow<Event>()
+    val event: SharedFlow<Event> = _event
 
     private var searchJob: Job? = null
 
@@ -67,22 +63,16 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         _currentPlaylistId.value?.let { loadVideoItems(it) }
         downloaderServiceConnection.setCallbacks(object : ServiceConnection.CallBack {
             override fun onFinished(videoItem: VideoItem) {
-                viewModelScope.launch {
-                    val musicFile = DataStorage.getMusic(context, videoItem.videoId)
-                    _videoItemStatus.send(VideoItemStatus.Downloaded(videoItem.videoId, musicFile.length()))
-                }
+                val musicFile = DataStorage.getMusic(context, videoItem.videoId)
+                sendVideoItemStatus(VideoItemStatus.Downloaded(videoItem.videoId, musicFile.length()))
             }
 
             override fun onProgress(videoItem: VideoItem, progress: Progress) {
-                viewModelScope.launch {
-                    _videoItemStatus.send(VideoItemStatus.Downloading(videoItem.videoId, progress.currentSize, progress.totalSize))
-                }
+                sendVideoItemStatus(VideoItemStatus.Downloading(videoItem.videoId, progress.currentSize, progress.totalSize))
             }
 
             override fun onError(videoItem: VideoItem, error: Exception) {
-                viewModelScope.launch {
-                    _videoItemStatus.send(VideoItemStatus.Failed(videoItem.videoId, error))
-                }
+                sendVideoItemStatus(VideoItemStatus.Failed(videoItem.videoId, error))
             }
 
         })
@@ -95,7 +85,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         GoogleAccount.signOut(context)
         preferences.setCurrentPlaylist(null)
         viewModelScope.launch {
-            _event.send(Event.SignOut)
+            _event.emit(Event.SignOut)
         }
     }
 
@@ -120,7 +110,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     }
 
     fun askToDelete(videoItem: VideoItem) = viewModelScope.launch {
-        _event.send(Event.DeleteItem(videoItem))
+        _event.emit(Event.DeleteItem(videoItem))
     }
 
     fun delete(videoItem: VideoItem) {
@@ -131,11 +121,11 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     }
 
     fun showFailedItemDetails(videoItem: VideoItem) = viewModelScope.launch {
-        _event.send(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
+        _event.emit(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
     }
 
     fun downloadAndAddToCategories(item: VideoItem) = viewModelScope.launch {
-        _event.send(Event.SelectCategories(item))
+        _event.emit(Event.SelectCategories(item))
     }
 
     fun getItemStatus(videoItem: VideoItem): VideoItemStatus {
@@ -162,7 +152,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     }
 
     private fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {
-        _videoItemStatus.send(videoItemStatus)
+        _videoItemStatus.emit(videoItemStatus)
     }
 
     private fun loadVideoItems(playlist: Playlist) {
