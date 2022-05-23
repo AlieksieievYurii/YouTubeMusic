@@ -100,6 +100,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
 
     fun tryToDownloadAgain(videoItem: VideoItem) {
         downloaderServiceConnection.retryToDownload(videoItem)
+        sendVideoItemStatus(VideoItemStatus.Downloading(videoItem, 0, 0))
     }
 
     fun cancelDownloading(item: VideoItem) {
