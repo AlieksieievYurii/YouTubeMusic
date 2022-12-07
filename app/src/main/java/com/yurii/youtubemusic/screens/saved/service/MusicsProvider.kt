@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import com.yurii.youtubemusic.models.*
-import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
+import com.yurii.youtubemusic.utilities.MediaStorage
 import com.yurii.youtubemusic.utilities.ServiceLocator
 import java.io.File
 import java.lang.Exception
@@ -19,6 +19,7 @@ class MusicsProvider(private val context: Context) {
         fun onFailedToLoad(error: Exception)
     }
 
+    private val mediaStorage = MediaStorage(context)
     private val mediaMetadataProvider = MediaMetadataProvider(context)
     private lateinit var metaDataItems: ArrayList<MediaMetaData>
     private val categories: ArrayList<Category> by lazy { retrieveCategories() }
@@ -111,7 +112,7 @@ class MusicsProvider(private val context: Context) {
         if (isMusicsInitialized)
             throw IllegalStateException("Music provider is already initialized")
 
-        MusicsLoader(context, mediaMetadataProvider).apply {
+        MusicsLoader(mediaStorage, mediaMetadataProvider).apply {
             onLoadSuccessfully = { mediaItems ->
                 metaDataItems = mediaItems
                 isMusicsInitialized = true
@@ -126,7 +127,7 @@ class MusicsProvider(private val context: Context) {
     fun isEmptyMusicsList() = metaDataItems.isEmpty()
 }
 
-private class MusicsLoader(private val context: Context, private val mediaMetadataProvider: MediaMetadataProvider) :
+private class MusicsLoader(private val mediaStorage: MediaStorage, private val mediaMetadataProvider: MediaMetadataProvider) :
     AsyncTask<Void, Void, ArrayList<MediaMetaData>>() {
     var onLoadSuccessfully: ((musicItems: ArrayList<MediaMetaData>) -> Unit)? = null
     var onFailedToLoad: ((error: Exception) -> Unit)? = null
@@ -150,7 +151,7 @@ private class MusicsLoader(private val context: Context, private val mediaMetada
         }
     }
 
-    private fun retrieveMusics(): List<File> = DataStorage.getAllMusicFiles(context)
+    private fun retrieveMusics(): List<File> = mediaStorage.getAllMusicFiles()
 
     override fun onPostExecute(result: ArrayList<MediaMetaData>?) {
         super.onPostExecute(result)

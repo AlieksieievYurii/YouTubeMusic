@@ -10,6 +10,9 @@ import java.io.FileNotFoundException
 import org.threeten.bp.Duration
 
 class MediaMetadataProvider(private val context: Context) {
+
+    private val mediaStorage = MediaStorage(context)
+
     fun readMetadata(musicId: String): MediaMetaData {
         val musicDescriptionFile = getMusicMetadataFile(musicId, raiseIfDoestNotExist = true)
         return Gson().fromJson(musicDescriptionFile.reader(), MediaMetaData::class.java)
@@ -21,9 +24,9 @@ class MediaMetadataProvider(private val context: Context) {
             mediaId = videoItem.videoId,
             author = videoItem.authorChannelTitle,
             description = videoItem.description,
-            thumbnail = DataStorage.getThumbnail(context, videoItem.videoId),
+            thumbnail = mediaStorage.getThumbnail(videoItem.videoId),
             duration = Duration.parse(videoItem.duration).toMillis(),
-            mediaFile = DataStorage.getMusic(context, videoItem.videoId),
+            mediaFile = mediaStorage.getMusic(videoItem.videoId),
             categories = categories
         )
 
@@ -41,7 +44,7 @@ class MediaMetadataProvider(private val context: Context) {
 
     @Throws(FileNotFoundException::class)
     private fun getMusicMetadataFile(musicId: String, raiseIfDoestNotExist: Boolean = false): File {
-        val file = DataStorage.getMetadata(context, musicId).apply {
+        val file = mediaStorage.getMetadata(musicId).apply {
             if (!parentFile!!.exists())
                 parentFile!!.mkdirs()
         }

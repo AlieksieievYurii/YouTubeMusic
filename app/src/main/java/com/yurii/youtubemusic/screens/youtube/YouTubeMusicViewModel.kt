@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.screens.youtube
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -11,8 +10,8 @@ import androidx.paging.cachedIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.screens.youtube.models.*
 import com.yurii.youtubemusic.screens.youtube.service.ServiceConnection
-import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.utilities.GoogleAccount
+import com.yurii.youtubemusic.utilities.MediaStorage
 import com.yurii.youtubemusic.utilities.Preferences2
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -27,7 +26,13 @@ abstract class VideoItemStatus(open val videoItem: Item) {
     class Failed(override val videoItem: VideoItem, val error: Exception?) : VideoItemStatus(videoItem)
 }
 
-class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: GoogleSignInAccount, private val preferences: Preferences2) :
+class YouTubeMusicViewModel(
+    private val mediaStorage: MediaStorage,
+    private val googleAccount: GoogleAccount,
+    private val downloaderServiceConnection: ServiceConnection,
+    googleSignInAccount: GoogleSignInAccount,
+    private val preferences: Preferences2
+) :
     ViewModel() {
     sealed class Event {
         data class SelectCategories(val videoItem: VideoItem) : Event()
@@ -38,7 +43,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
         object SignOut : Event()
     }
 
-    private val credential = GoogleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount, context)
+    private val credential = googleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount)
     val youTubeAPI = YouTubeAPI(credential)
 
     private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
@@ -55,14 +60,12 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
 
     private var searchJob: Job? = null
 
-    private val downloaderServiceConnection = ServiceConnection(context)
-
     init {
         deleteUnFinishedJobs()
         _currentPlaylistId.value?.let { loadVideoItems(it) }
         downloaderServiceConnection.setCallbacks(object : ServiceConnection.CallBack {
             override fun onFinished(videoItem: VideoItem) {
-                val musicFile = DataStorage.getMusic(context, videoItem.videoId)
+                val musicFile = mediaStorage.getMusic(videoItem.videoId)
                 sendVideoItemStatus(VideoItemStatus.Downloaded(videoItem, musicFile.length()))
                 sendEvent(Event.NotifyVideoItemHasBeenDownloaded(videoItem))
             }
@@ -82,7 +85,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     fun getAllCategories() = preferences.getMusicCategories()
 
     fun signOut() {
-        GoogleAccount.signOut(context)
+        googleAccount.signOut()
         preferences.setCurrentPlaylist(null)
         sendEvent(Event.SignOut)
     }
@@ -111,9 +114,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     fun askToDelete(videoItem: VideoItem) = sendEvent(Event.DeleteItem(videoItem))
 
     fun delete(videoItem: VideoItem) {
-        DataStorage.getMusic(context, videoItem.videoId).delete()
-        DataStorage.getMetadata(context, videoItem.videoId).delete()
-        DataStorage.getThumbnail(context, videoItem.videoId).delete()
+        mediaStorage.deleteAllDataFor(videoItem.videoId)
         sendVideoItemStatus(VideoItemStatus.Download(videoItem))
         sendEvent(Event.NotifyVideoItemHasBeenDeleted(videoItem))
     }
@@ -123,7 +124,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     fun downloadAndAddToCategories(item: VideoItem) = sendEvent(Event.SelectCategories(item))
 
     fun getItemStatus(videoItem: VideoItem): VideoItemStatus {
-        val musicFile = DataStorage.getMusic(context, videoItem.videoId)
+        val musicFile = mediaStorage.getMusic(videoItem.videoId)
 
         if (musicFile.exists())
             return VideoItemStatus.Downloaded(videoItem, musicFile.length())
@@ -140,7 +141,7 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     }
 
     private fun deleteUnFinishedJobs() {
-        DataStorage.getMusicStorage(context).walk().filter { it.extension == "downloading" }.forEach {
+        mediaStorage.musicStorageFolder.walk().filter { it.extension == "downloading" }.forEach {
             it.delete()
         }
     }
@@ -165,12 +166,17 @@ class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: G
     }
 
     @Suppress("UNCHECKED_CAST")
-    class Factory(private val context: Context, private val googleSignInAccount: GoogleSignInAccount, private val preferences: Preferences2) :
-        ViewModelProvider.Factory {
+    class Factory(
+        private val mediaStorage: MediaStorage,
+        private val googleAccount: GoogleAccount,
+        private val downloaderServiceConnection: ServiceConnection,
+        private val googleSignInAccount: GoogleSignInAccount,
+        private val preferences: Preferences2
+    ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
-                return YouTubeMusicViewModel(context, googleSignInAccount, preferences) as T
-            throw IllegalStateException("Given the model class is not assignable from YouTuneViewModel class")
+                return YouTubeMusicViewModel(mediaStorage, googleAccount, downloaderServiceConnection, googleSignInAccount, preferences) as T
+            throw IllegalStateException("Given the model class is not assignable from YouTubeMusicViewModel class")
         }
 
     }

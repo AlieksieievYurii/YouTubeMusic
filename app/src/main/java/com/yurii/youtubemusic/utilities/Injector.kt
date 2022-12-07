@@ -8,10 +8,12 @@ import com.yurii.youtubemusic.screens.saved.service.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.categories.CategoriesEditorViewModel
 import com.yurii.youtubemusic.screens.equalizer.EqualizerViewModel
+import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.screens.player.PlayerControllerViewModel
 import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel
 import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsViewModel
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
+import com.yurii.youtubemusic.screens.youtube.service.ServiceConnection
 
 //import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
 
@@ -22,9 +24,15 @@ object Injector {
         return EqualizerViewModel.Factory(context.applicationContext, musicServiceConnection)
     }
 
-    fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel.Factory {
+    fun provideMediaItemsViewModel(
+        context: Context,
+        category: Category,
+        activityMainActivityViewModel: MainActivityViewModel
+    ): MediaItemsViewModel.Factory {
         val musicServiceConnection = provideMusicServiceConnection(context)
-        return MediaItemsViewModel.Factory(context, category, musicServiceConnection)
+        val mediaStorage = MediaStorage(context)
+        val mediaMetadataProvider = MediaMetadataProvider(context)
+        return MediaItemsViewModel.Factory(category, mediaStorage, mediaMetadataProvider, activityMainActivityViewModel, musicServiceConnection)
     }
 
     fun providePlayerControllerViewModel(context: Context): PlayerControllerViewModel.Factory {
@@ -40,7 +48,10 @@ object Injector {
     }
 
     fun provideYouTubeMusicViewModel(context: Context, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
-        return YouTubeMusicViewModel.Factory(context, googleSignInAccount, Preferences2(context))
+        val mediaStorage = MediaStorage(context)
+        val googleAccount = GoogleAccount(context)
+        val downloaderServiceConnection = ServiceConnection(context)
+        return YouTubeMusicViewModel.Factory(mediaStorage, googleAccount, downloaderServiceConnection, googleSignInAccount, Preferences2(context))
     }
 
     fun provideCategoriesEditorViewMode(context: Context): CategoriesEditorViewModel.Factory {

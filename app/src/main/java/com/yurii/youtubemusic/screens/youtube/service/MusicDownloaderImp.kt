@@ -10,8 +10,8 @@ import com.github.kiulian.downloader.model.formats.AudioFormat
 import com.yurii.youtubemusic.screens.youtube.models.Category
 import com.yurii.youtubemusic.screens.youtube.models.Progress
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
-import com.yurii.youtubemusic.utilities.DataStorage
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
+import com.yurii.youtubemusic.utilities.MediaStorage
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -24,9 +24,10 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 
-class MusicDownloaderImp(private val context: Context, private val callBack: CallBack) : MusicDownloaderAbstract() {
+class MusicDownloaderImp(context: Context, private val callBack: CallBack) : MusicDownloaderAbstract() {
     private val youtubeDownloader = YoutubeDownloader()
     private val mediaMetadataProvider = MediaMetadataProvider(context)
+    private val mediaStorage = MediaStorage(context)
 
     private val keepAliveTime = 1L
     private val keepAliveTimeUnit = TimeUnit.SECONDS
@@ -166,7 +167,7 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
         }
 
         private fun saveBitmapToFile(bitmap: Bitmap) {
-            val file = DataStorage.getThumbnail(context, videoItem.videoId).also {
+            val file = mediaStorage.getThumbnail(videoItem.videoId).also {
                 if (!it.parentFile!!.exists())
                     it.parentFile!!.mkdirs()
             }
@@ -205,7 +206,7 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
         }
 
         private fun setFileName(file: File) {
-            val newFile = DataStorage.getMusic(context, videoItem.videoId)
+            val newFile = mediaStorage.getMusic(videoItem.videoId)
             val isRenamed = file.renameTo(newFile)
 
             check(isRenamed) { "Cannot rename the file after complete downloading" }
@@ -226,7 +227,7 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
                             outputFile.delete()
                             throw InterruptedException()
                         }
-                        
+
                         bos.write(buffer, 0, count)
                         total += count.toDouble()
 
@@ -242,7 +243,7 @@ class MusicDownloaderImp(private val context: Context, private val callBack: Cal
         }
 
         private fun getOutputFile(): File {
-            val outDir = DataStorage.getMusicStorage(context).also {
+            val outDir = mediaStorage.musicStorageFolder.also {
                 if (!it.exists())
                     it.mkdirs()
             }
