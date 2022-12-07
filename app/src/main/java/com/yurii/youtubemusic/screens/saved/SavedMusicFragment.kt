@@ -1,7 +1,6 @@
 package com.yurii.youtubemusic.screens.saved
 
 import android.content.Intent
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -72,11 +71,6 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
             tab.text = categories[position].name
         }.attach()
         binding.categories.visibility = View.VISIBLE
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.i("TEST", "Saved onresume")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

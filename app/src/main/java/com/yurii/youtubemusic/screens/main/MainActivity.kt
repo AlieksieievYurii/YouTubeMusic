@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     private fun initAndOpenYouTubeMusicFragment() {
         try {
-            val account = GoogleAccount.getLastSignedInAccount(this)
+            val account = GoogleAccount(this).getLastSignedInAccount()
             fragmentHelper.initYouTubeMusicFragment(account)
             fragmentHelper.showYouTubeMusicFragment()
         } catch (e: IsNotSignedIn) {

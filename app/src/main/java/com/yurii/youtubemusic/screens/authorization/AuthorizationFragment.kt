@@ -18,17 +18,18 @@ class AuthorizationFragment : TabFragment<FragmentAuthorizationBinding>(
     titleStringId = R.string.label_fragment_title_youtube_musics
 ) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
+    private val googleAccount: GoogleAccount by lazy { GoogleAccount(requireContext()) }
 
     override fun onInflatedView(viewDataBinding: FragmentAuthorizationBinding) {
         binding.signInButton.setOnClickListener {
             binding.signInButton.isEnabled = false
-            GoogleAccount.startSignInActivity(this)
+            googleAccount.startSignInActivity(this)
         }
     }
 
     private fun handleSignInResult(result: Intent) {
         try {
-            val account = GoogleAccount.obtainAccountFromIntent(result)
+            val account = googleAccount.obtainAccountFromIntent(result)
             mainActivityViewModel.signIn(account)
         } catch (error: ApiException) {
             Toast.makeText(context, "${error.message}, code:${error.statusCode}", Toast.LENGTH_LONG).show()

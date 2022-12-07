@@ -17,12 +17,10 @@ class IsNotSignedIn : Exception("The user is not signed in")
 
 class DoesNotHaveRequiredScopes : Exception("Require the scopes")
 
-object GoogleAccount {
-    private val SCOPES = arrayOf(Scope(YouTubeScopes.YOUTUBE_READONLY))
-    const val REQUEST_SIGN_IN = 10003
-
+class GoogleAccount(private val context: Context) {
+    private val scopes = arrayOf(Scope(YouTubeScopes.YOUTUBE_READONLY))
     private val googleSignInOptions: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestScopes(SCOPES.first(), *SCOPES)
+        .requestScopes(scopes.first(), *scopes)
         .requestEmail()
         .build()
 
@@ -31,33 +29,33 @@ object GoogleAccount {
         val completedTask = GoogleSignIn.getSignedInAccountFromIntent(intent)
 
         val account: GoogleSignInAccount = completedTask.getResult(ApiException::class.java) as GoogleSignInAccount
-        if (GoogleSignIn.hasPermissions(account, *SCOPES))
+        if (GoogleSignIn.hasPermissions(account, *scopes))
             return account
         else
             throw DoesNotHaveRequiredScopes()
     }
 
-    fun getGoogleAccountCredentialUsingOAuth2(googleSignInAccount: GoogleSignInAccount, context: Context): GoogleAccountCredential {
-        return GoogleAccountCredential.usingOAuth2(context, SCOPES.map { it.scopeUri }).also {
+    fun getGoogleAccountCredentialUsingOAuth2(googleSignInAccount: GoogleSignInAccount): GoogleAccountCredential {
+        return GoogleAccountCredential.usingOAuth2(context, scopes.map { it.scopeUri }).also {
             it.selectedAccount = googleSignInAccount.account
         }
     }
 
 
     fun startSignInActivity(fragment: Fragment) {
-        val client = getClient(fragment.requireContext())
+        val client = getClient()
         fragment.startActivityForResult(client.signInIntent, REQUEST_SIGN_IN)
     }
 
-    fun signOut(context: Context) {
-        val client = getClient(context)
+    fun signOut() {
+        val client = getClient()
         client.signOut().addOnCompleteListener {
             client.revokeAccess()
         }
     }
 
     @Throws(IsNotSignedIn::class, DoesNotHaveRequiredScopes::class)
-    fun getLastSignedInAccount(context: Context): GoogleSignInAccount {
+    fun getLastSignedInAccount(): GoogleSignInAccount {
         val account = GoogleSignIn.getLastSignedInAccount(context) ?: throw IsNotSignedIn()
 
         if (GoogleSignIn.hasPermissions(account, Scope(YouTubeScopes.YOUTUBE_READONLY)))
@@ -66,7 +64,9 @@ object GoogleAccount {
             throw DoesNotHaveRequiredScopes()
     }
 
-    private fun getClient(context: Context): GoogleSignInClient = GoogleSignIn.getClient(context,
-        googleSignInOptions
-    )
+    private fun getClient(): GoogleSignInClient = GoogleSignIn.getClient(context, googleSignInOptions)
+
+    companion object {
+        const val REQUEST_SIGN_IN = 10003
+    }
 }
