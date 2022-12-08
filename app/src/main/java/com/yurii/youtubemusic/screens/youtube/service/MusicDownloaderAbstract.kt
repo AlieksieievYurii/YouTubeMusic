@@ -1,7 +1,7 @@
 package com.yurii.youtubemusic.screens.youtube.service
 
 import androidx.annotation.IntRange
-import com.yurii.youtubemusic.screens.youtube.models.Category
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.youtube.models.Progress
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
 import java.lang.Exception

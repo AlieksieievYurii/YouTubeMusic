@@ -21,9 +21,11 @@ import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
+import com.yurii.youtubemusic.utilities.MediaLibraryManager
 import com.yurii.youtubemusic.utilities.requireParcelable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
@@ -45,6 +47,11 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launchWhenCreated {
+            launch {
+                MediaLibraryManager.getInstance(requireContext()).event.collectLatest {
+                    Timber.i("Category: ${requireArguments().requireParcelable<Category>(EXTRA_CATEGORY)}, $it")
+                }
+            }
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { startObservingEvents() }
                 launch { startObservingMediaItems() }
@@ -61,7 +68,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
 
     private suspend fun startObservingPlayingItem() = viewModel.playingMediaItem.collectLatest { playingMediaItem ->
-            mediaListAdapter.setPlayingMediaItem(playingMediaItem)
+        mediaListAdapter.setPlayingMediaItem(playingMediaItem)
     }
 
     private suspend fun startObservingMediaItems() = viewModel.mediaItems.collectLatest {
@@ -94,7 +101,9 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
         ConfirmDeletionDialog.create(
             titleId = R.string.dialog_confirm_deletion_music_title,
             messageId = R.string.dialog_confirm_deletion_music_message,
-            onConfirm = { viewModel.deleteMediaItem(mediaItem) }
+            onConfirm = {
+                viewModel.deleteMediaItem(mediaItem)
+            }
         ).show(requireActivity().supportFragmentManager, "RequestToDeleteMediaItem")
 
     }

@@ -8,13 +8,14 @@ import com.yurii.youtubemusic.screens.saved.service.MusicServiceConnection
 import com.yurii.youtubemusic.screens.saved.service.PLAYBACK_STATE_MEDIA_ITEM
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
+import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
-import com.yurii.youtubemusic.screens.youtube.models.Item
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
 import com.yurii.youtubemusic.utilities.MediaStorage
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.lang.IllegalStateException
 
 class MediaItemsViewModel(
@@ -71,6 +72,7 @@ class MediaItemsViewModel(
         override fun onError(parentId: String, options: Bundle) {
             super.onError(parentId, options)
             //TODO Implement error handling
+            Timber.e(parentId + options)
         }
     }
 

@@ -7,7 +7,7 @@ import com.github.kiulian.downloader.YoutubeDownloader
 import com.github.kiulian.downloader.YoutubeException
 import com.github.kiulian.downloader.model.YoutubeVideo
 import com.github.kiulian.downloader.model.formats.AudioFormat
-import com.yurii.youtubemusic.screens.youtube.models.Category
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.youtube.models.Progress
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
 import com.yurii.youtubemusic.utilities.MediaMetadataProvider
@@ -151,12 +151,12 @@ class MusicDownloaderImp(context: Context, private val callBack: CallBack) : Mus
         }
 
         private fun addMetadata() {
-            val v = com.yurii.youtubemusic.models.VideoItem(
+            val v = VideoItem(
                 videoItem.videoId,
                 videoItem.title,
                 videoItem.authorChannelTitle,
                 videoItem.description,
-                videoItem.duration,
+                videoItem.durationInMillis,
                 videoItem.viewCount,
                 videoItem.likeCount,
                 videoItem.thumbnail,

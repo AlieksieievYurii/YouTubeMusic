@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
-import com.yurii.youtubemusic.screens.youtube.models.Category
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.youtube.models.Progress
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
 import java.lang.Exception

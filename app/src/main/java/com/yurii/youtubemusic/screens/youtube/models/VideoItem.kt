@@ -1,28 +1,30 @@
 package com.yurii.youtubemusic.screens.youtube.models
 
 import com.google.api.services.youtube.model.Video
+import com.yurii.youtubemusic.models.Item
+import org.threeten.bp.Duration
 import java.io.Serializable
 import java.math.BigInteger
 
 data class VideoItem(
     val videoId: String,
-    val title: String,
+    val videoTitle: String,
     val authorChannelTitle: String,
     val description: String,
-    val duration: String,
+    val videoDurationInMillis: Long,
     val viewCount: BigInteger,
     val likeCount: BigInteger,
     val thumbnail: String,
     val normalThumbnail: String
-) : Item(videoId), Serializable {
+) : Item(videoId, videoTitle, authorChannelTitle, videoDurationInMillis), Serializable {
 
     companion object {
         fun createFrom(video: Video): VideoItem =
             VideoItem(
                 videoId = video.id,
-                title = video.snippet.title,
+                videoTitle = video.snippet.title,
                 description = video.snippet.description,
-                duration = video.contentDetails.duration,
+                videoDurationInMillis = Duration.parse(video.contentDetails.duration).toMillis(),
                 viewCount = video.statistics.viewCount,
                 likeCount = video.statistics.likeCount,
                 authorChannelTitle = video.snippet.channelTitle,
