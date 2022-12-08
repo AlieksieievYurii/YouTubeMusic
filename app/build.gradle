@@ -61,6 +61,8 @@ dependencies {
     implementation "com.google.code.gson:gson:$gson_version"
     implementation "de.hdodenhof:circleimageview:$circleimageview_version"
     implementation "com.google.android.material:material:$material_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx_version"
+    implementation "com.jakewharton.timber:timber:$timber_version"
     implementation "com.google.android.gms:play-services-auth:$play_services_auth"
     implementation "com.otaliastudios:nestedscrollcoordinatorlayout:$nestedscrollcoordinatorlayout_version"
     implementation "com.github.yogacp:android-viewbinding:$view_biding_delegate_version"
@@ -84,6 +86,6 @@ dependencies {
     testImplementation "androidx.test:core:$androidx_test_core_version"
     androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
-    androidTestImplementation  "androidx.test:core-ktx:$core_ktx_version"
+    androidTestImplementation "androidx.test:core-ktx:$core_ktx_version"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$espresso_contrib_version"
 }
