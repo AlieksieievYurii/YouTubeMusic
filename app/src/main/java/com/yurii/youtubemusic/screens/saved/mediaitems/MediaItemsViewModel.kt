@@ -51,12 +51,11 @@ class MediaItemsViewModel(
         viewModelScope.launch {
             musicServiceConnection.playbackState.asFlow().collectLatest {
                 val mediaMetaData = it.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
+
                 when (it.state) {
-                    PlaybackStateCompat.STATE_PLAYING ->
-                        _playingMediaItem.value = PlayingMediaItem(mediaMetaData!!, isPaused = false)
-                    PlaybackStateCompat.STATE_PAUSED ->
-                        _playingMediaItem.value = PlayingMediaItem(mediaMetaData!!, isPaused = true)
-                    PlaybackStateCompat.STATE_STOPPED -> throw Exception("DUPOA")
+                    PlaybackStateCompat.STATE_PLAYING -> _playingMediaItem.value = PlayingMediaItem(mediaMetaData!!, isPaused = false)
+                    PlaybackStateCompat.STATE_PAUSED -> _playingMediaItem.value = PlayingMediaItem(mediaMetaData!!, isPaused = true)
+                    PlaybackStateCompat.STATE_STOPPED -> _playingMediaItem.value = null
                 }
             }
         }
