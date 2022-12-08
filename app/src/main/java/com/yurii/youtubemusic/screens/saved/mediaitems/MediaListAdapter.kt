@@ -37,18 +37,27 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaMetaDa
 
     private var playingMediaItem: MediaItemsViewModel.PlayingMediaItem? = null
 
-    fun setPlayingMediaItem(playingMediaItem: MediaItemsViewModel.PlayingMediaItem) {
-        if (playingMediaItem != this.playingMediaItem)
-            recyclerView.getVisibleItems<MusicViewHolder>().forEach { it.setNonPlayingState() }
+    fun setPlayingMediaItem(playingMediaItem: MediaItemsViewModel.PlayingMediaItem?) {
+        playingMediaItem?.let {
+            if (it != this.playingMediaItem)
+                setClearAllVisibleItems()
 
-        this.playingMediaItem = playingMediaItem
-        findVisibleViewHolder(playingMediaItem.mediaMetaData)?.setPlaying(playingMediaItem.isPaused)
+            this.playingMediaItem = it
+            findVisibleViewHolder(it.mediaMetaData)?.setPlaying(it.isPaused)
+        } ?: setNoPlayingItem()
     }
+
+    private fun setNoPlayingItem() {
+        playingMediaItem = null
+        setClearAllVisibleItems()
+    }
+
+    private fun setClearAllVisibleItems() = recyclerView.getVisibleItems<MusicViewHolder>().forEach { it.setNonPlayingState() }
 
     private fun findVisibleViewHolder(mediaItem: MediaMetaData): MediaListAdapter.MusicViewHolder? {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
         (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
-            if (it != -1 && getItem(it)?.id == mediaItem.id) {
+            if (it != -1 && getItem(it)?.mediaId == mediaItem.mediaId) {
                 return recyclerView.findViewHolderForLayoutPosition(it) as MediaListAdapter.MusicViewHolder
             }
         }
