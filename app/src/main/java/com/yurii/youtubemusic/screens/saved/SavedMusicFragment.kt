@@ -12,7 +12,6 @@ import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
-import com.yurii.youtubemusic.utilities.CategoriesTabAdapter
 import kotlinx.coroutines.flow.collectLatest
 
 

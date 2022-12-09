@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.utilities
+package com.yurii.youtubemusic.screens.saved
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
