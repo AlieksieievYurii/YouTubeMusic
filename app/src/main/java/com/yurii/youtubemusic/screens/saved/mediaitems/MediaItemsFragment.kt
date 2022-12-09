@@ -17,16 +17,14 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
-import com.yurii.youtubemusic.utilities.MediaLibraryManager
+import com.yurii.youtubemusic.utilities.PlaybackState
 import com.yurii.youtubemusic.utilities.requireParcelable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
@@ -39,7 +37,6 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val mediaListAdapter: MediaListAdapter by lazy {
         MediaListAdapter(object : MediaListAdapter.Callback {
             override fun onMediaItemClicked(mediaItem: MediaItem) {
-                //viewModel.onClickMediaItem(mediaItem)
                 viewModel.onClickMediaItem(mediaItem)
             }
 
@@ -51,19 +48,8 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launchWhenCreated {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                launch { startObservingEvents() }
-//                launch { startObservingMediaItems() }
-//                launch { startObservingPlayingItem() }
-                viewModel.mediaItemsStatus.collectLatest { mediaItemsStatus ->
-                    binding.apply {
-                        loadingBar.isVisible = mediaItemsStatus == MediaItemsViewModel2.MediaItemsStatus.Loading
-                        mediaItems.isVisible = mediaItemsStatus is MediaItemsViewModel2.MediaItemsStatus.Loaded
-                        noMediaItems.isVisible = mediaItemsStatus == MediaItemsViewModel2.MediaItemsStatus.NoMediaItems
-
-                        if (mediaItemsStatus is MediaItemsViewModel2.MediaItemsStatus.Loaded)
-                            mediaListAdapter.submitList(mediaItemsStatus.mediaItems)
-                    }
-                }
+                launch { startObservingMediaItems() }
+                launch { startObservingPlayingItem() }
             }
         }
 
@@ -74,36 +60,26 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             adapter = mediaListAdapter
         }
     }
-//
-//    private suspend fun startObservingPlayingItem() = viewModel.playingMediaItem.collectLatest { playingMediaItem ->
-//        mediaListAdapter.setPlayingMediaItem(playingMediaItem)
-//    }
-//
-//    private suspend fun startObservingMediaItems() = viewModel.mediaItems.collectLatest {
-//        when (it) {
-//            is MediaItemsViewModel.MediaItemsStatus.Loading -> binding.apply {
-//                loadingBar.isVisible = true
-//                mediaItems.isVisible = false
-//            }
-//            is MediaItemsViewModel.MediaItemsStatus.Loaded -> binding.apply {
-//                loadingBar.isVisible = false
-//                mediaItems.isVisible = true
-//                mediaListAdapter.submitList(it.mediaItems)
-//            }
-//            MediaItemsViewModel.MediaItemsStatus.NoMediaItems -> binding.apply {
-//                noMediaItems.isVisible = true
-//                mediaItems.isVisible = false
-//            }
-//        }
-//    }
-//
-//    private suspend fun startObservingEvents() {
-//        viewModel.event.collectLatest {
-//            when (it) {
-//                is MediaItemsViewModel.Event.ConfirmRemovingMediaItem -> confirmRemovingMediaItem(it.mediaMetaData)
-//            }
-//        }
-//    }
+
+    private suspend fun startObservingPlayingItem() = viewModel.playbackState.collectLatest { playbackState ->
+        when(playbackState) {
+            PlaybackState.None -> mediaListAdapter.resetState()
+            is PlaybackState.Paused -> mediaListAdapter.setPlayingStateMediaItem(playbackState.mediaItem, isPlaying = false)
+            is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(playbackState.mediaItem, isPlaying = true)
+        }
+    }
+
+    private suspend fun startObservingMediaItems() = viewModel.mediaItemsStatus.collectLatest { mediaItemsStatus ->
+        binding.apply {
+            loadingBar.isVisible = mediaItemsStatus == MediaItemsViewModel2.MediaItemsStatus.Loading
+            mediaItems.isVisible = mediaItemsStatus is MediaItemsViewModel2.MediaItemsStatus.Loaded
+            noMediaItems.isVisible = mediaItemsStatus == MediaItemsViewModel2.MediaItemsStatus.NoMediaItems
+
+            if (mediaItemsStatus is MediaItemsViewModel2.MediaItemsStatus.Loaded)
+                mediaListAdapter.submitList(mediaItemsStatus.mediaItems)
+        }
+    }
+
 
     private fun confirmRemovingMediaItem(mediaItem: MediaItem) {
         ConfirmDeletionDialog.create(

@@ -1,19 +1,14 @@
 package com.yurii.youtubemusic.screens.saved.mediaitems
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.utilities.MediaPlayer
-import com.yurii.youtubemusic.utilities.MediaServiceConnection
 import com.yurii.youtubemusic.utilities.PlaybackState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
@@ -27,6 +22,8 @@ class MediaItemsViewModel2(private val mediaPlayer: MediaPlayer) : ViewModel() {
     private val _mediaItemsStatus: MutableStateFlow<MediaItemsStatus> = MutableStateFlow(MediaItemsStatus.Loading)
     val mediaItemsStatus = _mediaItemsStatus.asStateFlow()
 
+    val playbackState = mediaPlayer.playbackState
+
     init {
         viewModelScope.launch {
             mediaPlayer.mediaItems.collect { mediaItems ->
@@ -35,12 +32,6 @@ class MediaItemsViewModel2(private val mediaPlayer: MediaPlayer) : ViewModel() {
         }
         viewModelScope.launch {
             mediaPlayer.launch()
-        }
-
-        viewModelScope.launch {
-            mediaPlayer.playbackState.collectLatest {
-                Log.i("DUPA", it.toString())
-            }
         }
     }
 
