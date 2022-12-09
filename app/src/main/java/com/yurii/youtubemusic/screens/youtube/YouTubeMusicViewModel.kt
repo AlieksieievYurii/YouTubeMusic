@@ -8,7 +8,10 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.screens.youtube.models.*
+import com.yurii.youtubemusic.screens.youtube.service.MusicDownloaderService
 import com.yurii.youtubemusic.screens.youtube.service.ServiceConnection
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.utilities.MediaStorage
@@ -32,8 +35,7 @@ class YouTubeMusicViewModel(
     private val downloaderServiceConnection: ServiceConnection,
     googleSignInAccount: GoogleSignInAccount,
     private val preferences: Preferences2
-) :
-    ViewModel() {
+) : ViewModel() {
     sealed class Event {
         data class SelectCategories(val videoItem: VideoItem) : Event()
         data class DeleteItem(val videoItem: VideoItem) : Event()
@@ -63,22 +65,24 @@ class YouTubeMusicViewModel(
     init {
         deleteUnFinishedJobs()
         _currentPlaylistId.value?.let { loadVideoItems(it) }
-        downloaderServiceConnection.setCallbacks(object : ServiceConnection.CallBack {
-            override fun onFinished(videoItem: VideoItem) {
-                val musicFile = mediaStorage.getMusic(videoItem.videoId)
-                sendVideoItemStatus(VideoItemStatus.Downloaded(videoItem, musicFile.length()))
-                sendEvent(Event.NotifyVideoItemHasBeenDownloaded(videoItem))
+        viewModelScope.launch {
+            downloaderServiceConnection.downloadingReport.collectLatest { report ->
+                when (report) {
+                    is MusicDownloaderService.DownloadingReport.Successful -> {
+                        val musicFile = mediaStorage.getMusic(report.videoItem.videoId)
+                        sendVideoItemStatus(VideoItemStatus.Downloaded(report.videoItem, musicFile.length()))
+                        sendEvent(Event.NotifyVideoItemHasBeenDownloaded(report.videoItem))
+                    }
+                    is MusicDownloaderService.DownloadingReport.Failed -> sendVideoItemStatus(VideoItemStatus.Failed(report.videoItem, report.error))
+                }
             }
+        }
 
-            override fun onProgress(videoItem: VideoItem, progress: Progress) {
-                sendVideoItemStatus(VideoItemStatus.Downloading(videoItem, progress.currentSize, progress.totalSize))
+        viewModelScope.launch {
+            downloaderServiceConnection.downloadingProgress.collectLatest { progress ->
+                sendVideoItemStatus(VideoItemStatus.Downloading(progress.first, progress.second.currentSize, progress.second.totalSize))
             }
-
-            override fun onError(videoItem: VideoItem, error: Exception) {
-                sendVideoItemStatus(VideoItemStatus.Failed(videoItem, error))
-            }
-
-        })
+        }
         downloaderServiceConnection.connect()
     }
 
