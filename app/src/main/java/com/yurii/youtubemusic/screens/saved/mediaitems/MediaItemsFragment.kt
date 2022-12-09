@@ -30,7 +30,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val viewModel: MediaItemsViewModel2 by viewModels {
         val category: Category = requireArguments().requireParcelable(EXTRA_CATEGORY)
-        Injector.provideMediaItemsViewModel2(requireContext(), category)
+        Injector.provideMediaItemsViewModel(requireContext(), category)
     }
     private val binding: FragmentMediaItemsBinding by viewBinding()
 

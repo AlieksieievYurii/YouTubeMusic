@@ -8,33 +8,17 @@ import com.yurii.youtubemusic.screens.saved.service.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.categories.CategoriesEditorViewModel
 import com.yurii.youtubemusic.screens.equalizer.EqualizerViewModel
-import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.screens.player.PlayerControllerViewModel
 import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel
-import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel2
-import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsViewModel
 import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsViewModel2
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
 import com.yurii.youtubemusic.screens.youtube.service.ServiceConnection
-
-//import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
 
 object Injector {
 
     fun provideEqualizerViewModel(context: Context): EqualizerViewModel.Factory {
         val musicServiceConnection = provideMusicServiceConnection(context)
         return EqualizerViewModel.Factory(context.applicationContext, musicServiceConnection)
-    }
-
-    fun provideMediaItemsViewModel(
-        context: Context,
-        category: Category,
-        activityMainActivityViewModel: MainActivityViewModel
-    ): MediaItemsViewModel.Factory {
-        val musicServiceConnection = provideMusicServiceConnection(context)
-        val mediaStorage = MediaStorage(context)
-        val mediaMetadataProvider = MediaMetadataProvider(context)
-        return MediaItemsViewModel.Factory(category, mediaStorage, mediaMetadataProvider, activityMainActivityViewModel, musicServiceConnection)
     }
 
     fun providePlayerControllerViewModel(context: Context): PlayerControllerViewModel.Factory {
