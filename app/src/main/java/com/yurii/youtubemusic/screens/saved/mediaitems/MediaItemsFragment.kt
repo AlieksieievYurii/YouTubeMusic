@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.MediaMetaData
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
@@ -29,33 +30,40 @@ import timber.log.Timber
 
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    private val viewModel: MediaItemsViewModel by viewModels {
+    private val viewModel: MediaItemsViewModel2 by viewModels {
         val category: Category = requireArguments().requireParcelable(EXTRA_CATEGORY)
-        Injector.provideMediaItemsViewModel(requireContext(), category, mainActivityViewModel)
+        Injector.provideMediaItemsViewModel2(requireContext(), category)
     }
     private val binding: FragmentMediaItemsBinding by viewBinding()
 
     private val mediaListAdapter: MediaListAdapter by lazy {
         MediaListAdapter(object : MediaListAdapter.Callback {
-            override fun onMediaItemClicked(mediaItem: MediaMetaData) =
+            override fun onMediaItemClicked(mediaItem: MediaItem) {
+                //viewModel.onClickMediaItem(mediaItem)
                 viewModel.onClickMediaItem(mediaItem)
+            }
 
-            override fun onMediaItemMoreOptionsClicked(mediaItem: MediaMetaData, mediaItemView: View) =
+            override fun onMediaItemMoreOptionsClicked(mediaItem: MediaItem, mediaItemView: View) =
                 expandMoreOptionsFor(mediaItemView, mediaItem)
         })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launchWhenCreated {
-            launch {
-                MediaLibraryManager.getInstance(requireContext()).event.collectLatest {
-                    Timber.i("Category: ${requireArguments().requireParcelable<Category>(EXTRA_CATEGORY)}, $it")
-                }
-            }
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { startObservingEvents() }
-                launch { startObservingMediaItems() }
-                launch { startObservingPlayingItem() }
+//                launch { startObservingEvents() }
+//                launch { startObservingMediaItems() }
+//                launch { startObservingPlayingItem() }
+                viewModel.mediaItemsStatus.collectLatest { mediaItemsStatus ->
+                    binding.apply {
+                        loadingBar.isVisible = mediaItemsStatus == MediaItemsViewModel2.MediaItemsStatus.Loading
+                        mediaItems.isVisible = mediaItemsStatus is MediaItemsViewModel2.MediaItemsStatus.Loaded
+                        noMediaItems.isVisible = mediaItemsStatus == MediaItemsViewModel2.MediaItemsStatus.NoMediaItems
+
+                        if (mediaItemsStatus is MediaItemsViewModel2.MediaItemsStatus.Loaded)
+                            mediaListAdapter.submitList(mediaItemsStatus.mediaItems)
+                    }
+                }
             }
         }
 
@@ -66,49 +74,49 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             adapter = mediaListAdapter
         }
     }
+//
+//    private suspend fun startObservingPlayingItem() = viewModel.playingMediaItem.collectLatest { playingMediaItem ->
+//        mediaListAdapter.setPlayingMediaItem(playingMediaItem)
+//    }
+//
+//    private suspend fun startObservingMediaItems() = viewModel.mediaItems.collectLatest {
+//        when (it) {
+//            is MediaItemsViewModel.MediaItemsStatus.Loading -> binding.apply {
+//                loadingBar.isVisible = true
+//                mediaItems.isVisible = false
+//            }
+//            is MediaItemsViewModel.MediaItemsStatus.Loaded -> binding.apply {
+//                loadingBar.isVisible = false
+//                mediaItems.isVisible = true
+//                mediaListAdapter.submitList(it.mediaItems)
+//            }
+//            MediaItemsViewModel.MediaItemsStatus.NoMediaItems -> binding.apply {
+//                noMediaItems.isVisible = true
+//                mediaItems.isVisible = false
+//            }
+//        }
+//    }
+//
+//    private suspend fun startObservingEvents() {
+//        viewModel.event.collectLatest {
+//            when (it) {
+//                is MediaItemsViewModel.Event.ConfirmRemovingMediaItem -> confirmRemovingMediaItem(it.mediaMetaData)
+//            }
+//        }
+//    }
 
-    private suspend fun startObservingPlayingItem() = viewModel.playingMediaItem.collectLatest { playingMediaItem ->
-        mediaListAdapter.setPlayingMediaItem(playingMediaItem)
-    }
-
-    private suspend fun startObservingMediaItems() = viewModel.mediaItems.collectLatest {
-        when (it) {
-            is MediaItemsViewModel.MediaItemsStatus.Loading -> binding.apply {
-                loadingBar.isVisible = true
-                mediaItems.isVisible = false
-            }
-            is MediaItemsViewModel.MediaItemsStatus.Loaded -> binding.apply {
-                loadingBar.isVisible = false
-                mediaItems.isVisible = true
-                mediaListAdapter.submitList(it.mediaItems)
-            }
-            MediaItemsViewModel.MediaItemsStatus.NoMediaItems -> binding.apply {
-                noMediaItems.isVisible = true
-                mediaItems.isVisible = false
-            }
-        }
-    }
-
-    private suspend fun startObservingEvents() {
-        viewModel.event.collectLatest {
-            when (it) {
-                is MediaItemsViewModel.Event.ConfirmRemovingMediaItem -> confirmRemovingMediaItem(it.mediaMetaData)
-            }
-        }
-    }
-
-    private fun confirmRemovingMediaItem(mediaItem: MediaMetaData) {
+    private fun confirmRemovingMediaItem(mediaItem: MediaItem) {
         ConfirmDeletionDialog.create(
             titleId = R.string.dialog_confirm_deletion_music_title,
             messageId = R.string.dialog_confirm_deletion_music_message,
             onConfirm = {
-                viewModel.deleteMediaItem(mediaItem)
+                //viewModel.deleteMediaItem(mediaItem)
             }
         ).show(requireActivity().supportFragmentManager, "RequestToDeleteMediaItem")
 
     }
 
-    private fun expandMoreOptionsFor(viewItem: View, mediaItem: MediaMetaData) {
+    private fun expandMoreOptionsFor(viewItem: View, mediaItem: MediaItem) {
         val popupMenu = PopupMenu(requireContext(), viewItem)
         popupMenu.menuInflater.inflate(R.menu.media_item_menu, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener {
@@ -122,11 +130,11 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
         popupMenu.show()
     }
 
-    private fun openCategoriesEditor(mediaItem: MediaMetaData) {
+    private fun openCategoriesEditor(mediaItem: MediaItem) {
         SelectCategoriesDialog.selectCategories(requireContext(), mediaItem.categories) {
             mediaItem.categories.clear()
             mediaItem.categories.addAll(it)
-            mainActivityViewModel.notifyMediaItemHasBeenModified(mediaItem)
+            //mainActivityViewModel.notifyMediaItemHasBeenModified(mediaItem)
         }
     }
 

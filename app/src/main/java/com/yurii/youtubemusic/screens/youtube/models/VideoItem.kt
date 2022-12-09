@@ -2,10 +2,12 @@ package com.yurii.youtubemusic.screens.youtube.models
 
 import com.google.api.services.youtube.model.Video
 import com.yurii.youtubemusic.models.Item
+import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.Duration
 import java.io.Serializable
 import java.math.BigInteger
 
+@Parcelize
 data class VideoItem(
     val videoId: String,
     val videoTitle: String,
@@ -16,7 +18,7 @@ data class VideoItem(
     val likeCount: BigInteger,
     val thumbnail: String,
     val normalThumbnail: String
-) : Item(videoId, videoTitle, authorChannelTitle, videoDurationInMillis), Serializable {
+) : Item(videoId, videoTitle, authorChannelTitle, videoDurationInMillis) {
 
     companion object {
         fun createFrom(video: Video): VideoItem =
