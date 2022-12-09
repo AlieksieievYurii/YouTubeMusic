@@ -11,20 +11,20 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemMusicBinding
-import com.yurii.youtubemusic.models.MediaMetaData
+import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.utilities.getVisibleItems
 
-class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaMetaData, MediaListAdapter.MusicViewHolder>(Comparator) {
+class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, MediaListAdapter.MusicViewHolder>(Comparator) {
     interface Callback {
-        fun onMediaItemClicked(mediaItem: MediaMetaData)
-        fun onMediaItemMoreOptionsClicked(mediaItem: MediaMetaData, mediaItemView: View)
+        fun onMediaItemClicked(mediaItem: MediaItem)
+        fun onMediaItemMoreOptionsClicked(mediaItem: MediaItem, mediaItemView: View)
     }
 
-    private object Comparator : DiffUtil.ItemCallback<MediaMetaData>() {
-        override fun areItemsTheSame(oldItem: MediaMetaData, newItem: MediaMetaData) =
+    private object Comparator : DiffUtil.ItemCallback<MediaItem>() {
+        override fun areItemsTheSame(oldItem: MediaItem, newItem: MediaItem) =
             oldItem.id == newItem.id
 
-        override fun areContentsTheSame(oldItem: MediaMetaData, newItem: MediaMetaData) =
+        override fun areContentsTheSame(oldItem: MediaItem, newItem: MediaItem) =
             oldItem == newItem
     }
 
@@ -35,29 +35,33 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaMetaDa
         this.recyclerView = recyclerView
     }
 
-    private var playingMediaItem: MediaItemsViewModel.PlayingMediaItem? = null
+    /*
+        playingMediaItem represents which mediaItem is playing or paused.
+        isPlaying represents actual state: playing or paused
+    */
+    private var playingMediaItem: MediaItem? = null
+    private var isPlaying = false
 
-    fun setPlayingMediaItem(playingMediaItem: MediaItemsViewModel.PlayingMediaItem?) {
-        playingMediaItem?.let {
-            if (it != this.playingMediaItem)
-                setClearAllVisibleItems()
-
-            this.playingMediaItem = it
-            findVisibleViewHolder(it.mediaMetaData)?.setPlaying(it.isPaused)
-        } ?: setNoPlayingItem()
-    }
-
-    private fun setNoPlayingItem() {
+    fun resetState() {
         playingMediaItem = null
-        setClearAllVisibleItems()
+        isPlaying = false
+        recyclerView.getVisibleItems<MusicViewHolder>().forEach { it.setNonPlayingState() }
     }
 
-    private fun setClearAllVisibleItems() = recyclerView.getVisibleItems<MusicViewHolder>().forEach { it.setNonPlayingState() }
 
-    private fun findVisibleViewHolder(mediaItem: MediaMetaData): MediaListAdapter.MusicViewHolder? {
+    fun setPlayingStateMediaItem(mediaItem: MediaItem, isPlaying: Boolean) {
+        if (mediaItem != playingMediaItem)
+            resetState()
+        playingMediaItem = mediaItem
+        this.isPlaying = isPlaying
+        findVisibleViewHolder(mediaItem)?.setPlayingState(isPlaying)
+    }
+
+
+    private fun findVisibleViewHolder(mediaItem: MediaItem): MediaListAdapter.MusicViewHolder? {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
         (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
-            if (it != -1 && getItem(it)?.mediaId == mediaItem.mediaId) {
+            if (it != -1 && getItem(it)?.id == mediaItem.id) {
                 return recyclerView.findViewHolderForLayoutPosition(it) as MediaListAdapter.MusicViewHolder
             }
         }
@@ -74,22 +78,22 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaMetaDa
     }
 
     inner class MusicViewHolder(private val itemMusicBinding: ItemMusicBinding) : RecyclerView.ViewHolder(itemMusicBinding.root) {
-        fun bind(mediaItem: MediaMetaData) {
+        fun bind(mediaItem: MediaItem) {
             itemMusicBinding.apply {
                 musicItem = mediaItem
                 container.setOnClickListener { callback.onMediaItemClicked(mediaItem) }
                 moreOptions.setOnClickListener { callback.onMediaItemMoreOptionsClicked(mediaItem, moreOptions) }
             }
 
-            if (playingMediaItem?.mediaMetaData == mediaItem)
-                setPlaying(playingMediaItem!!.isPaused)
+            if (playingMediaItem == mediaItem)
+                setPlayingState(isPlaying)
             else
                 setNonPlayingState()
         }
 
-        fun setPlaying(isPaused: Boolean) {
+        fun setPlayingState(isPlaying: Boolean) {
             itemMusicBinding.apply {
-                val itemIcon = ContextCompat.getDrawable(root.context, if (isPaused) R.drawable.ic_pause_24px else R.drawable.ic_play_24dp)
+                val itemIcon = ContextCompat.getDrawable(root.context, if (isPlaying) R.drawable.ic_pause_24px else R.drawable.ic_play_24dp)
                 container.setCardBackgroundColor(ContextCompat.getColor(root.context, R.color.lightGray))
                 thumbnailState.isVisible = true
                 thumbnailState.setImageDrawable(itemIcon)
