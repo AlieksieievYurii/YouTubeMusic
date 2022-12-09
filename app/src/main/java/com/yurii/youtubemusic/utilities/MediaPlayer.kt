@@ -11,14 +11,26 @@ import kotlinx.coroutines.flow.*
  * It provides [mediaItems] flow to get all the media items assigned to given [category].
  * Once the instance of the class is created, run suspended function [launch] to load the items and observe changes
  */
-class MediaPlayer(val category: Category, private val mediaServiceConnection: MediaServiceConnection) {
-    private val _mediaItems: MutableSharedFlow<List<MediaItem>> = MutableSharedFlow()
+class MediaPlayer(
+    val category: Category,
+    private val mediaServiceConnection: MediaServiceConnection,
+    private val mediaLibraryManager: MediaLibraryManager
+) {
+    private val _mediaItems: MutableSharedFlow<List<MediaItem>> = MutableSharedFlow(replay = 1) // replay = 1 to keep the cache
     val mediaItems = _mediaItems.asSharedFlow()
 
     val playbackState = mediaServiceConnection.playbackState
 
     suspend fun launch() {
         _mediaItems.emit(mediaServiceConnection.getMediaItemsFor(category))
+        mediaLibraryManager.event.collectLatest { event ->
+            when (event) {
+                is MediaLibraryManager.Event.ItemDeleted -> {
+                    val newList = _mediaItems.replayCache[0].filter { it.id != event.item.id } //replayCache[0] because replay = 1
+                    _mediaItems.emit(newList)
+                }
+            }
+        }
     }
 
     fun play(mediaItem: MediaItem) {
@@ -31,6 +43,14 @@ class MediaPlayer(val category: Category, private val mediaServiceConnection: Me
 
     fun resume() {
         mediaServiceConnection.resume()
+    }
+
+    /**
+     * Eliminates given [mediaItem] and notifies [com.yurii.youtubemusic.screens.saved.service.MediaService] about that
+     */
+    suspend fun removeMediaItem(mediaItem: MediaItem) {
+        mediaLibraryManager.deleteItem(mediaItem)
+        mediaServiceConnection.notifyItemIsDeleted(mediaItem)
     }
 
 }

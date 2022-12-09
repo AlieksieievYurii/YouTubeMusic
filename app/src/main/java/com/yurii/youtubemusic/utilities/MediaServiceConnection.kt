@@ -8,10 +8,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
-import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.models.MediaMetaData
+import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.saved.service.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,17 +49,23 @@ class MediaServiceConnection private constructor(private val context: Context) {
             putParcelable(EXTRA_KEY_CATEGORIES, category)
         }
         mediaController?.transportControls?.playFromMediaId(mediaItem.id, extras)
-            ?: throw throw IllegalStateException("Can not 'Play' media item because mediaController is not initialized")
+            ?: throw IllegalStateException("Can not 'Play' media item because mediaController is not initialized")
     }
 
     fun pause() {
         mediaController?.transportControls?.pause()
-            ?: throw throw IllegalStateException("Can not 'Pause' playing because mediaController is not initialized")
+            ?: throw IllegalStateException("Can not 'Pause' playing because mediaController is not initialized")
     }
 
     fun resume() {
         mediaController?.transportControls?.play()
-            ?: throw throw IllegalStateException("Can not 'Resume' playing because mediaController is not initialized")
+            ?: throw IllegalStateException("Can not 'Resume' playing because mediaController is not initialized")
+    }
+
+    fun notifyItemIsDeleted(item: Item) {
+        mediaController?.sendCommand(REQUEST_COMMAND_DELETE_MEDIA_ITEM, Bundle().apply {
+            putString(EXTRA_MEDIA_ITEM, item.id)
+        }, null) ?: throw IllegalStateException("Can not 'notifyItemIsDeleted' because mediaController is not initialized")
     }
 
     suspend fun getMediaItemsFor(category: Category): List<MediaItem> = suspendCoroutine { callback ->

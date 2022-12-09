@@ -85,9 +85,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
         ConfirmDeletionDialog.create(
             titleId = R.string.dialog_confirm_deletion_music_title,
             messageId = R.string.dialog_confirm_deletion_music_message,
-            onConfirm = {
-                //viewModel.deleteMediaItem(mediaItem)
-            }
+            onConfirm = { viewModel.deleteMediaItem(mediaItem) }
         ).show(requireActivity().supportFragmentManager, "RequestToDeleteMediaItem")
 
     }

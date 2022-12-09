@@ -43,6 +43,10 @@ class MediaItemsViewModel2(private val mediaPlayer: MediaPlayer) : ViewModel() {
         }
     }
 
+    fun deleteMediaItem(mediaItem: MediaItem) {
+        viewModelScope.launch { mediaPlayer.removeMediaItem(mediaItem) }
+    }
+
     @Suppress("UNCHECKED_CAST")
     class Factory(
         private val mediaPlayer: MediaPlayer
