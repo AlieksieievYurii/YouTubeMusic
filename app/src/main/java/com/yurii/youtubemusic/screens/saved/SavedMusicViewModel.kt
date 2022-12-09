@@ -1,56 +1,35 @@
 package com.yurii.youtubemusic.screens.saved
 
-import android.app.Application
-import android.content.Context
-import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
-import androidx.lifecycle.*
-import com.yurii.youtubemusic.screens.saved.service.CATEGORIES_CONTENT
-import com.yurii.youtubemusic.screens.saved.service.MusicServiceConnection
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.MediaMetaData
+import com.yurii.youtubemusic.utilities.MediaServiceConnection
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
-class SavedMusicViewModel(application: Application, musicServiceConnection: MusicServiceConnection) : AndroidViewModel(application) {
-    private val _categoryItems = MutableLiveData<List<Category>>()
-    val categoryItems: LiveData<List<Category>> = _categoryItems
+class SavedMusicViewModel(private val mediaServiceConnection: MediaServiceConnection) : ViewModel() {
+    private val _musicCategories: MutableSharedFlow<List<Category>> = MutableSharedFlow()
+    val musicCategories = _musicCategories.asSharedFlow()
 
-
-    private val categoryItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
-        override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
-            super.onChildrenLoaded(parentId, children)
-            _categoryItems.postValue(children.map { Category.createFrom(it) })
-        }
-
-        override fun onError(parentId: String, options: Bundle) {
-            super.onError(parentId, options)
-            //TODO Implement error handling
-        }
+    init {
+        reloadMusicCategories()
     }
 
-    fun refreshCategories() {
-        musicServiceConnection.requestUpdatingMediaItems {
-            musicServiceConnection.unsubscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
-            musicServiceConnection.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
+    fun reloadMusicCategories() {
+        viewModelScope.launch {
+            _musicCategories.emit(mediaServiceConnection.getCategories())
         }
-    }
-
-    fun deleteMediaItem(mediaId: String) = musicServiceConnection.requestDeleteMediaItem(mediaId)
-
-    fun updateMediaItem(mediaMetaData: MediaMetaData) = musicServiceConnection.requestUpdateMediaItem(mediaMetaData)
-
-    fun notifyVideoItemHasBeenDownloaded(mediaId: String) = musicServiceConnection.requestAddMediaItem(mediaId)
-
-    private val musicServiceConnection = musicServiceConnection.also {
-        it.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
     }
 
     @Suppress("UNCHECKED_CAST")
-    class Factory(private val context: Context, private val musicServiceConnection: MusicServiceConnection) :
-        ViewModelProvider.Factory {
+    class Factory(private val mediaServiceConnection: MediaServiceConnection) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(SavedMusicViewModel::class.java))
-                return SavedMusicViewModel(context as Application, musicServiceConnection) as T
+                return SavedMusicViewModel(mediaServiceConnection) as T
             throw IllegalStateException("Given the model class is not assignable from SavedMusicViewModel class")
         }
     }

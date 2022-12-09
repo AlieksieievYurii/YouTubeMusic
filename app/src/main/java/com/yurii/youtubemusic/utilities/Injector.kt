@@ -11,7 +11,9 @@ import com.yurii.youtubemusic.screens.equalizer.EqualizerViewModel
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.screens.player.PlayerControllerViewModel
 import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel
+import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel2
 import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsViewModel
+import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsViewModel2
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
 import com.yurii.youtubemusic.screens.youtube.service.ServiceConnection
 
@@ -42,9 +44,12 @@ object Injector {
     }
 
     fun provideSavedMusicViewModel(context: Context): SavedMusicViewModel.Factory {
-        val applicationContext = context.applicationContext
-        val musicServiceConnection = provideMusicServiceConnection(context)
-        return SavedMusicViewModel.Factory(applicationContext, musicServiceConnection)
+        return SavedMusicViewModel.Factory(MediaServiceConnection.getInstance(context))
+    }
+
+    fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel2.Factory {
+        val mediaPlayer = MediaPlayer(category, MediaServiceConnection.getInstance(context), MediaLibraryManager.getInstance(context))
+        return MediaItemsViewModel2.Factory(mediaPlayer)
     }
 
     fun provideYouTubeMusicViewModel(context: Context, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
