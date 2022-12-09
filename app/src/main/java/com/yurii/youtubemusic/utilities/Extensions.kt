@@ -1,6 +1,9 @@
 package com.yurii.youtubemusic.utilities
 
+import android.os.Bundle
+import android.os.Parcelable
 import androidx.recyclerview.widget.RecyclerView
+import java.lang.IllegalStateException
 
 fun <T : RecyclerView.ViewHolder> RecyclerView.getVisibleItems(): List<T> {
     val arrayList = ArrayList<T>()
@@ -16,4 +19,8 @@ fun <T : RecyclerView.ViewHolder> RecyclerView.getVisibleItems(): List<T> {
     }
 
     return arrayList
+}
+
+fun <T : Parcelable> Bundle.requireParcelable(key: String): T {
+    return this.getParcelable(key) ?: throw IllegalStateException("This bundle argument is required: $key")
 }
