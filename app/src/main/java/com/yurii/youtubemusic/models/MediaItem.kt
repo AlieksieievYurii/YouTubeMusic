@@ -18,7 +18,6 @@ data class MediaItem(
     val description: String,
     val thumbnail: File,
     val mediaFile: File,
-    val categories: ArrayList<Category>
 ) : Item(id, title, author, durationInMillis) {
     companion object {
         fun createFrom(mediaItem: MediaBrowserCompat.MediaItem): MediaItem {
@@ -31,7 +30,6 @@ data class MediaItem(
                 durationInMillis = extras.getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
                 thumbnail = mediaItem.description.iconUri!!.toFile(),
                 mediaFile = mediaItem.description.mediaUri!!.toFile(),
-                categories = extras.getParcelableArrayList(EXTRA_KEY_CATEGORIES)!!
             )
         }
 
@@ -44,7 +42,6 @@ data class MediaItem(
                 description = mediaMetaData.description,
                 thumbnail = mediaMetaData.thumbnail,
                 mediaFile = mediaMetaData.mediaFile,
-                categories = mediaMetaData.categories
             )
         }
     }

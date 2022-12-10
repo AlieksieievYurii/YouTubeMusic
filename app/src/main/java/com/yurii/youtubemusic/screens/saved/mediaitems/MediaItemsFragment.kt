@@ -105,11 +105,11 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
 
     private fun openCategoriesEditor(mediaItem: MediaItem) {
-        SelectCategoriesDialog.selectCategories(requireContext(), mediaItem.categories) {
-            mediaItem.categories.clear()
-            mediaItem.categories.addAll(it)
-            //mainActivityViewModel.notifyMediaItemHasBeenModified(mediaItem)
-        }
+//        SelectCategoriesDialog.selectCategories(requireContext(), mediaItem.categories) {
+//            mediaItem.categories.clear()
+//            mediaItem.categories.addAll(it)
+//            //mainActivityViewModel.notifyMediaItemHasBeenModified(mediaItem)
+//        }
     }
 
     companion object {
