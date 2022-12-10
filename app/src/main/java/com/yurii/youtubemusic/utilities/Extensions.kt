@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.utilities
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.recyclerview.widget.RecyclerView
+import java.io.File
 import java.lang.IllegalStateException
 
 fun <T : RecyclerView.ViewHolder> RecyclerView.getVisibleItems(): List<T> {
@@ -24,3 +25,16 @@ fun <T : RecyclerView.ViewHolder> RecyclerView.getVisibleItems(): List<T> {
 fun <T : Parcelable> Bundle.requireParcelable(key: String): T {
     return this.getParcelable(key) ?: throw IllegalStateException("This bundle argument is required: $key")
 }
+
+/**
+ * Creates parent folders of the file
+ */
+fun File.parentMkdir() {
+    if (!parentFile!!.exists())
+        parentFile!!.mkdirs()
+}
+
+/**
+ * Iterates recursively over all file of the directory
+ */
+fun File.walkFiles() = walk().filter { it.isFile }
