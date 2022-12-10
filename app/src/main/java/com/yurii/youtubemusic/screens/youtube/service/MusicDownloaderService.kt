@@ -7,6 +7,7 @@ import android.os.IBinder
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.youtube.models.Progress
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.utilities.MediaLibraryManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,7 +34,7 @@ class MusicDownloaderService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        downloader = MusicDownloaderImp(this, MusicDownloaderCallBacks())
+        downloader = MusicDownloaderImp(MusicDownloaderCallBacks(), MediaLibraryManager.getInstance(this))
         notificationManager = NotificationManager(this)
     }
 

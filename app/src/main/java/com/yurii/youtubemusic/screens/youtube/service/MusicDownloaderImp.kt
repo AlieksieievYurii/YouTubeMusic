@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.screens.youtube.service
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.github.kiulian.downloader.YoutubeDownloader
@@ -10,8 +9,8 @@ import com.github.kiulian.downloader.model.formats.AudioFormat
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.youtube.models.Progress
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
-import com.yurii.youtubemusic.utilities.MediaMetadataProvider
-import com.yurii.youtubemusic.utilities.MediaStorage
+import com.yurii.youtubemusic.utilities.MediaLibraryManager
+import com.yurii.youtubemusic.utilities.parentMkdir
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -24,10 +23,9 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 
-class MusicDownloaderImp(context: Context, private val callBack: CallBack) : MusicDownloaderAbstract() {
+class MusicDownloaderImp(private val callBack: CallBack, private val mediaLibraryManager: MediaLibraryManager) :
+    MusicDownloaderAbstract() {
     private val youtubeDownloader = YoutubeDownloader()
-    private val mediaMetadataProvider = MediaMetadataProvider(context)
-    private val mediaStorage = MediaStorage(context)
 
     private val keepAliveTime = 1L
     private val keepAliveTimeUnit = TimeUnit.SECONDS
@@ -85,9 +83,9 @@ class MusicDownloaderImp(context: Context, private val callBack: CallBack) : Mus
 
     override fun getProgress(videoItem: VideoItem): Progress? = findExecutingTask(videoItem)?.progress
 
-    private fun findExecutingTask(videoItem: VideoItem): Task? = executionTasks.find { it.videoItem.videoId == videoItem.videoId }
+    private fun findExecutingTask(videoItem: VideoItem): Task? = executionTasks.find { it.videoItem.id == videoItem.id }
 
-    private fun findFailedTask(videoItem: VideoItem): Task? = failedTasks.find { it.videoItem.videoId == videoItem.videoId }
+    private fun findFailedTask(videoItem: VideoItem): Task? = failedTasks.find { it.videoItem.id == videoItem.id }
 
     private inner class Task(val videoItem: VideoItem, private val categories: List<Category>) : Runnable {
         var progress: Progress = Progress.create()
@@ -110,7 +108,7 @@ class MusicDownloaderImp(context: Context, private val callBack: CallBack) : Mus
             try {
                 downloadMusic()
                 downloadThumbnail()
-                addMetadata()
+                mediaLibraryManager.registerDownloadedVideoItem(videoItem, categories.map { it.id }) //TODO Why not pass categories directly
             } catch (_: InterruptedException) {
                 executionTasks.remove(this)
                 return
@@ -136,7 +134,7 @@ class MusicDownloaderImp(context: Context, private val callBack: CallBack) : Mus
             var attempt = 1
             while (true)
                 try {
-                    return youtubeDownloader.getVideo(videoItem.videoId)
+                    return youtubeDownloader.getVideo(videoItem.id)
                 } catch (error: YoutubeException) {
                     if (attempt == 3)
                         throw error
@@ -147,34 +145,7 @@ class MusicDownloaderImp(context: Context, private val callBack: CallBack) : Mus
 
         private fun downloadThumbnail() {
             val bitmap = downloadBitmap(videoItem.normalThumbnail)
-            saveBitmapToFile(bitmap)
-        }
-
-        private fun addMetadata() {
-            val v = VideoItem(
-                videoItem.videoId,
-                videoItem.title,
-                videoItem.authorChannelTitle,
-                videoItem.description,
-                videoItem.durationInMillis,
-                videoItem.viewCount,
-                videoItem.likeCount,
-                videoItem.thumbnail,
-                videoItem.normalThumbnail
-            )
-            val c = categories.map { com.yurii.youtubemusic.models.Category(it.id, it.name) }
-            mediaMetadataProvider.setMetadata(v, ArrayList(c))
-        }
-
-        private fun saveBitmapToFile(bitmap: Bitmap) {
-            val file = mediaStorage.getThumbnail(videoItem.videoId).also {
-                if (!it.parentFile!!.exists())
-                    it.parentFile!!.mkdirs()
-            }
-
-            file.outputStream().run {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, this)
-            }
+            mediaLibraryManager.mediaStorage.saveThumbnail(bitmap, videoItem)
         }
 
         private fun downloadBitmap(srcUrl: String): Bitmap {
@@ -187,7 +158,7 @@ class MusicDownloaderImp(context: Context, private val callBack: CallBack) : Mus
         }
 
         private fun download(audioFormat: AudioFormat) {
-            val outputFile = getOutputFile()
+            val outputFile = mediaLibraryManager.mediaStorage.getDownloadingMockFile(videoItem).also { it.parentMkdir() }
             val url = URL(audioFormat.url())
             val totalSize = audioFormat.contentLength()!!
 
@@ -196,20 +167,13 @@ class MusicDownloaderImp(context: Context, private val callBack: CallBack) : Mus
             if (isInterrupted)
                 return
 
-            setFileName(outputFile)
+            mediaLibraryManager.mediaStorage.setMockAsDownloaded(videoItem)
         }
 
         private fun checkIfVideoIsLive(video: YoutubeVideo) {
             val videoDetails = video.details()
             if (videoDetails.isLive)
                 throw YoutubeException.LiveVideoException("Can not download live stream")
-        }
-
-        private fun setFileName(file: File) {
-            val newFile = mediaStorage.getMusic(videoItem.videoId)
-            val isRenamed = file.renameTo(newFile)
-
-            check(isRenamed) { "Cannot rename the file after complete downloading" }
         }
 
         private fun downloadFile(url: URL, totalSize: Long, outputFile: File) {
@@ -242,15 +206,7 @@ class MusicDownloaderImp(context: Context, private val callBack: CallBack) : Mus
             }
         }
 
-        private fun getOutputFile(): File {
-            val outDir = mediaStorage.musicStorageFolder.also {
-                if (!it.exists())
-                    it.mkdirs()
-            }
 
-            return File(outDir, "${videoItem.videoId}.downloading")
-        }
-
-        override fun toString(): String = "VideoItemTask(videoItem=${videoItem.videoId}, progress=$progress)"
+        override fun toString(): String = "VideoItemTask(videoItem=${videoItem.id}, progress=$progress)"
     }
 }
