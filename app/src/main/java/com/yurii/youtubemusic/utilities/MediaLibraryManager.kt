@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
  * The class is responsible for doing modification operations. It implements event-based approach. In simple words
  * when you do some changes, an event is triggered and all its subscribers are informed.
  */
-class MediaLibraryManager private constructor(val mediaStorage: MediaStorage2) {
+class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
     sealed class Event {
         data class ItemDeleted(val item: Item) : Event()
         data class MediaItemIsAdded(val mediaItem: MediaItem): Event()
@@ -83,7 +83,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage2) {
 
         fun getInstance(context: Context): MediaLibraryManager {
             if (instance == null)
-                instance = MediaLibraryManager(MediaStorage2(context))
+                instance = MediaLibraryManager(MediaStorage(context))
 
             return instance!!
         }

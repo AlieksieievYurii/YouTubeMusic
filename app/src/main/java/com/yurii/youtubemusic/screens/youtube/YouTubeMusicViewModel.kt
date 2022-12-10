@@ -63,13 +63,13 @@ class YouTubeMusicViewModel(
     private var searchJob: Job? = null
 
     init {
-        deleteUnFinishedJobs()
+        mediaStorage.deleteDownloadingMocks()
         _currentPlaylistId.value?.let { loadVideoItems(it) }
         viewModelScope.launch {
             downloaderServiceConnection.downloadingReport.collectLatest { report ->
                 when (report) {
                     is MusicDownloaderService.DownloadingReport.Successful -> {
-                        val musicFile = mediaStorage.getMusic(report.videoItem.videoId)
+                        val musicFile = mediaStorage.getMediaFile(report.videoItem)
                         sendVideoItemStatus(VideoItemStatus.Downloaded(report.videoItem, musicFile.length()))
                         sendEvent(Event.NotifyVideoItemHasBeenDownloaded(report.videoItem))
                     }
@@ -118,7 +118,7 @@ class YouTubeMusicViewModel(
     fun askToDelete(videoItem: VideoItem) = sendEvent(Event.DeleteItem(videoItem))
 
     fun delete(videoItem: VideoItem) {
-        mediaStorage.deleteAllDataFor(videoItem.videoId)
+        mediaStorage.deleteAllDataFor(videoItem)
         sendVideoItemStatus(VideoItemStatus.Download(videoItem))
         sendEvent(Event.NotifyVideoItemHasBeenDeleted(videoItem))
     }
@@ -128,7 +128,7 @@ class YouTubeMusicViewModel(
     fun downloadAndAddToCategories(item: VideoItem) = sendEvent(Event.SelectCategories(item))
 
     fun getItemStatus(videoItem: VideoItem): VideoItemStatus {
-        val musicFile = mediaStorage.getMusic(videoItem.videoId)
+        val musicFile = mediaStorage.getMediaFile(videoItem)
 
         if (musicFile.exists())
             return VideoItemStatus.Downloaded(videoItem, musicFile.length())
@@ -142,12 +142,6 @@ class YouTubeMusicViewModel(
             return VideoItemStatus.Failed(videoItem, downloaderServiceConnection.getError(videoItem))
 
         return VideoItemStatus.Download(videoItem)
-    }
-
-    private fun deleteUnFinishedJobs() {
-        mediaStorage.musicStorageFolder.walk().filter { it.extension == "downloading" }.forEach {
-            it.delete()
-        }
     }
 
     fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {
