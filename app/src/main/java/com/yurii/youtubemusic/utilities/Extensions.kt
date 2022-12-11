@@ -38,3 +38,14 @@ fun File.parentMkdir() {
  * Iterates recursively over all file of the directory
  */
 fun File.walkFiles() = walk().filter { it.isFile }
+
+/**
+ * Returns index of the item where the [filter] matches. Otherwise null
+ */
+fun <T> List<T>.findIndex(filter: (T) -> Boolean): Int? {
+    forEachIndexed { index, item ->
+        if (filter.invoke(item))
+            return index
+    }
+    return null
+}
