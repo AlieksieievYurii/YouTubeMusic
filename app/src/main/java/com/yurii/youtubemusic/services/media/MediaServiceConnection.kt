@@ -9,10 +9,11 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.yurii.youtubemusic.models.*
-import com.yurii.youtubemusic.screens.saved.service.*
+import com.yurii.youtubemusic.services.media.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
+import java.lang.Exception
 import java.lang.IllegalStateException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -77,7 +78,8 @@ class MediaServiceConnection private constructor(private val context: Context) {
 
             override fun onError(parentId: String, options: Bundle) {
                 super.onError(parentId, options)
-                throw IllegalStateException("FAILED TO GET MEDIA ITEMS. $options")
+                throw options.getSerializable(EXTRA_ERROR_MESSAGE) as? Exception
+                    ?: IllegalStateException("Error occurred during requesting media items for $category. Can not get Error")
             }
         }
 
@@ -93,7 +95,8 @@ class MediaServiceConnection private constructor(private val context: Context) {
 
             override fun onError(parentId: String, options: Bundle) {
                 super.onError(parentId, options)
-                throw IllegalStateException("FAILED TO GET CATEGORIES. $options")
+                throw options.getSerializable(EXTRA_ERROR_MESSAGE) as? Exception
+                    ?: IllegalStateException("Error occurred during requesting Categories. Can not get Error")
             }
         }
         mediaBrowser.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
@@ -119,15 +122,13 @@ class MediaServiceConnection private constructor(private val context: Context) {
 
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-            val mediaMetaData = state.extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
+            val mediaItem = state.extras?.getParcelable<MediaItem>(PLAYBACK_STATE_MEDIA_ITEM)
             when (state.state) {
                 PlaybackStateCompat.STATE_PLAYING -> {
-                    //TODO Remove meta data because MediaItem must be used
-                    _playbackState.value = PlaybackState.Playing(MediaItem.createFromMediaMetaData(mediaMetaData!!))
+                    _playbackState.value = PlaybackState.Playing(mediaItem!!)
                 }
                 PlaybackStateCompat.STATE_PAUSED -> {
-                    //TODO Remove meta data because MediaItem must be used
-                    _playbackState.value = PlaybackState.Paused(MediaItem.createFromMediaMetaData(mediaMetaData!!))
+                    _playbackState.value = PlaybackState.Paused(mediaItem!!)
                 }
                 PlaybackStateCompat.STATE_STOPPED -> _playbackState.value = PlaybackState.None
                 else -> {
