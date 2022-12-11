@@ -33,7 +33,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
     private fun findVisibleViewHolder(videoId: String): MyViewHolder? {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
         (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
-            if (it != -1 && getItem(it)?.videoId == videoId) {
+            if (it != -1 && getItem(it)?.id == videoId) {
                 return recyclerView.findViewHolderForLayoutPosition(it) as MyViewHolder
             }
         }
@@ -42,7 +42,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
 
     object Comparator : DiffUtil.ItemCallback<VideoItem>() {
         override fun areItemsTheSame(oldItem: VideoItem, newItem: VideoItem) =
-            oldItem.videoId == newItem.videoId
+            oldItem.id == newItem.id
 
         override fun areContentsTheSame(oldItem: VideoItem, newItem: VideoItem) =
             oldItem == newItem
