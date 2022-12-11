@@ -1,8 +1,11 @@
 package com.yurii.youtubemusic.models
 
+import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.core.net.toFile
+import androidx.core.net.toUri
 import kotlinx.android.parcel.Parcelize
 import java.io.File
 
@@ -45,4 +48,25 @@ data class MediaItem(
             )
         }
     }
+}
+
+fun MediaItem.getMediaDescriptionCompat(): MediaDescriptionCompat {
+    val extras = Bundle().also {
+        it.putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, this.author)
+        it.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, this.durationInMillis)
+    }
+    return MediaDescriptionCompat.Builder().also {
+        it.setDescription(this.description)
+        it.setTitle(this.title)
+        it.setSubtitle(this.title)
+        it.setMediaId(this.id)
+        it.setIconUri(this.thumbnail.toUri())
+        it.setMediaUri(this.mediaFile.toUri())
+        it.setExtras(extras)
+    }.build()
+}
+
+
+fun MediaItem.toCompatMediaItem(): MediaBrowserCompat.MediaItem {
+    return MediaBrowserCompat.MediaItem(this.getMediaDescriptionCompat(), MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
 }

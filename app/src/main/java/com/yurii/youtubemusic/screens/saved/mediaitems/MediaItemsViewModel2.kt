@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.utilities.MediaPlayer
+import com.yurii.youtubemusic.services.media.MediaPlayer
 import com.yurii.youtubemusic.utilities.PlaybackState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
