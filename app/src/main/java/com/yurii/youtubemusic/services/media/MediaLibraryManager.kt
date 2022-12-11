@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.utilities
+package com.yurii.youtubemusic.services.media
 
 import android.content.Context
 import com.yurii.youtubemusic.models.Category
@@ -6,7 +6,6 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
-import com.yurii.youtubemusic.services.media.MediaStorage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
@@ -31,11 +30,11 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
 
     /**
      * Creates Metadata file for give(downloaded) [videoItem].
-     * Also appends [videoItem] to the given [additionalCustomCategories]
+     * Also appends [videoItem] to the given [customCategories]
      */
 
     //TODO Make some lock to avoid asynchronous registering items
-    suspend fun registerMediaItem(videoItem: VideoItem, additionalCustomCategories: List<Category>) {
+    suspend fun registerMediaItem(videoItem: VideoItem, customCategories: List<Category>) {
         val mediaFile = mediaStorage.getMediaFile(videoItem)
         val thumbnailFile = mediaStorage.getThumbnail(videoItem)
 
@@ -56,29 +55,18 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         )
 
         mediaStorage.createMediaMetadata(mediaItem)
-        addMediaItemToDefaultCategory(videoItem)
-        addMediaItemToAdditionalCategories(mediaItem, additionalCustomCategories)
-        _event.emit(Event.MediaItemIsAdded(mediaItem, additionalCustomCategories.map { it.id }))
+        mediaStorage.assignItemToCategory(Category.ALL, mediaItem)
+        addMediaItemToAdditionalCategories(mediaItem, customCategories)
+        _event.emit(Event.MediaItemIsAdded(mediaItem, customCategories.map { it.id }))
     }
 
-    private fun addMediaItemToDefaultCategory(videoItem: VideoItem) {
-        val defaultCategory = mediaStorage.getDefaultCategory()
-        defaultCategory.appendItem(videoItem)
-        mediaStorage.saveCategory(defaultCategory)
-    }
-
-
-    private fun addMediaItemToAdditionalCategories(mediaItem: MediaItem, additionalCustomCategories: List<Category>) {
+    private suspend fun addMediaItemToAdditionalCategories(mediaItem: MediaItem, additionalCustomCategories: List<Category>) {
         val availableCategories = mediaStorage.getCustomCategories()
 
         additionalCustomCategories.forEach { targetCategory ->
             val category = availableCategories.find { it.id == targetCategory.id }
-            category?.let {
-                it.appendItem(mediaItem)
-                mediaStorage.saveCategory(category)
-            }
+            category?.let { mediaStorage.assignItemToCategory(it, mediaItem) }
         }
-
     }
 
     companion object {
