@@ -70,3 +70,14 @@ fun MediaItem.getMediaDescriptionCompat(): MediaDescriptionCompat {
 fun MediaItem.toCompatMediaItem(): MediaBrowserCompat.MediaItem {
     return MediaBrowserCompat.MediaItem(this.getMediaDescriptionCompat(), MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
 }
+
+fun MediaItem.toMediaMetadataCompat(): MediaMetadataCompat = MediaMetadataCompat.Builder().also {
+    it.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, this.id)
+    it.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, this.title)
+    it.putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, this.author)
+    it.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, this.author)
+    it.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, this.description)
+    it.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, this.thumbnail.absolutePath)
+    it.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, this.mediaFile.toString())
+    it.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, this.durationInMillis)
+}.build()
