@@ -65,7 +65,7 @@ class AddEditCategoryDialog : DialogFragment() {
 
     private fun renameCategory() {
         getCategoryName { categoryName ->
-            val category = Category(id = currentCategory!!.id, name = categoryName, mutableListOf())
+            val category = Category(id = currentCategory!!.id, name = categoryName)
             onEditCategoryCallBack?.invoke(category)
             dismiss()
         }

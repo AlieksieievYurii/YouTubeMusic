@@ -9,7 +9,7 @@ import com.github.kiulian.downloader.model.formats.AudioFormat
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.youtube.models.Progress
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
-import com.yurii.youtubemusic.utilities.MediaLibraryManager
+import com.yurii.youtubemusic.services.media.MediaStorage
 import com.yurii.youtubemusic.utilities.parentMkdir
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 
-class MusicDownloaderImp(private val callBack: CallBack, private val mediaLibraryManager: MediaLibraryManager) :
+class MusicDownloaderImp(private val callBack: CallBack, private val mediaStorage: MediaStorage) :
     MusicDownloaderAbstract() {
     private val youtubeDownloader = YoutubeDownloader()
 
@@ -41,8 +41,8 @@ class MusicDownloaderImp(private val callBack: CallBack, private val mediaLibrar
         decodeWorkQueue
     )
 
-    override fun download(videoItem: VideoItem, categories: List<Category>) {
-        val task = Task(videoItem, categories)
+    override fun download(videoItem: VideoItem, customCategories: List<Category>) {
+        val task = Task(videoItem, customCategories)
         executeTask(task)
     }
 
@@ -87,7 +87,7 @@ class MusicDownloaderImp(private val callBack: CallBack, private val mediaLibrar
 
     private fun findFailedTask(videoItem: VideoItem): Task? = failedTasks.find { it.videoItem.id == videoItem.id }
 
-    private inner class Task(val videoItem: VideoItem, private val categories: List<Category>) : Runnable {
+    private inner class Task(val videoItem: VideoItem, private val customCategories: List<Category>) : Runnable {
         var progress: Progress = Progress.create()
         private var isInterrupted = false
 
@@ -108,13 +108,12 @@ class MusicDownloaderImp(private val callBack: CallBack, private val mediaLibrar
             try {
                 downloadMusic()
                 downloadThumbnail()
-                mediaLibraryManager.registerDownloadedVideoItem(videoItem, categories.map { it.id }) //TODO Why not pass categories directly
             } catch (_: InterruptedException) {
                 executionTasks.remove(this)
                 return
             }
             executionTasks.remove(this)
-            callBack.onFinished(videoItem)
+            callBack.onFinished(videoItem, customCategories)
         }
 
         fun interruptTask() {
@@ -145,7 +144,7 @@ class MusicDownloaderImp(private val callBack: CallBack, private val mediaLibrar
 
         private fun downloadThumbnail() {
             val bitmap = downloadBitmap(videoItem.normalThumbnail)
-            mediaLibraryManager.mediaStorage.saveThumbnail(bitmap, videoItem)
+            mediaStorage.saveThumbnail(bitmap, videoItem)
         }
 
         private fun downloadBitmap(srcUrl: String): Bitmap {
@@ -158,7 +157,7 @@ class MusicDownloaderImp(private val callBack: CallBack, private val mediaLibrar
         }
 
         private fun download(audioFormat: AudioFormat) {
-            val outputFile = mediaLibraryManager.mediaStorage.getDownloadingMockFile(videoItem).also { it.parentMkdir() }
+            val outputFile = mediaStorage.getDownloadingMockFile(videoItem).also { it.parentMkdir() }
             val url = URL(audioFormat.url())
             val totalSize = audioFormat.contentLength()!!
 
@@ -167,7 +166,7 @@ class MusicDownloaderImp(private val callBack: CallBack, private val mediaLibrar
             if (isInterrupted)
                 return
 
-            mediaLibraryManager.mediaStorage.setMockAsDownloaded(videoItem)
+            mediaStorage.setMockAsDownloaded(videoItem)
         }
 
         private fun checkIfVideoIsLive(video: YoutubeVideo) {

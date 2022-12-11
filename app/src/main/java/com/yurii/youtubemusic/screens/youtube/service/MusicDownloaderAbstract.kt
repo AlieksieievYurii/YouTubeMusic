@@ -8,12 +8,12 @@ import java.lang.Exception
 
 abstract class MusicDownloaderAbstract {
     interface CallBack {
-        fun onFinished(videoItem: VideoItem)
+        fun onFinished(videoItem: VideoItem, customCategories: List<Category>)
         fun onChangeProgress(videoItem: VideoItem, progress: Progress)
         fun onErrorOccurred(videoItem: VideoItem, error: Exception)
     }
 
-    abstract fun download(videoItem: VideoItem, categories: List<Category> = listOf())
+    abstract fun download(videoItem: VideoItem, customCategories: List<Category> = listOf())
     abstract fun retryToDownload(videoItem: VideoItem)
     abstract fun cancel(videoItem: VideoItem)
     abstract fun isItemDownloading(videoItem: VideoItem): Boolean

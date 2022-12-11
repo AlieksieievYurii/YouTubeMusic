@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.models.isDefault
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
 import java.io.File
 import java.lang.IllegalStateException
@@ -56,7 +57,10 @@ class MediaStorage(context: Context) {
         }
     }
 
-    fun getCategories(): List<Category> = categoriesStorage.walkFiles().map { gson.fromJson(it.readText(), Category::class.java) }.toList()
+    fun getCustomCategories(): List<Category> =
+        categoriesStorage.walkFiles().map { gson.fromJson(it.readText(), Category::class.java) }.filter { !it.isDefault }.toList()
+
+    fun getAllCategories(): List<Category> = getCustomCategories().toMutableList().apply { add(0, getDefaultCategory()) }
 
     fun saveCategory(category: Category) {
         val json = gson.toJson(category)

@@ -17,11 +17,11 @@ import android.util.Log
 import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
+import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.main.MainActivity
-import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.EXTRA_KEY_CATEGORIES
-import com.yurii.youtubemusic.models.MediaMetaData
-import com.yurii.youtubemusic.models.toMediaMetadataCompat
+import com.yurii.youtubemusic.services.media.MediaStorage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 private const val TAG = "MediaBackgroundService"
 
@@ -64,6 +64,11 @@ class MediaService : MediaBrowserServiceCompat() {
     private var currentAudioFocus = AudioFocus.NoFocus
     private val becomingNoisyReceiver = BecomingNoisyReceiver()
     private val playbackStateBuilder = PlaybackStateCompat.Builder()
+
+    private val mediaStorage: MediaStorage by lazy { MediaStorage(this) }
+
+    private val coroutineScopeJob = Job()
+    private val coroutineScope = CoroutineScope(coroutineScopeJob)
 
     override fun onCreate() {
         super.onCreate()
@@ -113,8 +118,8 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun requestCategories(result: Result<List<MediaBrowserCompat.MediaItem>>) {
-        val categories = musicProvider.getMediaItemsCategories()
-        result.sendResult(categories)
+        val categories = mediaStorage.getAllCategories()
+        result.sendResult(categories.map { it.toMediaItem() })
     }
 
     private fun requestMusicItemsByCategory(patentId: String, result: Result<List<MediaBrowserCompat.MediaItem>>) {
@@ -456,6 +461,7 @@ class MediaService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         super.onDestroy()
+        coroutineScopeJob.cancel()
         mediaSession.run {
             isActive = false
             release()

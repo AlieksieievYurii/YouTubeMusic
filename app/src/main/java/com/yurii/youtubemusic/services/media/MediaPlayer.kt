@@ -2,6 +2,7 @@ package com.yurii.youtubemusic.utilities
 
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.models.isDefault
 import kotlinx.coroutines.flow.*
 
 /**
@@ -27,6 +28,12 @@ class MediaPlayer(
             when (event) {
                 is MediaLibraryManager.Event.ItemDeleted -> {
                     val newList = _mediaItems.replayCache[0].filter { it.id != event.item.id } //replayCache[0] because replay = 1
+                    _mediaItems.emit(newList)
+                }
+                is MediaLibraryManager.Event.MediaItemIsAdded -> if (category.isDefault || category.id in event.assignedCategoriesIds) {
+                    val newList = _mediaItems.replayCache[0].toMutableList().apply {
+                        add(event.mediaItem)
+                    }
                     _mediaItems.emit(newList)
                 }
             }

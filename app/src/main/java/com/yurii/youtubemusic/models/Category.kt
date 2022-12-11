@@ -9,25 +9,18 @@ import kotlinx.android.parcel.Parcelize
  * Represents a media category that is a group of included media items
  */
 @Parcelize
-data class Category(val id: Int, val name: String, private val _mediaItemsIds: MutableList<String>) : Parcelable {
-    val mediaItemsIds: List<String>
-        get() = _mediaItemsIds
-
-    fun appendItem(item: Item) {
-        if (_mediaItemsIds.contains(item.id))
-            return
-
-        _mediaItemsIds.add(item.id)
-    }
-
+data class Category(val id: Int, val name: String) : Parcelable {
     companion object {
-        val ALL = Category(0, "all", mutableListOf())
+        val ALL = Category(0, "all")
 
         fun createFrom(mediaItem: MediaBrowserCompat.MediaItem): Category {
-            return Category(mediaItem.mediaId!!.toInt(), mediaItem.description.title.toString(), mutableListOf())
+            return Category(mediaItem.mediaId!!.toInt(), mediaItem.description.title.toString())
         }
     }
 }
+
+val Category.isDefault: Boolean
+    get() = this.id == Category.ALL.id
 
 fun Category.toMediaItem(): MediaBrowserCompat.MediaItem {
     val mediaDescription = MediaDescriptionCompat.Builder()
@@ -36,3 +29,6 @@ fun Category.toMediaItem(): MediaBrowserCompat.MediaItem {
         .build()
     return MediaBrowserCompat.MediaItem(mediaDescription, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE)
 }
+
+@Parcelize
+data class CategoryContainer(val category: Category, val mediaItemsIds: List<String>) : Parcelable

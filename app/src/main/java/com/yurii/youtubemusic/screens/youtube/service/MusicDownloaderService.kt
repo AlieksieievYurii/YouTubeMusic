@@ -7,7 +7,7 @@ import android.os.IBinder
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.youtube.models.Progress
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
-import com.yurii.youtubemusic.utilities.MediaLibraryManager
+import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,19 +24,14 @@ class MusicDownloaderService : Service() {
     private val scopeJob = Job()
     private val serviceCoroutineScope = CoroutineScope(scopeJob)
 
+    private val mediaLibraryManager by lazy { MediaLibraryManager.getInstance(this) }
+
     private var downloadingProgress: MutableSharedFlow<Pair<VideoItem, Progress>>? = null
     private var downloadingReport: MutableSharedFlow<DownloadingReport>? = null
 
-    private lateinit var downloader: MusicDownloaderAbstract
-    private lateinit var notificationManager: NotificationManager
+    private val downloader: MusicDownloaderAbstract by lazy { MusicDownloaderImp(MusicDownloaderCallBacks(), mediaLibraryManager.mediaStorage) }
+    private val notificationManager by lazy { NotificationManager(this) }
     private var isForeground = false
-
-    override fun onCreate() {
-        super.onCreate()
-
-        downloader = MusicDownloaderImp(MusicDownloaderCallBacks(), MediaLibraryManager.getInstance(this))
-        notificationManager = NotificationManager(this)
-    }
 
     override fun onBind(intent: Intent?): IBinder {
         return ServiceInterface()
@@ -62,9 +57,10 @@ class MusicDownloaderService : Service() {
     }
 
     private inner class MusicDownloaderCallBacks : MusicDownloaderAbstract.CallBack {
-        override fun onFinished(videoItem: VideoItem) {
+        override fun onFinished(videoItem: VideoItem, customCategories: List<Category>) {
             stopAsForegroundIfQueueIsEmpty()
             serviceCoroutineScope.launch {
+                mediaLibraryManager.registerMediaItem(videoItem, customCategories) //TODO Why not pass categories directly
                 downloadingReport?.emit(DownloadingReport.Successful(videoItem))
             }
         }
