@@ -44,9 +44,9 @@ const val PLAYBACK_STATE_SESSION_ID = "com.yurii.youtubemusic.playback.state.ses
 const val EXTRA_MEDIA_ITEM = "com.yurii.youtubemusic.playback.media.item"
 const val EXTRA_CURRENT_TIME_POSITION = "com.yurii.youtubemusic.current.time.position"
 
-const val ERROR_OCCURRED = "error"
-const val FAILED_TO_LOAD_CATEGORIES = "faild_to_load_categories"
-const val FAILED_TO_LOAD_MEDIA_ITEMS = "faild_to_load_media_items"
+const val FAILED_TO_LOAD_CATEGORIES = "failed_to_load_categories"
+const val FAILED_TO_LOAD_MEDIA_ITEMS = "failed_to_load_media_items"
+const val BROKEN_MEDIA_ITEM = "broken_media_item"
 const val EXTRA_EXCEPTION = "exception"
 
 private const val VOLUME_DUCK = 0.2f
@@ -81,6 +81,7 @@ class MediaService : MediaBrowserServiceCompat() {
         super.onCreate()
         initMediaSession()
         updateCurrentPlaybackState()
+        startHandlingMediaLibraryEvents()
     }
 
     private fun initMediaSession() {
@@ -103,6 +104,18 @@ class MediaService : MediaBrowserServiceCompat() {
             setSessionActivity(sessionActivityPendingIntent)
         }
         sessionToken = mediaSession.sessionToken
+    }
+
+    private fun startHandlingMediaLibraryEvents() {
+        coroutineScope.launch {
+            mediaLibraryManager.event.collectLatest { event ->
+                when (event) {
+                    is MediaLibraryManager.Event.ItemDeleted -> onMediaItemIsDeleted(event.item)
+                    is MediaLibraryManager.Event.MediaItemIsAdded -> {
+                    }
+                }
+            }
+        }
     }
 
     override fun onLoadChildren(parentId: String, result: Result<List<MediaBrowserCompat.MediaItem>>) {
@@ -136,14 +149,26 @@ class MediaService : MediaBrowserServiceCompat() {
     private fun requestMusicItemsByCategory(patentId: String, result: Result<List<MediaBrowserCompat.MediaItem>>) {
         result.detach()
         coroutineScope.launch {
-            result.sendResult(try {
-                val mediaItems = mediaLibraryManager.mediaStorage.getMediaItemsFor(patentId.toInt())
-                mediaItems.map { it.toCompatMediaItem() }
-            } catch (error: Exception) {
-                sendMediaSessionError(FAILED_TO_LOAD_MEDIA_ITEMS, error)
-                null
-            })
+            result.sendResult(getMediaBrowserMediaItemsFor(patentId.toInt()))
         }
+    }
+
+    private suspend fun getMediaBrowserMediaItemsFor(categoryId: Int): List<MediaBrowserCompat.MediaItem>? {
+        val mediaItemsIds: List<String> = try {
+            mediaLibraryManager.mediaStorage.getCategoryContainer(categoryId).mediaItemsIds
+        } catch (error: Exception) {
+            sendMediaSessionError(FAILED_TO_LOAD_MEDIA_ITEMS, error)
+            return null
+        }
+        val results = ArrayList<MediaBrowserCompat.MediaItem>()
+        mediaItemsIds.forEach {
+            try {
+                results.add(mediaLibraryManager.mediaStorage.getValidatedMediaItem(it).toCompatMediaItem())
+            } catch (error: MediaItemValidationException) {
+                sendMediaSessionError(BROKEN_MEDIA_ITEM, error)
+            }
+        }
+        return results
     }
 
     private fun updateCurrentPlaybackState() {
@@ -302,6 +327,12 @@ class MediaService : MediaBrowserServiceCompat() {
         stopSelf()
     }
 
+    private fun onMediaItemIsDeleted(item: Item) {
+        if (queueProvider.getCurrentQueueItem().id == item.id) {
+            handleStopRequest()
+        }
+
+    }
 
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
         override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {

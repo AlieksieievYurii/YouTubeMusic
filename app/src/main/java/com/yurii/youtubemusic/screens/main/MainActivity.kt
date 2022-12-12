@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.screens.main
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
                 if (it is MainActivityViewModel.Event.MediaServiceError) {
                     //TODO Add showing up a snackbar or smt like that
+                    Log.e("ERROR", it.exception.toString())
                 }
             }
         }

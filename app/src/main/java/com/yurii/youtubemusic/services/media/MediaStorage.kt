@@ -12,6 +12,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.lang.IllegalStateException
 
+class MediaItemValidationException(message: String) : Exception(message)
+
 /**
  * Represents an logical interface to the file system in order to manage media files from single repository
  */
@@ -24,7 +26,8 @@ class MediaStorage(context: Context) {
 
     fun getMediaFile(item: Item): File = getMediaFile(item.id)
 
-    fun getThumbnail(item: Item): File = File(thumbnailStorage, "${item.id}.jpeg")
+    fun getThumbnail(item: Item): File = getThumbnail(item.id)
+    fun getThumbnail(id: String): File = File(thumbnailStorage, "$id.jpeg")
 
     fun getAllMusicFiles(): List<File> = musicStorageFolder.walkFiles().filter { it.extension == "mp3" }.toList()
 
@@ -37,6 +40,9 @@ class MediaStorage(context: Context) {
         val json = gson.toJson(mediaItem)
         metadataJson.writeText(json)
     }
+
+    private suspend fun getAllCategoryContainers(): List<CategoryContainer> =
+        getCustomCategoryContainers().toMutableList().apply { add(0, getDefaultCategoryContainer()) }
 
     suspend fun getMediaItemsFor(category: Category) = getMediaItemsFor(category.id)
 
@@ -85,6 +91,23 @@ class MediaStorage(context: Context) {
         gson.fromJson(getMediaMetadata(id).readText(), MediaItem::class.java)!!
     }
 
+    suspend fun validate(mediaItem: MediaItem) {
+        if (!mediaItem.mediaFile.exists()) {
+            eliminateMediaItem(mediaItem.id)
+            throw MediaItemValidationException("Media file does not exist for ${mediaItem.id}. So eliminate that")
+        }
+
+        if (!mediaItem.thumbnail.exists()) {
+            eliminateMediaItem(mediaItem.id)
+            throw MediaItemValidationException("Thumbnail file does not exist for ${mediaItem.id}. So eliminate that")
+        }
+
+        if (getDefaultCategoryContainer().mediaItemsIds.find { it == mediaItem.id } == null) {
+            eliminateMediaItem(mediaItem.id)
+            throw MediaItemValidationException("MediaItem (${mediaItem.id}) is not listed in the Default category, so eliminate that")
+        }
+    }
+
     private fun getCategoryContainerFile(category: Category): File = getCategoryContainerFile(category.id)
 
     private fun getCategoryContainerFile(categoryId: Int): File = File(categoriesContainersStorage, "$categoryId.json")
@@ -105,6 +128,20 @@ class MediaStorage(context: Context) {
         }
     }
 
+    private suspend fun eliminateMediaItem(id: String) {
+        getMediaFile(id).delete()
+        getMediaMetadata(id).delete()
+        getThumbnail(id).delete()
+        getAllCategoryContainers().forEach {
+            if (it.mediaItemsIds.contains(id)) {
+                val newMediaItemsIdsList = it.mediaItemsIds.toMutableList()
+                newMediaItemsIdsList.remove(id)
+                val newContainerCategory = CategoryContainer(it.category, newMediaItemsIdsList)
+                saveCategoryContainer(newContainerCategory)
+            }
+        }
+    }
+
     private suspend fun getDefaultCategory(): Category = getDefaultCategoryContainer().category
 
     private suspend fun getCustomCategoryContainers(): List<CategoryContainer> = withContext(Dispatchers.IO) {
@@ -115,11 +152,46 @@ class MediaStorage(context: Context) {
 
     private suspend fun getCategoryContainer(category: Category): CategoryContainer = getCategoryContainer(category.id)
 
-    private suspend fun getCategoryContainer(categoryId: Int): CategoryContainer = withContext(Dispatchers.IO) {
+    suspend fun getCategoryContainer(categoryId: Int): CategoryContainer = withContext(Dispatchers.IO) {
         gson.fromJson(getCategoryContainerFile(categoryId).readText(), CategoryContainer::class.java)
     }
 
-    private fun saveCategoryContainer(categoryContainer: CategoryContainer) {
+    /**
+     * Returns an instance of [MediaItem] for given [id]. Moreover, it checks if the media item is validated:
+     *  - if can get media item itself
+     *  - if a music file exists
+     *  - if a thumbnail exists
+     *  - if the media item is listed in Default category
+     *
+     * When some of this criteria is failed, then eliminate the whole media item and throws an exception [MediaItemValidationException]
+     */
+    suspend fun getValidatedMediaItem(id: String): MediaItem {
+        val mediaItem = try {
+            getMediaItem(id)
+        } catch (error: Exception) {
+            eliminateMediaItem(id)
+            throw MediaItemValidationException("Can not get Media metadata for $id, so eliminating it")
+        }
+
+        if (!mediaItem.mediaFile.exists()) {
+            eliminateMediaItem(mediaItem.id)
+            throw MediaItemValidationException("Media file does not exist for ${mediaItem.id}. So eliminate that")
+        }
+
+        if (!mediaItem.thumbnail.exists()) {
+            eliminateMediaItem(mediaItem.id)
+            throw MediaItemValidationException("Thumbnail file does not exist for ${mediaItem.id}. So eliminate that")
+        }
+
+        if (getDefaultCategoryContainer().mediaItemsIds.find { it == mediaItem.id } == null) {
+            eliminateMediaItem(mediaItem.id)
+            throw MediaItemValidationException("MediaItem (${mediaItem.id}) is not listed in the Default category, so eliminate that")
+        }
+
+        return mediaItem
+    }
+
+    private suspend fun saveCategoryContainer(categoryContainer: CategoryContainer) = withContext(Dispatchers.IO) {
         val json = gson.toJson(categoryContainer)
         val categoryFile = getCategoryContainerFile(categoryContainer.category).also { it.parentMkdir() }
         categoryFile.writeText(json)

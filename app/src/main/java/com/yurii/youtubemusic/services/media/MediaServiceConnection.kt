@@ -130,7 +130,7 @@ class MediaServiceConnection private constructor(private val context: Context) {
 
         override fun onSessionEvent(event: String, extras: Bundle?) {
             super.onSessionEvent(event, extras)
-            if (event == FAILED_TO_LOAD_MEDIA_ITEMS || event == FAILED_TO_LOAD_CATEGORIES)
+            if (event == FAILED_TO_LOAD_MEDIA_ITEMS || event == FAILED_TO_LOAD_CATEGORIES || event == BROKEN_MEDIA_ITEM)
                 _errors.tryEmit(extras?.getSerializable(EXTRA_EXCEPTION) as? Exception ?: Exception("Unknown"))
         }
 
