@@ -81,7 +81,9 @@ class MediaStorage(context: Context) {
 
     private fun getMediaFile(id: String): File = File(musicStorageFolder, "${id}.mp3")
 
-    private fun getMediaItem(id: String): MediaItem = gson.fromJson(getMediaMetadata(id).readText(), MediaItem::class.java)!!
+    private suspend fun getMediaItem(id: String): MediaItem = withContext(Dispatchers.IO) {
+        gson.fromJson(getMediaMetadata(id).readText(), MediaItem::class.java)!!
+    }
 
     private fun getCategoryContainerFile(category: Category): File = getCategoryContainerFile(category.id)
 
