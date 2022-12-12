@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.utilities.MediaServiceConnection
+import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
