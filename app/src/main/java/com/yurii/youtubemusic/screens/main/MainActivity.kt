@@ -12,12 +12,19 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.yurii.youtubemusic.screens.player.PlayerControlPanelFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
+import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.utilities.*
 import kotlinx.coroutines.flow.collectLatest
 import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
-    private val viewModel: MainActivityViewModel by viewModels { MainActivityViewModel.MainActivityViewModelFactory() }
+    private val viewModel: MainActivityViewModel by viewModels {
+        MainActivityViewModel.MainActivityViewModelFactory(
+            MediaServiceConnection.getInstance(
+                this
+            )
+        )
+    }
     private val activityMainBinding: ActivityMainBinding by viewBinding()
     private var activeBottomMenuItem: Int = R.id.item_saved_music
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
@@ -35,6 +42,10 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                     handleSignIn(it.account)
                 else if (it is MainActivityViewModel.Event.LogOutEvent)
                     handleSignOut()
+
+                if (it is MainActivityViewModel.Event.MediaServiceError) {
+                    //TODO Add showing up a snackbar or smt like that
+                }
             }
         }
 

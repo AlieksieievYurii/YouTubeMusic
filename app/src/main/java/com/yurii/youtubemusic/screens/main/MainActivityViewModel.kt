@@ -4,21 +4,31 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaMetaData
-import com.yurii.youtubemusic.screens.youtube.models.Item
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
-class MainActivityViewModel : ViewModel() {
+class MainActivityViewModel(private val mediaServiceConnection: MediaServiceConnection) : ViewModel() {
     sealed class Event {
         object LogOutEvent : Event()
         data class LogInEvent(val account: GoogleSignInAccount) : Event()
         data class ItemHasBeenDownloaded(val videoItem: VideoItem) : Event()
         data class ItemHasBeenDeleted(val item: Item) : Event()
         data class ItemHasBeenModified(val item: MediaMetaData) : Event()
+        data class MediaServiceError(val exception: Exception) : Event()
 
+    }
+
+    init {
+        viewModelScope.launch {
+            mediaServiceConnection.errors.collectLatest { sendEvent(Event.MediaServiceError(it)) }
+        }
     }
 
     private val _event = MutableSharedFlow<Event>()
@@ -38,11 +48,11 @@ class MainActivityViewModel : ViewModel() {
         _event.emit(event)
     }
 
-    class MainActivityViewModelFactory : ViewModelProvider.Factory {
+    class MainActivityViewModelFactory(private val mediaServiceConnection: MediaServiceConnection) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(MainActivityViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return MainActivityViewModel() as T
+                return MainActivityViewModel(mediaServiceConnection) as T
             }
             throw IllegalArgumentException("Unable to construct viewModel")
         }
