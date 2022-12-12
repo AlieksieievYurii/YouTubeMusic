@@ -6,9 +6,14 @@ import android.os.Bundle
 import android.viewbinding.library.activity.viewBinding
 import android.widget.SeekBar
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
+import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.utilities.Injector
+import kotlinx.coroutines.flow.collectLatest
 
 class PlayerActivity : AppCompatActivity() {
     private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(this) }
@@ -19,22 +24,30 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lifecycleScope.launchWhenCreated {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.playbackState.collectLatest {
+                    when(it) {
+                        PlaybackState.None -> TODO()
+                        is PlaybackState.Paused -> {
+                            binding.mediaItem = it.mediaItem
+                            binding.isPlayingNow = false
+                        }
+                        is PlaybackState.Playing -> {
+                            binding.mediaItem = it.mediaItem
+                            binding.isPlayingNow = true
+                        }
+                    }
+                }
+            }
+        }
 
-        viewModel.playingNow.observe(this) { binding.mediaItem = it }
-        viewModel.currentPlaybackState.observe(this) { binding.isPlayingNow = viewModel.isPlaying() }
-
-        binding.actionButton.setOnClickListener { viewModel.onPauseOrPlay() }
+        binding.actionButton.setOnClickListener { viewModel.pauseOrPlay() }
 
         binding.openAudioEffects.setOnClickListener {
             startActivity(Intent(this, EqualizerActivity::class.java))
         }
 
-        viewModel.currentProgressTime.observe(this) {
-            if (!isStartChangingSeek) {
-                binding.currentTimePosition = it
-                binding.seekBar.progress = (it * 1000 / viewModel.playingNow.value!!.duration).toInt()
-            }
-        }
 
         binding.moveToNext.setOnClickListener { viewModel.moveToNextTrack() }
         binding.moveToPrevious.setOnClickListener { viewModel.moveToPreviousTrack() }
@@ -42,8 +55,7 @@ class PlayerActivity : AppCompatActivity() {
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (isStartChangingSeek) {
-                    binding.currentTimePosition = progress * viewModel.playingNow.value!!.duration / 1000
-                    seekProgress = progress
+
                 }
             }
 
