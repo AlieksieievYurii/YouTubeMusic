@@ -22,6 +22,7 @@ import com.yurii.youtubemusic.screens.main.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 private const val TAG = "MediaBackgroundService"
@@ -43,7 +44,10 @@ const val PLAYBACK_STATE_SESSION_ID = "com.yurii.youtubemusic.playback.state.ses
 const val EXTRA_MEDIA_ITEM = "com.yurii.youtubemusic.playback.media.item"
 const val EXTRA_CURRENT_TIME_POSITION = "com.yurii.youtubemusic.current.time.position"
 
-const val EXTRA_ERROR_MESSAGE = "error"
+const val ERROR_OCCURRED = "error"
+const val FAILED_TO_LOAD_CATEGORIES = "faild_to_load_categories"
+const val FAILED_TO_LOAD_MEDIA_ITEMS = "faild_to_load_media_items"
+const val EXTRA_EXCEPTION = "exception"
 
 private const val VOLUME_DUCK = 0.2f
 private const val VOLUME_NORMAL = 1.0f
@@ -119,24 +123,26 @@ class MediaService : MediaBrowserServiceCompat() {
     private fun requestCategories(result: Result<List<MediaBrowserCompat.MediaItem>>) {
         result.detach()
         coroutineScope.launch {
-            try {
+            result.sendResult(try {
                 val categories = mediaLibraryManager.mediaStorage.getAllCategories()
-                result.sendResult(categories.map { it.toMediaItem() })
+                categories.map { it.toMediaItem() }
             } catch (error: Exception) {
-                result.sendError(Bundle().apply { this.putSerializable(EXTRA_ERROR_MESSAGE, error) })
-            }
+                sendMediaSessionError(FAILED_TO_LOAD_CATEGORIES, error)
+                null
+            })
         }
     }
 
     private fun requestMusicItemsByCategory(patentId: String, result: Result<List<MediaBrowserCompat.MediaItem>>) {
         result.detach()
         coroutineScope.launch {
-            try {
+            result.sendResult(try {
                 val mediaItems = mediaLibraryManager.mediaStorage.getMediaItemsFor(patentId.toInt())
-                result.sendResult(mediaItems.map { it.toCompatMediaItem() })
+                mediaItems.map { it.toCompatMediaItem() }
             } catch (error: Exception) {
-                result.sendError(Bundle().apply { this.putSerializable(EXTRA_ERROR_MESSAGE, error) })
-            }
+                sendMediaSessionError(FAILED_TO_LOAD_MEDIA_ITEMS, error)
+                null
+            })
         }
     }
 
@@ -161,6 +167,9 @@ class MediaService : MediaBrowserServiceCompat() {
 
         mediaSession.setPlaybackState(errorPlaybackState)
     }
+
+    private fun sendMediaSessionError(errorEvent: String, error: Exception) =
+        mediaSession.sendSessionEvent(errorEvent, Bundle().apply { putSerializable(EXTRA_EXCEPTION, error) })
 
     private fun getCurrentPlaybackStateBuilder(): PlaybackStateCompat.Builder {
         val position: Long = mediaPlayer?.run { currentPosition.toLong() } ?: PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN
