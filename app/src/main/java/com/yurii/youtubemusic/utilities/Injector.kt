@@ -35,10 +35,15 @@ object Injector {
     }
 
     fun provideYouTubeMusicViewModel(context: Context, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
-        val mediaStorage = MediaStorage(context)
         val googleAccount = GoogleAccount(context)
         val downloaderServiceConnection = ServiceConnection(context)
-        return YouTubeMusicViewModel.Factory(mediaStorage, googleAccount, downloaderServiceConnection, googleSignInAccount, Preferences(context))
+        return YouTubeMusicViewModel.Factory(
+            MediaLibraryManager.getInstance(context),
+            googleAccount,
+            downloaderServiceConnection,
+            googleSignInAccount,
+            Preferences(context)
+        )
     }
 
     fun provideCategoriesEditorViewMode(context: Context): CategoriesEditorViewModel.Factory {

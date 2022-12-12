@@ -13,9 +13,9 @@ import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.screens.youtube.models.*
 import com.yurii.youtubemusic.screens.youtube.service.MusicDownloaderService
 import com.yurii.youtubemusic.screens.youtube.service.ServiceConnection
+import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.utilities.GoogleAccount
-import com.yurii.youtubemusic.utilities.MediaStorage
-import com.yurii.youtubemusic.utilities.Preferences2
+import com.yurii.youtubemusic.utilities.Preferences
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -30,17 +30,14 @@ abstract class VideoItemStatus(open val videoItem: Item) {
 }
 
 class YouTubeMusicViewModel(
-    private val mediaStorage: MediaStorage,
+    private val mediaLibraryManager: MediaLibraryManager,
     private val googleAccount: GoogleAccount,
     private val downloaderServiceConnection: ServiceConnection,
     googleSignInAccount: GoogleSignInAccount,
-    private val preferences: Preferences2
+    private val preferences: Preferences
 ) : ViewModel() {
     sealed class Event {
         data class SelectCategories(val videoItem: VideoItem) : Event()
-        data class DeleteItem(val videoItem: VideoItem) : Event()
-        data class NotifyVideoItemHasBeenDeleted(val videoItem: VideoItem) : Event()
-        data class NotifyVideoItemHasBeenDownloaded(val videoItem: VideoItem) : Event()
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
         object SignOut : Event()
     }
@@ -51,7 +48,7 @@ class YouTubeMusicViewModel(
     private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
     val videoItems: StateFlow<PagingData<VideoItem>> = _videoItems
 
-    private val _currentPlaylistId: MutableStateFlow<Playlist?> = MutableStateFlow(preferences.getCurrentPlaylist())
+    private val _currentPlaylistId: MutableStateFlow<Playlist?> = MutableStateFlow(preferences.getCurrentYouTubePlaylist())
     val currentPlaylistId: StateFlow<Playlist?> = _currentPlaylistId
 
     private val _videoItemStatus = MutableSharedFlow<VideoItemStatus>()
@@ -63,15 +60,16 @@ class YouTubeMusicViewModel(
     private var searchJob: Job? = null
 
     init {
-        mediaStorage.deleteDownloadingMocks()
+        mediaLibraryManager.mediaStorage.deleteDownloadingMocks()
+
         _currentPlaylistId.value?.let { loadVideoItems(it) }
+
         viewModelScope.launch {
             downloaderServiceConnection.downloadingReport.collectLatest { report ->
                 when (report) {
                     is MusicDownloaderService.DownloadingReport.Successful -> {
-                        val musicFile = mediaStorage.getMediaFile(report.videoItem)
+                        val musicFile = mediaLibraryManager.mediaStorage.getMediaFile(report.videoItem)
                         sendVideoItemStatus(VideoItemStatus.Downloaded(report.videoItem, musicFile.length()))
-                        sendEvent(Event.NotifyVideoItemHasBeenDownloaded(report.videoItem))
                     }
                     is MusicDownloaderService.DownloadingReport.Failed -> sendVideoItemStatus(VideoItemStatus.Failed(report.videoItem, report.error))
                 }
@@ -86,16 +84,16 @@ class YouTubeMusicViewModel(
         downloaderServiceConnection.connect()
     }
 
-    fun getAllCategories() = preferences.getMusicCategories()
+    fun getAllCategories() = mutableListOf<Category>()
 
     fun signOut() {
         googleAccount.signOut()
-        preferences.setCurrentPlaylist(null)
+        preferences.setCurrentYouTubePlaylist(null)
         sendEvent(Event.SignOut)
     }
 
     fun setPlaylist(playlist: Playlist) {
-        preferences.setCurrentPlaylist(playlist)
+        preferences.setCurrentYouTubePlaylist(playlist)
         _currentPlaylistId.value = playlist
         loadVideoItems(playlist)
     }
@@ -115,12 +113,10 @@ class YouTubeMusicViewModel(
         sendVideoItemStatus(VideoItemStatus.Download(item))
     }
 
-    fun askToDelete(videoItem: VideoItem) = sendEvent(Event.DeleteItem(videoItem))
-
     fun delete(videoItem: VideoItem) {
-        mediaStorage.deleteAllDataFor(videoItem)
-        sendVideoItemStatus(VideoItemStatus.Download(videoItem))
-        sendEvent(Event.NotifyVideoItemHasBeenDeleted(videoItem))
+        viewModelScope.launch {
+            mediaLibraryManager.deleteItem(videoItem)
+        }
     }
 
     fun showFailedItemDetails(videoItem: VideoItem) = sendEvent(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
@@ -128,7 +124,7 @@ class YouTubeMusicViewModel(
     fun downloadAndAddToCategories(item: VideoItem) = sendEvent(Event.SelectCategories(item))
 
     fun getItemStatus(videoItem: VideoItem): VideoItemStatus {
-        val musicFile = mediaStorage.getMediaFile(videoItem)
+        val musicFile = mediaLibraryManager.mediaStorage.getMediaFile(videoItem)
 
         if (musicFile.exists())
             return VideoItemStatus.Downloaded(videoItem, musicFile.length())
@@ -165,15 +161,15 @@ class YouTubeMusicViewModel(
 
     @Suppress("UNCHECKED_CAST")
     class Factory(
-        private val mediaStorage: MediaStorage,
+        private val mediaLibraryManager: MediaLibraryManager
         private val googleAccount: GoogleAccount,
         private val downloaderServiceConnection: ServiceConnection,
         private val googleSignInAccount: GoogleSignInAccount,
-        private val preferences: Preferences2
+        private val preferences: Preferences
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
-                return YouTubeMusicViewModel(mediaStorage, googleAccount, downloaderServiceConnection, googleSignInAccount, preferences) as T
+                return YouTubeMusicViewModel(mediaLibraryManager, googleAccount, downloaderServiceConnection, googleSignInAccount, preferences) as T
             throw IllegalStateException("Given the model class is not assignable from YouTubeMusicViewModel class")
         }
 
