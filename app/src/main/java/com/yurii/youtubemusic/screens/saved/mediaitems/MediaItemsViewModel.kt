@@ -5,14 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.services.media.MediaPlayer
-import com.yurii.youtubemusic.utilities.PlaybackState
+import com.yurii.youtubemusic.services.media.PlaybackState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
-class MediaItemsViewModel2(private val mediaPlayer: MediaPlayer) : ViewModel() {
+class MediaItemsViewModel(private val mediaPlayer: MediaPlayer) : ViewModel() {
     sealed class MediaItemsStatus {
         object Loading : MediaItemsStatus()
         object NoMediaItems : MediaItemsStatus()
@@ -52,9 +52,9 @@ class MediaItemsViewModel2(private val mediaPlayer: MediaPlayer) : ViewModel() {
         private val mediaPlayer: MediaPlayer
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(MediaItemsViewModel2::class.java))
-                return MediaItemsViewModel2(mediaPlayer) as T
-            throw IllegalStateException("Given the model class is not assignable from MediaItemsViewModel2 class")
+            if (modelClass.isAssignableFrom(MediaItemsViewModel::class.java))
+                return MediaItemsViewModel(mediaPlayer) as T
+            throw IllegalStateException("Given the model class is not assignable from MediaItemsViewModel class")
         }
     }
 }

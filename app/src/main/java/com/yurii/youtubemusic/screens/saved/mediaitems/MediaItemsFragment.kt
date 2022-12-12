@@ -7,7 +7,6 @@ import android.viewbinding.library.fragment.viewBinding
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -18,17 +17,14 @@ import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
-import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.utilities.Injector
-import com.yurii.youtubemusic.screens.main.MainActivityViewModel
-import com.yurii.youtubemusic.utilities.PlaybackState
+import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.utilities.requireParcelable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
-    private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    private val viewModel: MediaItemsViewModel2 by viewModels {
+    private val viewModel: MediaItemsViewModel by viewModels {
         val category: Category = requireArguments().requireParcelable(EXTRA_CATEGORY)
         Injector.provideMediaItemsViewModel(requireContext(), category)
     }
@@ -71,11 +67,11 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
 
     private suspend fun startObservingMediaItems() = viewModel.mediaItemsStatus.collectLatest { mediaItemsStatus ->
         binding.apply {
-            loadingBar.isVisible = mediaItemsStatus == MediaItemsViewModel2.MediaItemsStatus.Loading
-            mediaItems.isVisible = mediaItemsStatus is MediaItemsViewModel2.MediaItemsStatus.Loaded
-            noMediaItems.isVisible = mediaItemsStatus == MediaItemsViewModel2.MediaItemsStatus.NoMediaItems
+            loadingBar.isVisible = mediaItemsStatus == MediaItemsViewModel.MediaItemsStatus.Loading
+            mediaItems.isVisible = mediaItemsStatus is MediaItemsViewModel.MediaItemsStatus.Loaded
+            noMediaItems.isVisible = mediaItemsStatus == MediaItemsViewModel.MediaItemsStatus.NoMediaItems
 
-            if (mediaItemsStatus is MediaItemsViewModel2.MediaItemsStatus.Loaded)
+            if (mediaItemsStatus is MediaItemsViewModel.MediaItemsStatus.Loaded)
                 mediaListAdapter.submitList(mediaItemsStatus.mediaItems)
         }
     }
