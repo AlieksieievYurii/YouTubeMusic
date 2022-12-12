@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.utilities
+package com.yurii.youtubemusic.services.media
 
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
@@ -52,12 +52,8 @@ class MediaPlayer(
         mediaServiceConnection.resume()
     }
 
-    /**
-     * Eliminates given [mediaItem] and notifies [com.yurii.youtubemusic.screens.saved.service.MediaService] about that
-     */
     suspend fun removeMediaItem(mediaItem: MediaItem) {
         mediaLibraryManager.deleteItem(mediaItem)
-        mediaServiceConnection.notifyItemIsDeleted(mediaItem)
     }
 
 }
