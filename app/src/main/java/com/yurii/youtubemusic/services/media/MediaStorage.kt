@@ -144,7 +144,7 @@ class MediaStorage(context: Context) {
         }.toList()
     }
 
-    private suspend fun getCategoryContainer(category: Category): CategoryContainer = getCategoryContainer(category.id)
+    suspend fun getCategoryContainer(category: Category): CategoryContainer = getCategoryContainer(category.id)
 
     suspend fun getCategoryContainer(categoryId: Int): CategoryContainer = withContext(Dispatchers.IO) {
         gson.fromJson(getCategoryContainerFile(categoryId).readText(), CategoryContainer::class.java)

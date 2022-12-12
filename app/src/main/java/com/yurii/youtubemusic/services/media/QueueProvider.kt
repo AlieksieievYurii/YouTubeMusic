@@ -29,13 +29,18 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
 
     fun removeFromQueueIfExists(item: Item) {
         queue.find { it.id == item.id }?.run {
+            val currentMediaItem = getCurrentQueueItem()
             queue.remove(this)
-            currentPlayingMediaItemPosition = 0
+            currentPlayingMediaItemPosition = queue.indexOf(currentMediaItem)
         }
     }
 
-    fun add(mediaItem: MediaItem) {
-        queue.add(mediaItem)
+    suspend fun add(mediaItem: MediaItem) {
+        playingCategory?.run {
+            val mediaItems = mediaStorage.getCategoryContainer(this).mediaItemsIds
+            if(mediaItems.contains(mediaItem.id))
+                queue.add(mediaItem)
+        }
     }
 
     suspend fun createQueueFor(category: Category) {

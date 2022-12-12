@@ -277,7 +277,7 @@ class MediaService : MediaBrowserServiceCompat() {
         try {
             prepareMusicFromQueue()
         } catch (error: Exception) {
-            setErrorState(PlaybackStateCompat.ERROR_CODE_UNKNOWN_ERROR, error.message!!)
+            setErrorState(PlaybackStateCompat.ERROR_CODE_UNKNOWN_ERROR, error.message ?: "unknown")
         }
     }
 
@@ -335,28 +335,13 @@ class MediaService : MediaBrowserServiceCompat() {
 
     private fun onMediaItemIsAdded(mediaItem: MediaItem) {
         if (queueProvider.isInitialized)
-            queueProvider.add(mediaItem)
+            coroutineScope.launch { queueProvider.add(mediaItem) }
     }
 
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
         override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
             super.onCommand(command, extras, cb)
             when (command) {
-                REQUEST_COMMAND_ADD_NEW_MEDIA_ITEM -> {
-                    val mediaId = extras?.getString(EXTRA_MEDIA_ITEM) ?: throw IllegalStateException("MediaId is required")
-
-                }
-                REQUEST_COMMAND_DELETE_MEDIA_ITEM -> {
-                    val mediaId = extras?.getString(EXTRA_MEDIA_ITEM) ?: throw IllegalStateException("MediaId is required")
-
-                }
-                REQUEST_COMMAND_UPDATE_MEDIA_ITEMS -> {
-                    cb?.send(REQUEST_CODE_UPDATE_MEDIA_ITEMS, null)
-                }
-                REQUEST_COMMAND_UPDATE_MEDIA_ITEM -> {
-                    val mediaMetaData = extras?.getParcelable<MediaMetaData>(PLAYBACK_STATE_MEDIA_ITEM)
-                        ?: throw IllegalStateException("Media metadata is required")
-                }
                 REQUEST_MEDIA_ITEM_TIME_POSITION -> cb?.send(0, Bundle().apply {
                     putLong(EXTRA_CURRENT_TIME_POSITION, mediaPlayer?.currentPosition?.toLong() ?: 0)
                 })
