@@ -4,32 +4,31 @@ import com.google.api.services.youtube.model.Video
 import com.yurii.youtubemusic.models.Item
 import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.Duration
-import java.io.Serializable
 import java.math.BigInteger
 
 @Parcelize
 data class VideoItem(
-    val videoId: String,
-    val videoTitle: String,
-    val authorChannelTitle: String,
+    override val id: String,
+    override val title: String,
+    override val author: String,
+    override val durationInMillis: Long,
     val description: String,
-    val videoDurationInMillis: Long,
     val viewCount: BigInteger,
     val likeCount: BigInteger,
     val thumbnail: String,
     val normalThumbnail: String
-) : Item(videoId, videoTitle, authorChannelTitle, videoDurationInMillis) {
+) : Item(id, title, author, durationInMillis) {
 
     companion object {
         fun createFrom(video: Video): VideoItem =
             VideoItem(
-                videoId = video.id,
-                videoTitle = video.snippet.title,
+                id = video.id,
+                title = video.snippet.title,
+                author = video.snippet.channelTitle,
+                durationInMillis = Duration.parse(video.contentDetails.duration).toMillis(),
                 description = video.snippet.description,
-                videoDurationInMillis = Duration.parse(video.contentDetails.duration).toMillis(),
                 viewCount = video.statistics.viewCount,
                 likeCount = video.statistics.likeCount,
-                authorChannelTitle = video.snippet.channelTitle,
                 thumbnail = video.snippet.thumbnails.default.url,
                 normalThumbnail = video.snippet.thumbnails.medium.url
             )

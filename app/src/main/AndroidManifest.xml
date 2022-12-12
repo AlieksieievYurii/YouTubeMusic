@@ -45,7 +45,7 @@
             android:name=".screens.youtube.service.MusicDownloaderService"
             android:exported="false" />
         <service
-            android:name=".screens.saved.service.MediaService"
+            android:name=".services.media.MediaService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />

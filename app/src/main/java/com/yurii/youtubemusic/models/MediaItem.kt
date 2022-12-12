@@ -35,18 +35,6 @@ data class MediaItem(
                 mediaFile = mediaItem.description.mediaUri!!.toFile(),
             )
         }
-
-        fun createFromMediaMetaData(mediaMetaData: MediaMetaData): MediaItem {
-            return MediaItem(
-                id = mediaMetaData.mediaId,
-                title = mediaMetaData.title,
-                author = mediaMetaData.author,
-                durationInMillis = mediaMetaData.duration,
-                description = mediaMetaData.description,
-                thumbnail = mediaMetaData.thumbnail,
-                mediaFile = mediaMetaData.mediaFile,
-            )
-        }
     }
 }
 

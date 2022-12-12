@@ -36,6 +36,7 @@ const val PLAYBACK_STATE_PLAYING_CATEGORY = "com.yurii.youtubemusic.playback.sta
 const val PLAYBACK_STATE_MEDIA_ITEM = "com.yurii.youtubemusic.playback.state.media.item"
 const val PLAYBACK_STATE_SESSION_ID = "com.yurii.youtubemusic.playback.state.session.id"
 
+const val EXTRA_KEY_CATEGORIES = "com.yurii.youtubemusic.category"
 const val EXTRA_CURRENT_TIME_POSITION = "com.yurii.youtubemusic.current.time.position"
 
 const val FAILED_TO_LOAD_CATEGORIES = "failed_to_load_categories"
