@@ -285,12 +285,12 @@ class MediaService : MediaBrowserServiceCompat() {
     private fun prepareMusicFromQueue() {
         currentState = PlaybackStateCompat.STATE_BUFFERING
         val targetMediaItem = queueProvider.getCurrentQueueItem()
-        mediaSession.setMetadata(targetMediaItem.toMediaMetadataCompat())
+        mediaSession.setMetadata(targetMediaItem!!.toMediaMetadataCompat())
         updateCurrentPlaybackState()
         resetOrCreateMediaPlayer()
 
         getMediaPlayer().apply {
-            setDataSource(queueProvider.getCurrentQueueItem().mediaFile.absolutePath)
+            setDataSource(queueProvider.getCurrentQueueItem()!!.mediaFile.absolutePath)
             prepareAsync()
         }
     }
@@ -328,10 +328,10 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun onMediaItemIsDeleted(item: Item) {
-        if (queueProvider.getCurrentQueueItem().id == item.id) {
+        if (queueProvider.getCurrentQueueItem()?.id == item.id) {
             handleStopRequest()
         }
-
+        queueProvider.removeFromQueueIfExists(item)
     }
 
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {

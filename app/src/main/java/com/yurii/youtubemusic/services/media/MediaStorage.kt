@@ -67,12 +67,6 @@ class MediaStorage(context: Context) {
         thumbnailFile.outputStream().run { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, this) }
     }
 
-    fun deleteAllDataFor(item: Item) {
-        getMediaFile(item).delete()
-        getMediaMetadata(item).delete()
-        getThumbnail(item).delete()
-    }
-
     suspend fun assignItemToCategory(category: Category, item: Item) {
         val categoryContainer = getCategoryContainer(category)
         val mediaItems = categoryContainer.mediaItemsIds.toMutableList()
@@ -128,7 +122,7 @@ class MediaStorage(context: Context) {
         }
     }
 
-    private suspend fun eliminateMediaItem(id: String) {
+    suspend fun eliminateMediaItem(id: String) {
         getMediaFile(id).delete()
         getMediaMetadata(id).delete()
         getThumbnail(id).delete()

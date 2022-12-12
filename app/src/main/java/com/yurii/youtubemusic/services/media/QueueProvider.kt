@@ -2,6 +2,7 @@ package com.yurii.youtubemusic.services.media
 
 import android.support.v4.media.session.MediaSessionCompat
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.getMediaDescriptionCompat
 import com.yurii.youtubemusic.utilities.findIndex
@@ -20,9 +21,17 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         return playingCategory ?: throw QueueProviderException("Can not get category")
     }
 
-    fun getCurrentQueueItem(): MediaItem {
-        // TODO add handling if item is not in place
-        return queue[currentPlayingMediaItemPosition]
+    fun getCurrentQueueItem(): MediaItem? {
+        if (queue.isNotEmpty())
+            return queue[currentPlayingMediaItemPosition]
+        return null
+    }
+
+    fun removeFromQueueIfExists(item: Item) {
+        queue.find { it.id == item.id }?.run {
+            queue.remove(this)
+            currentPlayingMediaItemPosition = 0
+        }
     }
 
     suspend fun createQueueFor(category: Category) {

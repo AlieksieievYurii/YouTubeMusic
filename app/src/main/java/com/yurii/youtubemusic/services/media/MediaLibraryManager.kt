@@ -24,7 +24,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
     val event: SharedFlow<Event> = _event
 
     suspend fun deleteItem(item: Item) {
-        mediaStorage.deleteAllDataFor(item)
+        mediaStorage.eliminateMediaItem(item.id)
         _event.emit(Event.ItemDeleted(item))
     }
 
