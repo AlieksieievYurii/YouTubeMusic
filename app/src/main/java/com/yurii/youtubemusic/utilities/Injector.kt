@@ -1,9 +1,7 @@
 package com.yurii.youtubemusic.utilities
 
-import android.content.ComponentName
 import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.yurii.youtubemusic.screens.saved.service.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.categories.CategoriesEditorViewModel
 import com.yurii.youtubemusic.screens.equalizer.EqualizerViewModel
@@ -17,8 +15,7 @@ import com.yurii.youtubemusic.services.media.*
 object Injector {
 
     fun provideEqualizerViewModel(context: Context): EqualizerViewModel.Factory {
-        val musicServiceConnection = provideMusicServiceConnection(context)
-        return EqualizerViewModel.Factory(context.applicationContext, musicServiceConnection)
+        return EqualizerViewModel.Factory()
     }
 
     fun providePlayerControllerViewModel(context: Context): PlayerControllerViewModel.Factory {
@@ -49,9 +46,5 @@ object Injector {
     fun provideCategoriesEditorViewMode(context: Context): CategoriesEditorViewModel.Factory {
         val preferences = ServiceLocator.providePreferences(context)
         return CategoriesEditorViewModel.Factory(preferences)
-    }
-
-    private fun provideMusicServiceConnection(context: Context): MusicServiceConnection {
-        return MusicServiceConnection.getInstance(context, ComponentName(context, MediaService::class.java))
     }
 }

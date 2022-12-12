@@ -17,11 +17,10 @@ import kotlinx.coroutines.flow.collectLatest
 
 class PlayerActivity : AppCompatActivity() {
     private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(this) }
-
     private val binding: ActivityPlayerBinding by viewBinding()
     private var isStartChangingSeek: Boolean = false
     private var seekProgress: Int = -1
-    //TODO Add showing from which category is playing
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launchWhenCreated {

@@ -19,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.ui.startValueAnimation
@@ -51,19 +52,22 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
                 viewModel.playbackState.collectLatest {
                     when (it) {
                         PlaybackState.None -> swipeViewAway()
-                        is PlaybackState.Paused -> setMediaItem(it.mediaItem, false)
-                        is PlaybackState.Playing -> setMediaItem(it.mediaItem, true)
+                        is PlaybackState.Paused -> setMediaItem(it.mediaItem, false, it.category)
+                        is PlaybackState.Playing -> setMediaItem(it.mediaItem, true, it.category)
                     }
                 }
             }
         }
     }
 
-    private fun setMediaItem(mediaItem: MediaItem, isPlaying: Boolean) {
-        binding.mediaItem = mediaItem
-        binding.isPlayingNow = isPlaying
-        if (!binding.container.isVisible)
-            showMusicPlayerPanel()
+    private fun setMediaItem(mediaItem: MediaItem, isPlaying: Boolean, category: Category) {
+        binding.apply {
+            this.mediaItem = mediaItem
+            isPlayingNow = isPlaying
+            playingCategory = category
+            if (!container.isVisible)
+                showMusicPlayerPanel()
+        }
     }
 
     private fun signDisplaySize() {

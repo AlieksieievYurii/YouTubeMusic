@@ -17,7 +17,7 @@
 
         <variable
             name="playingCategory"
-            type="String" />
+            type="com.yurii.youtubemusic.models.Category" />
 
         <variable
             name="isPlayingNow"
@@ -80,7 +80,7 @@
                         android:id="@+id/hint_playing_category"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{@string/label_playing_from(playingCategory)}"
+                        android:text="@{@string/label_playing_from(playingCategory.name)}"
                         tools:text="@tools:sample/lorem/random"
                         android:ellipsize="end"
                         android:maxLines="1"
