@@ -37,7 +37,6 @@ class YouTubeMusicViewModel(
     private val preferences: Preferences
 ) : ViewModel() {
     sealed class Event {
-        data class SelectCategories(val videoItem: VideoItem) : Event()
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
         object SignOut : Event()
     }
@@ -119,9 +118,9 @@ class YouTubeMusicViewModel(
         }
     }
 
-    fun showFailedItemDetails(videoItem: VideoItem) = sendEvent(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
-
-    fun downloadAndAddToCategories(item: VideoItem) = sendEvent(Event.SelectCategories(item))
+    fun showFailedItemDetails(videoItem: VideoItem) {
+        sendEvent(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
+    }
 
     fun getItemStatus(videoItem: VideoItem): VideoItemStatus {
         val musicFile = mediaLibraryManager.mediaStorage.getMediaFile(videoItem)
@@ -161,7 +160,7 @@ class YouTubeMusicViewModel(
 
     @Suppress("UNCHECKED_CAST")
     class Factory(
-        private val mediaLibraryManager: MediaLibraryManager
+        private val mediaLibraryManager: MediaLibraryManager,
         private val googleAccount: GoogleAccount,
         private val downloaderServiceConnection: ServiceConnection,
         private val googleSignInAccount: GoogleSignInAccount,

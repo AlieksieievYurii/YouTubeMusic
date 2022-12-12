@@ -39,7 +39,17 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
 
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val viewModel: YouTubeMusicViewModel by viewModels { Injector.provideYouTubeMusicViewModel(requireContext(), getGoogleSignInAccount()) }
-    private val listAdapter: VideoItemsListAdapter by lazy { VideoItemsListAdapter(viewModel, viewLifecycleOwner.lifecycleScope) }
+    private val listAdapter: VideoItemsListAdapter by lazy {
+        VideoItemsListAdapter(object : VideoItemsListAdapter.Callback {
+            override fun getItemStatus(videoItem: VideoItem): VideoItemStatus = viewModel.getItemStatus(videoItem)
+            override fun onDownload(videoItem: VideoItem) = viewModel.download(videoItem)
+            override fun onDownloadAndAssignedCategories(videoItem: VideoItem) = showDialogToSelectCategories(videoItem)
+            override fun onCancelDownloading(videoItem: VideoItem) = viewModel.cancelDownloading(videoItem)
+            override fun onDelete(videoItem: VideoItem) = showConfirmationDialogToDeleteVideoItem(videoItem)
+            override fun onShowErrorDetail(videoItem: VideoItem) = viewModel.showFailedItemDetails(videoItem)
+
+        })
+    }
 
     override fun onClickOption(id: Int) {
         when (id) {
@@ -62,6 +72,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             launch { startHandlingListLoadState() }
             launch { startHandlingEvents() }
             launch { startListeningDeletedItems() }
+            launch { viewModel.videoItemStatus.collectLatest { listAdapter.updateItem(it) } }
         }
 
         binding.apply {
@@ -79,12 +90,8 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
 
     private suspend fun startHandlingEvents() = viewModel.event.collectLatest { event ->
         when (event) {
-            is YouTubeMusicViewModel.Event.SelectCategories -> showDialogToSelectCategories(event.videoItem)
             is YouTubeMusicViewModel.Event.SignOut -> mainActivityViewModel.logOut()
-            is YouTubeMusicViewModel.Event.DeleteItem -> showConfirmationDialogToDeleteVideoItem(event.videoItem)
             is YouTubeMusicViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(event.videoItem, event.error)
-            is YouTubeMusicViewModel.Event.NotifyVideoItemHasBeenDeleted -> mainActivityViewModel.notifyMediaItemHasBeenDeleted(event.videoItem)
-            is YouTubeMusicViewModel.Event.NotifyVideoItemHasBeenDownloaded -> mainActivityViewModel.notifyVideoItemHasBeenDownloaded(event.videoItem)
         }
     }
 
@@ -114,7 +121,6 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             if (it != null) {
                 viewState = ViewState.Loading
                 tvPlayListName.text = it.name
-
             } else {
                 viewState = ViewState.NoSelectedPlaylist
             }

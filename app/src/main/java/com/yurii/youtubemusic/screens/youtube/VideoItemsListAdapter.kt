@@ -6,7 +6,6 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,19 +14,23 @@ import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
 import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.ui.getValueAnimator
-import kotlinx.coroutines.flow.collectLatest
 
-class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecycleCoroutineScope: LifecycleCoroutineScope) :
+class VideoItemsListAdapter(private val callback: Callback) :
     PagingDataAdapter<VideoItem, VideoItemsListAdapter.MyViewHolder>(Comparator) {
+    interface Callback {
+        fun getItemStatus(videoItem: VideoItem): VideoItemStatus
+        fun onDownload(videoItem: VideoItem)
+        fun onDownloadAndAssignedCategories(videoItem: VideoItem)
+        fun onCancelDownloading(videoItem: VideoItem)
+        fun onDelete(videoItem: VideoItem)
+        fun onShowErrorDetail(videoItem: VideoItem)
+    }
+
     private var expandedItem: VideoItem? = null
     private lateinit var recyclerView: RecyclerView
 
-    init {
-        lifecycleCoroutineScope.launchWhenCreated {
-            viewModel.videoItemStatus.collectLatest { status ->
-                findVisibleViewHolder(status.videoItem.id)?.updateStatus(status)
-            }
-        }
+    fun updateItem(videoItemStatus: VideoItemStatus) {
+        findVisibleViewHolder(videoItemStatus.videoItem.id)?.updateStatus(videoItemStatus)
     }
 
     private fun findVisibleViewHolder(videoId: String): MyViewHolder? {
@@ -56,7 +59,7 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
     inner class MyViewHolder(val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(videoItem: VideoItem) {
             binding.videoItem = videoItem
-            updateStatus(viewModel.getItemStatus(videoItem))
+            updateStatus(callback.getItemStatus(videoItem))
             expandItem(this, expandedItem == videoItem, animate = false)
 
             binding.cardContainer.setOnClickListener {
@@ -64,15 +67,15 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
             }
 
             binding.btnDownload.setOnLongClickDownloadLister {
-                viewModel.downloadAndAddToCategories(videoItem)
+                callback.onDownloadAndAssignedCategories(videoItem)
             }
 
             binding.btnDownload.setOnClickStateListener {
                 when (binding.btnDownload.state) {
-                    is DownloadButton.State.Download -> viewModel.download(videoItem)
-                    is DownloadButton.State.Downloading -> viewModel.cancelDownloading(videoItem)
-                    is DownloadButton.State.Downloaded -> viewModel.askToDelete(videoItem)
-                    is DownloadButton.State.Failed -> viewModel.showFailedItemDetails(videoItem)
+                    is DownloadButton.State.Download -> callback.onDownload(videoItem)
+                    is DownloadButton.State.Downloading -> callback.onCancelDownloading(videoItem)
+                    is DownloadButton.State.Downloaded -> callback.onDelete(videoItem)
+                    is DownloadButton.State.Failed -> callback.onShowErrorDetail(videoItem)
                 }
             }
         }
@@ -113,8 +116,9 @@ class VideoItemsListAdapter(private val viewModel: YouTubeMusicViewModel, lifecy
             val expandedItemHeight: Int = view.binding.expandableLayout.measuredHeight
 
             if (animate) {
-                val animator =
-                    getValueAnimator(expand, 200L, AccelerateDecelerateInterpolator()) { setExpandedProgress(view, expandedItemHeight, it) }
+                val animator = getValueAnimator(expand, 200L, AccelerateDecelerateInterpolator()) {
+                    setExpandedProgress(view, expandedItemHeight, it)
+                }
 
                 if (expand) animator.doOnStart { view.binding.expandableLayout.isVisible = true }
                 else animator.doOnEnd { view.binding.expandableLayout.isVisible = false }
