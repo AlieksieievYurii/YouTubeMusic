@@ -55,7 +55,7 @@
                     android:layout_marginEnd="@dimen/mediumMargin"
                     android:layout_marginBottom="@dimen/mediumMargin"
                     android:background="@drawable/rectangle"
-                    android:text="@{UtilsKt.parseDurationToHumanView(videoItem.duration)}"
+                    android:text="@{UtilsKt.parseDurationToHumanView(videoItem.durationInMillis)}"
                     android:textColor="@android:color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
@@ -86,7 +86,7 @@
                     android:layout_toEndOf="@id/thumbnail"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="@{videoItem.authorChannelTitle}"
+                    android:text="@{videoItem.author}"
                     android:textSize="12sp"
                     tools:text="@tools:sample/lorem/random" />
 
