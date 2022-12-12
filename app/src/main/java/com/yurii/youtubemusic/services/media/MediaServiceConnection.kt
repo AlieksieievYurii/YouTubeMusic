@@ -60,6 +60,8 @@ class MediaServiceConnection private constructor(private val context: Context) {
 
     fun resume() = getMediaController().transportControls.play()
 
+    fun stop() = getMediaController().transportControls.stop()
+
     fun skipToNextTrack() = getMediaController().transportControls.skipToNext()
 
     fun skipToPreviousTrack() = getMediaController().transportControls.skipToPrevious()

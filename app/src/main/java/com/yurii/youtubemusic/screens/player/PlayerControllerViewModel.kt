@@ -27,10 +27,7 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
         //TODO implement on seek
     }
 
-    fun stopPlaying() {
-
-    }
-
+    fun stopPlaying() = mediaServiceConnection.stop()
 
     @Suppress("UNCHECKED_CAST")
     class Factory(private val mediaServiceConnection: MediaServiceConnection) :
