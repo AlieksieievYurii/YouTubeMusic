@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.utilities
+package com.yurii.youtubemusic.services.media
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
@@ -9,8 +9,9 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.yurii.youtubemusic.models.*
-import com.yurii.youtubemusic.services.media.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
 import java.lang.Exception
@@ -27,6 +28,9 @@ sealed class PlaybackState {
 class MediaServiceConnection private constructor(private val context: Context) {
     private val _isMediaControllerConnected = MutableStateFlow(false)
     val isMediaControllerConnected = _isMediaControllerConnected.asStateFlow()
+
+    private val _errors: MutableSharedFlow<Exception> = MutableSharedFlow(extraBufferCapacity=1)
+    val errors = _errors.asSharedFlow()
 
     private val mediaBrowserConnectionCallback = MediaBrowserConnectionCallback()
 
@@ -63,23 +67,11 @@ class MediaServiceConnection private constructor(private val context: Context) {
             ?: throw IllegalStateException("Can not 'Resume' playing because mediaController is not initialized")
     }
 
-    fun notifyItemIsDeleted(item: Item) {
-        mediaController?.sendCommand(REQUEST_COMMAND_DELETE_MEDIA_ITEM, Bundle().apply {
-            putString(EXTRA_MEDIA_ITEM, item.id)
-        }, null) ?: throw IllegalStateException("Can not 'notifyItemIsDeleted' because mediaController is not initialized")
-    }
-
     suspend fun getMediaItemsFor(category: Category): List<MediaItem> = suspendCoroutine { callback ->
         val mediaItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
             override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
                 super.onChildrenLoaded(parentId, children)
                 callback.resume(children.map { MediaItem.createFrom(it) })
-            }
-
-            override fun onError(parentId: String, options: Bundle) {
-                super.onError(parentId, options)
-                throw options.getSerializable(EXTRA_ERROR_MESSAGE) as? Exception
-                    ?: IllegalStateException("Error occurred during requesting media items for $category. Can not get Error")
             }
         }
 
@@ -91,12 +83,6 @@ class MediaServiceConnection private constructor(private val context: Context) {
             override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
                 super.onChildrenLoaded(parentId, children)
                 callback.resume(children.map { Category.createFrom(it) })
-            }
-
-            override fun onError(parentId: String, options: Bundle) {
-                super.onError(parentId, options)
-                throw options.getSerializable(EXTRA_ERROR_MESSAGE) as? Exception
-                    ?: IllegalStateException("Error occurred during requesting Categories. Can not get Error")
             }
         }
         mediaBrowser.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
@@ -140,6 +126,12 @@ class MediaServiceConnection private constructor(private val context: Context) {
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             Timber.d("MediaControllerCallback -> onMetadataChanged: $metadata")
+        }
+
+        override fun onSessionEvent(event: String, extras: Bundle?) {
+            super.onSessionEvent(event, extras)
+            if (event == FAILED_TO_LOAD_MEDIA_ITEMS || event == FAILED_TO_LOAD_CATEGORIES)
+                _errors.tryEmit(extras?.getSerializable(EXTRA_EXCEPTION) as? Exception ?: Exception("Unknown"))
         }
 
         override fun onSessionDestroyed() {
