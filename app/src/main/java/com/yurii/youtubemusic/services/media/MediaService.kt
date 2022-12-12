@@ -111,8 +111,7 @@ class MediaService : MediaBrowserServiceCompat() {
             mediaLibraryManager.event.collectLatest { event ->
                 when (event) {
                     is MediaLibraryManager.Event.ItemDeleted -> onMediaItemIsDeleted(event.item)
-                    is MediaLibraryManager.Event.MediaItemIsAdded -> {
-                    }
+                    is MediaLibraryManager.Event.MediaItemIsAdded -> onMediaItemIsAdded(event.mediaItem)
                 }
             }
         }
@@ -332,6 +331,11 @@ class MediaService : MediaBrowserServiceCompat() {
             handleStopRequest()
         }
         queueProvider.removeFromQueueIfExists(item)
+    }
+
+    private fun onMediaItemIsAdded(mediaItem: MediaItem) {
+        if (queueProvider.isInitialized)
+            queueProvider.add(mediaItem)
     }
 
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {

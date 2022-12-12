@@ -34,6 +34,10 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         }
     }
 
+    fun add(mediaItem: MediaItem) {
+        queue.add(mediaItem)
+    }
+
     suspend fun createQueueFor(category: Category) {
         if (playingCategory == category)
             return
