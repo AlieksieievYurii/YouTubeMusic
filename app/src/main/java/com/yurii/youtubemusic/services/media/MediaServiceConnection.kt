@@ -29,7 +29,7 @@ class MediaServiceConnection private constructor(private val context: Context) {
     private val _isMediaControllerConnected = MutableStateFlow(false)
     val isMediaControllerConnected = _isMediaControllerConnected.asStateFlow()
 
-    private val _errors: MutableSharedFlow<Exception> = MutableSharedFlow(extraBufferCapacity=1)
+    private val _errors: MutableSharedFlow<Exception> = MutableSharedFlow(extraBufferCapacity = 1)
     val errors = _errors.asSharedFlow()
 
     private val mediaBrowserConnectionCallback = MediaBrowserConnectionCallback()
@@ -53,19 +53,16 @@ class MediaServiceConnection private constructor(private val context: Context) {
         val extras = Bundle().apply {
             putParcelable(EXTRA_KEY_CATEGORIES, category)
         }
-        mediaController?.transportControls?.playFromMediaId(mediaItem.id, extras)
-            ?: throw IllegalStateException("Can not 'Play' media item because mediaController is not initialized")
+        getMediaController().transportControls.playFromMediaId(mediaItem.id, extras)
     }
 
-    fun pause() {
-        mediaController?.transportControls?.pause()
-            ?: throw IllegalStateException("Can not 'Pause' playing because mediaController is not initialized")
-    }
+    fun pause() = getMediaController().transportControls.pause()
 
-    fun resume() {
-        mediaController?.transportControls?.play()
-            ?: throw IllegalStateException("Can not 'Resume' playing because mediaController is not initialized")
-    }
+    fun resume() = getMediaController().transportControls.play()
+
+    fun skipToNextTrack() = getMediaController().transportControls.skipToNext()
+
+    fun skipToPreviousTrack() = getMediaController().transportControls.skipToPrevious()
 
     suspend fun getMediaItemsFor(category: Category): List<MediaItem> = suspendCoroutine { callback ->
         val mediaItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
@@ -77,6 +74,9 @@ class MediaServiceConnection private constructor(private val context: Context) {
 
         mediaBrowser.subscribe(category.id.toString(), mediaItemsSubscription)
     }
+
+    private fun getMediaController(): MediaControllerCompat =
+        mediaController ?: throw IllegalStateException("Can not get mediaController because it is not initialized")
 
     suspend fun getCategories(): List<Category> = suspendCoroutine { callback ->
         val categoryItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
