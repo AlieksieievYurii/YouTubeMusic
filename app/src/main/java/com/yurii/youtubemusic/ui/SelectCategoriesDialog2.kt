@@ -4,7 +4,7 @@ package com.yurii.youtubemusic.ui
 import android.content.Context
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.screens.youtube.models.Category
+import com.yurii.youtubemusic.models.Category
 
 class SelectCategoriesDialog2 constructor(
     private val context: Context,

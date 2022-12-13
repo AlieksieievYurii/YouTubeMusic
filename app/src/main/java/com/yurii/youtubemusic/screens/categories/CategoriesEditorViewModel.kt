@@ -2,81 +2,72 @@ package com.yurii.youtubemusic.screens.categories
 
 import androidx.lifecycle.*
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.utilities.IPreferences
+import com.yurii.youtubemusic.services.media.MediaLibraryManager
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
-import java.util.*
 
-class CategoriesEditorViewModel(private val preferences: IPreferences) : ViewModel() {
-    private val categoriesList = mutableListOf<Category>()
-    private var nextId = -1
-
-    private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
-    val categories: LiveData<List<Category>> = _categories.also {
-        categoriesList.addAll(preferences.getMusicCategories().toMutableList())
-        it.postValue(categoriesList)
-        nextId = initLastAvailableId()
+class CategoriesEditorViewModel(private val mediaLibraryManager: MediaLibraryManager) : ViewModel() {
+    sealed class State {
+        object Loading : State()
+        data class Loaded(val categories: List<Category>) : State()
     }
 
-    var areChanges = false
-        private set
+    private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
+    val state = _state.asStateFlow()
 
-    fun getCategoryByName(name: String): Category =
-        categoriesList.find { it.name == name } ?: throw IllegalStateException("Cannot find category with name $name")
+    private val reservedIds = mutableListOf<Int>()
 
-    fun isCategoryNameExist(categoryName: String): Boolean {
-        val trimCategoryName = categoryName.toLowerCase(Locale.ROOT).trim()
-        if (trimCategoryName == Category.ALL.name)
-            return true
-        val res = categoriesList.find { it.name.toLowerCase(Locale.ROOT).trim() == trimCategoryName }
-        return res != null
-    }
-
-    fun updateCategory(category: Category) {
-        areChanges = true
-        categoriesList.forEachIndexed { index, it ->
-            if (category.id == it.id) {
-                categoriesList[index] = category
-                return
-            }
+    init {
+        viewModelScope.launch {
+            _state.value = State.Loaded(mediaLibraryManager.mediaStorage.getCustomCategories().also { categories ->
+                reservedIds.addAll(categories.map { it.id })
+            })
         }
     }
 
-    fun createNewCategory(categoryName: String): Category {
-        areChanges = true
-        val category = Category(generateId(), categoryName)
-        categoriesList.add(category)
-        return category
-    }
-
-    private fun initLastAvailableId(): Int {
-        var id = 1 //Starts from 1 because it assumes that the main category ALL has id 1
-        categoriesList.forEach {
-            if (it.id > id)
-                id = it.id
+    fun renameCategory(category: Category, newName: String) {
+        viewModelScope.launch {
+            mediaLibraryManager.renameCategory(category, newName)
         }
-        return ++id
     }
 
-    private fun generateId(): Int = nextId++
-
-    fun removeCategory(category: Category) {
-        areChanges = true
-        categoriesList.remove(category)
-
-        if (categoriesList.isEmpty())
-            _categories.postValue(categoriesList)
+    fun removeCategory(categoryId: Int) {
+        viewModelScope.launch {
+            val category = mediaLibraryManager.mediaStorage.getCategoryContainer(categoryId).category
+            reservedIds.remove(categoryId)
+            _state.value = State.Loaded(getCurrentLoadedMutableCategories().apply { remove(category) })
+            mediaLibraryManager.removeCategory(category)
+        }
     }
 
-    fun saveChanges() {
-        if (areChanges)
-            preferences.setCategories(categoriesList)
+    fun createCategory(name: String) {
+        val category = Category(generateId(), name)
+        _state.value = State.Loaded(getCurrentLoadedMutableCategories().apply { add(category) })
+        viewModelScope.launch {
+            mediaLibraryManager.createCategory(category)
+        }
+    }
+
+    private fun getCurrentLoadedMutableCategories(): MutableList<Category> {
+        return (_state.value as? State.Loaded)?.categories?.toMutableList()
+            ?: throw IllegalStateException("Can not createCategory while it is not loaded")
+    }
+
+    private fun generateId(): Int {
+        var id = 1
+        while (reservedIds.contains(id))
+            id++
+        reservedIds.add(id)
+        return id
     }
 
     @Suppress("UNCHECKED_CAST")
-    class Factory(private val preferences: IPreferences): ViewModelProvider.Factory {
+    class Factory(private val mediaLibraryManager: MediaLibraryManager) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(CategoriesEditorViewModel::class.java))
-                return CategoriesEditorViewModel(preferences) as T
+                return CategoriesEditorViewModel(mediaLibraryManager) as T
             throw IllegalStateException("Given the model class is not assignable from CategoriesEditorViewModel class")
         }
     }

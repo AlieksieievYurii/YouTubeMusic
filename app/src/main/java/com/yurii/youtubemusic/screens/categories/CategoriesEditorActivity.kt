@@ -7,7 +7,10 @@ import android.os.Bundle
 import android.view.View
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.chip.Chip
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityCategoriesEditorBinding
@@ -15,6 +18,8 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.AddEditCategoryDialog
 import com.yurii.youtubemusic.utilities.Injector
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class CategoriesEditorActivity : AppCompatActivity() {
     private val viewModel by viewModels<CategoriesEditorViewModel> { Injector.provideCategoriesEditorViewMode(this) }
@@ -24,38 +29,47 @@ class CategoriesEditorActivity : AppCompatActivity() {
         ConfirmDeletionDialog.create(
             titleId = R.string.dialog_confirm_deletion_playlist_title,
             messageId = R.string.dialog_confirm_deletion_playlist_message,
-            onConfirm = { removeCategory(it) }
+            onConfirm = { viewModel.removeCategory((it as Chip).id) }
         ).show(supportFragmentManager, "DeleteCategoryDialog")
     }
 
     private val onEditCategoryName = View.OnClickListener {
-        val categoryChip = it as Chip
-        val category = viewModel.getCategoryByName(categoryChip.text.toString())
-
-        AddEditCategoryDialog.createDialogToEditCategory(category,
-            { categoryName -> viewModel.isCategoryNameExist(categoryName) }) { editedCategory ->
-            viewModel.updateCategory(editedCategory)
-            categoryChip.text = editedCategory.name
-        }.show(supportFragmentManager, "EditCategoryDialog")
+//        val categoryChip = it as Chip
+//
+//        AddEditCategoryDialog.createDialogToEditCategory(category,
+//            { categoryName -> viewModel.isCategoryNameExist(categoryName) }) { editedCategory ->
+//            categoryChip.text = editedCategory.name
+//        }.show(supportFragmentManager, "EditCategoryDialog")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initActionBar()
-        initCategoryChips()
+
+        lifecycleScope.launchWhenCreated {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { observeCategoriesState() }
+            }
+        }
     }
 
-    private fun initCategoryChips() {
-        viewModel.categories.observe(this, Observer { categories ->
-            if (categories.isNullOrEmpty())
-                setNoCategories()
-            else
-                setCategories(categories)
-        })
+    private suspend fun observeCategoriesState() {
+        viewModel.state.collectLatest {
+            when (it) {
+                is CategoriesEditorViewModel.State.Loaded ->
+                    if (it.categories.isNullOrEmpty()) setNoCategories() else setCategories(it.categories)
+                CategoriesEditorViewModel.State.Loading -> {
+
+                }
+            }
+        }
     }
 
-    private fun setCategories(categories: List<Category>) {
-        categories.forEach { category -> inflateAndAddChip(category) }
+    private fun setCategories(categoriesList: List<Category>) {
+        binding.categories.apply {
+            removeAllViews()
+            categoriesList.forEach { category -> addView(inflateChip(category)) }
+        }
         setShowCategories()
     }
 
@@ -69,58 +83,43 @@ class CategoriesEditorActivity : AppCompatActivity() {
     }
 
     private fun setNoCategories() {
-        binding.categoriesLayout.visibility = View.GONE
-        binding.labelNoCategories.visibility = View.VISIBLE
-        binding.create.apply {
-            text = getString(R.string.label_create)
-            setOnClickListener { createFirstCategory() }
+        binding.apply {
+            categoriesLayout.visibility = View.GONE
+            labelNoCategories.visibility = View.VISIBLE
+            create.apply {
+                text = getString(R.string.label_create)
+                setOnClickListener { createFirstCategory() }
+            }
         }
     }
 
     private fun createFirstCategory() = addNewCategory(isFirstCategory = true)
 
     private fun addNewCategory(isFirstCategory: Boolean = false) {
-        AddEditCategoryDialog.createDialogToCreateNewCategory({ viewModel.isCategoryNameExist(it) }) { categoryName ->
-            val category = viewModel.createNewCategory(categoryName)
-            inflateAndAddChip(category)
+        AddEditCategoryDialog.createDialogToCreateNewCategory({ false }) { categoryName ->
+            viewModel.createCategory(categoryName)
             if (isFirstCategory)
                 setShowCategories()
         }.show(supportFragmentManager, "AddCategoryDialog")
     }
 
-    private fun inflateAndAddChip(category: Category) {
+    private fun inflateChip(category: Category): Chip {
         val chip = layoutInflater.inflate(R.layout.category_chip, binding.categories, false) as Chip
         chip.apply {
+            id = category.id
             text = category.name
             setOnClickListener(onEditCategoryName)
             setOnCloseIconClickListener(onDeleteClick)
         }
-        binding.categories.addView(chip)
+        return chip
     }
 
     private fun initActionBar() {
-        supportActionBar?.let {
-            it.title = getString(R.string.label_edit_playlists)
-            it.setHomeButtonEnabled(true)
-            it.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.apply {
+            title = getString(R.string.label_edit_playlists)
+            setHomeButtonEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
         }
-    }
-
-    override fun finish() {
-        viewModel.saveChanges()
-        setResult(if (viewModel.areChanges) CATEGORIES_ARE_CHANGE_RESULT_CODE else -1)
-        super.finish()
-    }
-
-    private fun removeCategory(view: View) {
-        val category = viewModel.getCategoryByName((view as Chip).text.toString())
-        viewModel.removeCategory(category)
-        binding.categories.removeView(view)
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
     }
 
     companion object {
