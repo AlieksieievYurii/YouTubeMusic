@@ -27,9 +27,8 @@ class MediaStorage(context: Context) {
     fun getMediaFile(item: Item): File = getMediaFile(item.id)
 
     fun getThumbnail(item: Item): File = getThumbnail(item.id)
-    fun getThumbnail(id: String): File = File(thumbnailStorage, "$id.jpeg")
 
-    fun getAllMusicFiles(): List<File> = musicStorageFolder.walkFiles().filter { it.extension == "mp3" }.toList()
+    fun getThumbnail(id: String): File = File(thumbnailStorage, "$id.jpeg")
 
     fun getDownloadingMockFile(videoItem: VideoItem): File = File(musicStorageFolder, "${videoItem.id}.downloading")
 
@@ -74,6 +73,16 @@ class MediaStorage(context: Context) {
         val newCategoryContainer = CategoryContainer(category, mediaItems)
         saveCategoryContainer(newCategoryContainer)
     }
+
+    suspend fun addCategory(category: Category) = withContext(Dispatchers.IO) {
+        val categoryContainer = CategoryContainer(category, emptyList())
+        saveCategoryContainer(categoryContainer)
+    }
+
+    suspend fun removeCategory(category: Category) = withContext(Dispatchers.IO) {
+        getCategoryContainerFile(category).delete()
+    }
+
 
     suspend fun getCustomCategories(): List<Category> = getCustomCategoryContainers().map { it.category }.filter { !it.isDefault }
 
@@ -185,7 +194,7 @@ class MediaStorage(context: Context) {
         return mediaItem
     }
 
-    private suspend fun saveCategoryContainer(categoryContainer: CategoryContainer) = withContext(Dispatchers.IO) {
+    suspend fun saveCategoryContainer(categoryContainer: CategoryContainer) = withContext(Dispatchers.IO) {
         val json = gson.toJson(categoryContainer)
         val categoryFile = getCategoryContainerFile(categoryContainer.category).also { it.parentMkdir() }
         categoryFile.writeText(json)
