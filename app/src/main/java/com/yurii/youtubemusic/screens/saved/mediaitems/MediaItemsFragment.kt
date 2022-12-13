@@ -19,6 +19,7 @@ import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.services.media.PlaybackState
+import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
 import com.yurii.youtubemusic.utilities.requireParcelable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -58,7 +59,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
 
     private suspend fun startObservingPlayingItem() = viewModel.playbackState.collectLatest { playbackState ->
-        when(playbackState) {
+        when (playbackState) {
             PlaybackState.None -> mediaListAdapter.resetState()
             is PlaybackState.Paused -> mediaListAdapter.setPlayingStateMediaItem(playbackState.mediaItem, isPlaying = false)
             is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(playbackState.mediaItem, isPlaying = true)
@@ -101,11 +102,11 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
 
     private fun openCategoriesEditor(mediaItem: MediaItem) {
-//        SelectCategoriesDialog.selectCategories(requireContext(), mediaItem.categories) {
-//            mediaItem.categories.clear()
-//            mediaItem.categories.addAll(it)
-//            //mainActivityViewModel.notifyMediaItemHasBeenModified(mediaItem)
-//        }
+        lifecycleScope.launch {
+            SelectCategoriesDialog2(requireContext(), viewModel.getAllCustomCategories(), viewModel.getAssignedCustomCategoriesFor(mediaItem)) {
+                viewModel.assignCustomCategoriesFor(mediaItem, it)
+            }.show()
+        }
     }
 
     companion object {

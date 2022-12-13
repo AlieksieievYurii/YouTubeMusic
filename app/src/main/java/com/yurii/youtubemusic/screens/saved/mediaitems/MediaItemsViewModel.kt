@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.screens.saved.mediaitems
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.services.media.MediaPlayer
 import com.yurii.youtubemusic.services.media.PlaybackState
@@ -45,6 +46,17 @@ class MediaItemsViewModel(private val mediaPlayer: MediaPlayer) : ViewModel() {
 
     fun deleteMediaItem(mediaItem: MediaItem) {
         viewModelScope.launch { mediaPlayer.removeMediaItem(mediaItem) }
+    }
+
+    suspend fun getAssignedCustomCategoriesFor(mediaItem: MediaItem) =
+        mediaPlayer.mediaLibraryManager.mediaStorage.getAssignedCustomCategoriesFor(mediaItem)
+
+    suspend fun getAllCustomCategories() = mediaPlayer.mediaLibraryManager.mediaStorage.getCustomCategories()
+
+    fun assignCustomCategoriesFor(mediaItem: MediaItem, categories: List<Category>) {
+        viewModelScope.launch {
+            mediaPlayer.mediaLibraryManager.assignCategories(mediaItem, categories)
+        }
     }
 
     @Suppress("UNCHECKED_CAST")

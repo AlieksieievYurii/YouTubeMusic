@@ -6,8 +6,10 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.withContext
 
 /**
  * The class is responsible for doing modification operations. It implements event-based approach. In simple words
@@ -20,6 +22,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         data class CategoryRemoved(val category: Category) : Event()
         data class CategoryCreated(val category: Category) : Event()
         data class CategoryUpdated(val category: Category) : Event()
+        data class CategoryAssignment(val mediaItem: MediaItem, val customCategories: List<Category>) : Event()
         //TODO Add Delete and Update events and implement them here
     }
 
@@ -77,6 +80,11 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         val newCategoryContainer = mediaStorage.getCategoryContainer(category).copy(category = category)
         mediaStorage.saveCategoryContainer(newCategoryContainer)
         _event.emit(Event.CategoryUpdated(category))
+    }
+
+    suspend fun assignCategories(mediaItem: MediaItem, customCategories: List<Category>) = withContext(Dispatchers.IO) {
+        customCategories.forEach { category -> mediaStorage.assignItemToCategory(category, mediaItem) }
+        _event.emit(Event.CategoryAssignment(mediaItem, customCategories))
     }
 
     private suspend fun addMediaItemToAdditionalCategories(mediaItem: MediaItem, additionalCustomCategories: List<Category>) {

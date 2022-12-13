@@ -47,6 +47,15 @@ class MediaStorage(context: Context) {
 
     suspend fun getMediaItemsFor(categoryId: Int): List<MediaItem> = getCategoryContainer(categoryId).mediaItemsIds.map { getMediaItem(it) }
 
+    suspend fun getAssignedCustomCategoriesFor(mediaItem: MediaItem): List<Category> = withContext(Dispatchers.IO) {
+        val res = mutableListOf<Category>()
+        getCustomCategoryContainers().forEach { categoryContainer ->
+            if (categoryContainer.mediaItemsIds.contains(mediaItem.id))
+                res.add(categoryContainer.category)
+        }
+        res
+    }
+
     fun setMockAsDownloaded(videoItem: VideoItem) {
         val downloadingMockFile = getDownloadingMockFile(videoItem)
 
@@ -69,6 +78,10 @@ class MediaStorage(context: Context) {
     suspend fun assignItemToCategory(category: Category, item: Item) {
         val categoryContainer = getCategoryContainer(category)
         val mediaItems = categoryContainer.mediaItemsIds.toMutableList()
+
+        if (mediaItems.contains(item.id))
+            return
+
         mediaItems.add(item.id)
         val newCategoryContainer = CategoryContainer(category, mediaItems)
         saveCategoryContainer(newCategoryContainer)
