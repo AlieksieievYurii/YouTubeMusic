@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.yurii.youtubemusic.screens.player.PlayerControlPanelFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
@@ -45,8 +46,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                     handleSignOut()
 
                 if (it is MainActivityViewModel.Event.MediaServiceError) {
-                    //TODO Add showing up a snackbar or smt like that
-                    Log.e("ERROR", it.exception.toString())
+                    Snackbar.make(activityMainBinding.coordinatorLayout, it.exception.message ?: "Unknown", Snackbar.LENGTH_LONG)
+                        .setAnchorView(activityMainBinding.bottomNavigationView).show()
                 }
             }
         }
