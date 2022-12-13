@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.services.media.MediaPlayer
 import com.yurii.youtubemusic.services.media.PlaybackState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
-class MediaItemsViewModel(private val mediaPlayer: MediaPlayer) : ViewModel() {
+class MediaItemsViewModel(private val mediaLibraryManager: MediaLibraryManager, private val mediaPlayer: MediaPlayer) : ViewModel() {
     sealed class MediaItemsStatus {
         object Loading : MediaItemsStatus()
         object NoMediaItems : MediaItemsStatus()
@@ -49,23 +50,24 @@ class MediaItemsViewModel(private val mediaPlayer: MediaPlayer) : ViewModel() {
     }
 
     suspend fun getAssignedCustomCategoriesFor(mediaItem: MediaItem) =
-        mediaPlayer.mediaLibraryManager.mediaStorage.getAssignedCustomCategoriesFor(mediaItem)
+        mediaLibraryManager.mediaStorage.getAssignedCustomCategoriesFor(mediaItem)
 
-    suspend fun getAllCustomCategories() = mediaPlayer.mediaLibraryManager.mediaStorage.getCustomCategories()
+    suspend fun getAllCustomCategories() = mediaLibraryManager.mediaStorage.getCustomCategories()
 
     fun assignCustomCategoriesFor(mediaItem: MediaItem, categories: List<Category>) {
         viewModelScope.launch {
-            mediaPlayer.mediaLibraryManager.assignCategories(mediaItem, categories)
+            mediaLibraryManager.assignCategories(mediaItem, categories)
         }
     }
 
     @Suppress("UNCHECKED_CAST")
     class Factory(
+        private val mediaLibraryManager: MediaLibraryManager,
         private val mediaPlayer: MediaPlayer
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(MediaItemsViewModel::class.java))
-                return MediaItemsViewModel(mediaPlayer) as T
+                return MediaItemsViewModel(mediaLibraryManager, mediaPlayer) as T
             throw IllegalStateException("Given the model class is not assignable from MediaItemsViewModel class")
         }
     }

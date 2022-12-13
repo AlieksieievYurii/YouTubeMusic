@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.*
 class MediaPlayer(
     val category: Category,
     private val mediaServiceConnection: MediaServiceConnection,
-    val mediaLibraryManager: MediaLibraryManager
+    private val mediaLibraryManager: MediaLibraryManager
 ) {
     private val _mediaItems: MutableSharedFlow<List<MediaItem>> = MutableSharedFlow(replay = 1) // replay = 1 to keep the cache
     val mediaItems = _mediaItems.asSharedFlow()

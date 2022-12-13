@@ -28,7 +28,7 @@ object Injector {
 
     fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel.Factory {
         val mediaPlayer = MediaPlayer(category, MediaServiceConnection.getInstance(context), MediaLibraryManager.getInstance(context))
-        return MediaItemsViewModel.Factory(mediaPlayer)
+        return MediaItemsViewModel.Factory(MediaLibraryManager.getInstance(context), mediaPlayer)
     }
 
     fun provideYouTubeMusicViewModel(context: Context, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
@@ -44,7 +44,6 @@ object Injector {
     }
 
     fun provideCategoriesEditorViewMode(context: Context): CategoriesEditorViewModel.Factory {
-        val preferences = ServiceLocator.providePreferences(context)
-        return CategoriesEditorViewModel.Factory(preferences)
+        return CategoriesEditorViewModel.Factory(MediaLibraryManager.getInstance(context))
     }
 }
