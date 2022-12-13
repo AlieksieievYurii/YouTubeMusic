@@ -8,7 +8,6 @@ import android.view.View
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.chip.Chip
@@ -33,18 +32,11 @@ class CategoriesEditorActivity : AppCompatActivity() {
         ).show(supportFragmentManager, "DeleteCategoryDialog")
     }
 
-    private val onEditCategoryName = View.OnClickListener {
-//        val categoryChip = it as Chip
-//
-//        AddEditCategoryDialog.createDialogToEditCategory(category,
-//            { categoryName -> viewModel.isCategoryNameExist(categoryName) }) { editedCategory ->
-//            categoryChip.text = editedCategory.name
-//        }.show(supportFragmentManager, "EditCategoryDialog")
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initActionBar()
+
+        binding.fab.setOnClickListener { addNewCategory() }
 
         lifecycleScope.launchWhenCreated {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -59,7 +51,7 @@ class CategoriesEditorActivity : AppCompatActivity() {
                 is CategoriesEditorViewModel.State.Loaded ->
                     if (it.categories.isNullOrEmpty()) setNoCategories() else setCategories(it.categories)
                 CategoriesEditorViewModel.State.Loading -> {
-
+                    //nothing
                 }
             }
         }
@@ -76,31 +68,19 @@ class CategoriesEditorActivity : AppCompatActivity() {
     private fun setShowCategories() {
         binding.labelNoCategories.visibility = View.GONE
         binding.categoriesLayout.visibility = View.VISIBLE
-        binding.create.apply {
-            text = getString(R.string.label_add)
-            setOnClickListener { addNewCategory() }
-        }
     }
 
     private fun setNoCategories() {
         binding.apply {
             categoriesLayout.visibility = View.GONE
             labelNoCategories.visibility = View.VISIBLE
-            create.apply {
-                text = getString(R.string.label_create)
-                setOnClickListener { createFirstCategory() }
-            }
         }
     }
 
-    private fun createFirstCategory() = addNewCategory(isFirstCategory = true)
-
-    private fun addNewCategory(isFirstCategory: Boolean = false) {
-        AddEditCategoryDialog.createDialogToCreateNewCategory({ false }) { categoryName ->
+    private fun addNewCategory() {
+        AddEditCategoryDialog.showToCreateCategory(supportFragmentManager) { categoryName ->
             viewModel.createCategory(categoryName)
-            if (isFirstCategory)
-                setShowCategories()
-        }.show(supportFragmentManager, "AddCategoryDialog")
+        }
     }
 
     private fun inflateChip(category: Category): Chip {
@@ -108,7 +88,9 @@ class CategoriesEditorActivity : AppCompatActivity() {
         chip.apply {
             id = category.id
             text = category.name
-            setOnClickListener(onEditCategoryName)
+            setOnClickListener {
+                AddEditCategoryDialog.showToRenameCategory(supportFragmentManager, category) { viewModel.renameCategory(category, it) }
+            }
             setOnCloseIconClickListener(onDeleteClick)
         }
         return chip

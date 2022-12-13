@@ -28,9 +28,13 @@ class CategoriesEditorViewModel(private val mediaLibraryManager: MediaLibraryMan
     }
 
     fun renameCategory(category: Category, newName: String) {
-        viewModelScope.launch {
-            mediaLibraryManager.renameCategory(category, newName)
-        }
+        val newCategory = category.copy(name = newName)
+        _state.value = State.Loaded(getCurrentLoadedMutableCategories().apply {
+            val index = indexOf(category)
+            removeAt(index)
+            add(index, newCategory)
+        })
+        viewModelScope.launch { mediaLibraryManager.updateCategory(newCategory) }
     }
 
     fun removeCategory(categoryId: Int) {
