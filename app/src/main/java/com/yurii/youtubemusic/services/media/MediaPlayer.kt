@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.services.media
 
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.isDefault
 import kotlinx.coroutines.flow.*
@@ -26,15 +27,11 @@ class MediaPlayer(
         _mediaItems.emit(mediaServiceConnection.getMediaItemsFor(category))
         mediaLibraryManager.event.collectLatest { event ->
             when (event) {
-                is MediaLibraryManager.Event.ItemDeleted -> {
-                    val newList = _mediaItems.replayCache[0].filter { it.id != event.item.id } //replayCache[0] because replay = 1
-                    _mediaItems.emit(newList)
-                }
-                is MediaLibraryManager.Event.MediaItemIsAdded -> if (category.isDefault || category.id in event.assignedCategoriesIds) {
-                    val newList = _mediaItems.replayCache[0].toMutableList().apply {
-                        add(event.mediaItem)
-                    }
-                    _mediaItems.emit(newList)
+                is MediaLibraryManager.Event.ItemDeleted -> handleItemIsRemoved(event.item)
+                is MediaLibraryManager.Event.MediaItemIsAdded -> handleMediaItemIsAdded(event.mediaItem, event.assignedCategoriesIds)
+                is MediaLibraryManager.Event.CategoryAssignment -> handleCustomCategoryAssignment(event.mediaItem, event.customCategories)
+                else -> {
+                    // Ignore some events
                 }
             }
         }
@@ -56,4 +53,33 @@ class MediaPlayer(
         mediaLibraryManager.deleteItem(mediaItem)
     }
 
+    private suspend fun handleItemIsRemoved(item: Item) {
+        val newList = getMediaItemsFromCache().filter { it.id != item.id }
+        _mediaItems.emit(newList)
+    }
+
+    private suspend fun handleMediaItemIsAdded(mediaItem: MediaItem, customAssignedCategoriesIds: List<Int>) {
+        if (category.isDefault || category.id in customAssignedCategoriesIds) {
+            val newList = getMediaItemsFromCache().apply {
+                add(mediaItem)
+            }
+            _mediaItems.emit(newList)
+        }
+    }
+
+    private suspend fun handleCustomCategoryAssignment(mediaItem: MediaItem, customCategories: List<Category>) {
+        if (category.isDefault)
+            return
+
+        val mediaItems = getMediaItemsFromCache()
+        if (customCategories.contains(category) && !mediaItems.contains(mediaItem)) {
+            mediaItems.add(mediaItem)
+            _mediaItems.emit(mediaItems)
+        } else if (!customCategories.contains(category) && mediaItems.contains(mediaItem)) {
+            mediaItems.remove(mediaItem)
+            _mediaItems.emit(mediaItems)
+        }
+    }
+
+    private fun getMediaItemsFromCache() = _mediaItems.replayCache[0].toMutableList() //replayCache[0] because replay = 1
 }

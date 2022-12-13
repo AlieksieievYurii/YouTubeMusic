@@ -83,6 +83,11 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
     }
 
     suspend fun assignCategories(mediaItem: MediaItem, customCategories: List<Category>) = withContext(Dispatchers.IO) {
+        mediaStorage.getAssignedCustomCategoriesFor(mediaItem).forEach { alreadyAssignedCategory ->
+            if (!customCategories.contains(alreadyAssignedCategory))
+                mediaStorage.demoteCategory(mediaItem, alreadyAssignedCategory)
+        }
+
         customCategories.forEach { category -> mediaStorage.assignItemToCategory(category, mediaItem) }
         _event.emit(Event.CategoryAssignment(mediaItem, customCategories))
     }

@@ -14,6 +14,9 @@ import java.lang.IllegalStateException
 
 class MediaItemValidationException(message: String) : Exception(message)
 
+//TODO Write Unit Tests for this class
+//TODO Write Docs
+
 /**
  * Represents an logical interface to the file system in order to manage media files from single repository
  */
@@ -54,6 +57,15 @@ class MediaStorage(context: Context) {
                 res.add(categoryContainer.category)
         }
         res
+    }
+
+    suspend fun demoteCategory(mediaItem: MediaItem, category: Category) {
+        assert(!category.isDefault) { "Can not call demoteCategory for default category" }
+
+        val categoryContainer = getCategoryContainer(category)
+        val mediaItems = categoryContainer.mediaItemsIds.toMutableList()
+        mediaItems.remove(mediaItem.id)
+        saveCategoryContainer(categoryContainer.copy(mediaItemsIds = mediaItems))
     }
 
     fun setMockAsDownloaded(videoItem: VideoItem) {
@@ -161,7 +173,7 @@ class MediaStorage(context: Context) {
     private suspend fun getDefaultCategory(): Category = getDefaultCategoryContainer().category
 
     private suspend fun getCustomCategoryContainers(): List<CategoryContainer> = withContext(Dispatchers.IO) {
-        categoriesContainersStorage.walkFiles().map {
+        categoriesContainersStorage.walkFiles().filter { it.name != "${Category.ALL.id}.json" }.map {
             gson.fromJson(it.readText(), CategoryContainer::class.java)
         }.toList()
     }
