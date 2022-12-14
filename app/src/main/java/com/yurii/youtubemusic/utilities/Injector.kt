@@ -23,7 +23,7 @@ object Injector {
     }
 
     fun provideSavedMusicViewModel(context: Context): SavedMusicViewModel.Factory {
-        return SavedMusicViewModel.Factory(MediaServiceConnection.getInstance(context))
+        return SavedMusicViewModel.Factory(MediaServiceConnection.getInstance(context), MediaLibraryManager.getInstance(context))
     }
 
     fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel.Factory {

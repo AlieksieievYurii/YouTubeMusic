@@ -32,7 +32,14 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
     override fun onInflatedView(viewDataBinding: FragmentSavedMusicBinding) {
         lifecycleScope.launchWhenStarted {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.musicCategories.collectLatest { initCategoriesLayout(it) }
+                viewModel.musicCategories.collectLatest {
+                    when(it) {
+                        is SavedMusicViewModel.State.Loaded -> initCategoriesLayout(it.allCategories)
+                        SavedMusicViewModel.State.Loading -> {
+                            // TODO Add some loading
+                        }
+                    }
+                }
             }
         }
     }
@@ -52,14 +59,6 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
             tab.text = categories[position].name
         }.attach()
         binding.categories.visibility = View.VISIBLE
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == CategoriesEditorActivity.REQUEST_CODE && resultCode == CategoriesEditorActivity.CATEGORIES_ARE_CHANGE_RESULT_CODE) {
-            viewModel.reloadMusicCategories()
-        }
     }
 
     companion object {
