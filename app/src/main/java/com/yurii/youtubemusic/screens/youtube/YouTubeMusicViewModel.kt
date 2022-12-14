@@ -38,6 +38,7 @@ class YouTubeMusicViewModel(
 ) : ViewModel() {
     sealed class Event {
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
+        data class OpenCategoriesSelector(val videoItem: VideoItem, val allCustomCategories: List<Category>) : Event()
         object SignOut : Event()
     }
 
@@ -83,8 +84,6 @@ class YouTubeMusicViewModel(
         downloaderServiceConnection.connect()
     }
 
-    fun getAllCategories() = mutableListOf<Category>()
-
     fun signOut() {
         googleAccount.signOut()
         preferences.setCurrentYouTubePlaylist(null)
@@ -100,6 +99,13 @@ class YouTubeMusicViewModel(
     fun download(item: VideoItem, categories: List<Category> = emptyList()) {
         downloaderServiceConnection.download(item, categories)
         sendVideoItemStatus(VideoItemStatus.Downloading(item, 0, 0))
+    }
+
+    fun openCategorySelectorFor(videoItem: VideoItem) {
+        viewModelScope.launch {
+            val allCustomCategories = mediaLibraryManager.mediaStorage.getCustomCategories()
+            _event.emit(Event.OpenCategoriesSelector(videoItem, allCustomCategories))
+        }
     }
 
     fun tryToDownloadAgain(videoItem: VideoItem) {
@@ -139,7 +145,7 @@ class YouTubeMusicViewModel(
         return VideoItemStatus.Download(videoItem)
     }
 
-    fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {
+    private fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {
         _videoItemStatus.emit(videoItemStatus)
     }
 

@@ -11,6 +11,7 @@ import com.yurii.youtubemusic.databinding.FragmentYoutubeMusicBinding
 import com.yurii.youtubemusic.utilities.*
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.R
+import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.screens.youtube.models.Playlist
 import com.yurii.youtubemusic.screens.youtube.models.VideoItem
@@ -42,7 +43,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         VideoItemsListAdapter(object : VideoItemsListAdapter.Callback {
             override fun getItemStatus(videoItem: VideoItem): VideoItemStatus = viewModel.getItemStatus(videoItem)
             override fun onDownload(videoItem: VideoItem) = viewModel.download(videoItem)
-            override fun onDownloadAndAssignedCategories(videoItem: VideoItem) = showDialogToSelectCategories(videoItem)
+            override fun onDownloadAndAssignedCategories(videoItem: VideoItem) = viewModel.openCategorySelectorFor(videoItem)
             override fun onCancelDownloading(videoItem: VideoItem) = viewModel.cancelDownloading(videoItem)
             override fun onDelete(videoItem: VideoItem) = showConfirmationDialogToDeleteVideoItem(videoItem)
             override fun onShowErrorDetail(videoItem: VideoItem) = viewModel.showFailedItemDetails(videoItem)
@@ -85,11 +86,12 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         when (event) {
             is YouTubeMusicViewModel.Event.SignOut -> mainActivityViewModel.logOut()
             is YouTubeMusicViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(event.videoItem, event.error)
+            is YouTubeMusicViewModel.Event.OpenCategoriesSelector -> showDialogToSelectCategories(event.videoItem, event.allCustomCategories)
         }
     }
 
-    private fun showDialogToSelectCategories(videoItem: VideoItem) {
-        SelectCategoriesDialog2(requireContext(), viewModel.getAllCategories(), emptyList()) { categories ->
+    private fun showDialogToSelectCategories(videoItem: VideoItem, allCustomCategories: List<Category>) {
+        SelectCategoriesDialog2(requireContext(), allCustomCategories, emptyList()) { categories ->
             viewModel.download(videoItem, categories)
         }.show()
     }
