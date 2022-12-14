@@ -24,12 +24,13 @@ import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.ui.startValueAnimation
 import com.yurii.youtubemusic.utilities.Injector
+import com.yurii.youtubemusic.utilities.requireApplication
 import kotlinx.coroutines.flow.collectLatest
 import kotlin.math.abs
 
 
 class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_panel) {
-    private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(requireContext()) }
+    private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(requireApplication()) }
     private val binding: FragmentPlayerControlPanelBinding by viewBinding()
 
     private var clickX = 0f

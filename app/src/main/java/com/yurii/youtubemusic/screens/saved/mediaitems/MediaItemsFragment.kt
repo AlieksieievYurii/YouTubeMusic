@@ -20,6 +20,7 @@ import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
+import com.yurii.youtubemusic.utilities.requireApplication
 import com.yurii.youtubemusic.utilities.requireParcelable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -27,7 +28,7 @@ import kotlinx.coroutines.launch
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val viewModel: MediaItemsViewModel by viewModels {
         val category: Category = requireArguments().requireParcelable(EXTRA_CATEGORY)
-        Injector.provideMediaItemsViewModel(requireContext(), category)
+        Injector.provideMediaItemsViewModel(requireApplication(), category)
     }
     private val binding: FragmentMediaItemsBinding by viewBinding()
 

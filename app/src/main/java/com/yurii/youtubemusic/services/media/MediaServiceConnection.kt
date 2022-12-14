@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.services.media
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
@@ -25,7 +26,7 @@ sealed class PlaybackState {
     data class Paused(val mediaItem: MediaItem, val category: Category) : PlaybackState()
 }
 
-class MediaServiceConnection private constructor(private val context: Context) {
+class MediaServiceConnection private constructor(private val application: Application) {
     private val _isMediaControllerConnected = MutableStateFlow(false)
     val isMediaControllerConnected = _isMediaControllerConnected.asStateFlow()
 
@@ -35,8 +36,8 @@ class MediaServiceConnection private constructor(private val context: Context) {
     private val mediaBrowserConnectionCallback = MediaBrowserConnectionCallback()
 
     private val mediaBrowser = MediaBrowserCompat(
-        context,
-        ComponentName(context, MediaService::class.java),
+        application,
+        ComponentName(application, MediaService::class.java),
         mediaBrowserConnectionCallback, null
     )
 
@@ -94,7 +95,7 @@ class MediaServiceConnection private constructor(private val context: Context) {
         override fun onConnected() {
             super.onConnected()
             Timber.d("MediaBrowserConnectionCallback -> OnConnected")
-            mediaController = MediaControllerCompat(context, mediaBrowser.sessionToken).apply { registerCallback(MediaControllerCallback()) }
+            mediaController = MediaControllerCompat(application, mediaBrowser.sessionToken).apply { registerCallback(MediaControllerCallback()) }
         }
 
         override fun onConnectionSuspended() {
@@ -144,14 +145,14 @@ class MediaServiceConnection private constructor(private val context: Context) {
     }
 
     companion object {
-        @SuppressLint("StaticFieldLeak")
+
         @Volatile
         private var instance: MediaServiceConnection? = null
 
-        fun getInstance(context: Context): MediaServiceConnection {
+        fun getInstance(application: Application): MediaServiceConnection {
             if (instance == null)
                 synchronized(this) {
-                    instance = MediaServiceConnection(context)
+                    instance = MediaServiceConnection(application)
                 }
             return instance!!
         }

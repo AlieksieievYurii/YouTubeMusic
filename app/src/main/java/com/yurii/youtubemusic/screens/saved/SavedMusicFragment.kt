@@ -12,6 +12,7 @@ import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
+import com.yurii.youtubemusic.utilities.requireApplication
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -20,7 +21,7 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
     titleStringId = R.string.label_fragment_title_saved_music,
     optionMenuId = R.menu.saved_musics_fragment_menu
 ) {
-    private val viewModel: SavedMusicViewModel by viewModels { Injector.provideSavedMusicViewModel(requireContext()) }
+    private val viewModel: SavedMusicViewModel by viewModels { Injector.provideSavedMusicViewModel(requireApplication()) }
 
     override fun onClickOption(id: Int) {
         when (id) {

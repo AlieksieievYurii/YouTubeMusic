@@ -21,7 +21,7 @@ import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private val viewModel: MainActivityViewModel by viewModels {
-        MainActivityViewModel.MainActivityViewModelFactory(MediaServiceConnection.getInstance(applicationContext))
+        MainActivityViewModel.MainActivityViewModelFactory(MediaServiceConnection.getInstance(application))
     }
     private val activityMainBinding: ActivityMainBinding by viewBinding()
     private var activeBottomMenuItem: Int = R.id.item_saved_music

@@ -16,7 +16,7 @@ import com.yurii.youtubemusic.utilities.Injector
 import kotlinx.coroutines.flow.collectLatest
 
 class PlayerActivity : AppCompatActivity() {
-    private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(this) }
+    private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(application) }
     private val binding: ActivityPlayerBinding by viewBinding()
     private var isStartChangingSeek: Boolean = false
     private var seekProgress: Int = -1

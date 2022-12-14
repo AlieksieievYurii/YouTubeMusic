@@ -19,17 +19,17 @@ object Injector {
         return EqualizerViewModel.Factory()
     }
 
-    fun providePlayerControllerViewModel(context: Context): PlayerControllerViewModel.Factory {
-        return PlayerControllerViewModel.Factory(MediaServiceConnection.getInstance(context))
+    fun providePlayerControllerViewModel(application: Application): PlayerControllerViewModel.Factory {
+        return PlayerControllerViewModel.Factory(MediaServiceConnection.getInstance(application))
     }
 
-    fun provideSavedMusicViewModel(context: Context): SavedMusicViewModel.Factory {
-        return SavedMusicViewModel.Factory(MediaServiceConnection.getInstance(context), MediaLibraryManager.getInstance(context))
+    fun provideSavedMusicViewModel(application: Application): SavedMusicViewModel.Factory {
+        return SavedMusicViewModel.Factory(MediaServiceConnection.getInstance(application), MediaLibraryManager.getInstance(application))
     }
 
-    fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel.Factory {
-        val mediaPlayer = MediaPlayer(category, MediaServiceConnection.getInstance(context), MediaLibraryManager.getInstance(context))
-        return MediaItemsViewModel.Factory(MediaLibraryManager.getInstance(context), mediaPlayer)
+    fun provideMediaItemsViewModel(application: Application, category: Category): MediaItemsViewModel.Factory {
+        val mediaPlayer = MediaPlayer(category, MediaServiceConnection.getInstance(application), MediaLibraryManager.getInstance(application))
+        return MediaItemsViewModel.Factory(MediaLibraryManager.getInstance(application), mediaPlayer)
     }
 
     fun provideYouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {

@@ -1,7 +1,9 @@
 package com.yurii.youtubemusic.utilities
 
+import android.app.Application
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
 import java.lang.IllegalStateException
@@ -48,4 +50,8 @@ fun <T> List<T>.findIndex(filter: (T) -> Boolean): Int? {
             return index
     }
     return null
+}
+
+fun Fragment.requireApplication(): Application {
+    return requireActivity().application
 }
