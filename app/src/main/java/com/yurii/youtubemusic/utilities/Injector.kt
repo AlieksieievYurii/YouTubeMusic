@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic.utilities
 
+import android.app.Application
 import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.models.Category
@@ -31,15 +32,15 @@ object Injector {
         return MediaItemsViewModel.Factory(MediaLibraryManager.getInstance(context), mediaPlayer)
     }
 
-    fun provideYouTubeMusicViewModel(context: Context, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
-        val googleAccount = GoogleAccount(context)
-        val downloaderServiceConnection = ServiceConnection(context)
+    fun provideYouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
+        val googleAccount = GoogleAccount(application)
+        val downloaderServiceConnection = ServiceConnection(application)
         return YouTubeMusicViewModel.Factory(
-            MediaLibraryManager.getInstance(context),
+            MediaLibraryManager.getInstance(application),
             googleAccount,
             downloaderServiceConnection,
             googleSignInAccount,
-            Preferences(context)
+            Preferences.getInstance(application)
         )
     }
 

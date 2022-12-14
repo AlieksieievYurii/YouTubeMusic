@@ -38,7 +38,12 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     }
 
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    private val viewModel: YouTubeMusicViewModel by viewModels { Injector.provideYouTubeMusicViewModel(requireContext(), getGoogleSignInAccount()) }
+    private val viewModel: YouTubeMusicViewModel by viewModels {
+        Injector.provideYouTubeMusicViewModel(
+            requireActivity().application,
+            getGoogleSignInAccount()
+        )
+    }
     private val listAdapter: VideoItemsListAdapter by lazy {
         VideoItemsListAdapter(object : VideoItemsListAdapter.Callback {
             override fun getItemStatus(videoItem: VideoItem): VideoItemStatus = viewModel.getItemStatus(videoItem)
