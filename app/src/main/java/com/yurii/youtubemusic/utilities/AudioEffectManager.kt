@@ -3,75 +3,64 @@ package com.yurii.youtubemusic.utilities
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
-import androidx.annotation.IntRange
-import com.yurii.youtubemusic.models.AudioEffectsData
+import com.yurii.youtubemusic.models.EqualizerData
+import com.yurii.youtubemusic.models.TwisterData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class AudioEffectManager(private  val preferences: IPreferences) {
-    val data: AudioEffectsData =  preferences.getAudioEffectsData()
-    private var sessionId: Int? = null
+class AudioEffectManager private constructor(private val preferences: Preferences) {
+    private var currentSessionId: Int? = null
 
     private var bassBoost: BassBoost? = null
     private var virtualizer: Virtualizer? = null
     private var equalizer: Equalizer? = null
 
-
-    fun applyLastChanges(sessionId: Int) {
-        if (this.sessionId == null || this.sessionId != sessionId) {
-            this.sessionId = sessionId
+    /**
+     * Sets current session by [sessionId].
+     */
+    fun setSession(sessionId: Int) {
+        if (currentSessionId != sessionId) {
+            currentSessionId = sessionId
             bassBoost = BassBoost(0, sessionId)
             virtualizer = Virtualizer(0, sessionId)
             equalizer = Equalizer(0, sessionId)
-            applyAudioAffects()
         }
     }
 
-    fun setEnableEqualizer(enable: Boolean) {
-        data.enableEqualizer = enable
-        equalizer?.enabled = enable
-    }
-
-    fun setEnableBassBoost(enable: Boolean) {
-        data.enableBassBoost = enable
-        bassBoost?.enabled = enable
-    }
-
-    fun setEnableVirtualizer(enable: Boolean) {
-        data.enableVirtualizer = enable
-        virtualizer?.enabled = enable
-    }
-
-    private fun applyAudioAffects() {
-        bassBoost?.apply {
-            enabled = data.enableBassBoost
-            setStrength(convertToAudioEffectRange(data.bassBoost))
+    /**
+     * If the session is assigned by [setSession], then this call applies saved audio effects
+     */
+    suspend fun applyCurrentAffects() {
+        currentSessionId?.let {
+            applyBassBoost(getBassBoostData())
+            applyVirtualizer(getVirtualizerData())
+            applyEqualizer(getEqualizerData())
         }
-        virtualizer?.apply {
-            enabled = data.enableVirtualizer
-            setStrength(convertToAudioEffectRange(data.virtualizer))
-        }
-        equalizer?.apply {
-            for ((bandId, level) in data.bandsLevels) {
-                setBandLevel(bandId, level)
-            }
-            enabled = data.enableEqualizer
-        }
-
     }
 
+    /**
+     * Returns all available presets names
+     */
     fun getPresets(): Array<String> {
         val eq = equalizer ?: getDefaultEqualizer()
         return (0 until eq.numberOfPresets).map { eq.getPresetName(it.toShort()) }.toTypedArray()
     }
 
-    fun setBandLevel(band: Int, level: Int) {
-        equalizer?.setBandLevel(band.toShort(), level.toShort())
-        data.bandsLevels[band] = level
+    /**
+     * Sets given [presetId]. If the value is not [EqualizerData.CUSTOM_PRESET_ID], then system preset bands levels are applied
+     */
+    suspend fun setPreset(presetId: Int) = withContext(Dispatchers.IO) {
+        val data = getEqualizerData()
+        if (presetId != EqualizerData.CUSTOM_PRESET_ID) {
+            equalizer?.usePreset(presetId.toShort())
+            setEqualizerData(data.copy(currentPreset = presetId, bandsLevels = getBandLevelsForPreset(presetId)))
+        } else
+            setEqualizerData(data.copy(currentPreset = presetId))
     }
 
-    fun setPreset(id: Int) {
-        equalizer?.usePreset(id.toShort())
-    }
-
+    /**
+     * Returns the list of system defined preset band levels
+     */
     fun getBandLevelsForPreset(presetId: Int): HashMap<Int, Int> {
         val eq = equalizer ?: getDefaultEqualizer()
         eq.usePreset(presetId.toShort())
@@ -82,18 +71,77 @@ class AudioEffectManager(private  val preferences: IPreferences) {
         return res
     }
 
+    fun getPresetName(presetId: Int): String {
+        val eq = equalizer ?: getDefaultEqualizer()
+        return eq.getPresetName(presetId.toShort())
+    }
+
+    suspend fun getBassBoostData(): TwisterData = withContext(Dispatchers.IO) { preferences.getBassBoostData() }
+
+    suspend fun getVirtualizerData(): TwisterData = withContext(Dispatchers.IO) { preferences.getVirtualizerData() }
+
+    suspend fun getEqualizerData(): EqualizerData = withContext(Dispatchers.IO) { preferences.getEqualizerData() }
+
+    suspend fun setBassBoostState(data: TwisterData) {
+        withContext(Dispatchers.IO) { preferences.setBassBoostData(data) }
+        applyBassBoost(data)
+    }
+
+    suspend fun setVirtualizerData(data: TwisterData) {
+        withContext(Dispatchers.IO) { preferences.setVirtualizerData(data) }
+        applyVirtualizer(data)
+    }
+
+    suspend fun setEqualizerData(data: EqualizerData) {
+        withContext(Dispatchers.IO) { preferences.setEqualizerData(data) }
+        applyEqualizer(data)
+    }
+
+    /**
+     * Sets Equalizer band level BUT does not save it to the [preferences]
+     */
+    fun setEqualizerBandLevel(bandId: Int, bandLevel: Int) {
+        equalizer?.apply {
+            setBandLevel(bandId.toShort(), bandLevel.toShort())
+        }
+    }
+
+    private fun applyBassBoost(bassBoostData: TwisterData) {
+        bassBoost?.apply {
+            enabled = bassBoostData.isEnabled
+            setStrength(convertToAudioEffectRange(bassBoostData.value))
+        }
+    }
+
+    private fun applyVirtualizer(bassBoostData: TwisterData) {
+        virtualizer?.apply {
+            enabled = bassBoostData.isEnabled
+            setStrength(convertToAudioEffectRange(bassBoostData.value))
+        }
+    }
+
+    private fun applyEqualizer(equalizerData: EqualizerData) {
+        equalizer?.apply {
+            for ((bandId, level) in equalizerData.bandsLevels)
+                setBandLevel(bandId.toShort(), level.toShort())
+            enabled = equalizerData.isEnabled
+        }
+    }
+
     private fun getDefaultEqualizer(): Equalizer = Equalizer(0, 0).apply { enabled = false }
 
-    fun setBassBoost(@IntRange(from = 0, to = 1000) strength: Int) {
-        data.bassBoost = strength
-        bassBoost?.setStrength(convertToAudioEffectRange(strength))
-    }
-
-    fun setVirtualizer(@IntRange(from = 0, to = 1000) strength: Int) {
-        data.virtualizer = strength
-        virtualizer?.setStrength(convertToAudioEffectRange(strength))
-    }
-
     private fun convertToAudioEffectRange(value: Int): Short = (value * 10).toShort()
-    fun saveChanges() = preferences.setAudioEffectsData(data)
+
+    companion object {
+        @Volatile
+        private var instance: AudioEffectManager? = null
+
+        fun getInstance(preferences: Preferences): AudioEffectManager {
+            if (instance == null)
+                synchronized(this) {
+                    instance = AudioEffectManager(preferences)
+                }
+            return instance!!
+        }
+    }
 }
