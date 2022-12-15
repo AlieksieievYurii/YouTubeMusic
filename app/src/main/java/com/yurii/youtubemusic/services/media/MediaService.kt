@@ -19,6 +19,8 @@ import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.main.MainActivity
+import com.yurii.youtubemusic.utilities.AudioEffectManager
+import com.yurii.youtubemusic.utilities.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -56,6 +58,7 @@ private enum class AudioFocus {
 class MediaService : MediaBrowserServiceCompat() {
     private val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     private val notificationManager by lazy { NotificationManager(baseContext, sessionToken!!) }
+    private val audioEffectManager by lazy { AudioEffectManager.getInstance(Preferences.getInstance(application)) }
     private lateinit var mediaSession: MediaSessionCompat
 
     private var mediaPlayer: MediaPlayer? = null
@@ -292,7 +295,11 @@ class MediaService : MediaBrowserServiceCompat() {
     private fun playMediaPlayer() {
         currentState = PlaybackStateCompat.STATE_PLAYING
         canPlayOnFocusGain = false
-        getMediaPlayer().start()
+        getMediaPlayer().apply {
+            start()
+            audioEffectManager.setSession(audioSessionId)
+            coroutineScope.launch { audioEffectManager.applyCurrentAffects() }
+        }
         notificationManager.showPlayingNotification()
         startForeground(NotificationManager.NOTIFICATION_ID, notificationManager.getCurrentNotification())
         updateCurrentPlaybackState()

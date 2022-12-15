@@ -15,8 +15,9 @@ import com.yurii.youtubemusic.services.media.*
 
 object Injector {
 
-    fun provideEqualizerViewModel(context: Context): EqualizerViewModel.Factory {
-        return EqualizerViewModel.Factory()
+    fun provideEqualizerViewModel(application: Application): EqualizerViewModel.Factory {
+        val audioEffectManager = AudioEffectManager.getInstance(Preferences.getInstance(application))
+        return EqualizerViewModel.Factory(audioEffectManager)
     }
 
     fun providePlayerControllerViewModel(application: Application): PlayerControllerViewModel.Factory {
