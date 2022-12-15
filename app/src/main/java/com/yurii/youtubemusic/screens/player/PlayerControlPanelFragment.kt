@@ -118,6 +118,8 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
     private fun returnViewToCenter() = startValueAnimation(binding.container.x, 0f) { binding.container.x = it }
 
     private fun swipeViewAway() {
+        if (!binding.container.isVisible)
+            return
         binding.container.apply {
             val end = if (x > 0) x + width else x - width
             startValueAnimation(x, end, onEnd = { isVisible = false }) { x = it }
