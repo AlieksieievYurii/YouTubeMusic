@@ -6,15 +6,19 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import androidx.core.content.res.ResourcesCompat
 import com.yurii.youtubemusic.R
+import java.lang.IllegalStateException
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
-
-typealias EventListener = (bandId: Int, level: Int, fromUser: Boolean) -> Unit
-
 class EqualizerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0, defStyleRes: Int = 0) :
     ViewGroup(context, attrs, defStyle, defStyleRes), SeekBar.OnSeekBarChangeListener {
+
+    interface OnChangeListener {
+        fun onBandLevelChanging(bandId: Int, bandLevel: Int)
+        fun onBandLevelsChanged(bandsLevel: Map<Int, Int>)
+    }
 
     companion object {
         private const val DEFAULT_BAND_SIZE = 3
@@ -22,8 +26,8 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
         private const val BAND_PADDING = 20
     }
 
-    var minValue = -1500
-    var maxValue = 1500
+    private var minValue = -1500
+    private var maxValue = 1500
     private var bandSize = 0
     private var progressDrawable = 0
     private var connectorColor = 0
@@ -33,10 +37,10 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
     private var enabledThumb = 0
     private var disableThumb = 0
     private var maxBand = 50
-    private var bandNames: ArrayList<Int>? = null
-    private var levels: Map<Int, Int>? = null
+    private var bandsFreqList: List<Int>? = null
+    private var levels: HashMap<Int, Int> = HashMap()
 
-    var listener: EventListener? = null
+    private var listener: OnChangeListener? = null
 
     private val bandList: ArrayList<BandView> = ArrayList(0)
     private var bandNameLayout: BandNameLayout? = null
@@ -59,19 +63,37 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
         setup()
     }
 
-    fun setBands(bands: ArrayList<Int>) {
-        if (bands.size > DEFAULT_BAND_SIZE) {
-            bandSize = bands.size
-            bandNames = bands
-        }
+
+    /**
+     * Initializes the equalizer view: sets constrains(min, max) and sets a number of bands with their frequency based
+     * on how many frequencies are available [listOfCenterFreq]
+     */
+    fun initEqualizer(minValue: Int, maxValue: Int, listOfCenterFreq: List<Int>) {
+        this.minValue = minValue
+        this.maxValue = maxValue
+
+        bandSize = listOfCenterFreq.size
+        bandsFreqList = listOfCenterFreq
+
+        setup()
     }
 
-    fun setBandSettings(levels: Map<Int, Int>) {
-        this.levels = levels
-        bandList.forEach {
-            it.progress = (levels.getValue(it.id) - minValue) * maxBand / (maxValue - minValue)
-        }
+    /**
+     * Sets band levels.
+     * [levels] is a list of mapped items where a key is band id and value is band value e.g -1500..1500
+     */
+    fun setBandLevels(levels: Map<Int, Int>) {
+        if (levels.size != bandList.size)
+            throw IllegalStateException("Number of levels doesn't equal the number of bands. " +
+                    "Band number: ${bandList.size}; Levels number: ${levels.size}")
+
+        bandList.forEach { it.progress = convertValueToProgress(levels.getValue(it.id)) }
+
+        this.levels.clear()
+        this.levels.putAll(levels)
     }
+
+    fun getBandsLevels(): Map<Int, Int> = levels
 
     fun setEnable(enable: Boolean) {
         isEnabled = enable
@@ -83,15 +105,11 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
             connectorColor = disableConnectorColor
             thumb = disableThumb
         }
-        draw()
-    }
-
-    fun setBandListener(bandListener: EventListener) {
-        listener = bandListener
-    }
-
-    fun draw() {
         setup()
+    }
+
+    fun setBandListener(bandListener: OnChangeListener) {
+        listener = bandListener
     }
 
     private fun setup() {
@@ -107,10 +125,10 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
         for (index in 0 until bandSize) {
             val bv = BandView(context)
-            bv.progressDrawable = resources.getDrawable(progressDrawable, null)
-            bv.thumb = resources.getDrawable(thumb, null)
+            bv.progressDrawable = ResourcesCompat.getDrawable(resources, progressDrawable, null)
+            bv.thumb = ResourcesCompat.getDrawable(resources, thumb, null)
             bv.max = maxBand
-            bv.progress = levels?.get(index)?.run { (this - minValue) * maxBand / (maxValue - minValue) } ?: maxBand / 2
+            bv.progress = levels[index]?.let { (it - minValue) * maxBand / (maxValue - minValue) } ?: maxBand / 2
             bv.id = index
             bv.setPadding(toPx(BAND_PADDING), 0, toPx(BAND_PADDING), 0)
             bv.setOnSeekBarChangeListener(this)
@@ -125,8 +143,9 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
         bandConnectorShadowView = BandConnectorShadowView(context)
         addView(bandConnectorShadowView)
 
-        bandNameLayout = BandNameLayout(context)
-        bandNameLayout?.hertz = bandNames
+        bandNameLayout = BandNameLayout(context).apply {
+            bandsFreqList?.let { initBandNames(it) }
+        }
 
         addView(bandNameLayout)
     }
@@ -194,20 +213,24 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
         setGridLines(canvas)
     }
 
-    override fun onProgressChanged(seekbar: SeekBar?, progress: Int, fromUser: Boolean) {
+    override fun onProgressChanged(seekbar: SeekBar, progress: Int, fromUser: Boolean) {
         bandConnectorLayout?.connect(bandList)
         bandConnectorShadowView?.draw(bandList)
-        listener?.invoke(seekbar?.id!!, convertProgressToValue(progress), fromUser)
+        val level = convertProgressToValue(progress)
+        levels[seekbar.id] = level
+        if (fromUser)
+            listener?.onBandLevelChanging(seekbar.id, level)
     }
 
     private fun convertProgressToValue(progress: Int): Int = progress * (maxValue - minValue) / maxBand + minValue
+    private fun convertValueToProgress(value: Int): Int = (value - minValue) * maxBand / (maxValue - minValue)
 
     override fun onStartTrackingTouch(seekbar: SeekBar?) {
         //Not used
     }
 
     override fun onStopTrackingTouch(seekbar: SeekBar?) {
-        //Not used
+        listener?.onBandLevelsChanged(getBandsLevels())
     }
 
     inner class BandView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
@@ -270,8 +293,14 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
         defStyleRes: Int = 0
     ) : View(context, attrs, defStyle, defStyleRes) {
 
-        var hertz: ArrayList<Int>? = null
+        private var frequencyNames: MutableList<String> = mutableListOf()
         private val textPaint = Paint()
+
+        fun initBandNames(frequencyList: List<Int>) {
+            frequencyNames.clear()
+            frequencyNames.addAll(frequencyList.map { String.format("%sHz", it) })
+            invalidate()
+        }
 
         init {
             setBackgroundColor(Color.WHITE)
@@ -280,27 +309,19 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
             textPaint.alpha = 100
             textPaint.textSize = toPx(15).toFloat()
             textPaint.textAlign = Paint.Align.CENTER
-            draw()
-        }
-
-        private fun draw() {
             invalidate()
         }
 
         override fun onDraw(canvas: Canvas?) {
             super.onDraw(canvas)
-            hertz?.let {
-                val distW = width / (hertz?.size ?: 3)
-                var centerX = (distW / 2)
-                for (hert in hertz!!) {
-                    val name = String.format("%sHz", hert)
-                    canvas?.drawText(name, centerX.toFloat(), (height / 2).toFloat(), textPaint)
-                    centerX += distW
-                }
+            val distW = width / frequencyNames.size
+            var centerX = (distW / 2)
+            frequencyNames.forEach {
+                val name = String.format("%sHz", it)
+                canvas?.drawText(name, centerX.toFloat(), (height / 2).toFloat(), textPaint)
+                centerX += distW
             }
-
         }
-
     }
 
     inner class BandConnectorShadowView @JvmOverloads constructor(
