@@ -5,15 +5,11 @@ import android.os.Bundle
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityEqualizerBinding
 import com.yurii.youtubemusic.models.EqualizerData
 import com.yurii.youtubemusic.ui.EqualizerView
 import com.yurii.youtubemusic.utilities.Injector
-import kotlinx.coroutines.launch
 
 
 class EqualizerActivity : AppCompatActivity() {
@@ -27,20 +23,12 @@ class EqualizerActivity : AppCompatActivity() {
             title = getString(R.string.label_audio_effects)
         }
 
-        lifecycleScope.launchWhenCreated {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { syncBassBoostState() }
-                launch { syncVirtualizerState() }
-                launch { syncEqualizerData() }
-            }
-        }
-
-        setListenersForBoostBass()
-        setListenersForVirtualizer()
-        setListenersForEqualizer()
+        initVirtualizerState()
+        initBassBoostState()
+        initEqualizerData()
     }
 
-    private suspend fun syncEqualizerData() {
+    private fun initEqualizerData() {
         viewModel.getEqualizerData().let {
             binding.equalizer.apply {
                 initEqualizer(it.lowestBandLevel.toInt(), it.highestBandLevel.toInt(), it.listOfCenterFreq)
@@ -50,7 +38,6 @@ class EqualizerActivity : AppCompatActivity() {
             binding.selectPresets.apply {
                 setOnClickListener { openDialogToSelectPreset() }
                 isEnabled = it.isEnabled
-
                 text = if (it.currentPreset == EqualizerData.CUSTOM_PRESET_ID)
                     getText(R.string.label_custom)
                 else
@@ -58,9 +45,10 @@ class EqualizerActivity : AppCompatActivity() {
             }
             binding.enableEqualizer.isChecked = it.isEnabled
         }
+        setListenersForEqualizer()
     }
 
-    private suspend fun syncBassBoostState() {
+    private fun initBassBoostState() {
         viewModel.getBassBoostData().let {
             binding.apply {
                 bassBoost.setEnable(it.isEnabled)
@@ -68,9 +56,10 @@ class EqualizerActivity : AppCompatActivity() {
                 enableBassBoost.isChecked = it.isEnabled
             }
         }
+        setListenersForBoostBass()
     }
 
-    private suspend fun syncVirtualizerState() {
+    private fun initVirtualizerState() {
         viewModel.getVirtualizerData().let {
             binding.apply {
                 virtualizer.setEnable(it.isEnabled)
@@ -78,6 +67,7 @@ class EqualizerActivity : AppCompatActivity() {
                 enableVirtualizer.isChecked = it.isEnabled
             }
         }
+        setListenersForVirtualizer()
     }
 
     private fun setListenersForBoostBass() = binding.apply {
@@ -109,7 +99,7 @@ class EqualizerActivity : AppCompatActivity() {
             }
 
             override fun onBandLevelsChanged(bandsLevel: Map<Int, Int>) {
-                viewModel.setEqualizerData(enableEqualizer.isChecked, equalizer.getBandsLevels())
+                viewModel.setEqualizerData(enableEqualizer.isChecked, bandsLevel)
                 viewModel.setPreset(EqualizerData.CUSTOM_PRESET_ID)
             }
         })

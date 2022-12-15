@@ -5,8 +5,6 @@ import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import com.yurii.youtubemusic.models.EqualizerData
 import com.yurii.youtubemusic.models.TwisterData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class AudioEffectManager private constructor(private val preferences: Preferences) {
     private var currentSessionId: Int? = null
@@ -30,7 +28,7 @@ class AudioEffectManager private constructor(private val preferences: Preference
     /**
      * If the session is assigned by [setSession], then this call applies saved audio effects
      */
-    suspend fun applyCurrentAffects() {
+    fun applyCurrentAffects() {
         currentSessionId?.let {
             applyBassBoost(getBassBoostData())
             applyVirtualizer(getVirtualizerData())
@@ -49,7 +47,7 @@ class AudioEffectManager private constructor(private val preferences: Preference
     /**
      * Sets given [presetId]. If the value is not [EqualizerData.CUSTOM_PRESET_ID], then system preset bands levels are applied
      */
-    suspend fun setPreset(presetId: Int) = withContext(Dispatchers.IO) {
+    fun setPreset(presetId: Int) {
         val data = getEqualizerData()
         if (presetId != EqualizerData.CUSTOM_PRESET_ID) {
             equalizer?.usePreset(presetId.toShort())
@@ -76,24 +74,24 @@ class AudioEffectManager private constructor(private val preferences: Preference
         return eq.getPresetName(presetId.toShort())
     }
 
-    suspend fun getBassBoostData(): TwisterData = withContext(Dispatchers.IO) { preferences.getBassBoostData() }
+    fun getBassBoostData(): TwisterData = preferences.getBassBoostData()
 
-    suspend fun getVirtualizerData(): TwisterData = withContext(Dispatchers.IO) { preferences.getVirtualizerData() }
+    fun getVirtualizerData(): TwisterData = preferences.getVirtualizerData()
 
-    suspend fun getEqualizerData(): EqualizerData = withContext(Dispatchers.IO) { preferences.getEqualizerData() }
+    fun getEqualizerData(): EqualizerData = preferences.getEqualizerData()
 
-    suspend fun setBassBoostState(data: TwisterData) {
-        withContext(Dispatchers.IO) { preferences.setBassBoostData(data) }
+    fun setBassBoostState(data: TwisterData) {
+        preferences.setBassBoostData(data)
         applyBassBoost(data)
     }
 
-    suspend fun setVirtualizerData(data: TwisterData) {
-        withContext(Dispatchers.IO) { preferences.setVirtualizerData(data) }
+    fun setVirtualizerData(data: TwisterData) {
+         preferences.setVirtualizerData(data)
         applyVirtualizer(data)
     }
 
-    suspend fun setEqualizerData(data: EqualizerData) {
-        withContext(Dispatchers.IO) { preferences.setEqualizerData(data) }
+    fun setEqualizerData(data: EqualizerData) {
+       preferences.setEqualizerData(data)
         applyEqualizer(data)
     }
 

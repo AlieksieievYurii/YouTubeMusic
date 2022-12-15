@@ -317,8 +317,7 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
             val distW = width / frequencyNames.size
             var centerX = (distW / 2)
             frequencyNames.forEach {
-                val name = String.format("%sHz", it)
-                canvas?.drawText(name, centerX.toFloat(), (height / 2).toFloat(), textPaint)
+                canvas?.drawText(it, centerX.toFloat(), (height / 2).toFloat(), textPaint)
                 centerX += distW
             }
         }
