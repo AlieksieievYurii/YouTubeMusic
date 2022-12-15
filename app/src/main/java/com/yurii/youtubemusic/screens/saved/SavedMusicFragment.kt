@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.screens.saved
 
 import android.content.Intent
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
@@ -31,8 +32,8 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
     }
 
     override fun onInflatedView(viewDataBinding: FragmentSavedMusicBinding) {
-        lifecycleScope.launchWhenStarted {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+        lifecycleScope.launchWhenCreated {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.musicCategories.collectLatest {
                     when(it) {
                         is SavedMusicViewModel.State.Loaded -> initCategoriesLayout(it.allCategories)
