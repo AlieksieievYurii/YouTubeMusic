@@ -19,7 +19,6 @@ import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.main.MainActivity
-import com.yurii.youtubemusic.utilities.AudioEffectManager
 import com.yurii.youtubemusic.utilities.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

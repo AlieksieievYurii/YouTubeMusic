@@ -1,10 +1,11 @@
-package com.yurii.youtubemusic.utilities
+package com.yurii.youtubemusic.services.media
 
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import com.yurii.youtubemusic.models.EqualizerData
 import com.yurii.youtubemusic.models.TwisterData
+import com.yurii.youtubemusic.utilities.Preferences
 
 class AudioEffectManager private constructor(private val preferences: Preferences) {
     private var currentSessionId: Int? = null

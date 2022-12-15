@@ -2,7 +2,7 @@ package com.yurii.youtubemusic.screens.equalizer
 
 import androidx.lifecycle.*
 import com.yurii.youtubemusic.models.TwisterData
-import com.yurii.youtubemusic.utilities.AudioEffectManager
+import com.yurii.youtubemusic.services.media.AudioEffectManager
 import java.lang.IllegalStateException
 
 class EqualizerViewModel(val audioEffectManager: AudioEffectManager) : ViewModel() {
