@@ -3,10 +3,7 @@ package com.yurii.youtubemusic.screens.player
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.*
 import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
@@ -26,6 +23,7 @@ import com.yurii.youtubemusic.ui.startValueAnimation
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.requireApplication
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 
@@ -50,16 +48,24 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
 
         lifecycleScope.launchWhenCreated {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.playbackState.collectLatest {
-                    when (it) {
-                        PlaybackState.None -> swipeViewAway()
-                        is PlaybackState.Paused -> setMediaItem(it.mediaItem, false, it.category)
-                        is PlaybackState.Playing -> setMediaItem(it.mediaItem, true, it.category)
-                    }
-                }
+                launch { observePlaybackState() }
+                launch { observePlayingPosition() }
             }
         }
     }
+
+    private suspend fun observePlayingPosition() = viewModel.currentPosition.collectLatest {
+        binding.currentTimePosition = it
+    }
+
+    private suspend fun observePlaybackState() = viewModel.playbackState.collectLatest {
+        when (it) {
+            PlaybackState.None -> swipeViewAway()
+            is PlaybackState.Paused -> setMediaItem(it.mediaItem, false, it.category)
+            is PlaybackState.Playing -> setMediaItem(it.mediaItem, true, it.category)
+        }
+    }
+
 
     private fun setMediaItem(mediaItem: MediaItem, isPlaying: Boolean, category: Category) {
         binding.apply {

@@ -14,6 +14,7 @@ import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.utilities.Injector
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class PlayerActivity : AppCompatActivity() {
     private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(application) }
@@ -25,19 +26,8 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         lifecycleScope.launchWhenCreated {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.playbackState.collectLatest {
-                    when(it) {
-                        PlaybackState.None -> TODO()
-                        is PlaybackState.Paused -> {
-                            binding.mediaItem = it.mediaItem
-                            binding.isPlayingNow = false
-                        }
-                        is PlaybackState.Playing -> {
-                            binding.mediaItem = it.mediaItem
-                            binding.isPlayingNow = true
-                        }
-                    }
-                }
+                launch { observePlaybackState() }
+                launch { observePlayingPosition() }
             }
         }
 
@@ -67,5 +57,23 @@ class PlayerActivity : AppCompatActivity() {
                 isStartChangingSeek = false
             }
         })
+    }
+
+    private suspend fun observePlayingPosition() = viewModel.currentPosition.collectLatest {
+        binding.currentTimePosition = it
+    }
+
+    private suspend fun observePlaybackState() = viewModel.playbackState.collectLatest {
+        when(it) {
+            PlaybackState.None -> TODO()
+            is PlaybackState.Paused -> {
+                binding.mediaItem = it.mediaItem
+                binding.isPlayingNow = false
+            }
+            is PlaybackState.Playing -> {
+                binding.mediaItem = it.mediaItem
+                binding.isPlayingNow = true
+            }
+        }
     }
 }
