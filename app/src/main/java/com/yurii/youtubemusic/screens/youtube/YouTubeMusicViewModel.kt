@@ -64,6 +64,13 @@ class YouTubeMusicViewModel(
     init {
         mediaLibraryManager.mediaStorage.deleteDownloadingMocks()
 
+        viewModelScope.launch {
+            mediaLibraryManager.event.collect {
+                if (it is MediaLibraryManager.Event.ItemDeleted)
+                    _videoItemStatus.emit(VideoItemStatus.Download(it.item))
+            }
+        }
+
         _currentPlaylistId.value?.let { loadVideoItems(it) }
 
         viewModelScope.launch {
