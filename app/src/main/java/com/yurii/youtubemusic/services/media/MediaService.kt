@@ -197,7 +197,7 @@ class MediaService : MediaBrowserServiceCompat() {
 
         return playbackStateBuilder.apply {
             setActions(getAvailableActions())
-            setState(currentState, position, 1.0f, SystemClock.elapsedRealtime())
+            setState(currentState, position, if (currentState == PlaybackStateCompat.STATE_PAUSED) 0f else 1.0f, SystemClock.elapsedRealtime())
         }
     }
 

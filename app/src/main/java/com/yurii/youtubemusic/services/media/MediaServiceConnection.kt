@@ -20,8 +20,8 @@ import kotlin.coroutines.suspendCoroutine
 
 sealed class PlaybackState {
     object None : PlaybackState()
-    data class Playing(val mediaItem: MediaItem, val category: Category) : PlaybackState()
-    data class Paused(val mediaItem: MediaItem, val category: Category) : PlaybackState()
+    data class Playing(val mediaItem: MediaItem, val category: Category, val currentPosition: Long) : PlaybackState()
+    data class Paused(val mediaItem: MediaItem, val category: Category, val currentPosition: Long) : PlaybackState()
 }
 
 class MediaServiceConnection private constructor(private val application: Application) {
@@ -113,10 +113,10 @@ class MediaServiceConnection private constructor(private val application: Applic
             val category = state.extras?.getParcelable<Category>(PLAYBACK_STATE_PLAYING_CATEGORY)
             when (state.state) {
                 PlaybackStateCompat.STATE_PLAYING -> {
-                    _playbackState.value = PlaybackState.Playing(mediaItem!!, category!!)
+                    _playbackState.value = PlaybackState.Playing(mediaItem!!, category!!, state.position)
                 }
                 PlaybackStateCompat.STATE_PAUSED -> {
-                    _playbackState.value = PlaybackState.Paused(mediaItem!!, category!!)
+                    _playbackState.value = PlaybackState.Paused(mediaItem!!, category!!, state.position)
                 }
                 PlaybackStateCompat.STATE_STOPPED -> _playbackState.value = PlaybackState.None
                 else -> {
