@@ -29,8 +29,7 @@ object Injector {
     }
 
     fun provideMediaItemsViewModel(application: Application, category: Category): MediaItemsViewModel.Factory {
-        val mediaPlayer = MediaPlayer(category, MediaServiceConnection.getInstance(application), MediaLibraryManager.getInstance(application))
-        return MediaItemsViewModel.Factory(MediaLibraryManager.getInstance(application), mediaPlayer)
+        return MediaItemsViewModel.Factory(category, MediaLibraryManager.getInstance(application),  MediaServiceConnection.getInstance(application))
     }
 
     fun provideYouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {

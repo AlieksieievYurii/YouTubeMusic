@@ -1,9 +1,7 @@
 package com.yurii.youtubemusic.services.media
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ComponentName
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
