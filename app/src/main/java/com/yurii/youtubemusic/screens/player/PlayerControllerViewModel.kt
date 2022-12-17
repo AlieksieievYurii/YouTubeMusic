@@ -21,13 +21,22 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
 
     val playbackState = mediaServiceConnection.playbackState
 
+    var playingMediaItemDuration: Long? = null
+        private set
+
     init {
         viewModelScope.launch {
             playbackState.collect {
                 when (it) {
                     PlaybackState.None -> timerJob?.cancel()
-                    is PlaybackState.Paused -> timerJob?.cancel()
-                    is PlaybackState.Playing -> runTimer(it.currentPosition)
+                    is PlaybackState.Paused -> {
+                        playingMediaItemDuration = it.mediaItem.durationInMillis
+                        timerJob?.cancel()
+                    }
+                    is PlaybackState.Playing -> {
+                        playingMediaItemDuration = it.mediaItem.durationInMillis
+                        runTimer(it.currentPosition)
+                    }
                 }
             }
         }
@@ -59,9 +68,15 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
     fun moveToPreviousTrack() = mediaServiceConnection.skipToPreviousTrack()
 
 
-    fun onSeek(@IntRange(from = 0, to = 1000) value: Int) {
-        //TODO implement on seek
+    fun seekTo(@IntRange(from = 0, to = 1000) value: Int) {
+        timerJob?.cancel()
+        val targetPosition = playingMediaItemDuration?.let { value * it / 1000 } ?: 0
+        playingMediaItemDuration?.let {
+            mediaServiceConnection.seekTo(targetPosition)
+        }
     }
+
+    fun getCurrentMappedPosition(): Int = playingMediaItemDuration?.let { (_currentPosition.value * 1000 / it).toInt() } ?: 0
 
     fun stopPlaying() = mediaServiceConnection.stop()
 

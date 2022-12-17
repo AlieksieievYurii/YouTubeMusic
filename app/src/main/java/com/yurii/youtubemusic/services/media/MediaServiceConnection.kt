@@ -65,6 +65,8 @@ class MediaServiceConnection private constructor(private val application: Applic
 
     fun skipToPreviousTrack() = getMediaController().transportControls.skipToPrevious()
 
+    fun seekTo(position: Long) = getMediaController().transportControls.seekTo(position)
+
     suspend fun getMediaItemsFor(category: Category): List<MediaItem> = suspendCoroutine { callback ->
         val mediaItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
             override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {

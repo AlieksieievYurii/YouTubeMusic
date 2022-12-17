@@ -396,6 +396,7 @@ class MediaService : MediaBrowserServiceCompat() {
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
             mediaPlayer?.seekTo(pos.toInt())
+            updateCurrentPlaybackState()
         }
     }
 
