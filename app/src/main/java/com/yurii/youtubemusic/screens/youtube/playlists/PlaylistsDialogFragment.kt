@@ -17,7 +17,6 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.DialogPlayListsBinding
 import com.yurii.youtubemusic.screens.youtube.LoaderViewHolder
 import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
-import com.yurii.youtubemusic.screens.youtube.models.Playlist
 import com.yurii.youtubemusic.utilities.EmptyListException
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

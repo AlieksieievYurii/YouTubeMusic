@@ -1,12 +1,12 @@
-package com.yurii.youtubemusic.screens.youtube.service
+package com.yurii.youtubemusic.services.downloader
 
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.screens.youtube.models.Progress
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.models.Progress
+import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -29,7 +29,7 @@ class MusicDownloaderService : Service() {
     private var downloadingProgress: MutableSharedFlow<Pair<VideoItem, Progress>>? = null
     private var downloadingReport: MutableSharedFlow<DownloadingReport>? = null
 
-    private val downloader: MusicDownloaderAbstract by lazy { MusicDownloaderImp(MusicDownloaderCallBacks(), mediaLibraryManager.mediaStorage) }
+    private val downloader: MusicDownloader by lazy { MusicDownloaderImpl(MusicDownloaderCallBacks(), mediaLibraryManager.mediaStorage) }
     private val notificationManager by lazy { NotificationManager(this) }
     private var isForeground = false
 
@@ -56,11 +56,11 @@ class MusicDownloaderService : Service() {
         scopeJob.cancel()
     }
 
-    private inner class MusicDownloaderCallBacks : MusicDownloaderAbstract.CallBack {
+    private inner class MusicDownloaderCallBacks : MusicDownloader.CallBack {
         override fun onFinished(videoItem: VideoItem, customCategories: List<Category>) {
             stopAsForegroundIfQueueIsEmpty()
             serviceCoroutineScope.launch {
-                mediaLibraryManager.registerMediaItem(videoItem, customCategories) //TODO Why not pass categories directly
+                mediaLibraryManager.registerMediaItem(videoItem, customCategories)
                 downloadingReport?.emit(DownloadingReport.Successful(videoItem))
             }
         }

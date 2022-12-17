@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.ui.getValueAnimator
 

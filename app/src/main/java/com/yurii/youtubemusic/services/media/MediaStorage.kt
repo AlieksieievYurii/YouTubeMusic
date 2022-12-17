@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import com.google.gson.Gson
 import com.yurii.youtubemusic.models.*
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.utilities.parentMkdir
 import com.yurii.youtubemusic.utilities.walkFiles
 import kotlinx.coroutines.Dispatchers

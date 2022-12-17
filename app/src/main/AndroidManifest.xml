@@ -42,7 +42,7 @@
         </activity>
 
         <service
-            android:name=".screens.youtube.service.MusicDownloaderService"
+            android:name=".services.downloader.MusicDownloaderService"
             android:exported="false" />
         <service
             android:name=".services.media.MediaService"

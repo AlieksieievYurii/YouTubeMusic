@@ -1,7 +1,6 @@
-package com.yurii.youtubemusic.screens.youtube.models
+package com.yurii.youtubemusic.models
 
 import com.google.api.services.youtube.model.Video
-import com.yurii.youtubemusic.models.Item
 import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.Duration
 import java.math.BigInteger

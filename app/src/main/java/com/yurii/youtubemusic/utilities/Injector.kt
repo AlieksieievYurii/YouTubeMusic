@@ -10,7 +10,7 @@ import com.yurii.youtubemusic.screens.player.PlayerControllerViewModel
 import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel
 import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsViewModel
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
-import com.yurii.youtubemusic.screens.youtube.service.ServiceConnection
+import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.media.*
 
 object Injector {

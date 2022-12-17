@@ -8,7 +8,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.models.VideoItem
 import java.lang.Exception
 
 typealias CallTryAgain = (videoItem: VideoItem) -> Unit

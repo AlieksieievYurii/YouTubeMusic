@@ -10,9 +10,11 @@ import androidx.paging.cachedIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.Item
-import com.yurii.youtubemusic.screens.youtube.models.*
-import com.yurii.youtubemusic.screens.youtube.service.MusicDownloaderService
-import com.yurii.youtubemusic.screens.youtube.service.ServiceConnection
+import com.yurii.youtubemusic.models.Progress
+import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
+import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
+import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.utilities.Preferences

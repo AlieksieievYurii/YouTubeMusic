@@ -8,7 +8,7 @@
 
         <variable
             name="playlist"
-            type="com.yurii.youtubemusic.screens.youtube.models.Playlist"/>
+            type="com.yurii.youtubemusic.screens.youtube.playlists.Playlist"/>
 
     </data>
 

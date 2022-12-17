@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.youtube.service
+package com.yurii.youtubemusic.services.downloader
 
 import android.app.Notification
 import android.app.PendingIntent

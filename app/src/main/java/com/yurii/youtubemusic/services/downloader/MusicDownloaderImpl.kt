@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.youtube.service
+package com.yurii.youtubemusic.services.downloader
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -7,8 +7,8 @@ import com.github.kiulian.downloader.YoutubeException
 import com.github.kiulian.downloader.model.YoutubeVideo
 import com.github.kiulian.downloader.model.formats.AudioFormat
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.screens.youtube.models.Progress
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.models.Progress
+import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.media.MediaStorage
 import com.yurii.youtubemusic.utilities.parentMkdir
 import java.io.BufferedInputStream
@@ -23,8 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 
-class MusicDownloaderImp(private val callBack: CallBack, private val mediaStorage: MediaStorage) :
-    MusicDownloaderAbstract() {
+class MusicDownloaderImpl(private val callBack: MusicDownloader.CallBack, private val mediaStorage: MediaStorage) : MusicDownloader {
     private val youtubeDownloader = YoutubeDownloader()
 
     private val keepAliveTime = 1L

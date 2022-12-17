@@ -2,7 +2,7 @@ package com.yurii.youtubemusic.screens.youtube
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.utilities.EmptyListException
 
 class VideosPagingSource(private val youTubeAPI: YouTubeAPI, private val playlistId: String) : PagingSource<String, VideoItem>() {

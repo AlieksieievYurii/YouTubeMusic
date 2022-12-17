@@ -13,8 +13,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.main.MainActivityViewModel
-import com.yurii.youtubemusic.screens.youtube.models.Playlist
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
 import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog

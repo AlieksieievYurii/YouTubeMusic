@@ -3,8 +3,6 @@ package com.yurii.youtubemusic.screens.youtube.playlists
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
-import com.yurii.youtubemusic.screens.youtube.models.Playlist
-import com.yurii.youtubemusic.screens.youtube.models.toPlaylist
 import com.yurii.youtubemusic.utilities.EmptyListException
 import java.lang.Exception
 

@@ -12,7 +12,7 @@
 
         <variable
             name="videoItem"
-            type="com.yurii.youtubemusic.screens.youtube.models.VideoItem" />
+            type="com.yurii.youtubemusic.models.VideoItem" />
     </data>
 
     <androidx.cardview.widget.CardView

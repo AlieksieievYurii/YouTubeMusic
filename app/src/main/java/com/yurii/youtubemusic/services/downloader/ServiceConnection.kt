@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.youtube.service
+package com.yurii.youtubemusic.services.downloader
 
 import android.content.ComponentName
 import android.content.Context
@@ -6,8 +6,8 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.screens.youtube.models.Progress
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.models.Progress
+import com.yurii.youtubemusic.models.VideoItem
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 

@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.youtube.models
+package com.yurii.youtubemusic.models
 
 import androidx.annotation.IntRange
 import java.io.Serializable

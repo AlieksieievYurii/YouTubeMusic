@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.youtube.models
+package com.yurii.youtubemusic.screens.youtube.playlists
 
 import com.google.api.services.youtube.model.Playlist as YouTubePlaylistModel
 

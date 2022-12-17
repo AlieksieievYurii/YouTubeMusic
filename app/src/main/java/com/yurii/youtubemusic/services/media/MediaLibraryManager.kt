@@ -5,7 +5,7 @@ import com.yurii.youtubemusic.models.Category
 
 import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.screens.youtube.models.VideoItem
+import com.yurii.youtubemusic.models.VideoItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow

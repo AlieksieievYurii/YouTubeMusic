@@ -5,7 +5,7 @@ import android.content.Context
 import com.google.gson.Gson
 import com.yurii.youtubemusic.models.EqualizerData
 import com.yurii.youtubemusic.models.TwisterData
-import com.yurii.youtubemusic.screens.youtube.models.Playlist
+import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 
 class Preferences private constructor(private val application: Application) {
 
