@@ -13,7 +13,6 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.text.TextUtils
-import android.util.Log
 import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
@@ -108,7 +107,13 @@ class MediaService : MediaBrowserServiceCompat() {
                     is MediaLibraryManager.Event.MediaItemIsAdded -> onMediaItemIsAdded(event.mediaItem)
                     is MediaLibraryManager.Event.CategoryAssignment -> onMediaItemIsAssignedToCategories(event.mediaItem, event.customCategories)
                     is MediaLibraryManager.Event.CategoryRemoved -> onCategoryRemoved(event.category)
-                    is MediaLibraryManager.Event.CategoryUpdated -> TODO()
+                    is MediaLibraryManager.Event.CategoryUpdated -> {
+                        queueProvider.updateCategory(event.category)
+                        updateCurrentPlaybackState()
+                    }
+                    else -> {
+                        // Ignore some cases
+                    }
                 }
             }
         }
@@ -418,7 +423,6 @@ class MediaService : MediaBrowserServiceCompat() {
 
     private inner class MediaPlayerCallBacks : MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
         override fun onPrepared(mp: MediaPlayer?) {
-            Log.i(TAG, "Music has been prepared!")
             playMediaPlayer()
         }
 

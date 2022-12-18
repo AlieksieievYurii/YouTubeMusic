@@ -28,6 +28,14 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     }
 
     /**
+     * Replaces the current playing category with [category] if their id are the same
+     */
+    fun updateCategory(category: Category) {
+        if (isInitialized && getCurrentPlayingCategory().id == category.id)
+            playingCategory = category
+    }
+
+    /**
      * Clears the queue
      */
     fun release() {
