@@ -21,29 +21,21 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
 
     val playbackState = mediaServiceConnection.playbackState
 
-    var playingMediaItemDuration: Long? = null
-        private set
-
     init {
         viewModelScope.launch {
             playbackState.collect {
                 when (it) {
                     PlaybackState.None -> timerJob?.cancel()
-                    is PlaybackState.Paused -> {
-                        playingMediaItemDuration = it.mediaItem.durationInMillis
-                        timerJob?.cancel()
-                    }
                     is PlaybackState.Playing -> {
-                        playingMediaItemDuration = it.mediaItem.durationInMillis
-                        runTimer(it.currentPosition)
+                        if (it.isPaused) timerJob?.cancel() else runTicker()
+                        _currentPosition.value = it.currentPosition
                     }
                 }
             }
         }
     }
 
-    private fun runTimer(startTimeInMillis: Long) {
-        _currentPosition.value = startTimeInMillis
+    private fun runTicker() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (true) {
@@ -54,12 +46,11 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
     }
 
     fun pauseOrPlay() {
-        when (playbackState.value) {
+        when (val it = playbackState.value) {
             PlaybackState.None -> {
                 // Ignore
             }
-            is PlaybackState.Paused -> mediaServiceConnection.resume()
-            is PlaybackState.Playing -> mediaServiceConnection.pause()
+            is PlaybackState.Playing -> if (it.isPaused) mediaServiceConnection.resume() else mediaServiceConnection.pause()
         }
     }
 
@@ -70,13 +61,13 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
 
     fun seekTo(@IntRange(from = 0, to = 1000) value: Int) {
         timerJob?.cancel()
-        val targetPosition = playingMediaItemDuration?.let { value * it / 1000 } ?: 0
-        playingMediaItemDuration?.let {
-            mediaServiceConnection.seekTo(targetPosition)
+        (playbackState.value as? PlaybackState.Playing)?.let {
+            mediaServiceConnection.seekTo(value * it.mediaItem.durationInMillis / 1000)
         }
     }
 
-    fun getCurrentMappedPosition(): Int = playingMediaItemDuration?.let { (_currentPosition.value * 1000 / it).toInt() } ?: 0
+    fun getCurrentMappedPosition(): Int =
+        (playbackState.value as? PlaybackState.Playing)?.let { (_currentPosition.value * 1000 / it.mediaItem.durationInMillis).toInt() } ?: 0
 
     fun stopPlaying() = mediaServiceConnection.stop()
 

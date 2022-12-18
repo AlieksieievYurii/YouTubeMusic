@@ -3,7 +3,6 @@ package com.yurii.youtubemusic.screens.player
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.viewbinding.library.activity.viewBinding
 import android.widget.SeekBar
 import androidx.activity.viewModels
@@ -20,8 +19,7 @@ import kotlinx.coroutines.launch
 class PlayerActivity : AppCompatActivity() {
     private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(application) }
     private val binding: ActivityPlayerBinding by viewBinding()
-    private var playingMediaItemDuration: Long? = null
-
+    private var isSeekBarChanging = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launchWhenCreated {
@@ -31,50 +29,41 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        binding.actionButton.setOnClickListener { viewModel.pauseOrPlay() }
-
-        binding.openAudioEffects.setOnClickListener {
-            startActivity(Intent(this, EqualizerActivity::class.java))
+        binding.apply {
+            actionButton.setOnClickListener { viewModel.pauseOrPlay() }
+            openAudioEffects.setOnClickListener { startActivity(Intent(applicationContext, EqualizerActivity::class.java)) }
+            moveToNext.setOnClickListener { viewModel.moveToNextTrack() }
+            moveToPrevious.setOnClickListener { viewModel.moveToPreviousTrack() }
         }
-
-
-        binding.moveToNext.setOnClickListener { viewModel.moveToNextTrack() }
-        binding.moveToPrevious.setOnClickListener { viewModel.moveToPreviousTrack() }
 
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-
+                // Nothing
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
+                isSeekBarChanging = true
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                Log.i("TEST", seekBar.progress.toString())
+                isSeekBarChanging = false
+                viewModel.seekTo(seekBar.progress)
             }
         })
     }
 
     private suspend fun observePlayingPosition() = viewModel.currentPosition.collectLatest {
         binding.currentTimePosition = it
-        playingMediaItemDuration?.let { mediaItemDuration ->
-            binding.seekBar.progress = (it * 1000 / mediaItemDuration).toInt()
-        }
+        if (!isSeekBarChanging)
+            binding.seekBar.progress = viewModel.getCurrentMappedPosition()
     }
 
     private suspend fun observePlaybackState() = viewModel.playbackState.collectLatest {
         when (it) {
             PlaybackState.None -> TODO()
-            is PlaybackState.Paused -> {
-                binding.mediaItem = it.mediaItem
-                binding.isPlayingNow = false
-                playingMediaItemDuration = it.mediaItem.durationInMillis
-            }
             is PlaybackState.Playing -> {
                 binding.mediaItem = it.mediaItem
-                binding.isPlayingNow = true
-                playingMediaItemDuration = it.mediaItem.durationInMillis
+                binding.isPlayingNow = !it.isPaused
             }
         }
     }

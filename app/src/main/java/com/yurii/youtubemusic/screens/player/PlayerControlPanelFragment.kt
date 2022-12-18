@@ -61,8 +61,7 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
     private suspend fun observePlaybackState() = viewModel.playbackState.collectLatest {
         when (it) {
             PlaybackState.None -> swipeViewAway()
-            is PlaybackState.Paused -> setMediaItem(it.mediaItem, false, it.category)
-            is PlaybackState.Playing -> setMediaItem(it.mediaItem, true, it.category)
+            is PlaybackState.Playing -> setMediaItem(it.mediaItem, !it.isPaused, it.category)
         }
     }
 
