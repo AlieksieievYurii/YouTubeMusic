@@ -106,7 +106,6 @@ class CategoriesEditorActivity : AppCompatActivity() {
 
     companion object {
         const val REQUEST_CODE = 1000
-        const val CATEGORIES_ARE_CHANGE_RESULT_CODE = 1
         fun create(context: Context): Intent {
             return Intent(context, CategoriesEditorActivity::class.java)
         }

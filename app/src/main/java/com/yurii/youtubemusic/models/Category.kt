@@ -6,7 +6,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import kotlinx.android.parcel.Parcelize
 
 /**
- * Represents a media category that is a group of included media items
+ * Represents a media category
  */
 @Parcelize
 data class Category(val id: Int, val name: String) : Parcelable {
@@ -30,5 +30,8 @@ fun Category.toMediaItem(): MediaBrowserCompat.MediaItem {
     return MediaBrowserCompat.MediaItem(mediaDescription, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE)
 }
 
+/**
+ * Represents a combination of [Category] and assigned media items
+ */
 @Parcelize
 data class CategoryContainer(val category: Category, val mediaItemsIds: List<String>) : Parcelable

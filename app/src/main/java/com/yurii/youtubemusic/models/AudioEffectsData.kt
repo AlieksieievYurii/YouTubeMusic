@@ -2,16 +2,18 @@ package com.yurii.youtubemusic.models
 
 import android.media.audiofx.Equalizer
 
-
-data class TwisterData(
-    val isEnabled: Boolean,
-    val value: Int
-) {
+/**
+ * Represents settings for BassBoost and Virtualizer
+ */
+data class TwisterData(val isEnabled: Boolean, val value: Int) {
     companion object {
         fun create() = TwisterData(false, 0)
     }
 }
 
+/**
+ * Represents settings for Equalizer
+ */
 data class EqualizerData(
     val isEnabled: Boolean,
     var lowestBandLevel: Short,

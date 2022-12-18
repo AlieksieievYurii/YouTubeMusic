@@ -2,6 +2,7 @@ package com.yurii.youtubemusic.utilities
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
 import com.yurii.youtubemusic.R
 import org.threeten.bp.Duration
 import java.math.BigInteger
@@ -55,7 +56,7 @@ fun calculateLikeBarValue(likeCount: BigInteger, disLikeCount: BigInteger): Int 
 }
 
 fun createFromPathOrReturnMock(context: Context, path: String?): Drawable {
-    return Drawable.createFromPath(path) ?: context.getDrawable(R.drawable.ic_thumbnail_mock)!!
+    return Drawable.createFromPath(path) ?: ContextCompat.getDrawable(context, R.drawable.ic_thumbnail_mock)!!
 }
 
 

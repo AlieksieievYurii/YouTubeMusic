@@ -5,6 +5,9 @@ import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.Duration
 import java.math.BigInteger
 
+/**
+ * Data class representing video item containing all necessary information
+ */
 @Parcelize
 data class VideoItem(
     override val id: String,
