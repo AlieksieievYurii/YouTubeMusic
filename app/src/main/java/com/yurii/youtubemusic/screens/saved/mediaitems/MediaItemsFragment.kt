@@ -26,10 +26,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
-    private val viewModel: MediaItemsViewModel by viewModels {
-        val category: Category = requireArguments().requireParcelable(EXTRA_CATEGORY)
-        Injector.provideMediaItemsViewModel(requireApplication(), category)
-    }
+    private val category: Category by lazy { requireArguments().requireParcelable(EXTRA_CATEGORY) }
+    private val viewModel: MediaItemsViewModel by viewModels { Injector.provideMediaItemsViewModel(requireApplication(), category) }
     private val binding: FragmentMediaItemsBinding by viewBinding()
 
     private val mediaListAdapter: MediaListAdapter by lazy {
@@ -62,7 +60,11 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private suspend fun startObservingPlayingItem() = viewModel.playbackState.collectLatest { playbackState ->
         when (playbackState) {
             PlaybackState.None -> mediaListAdapter.resetState()
-            is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(playbackState.mediaItem, isPlaying = !playbackState.isPaused)
+            is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(
+                playbackState.mediaItem,
+                isPlaying = !playbackState.isPaused,
+                category = if(playbackState.category != category) playbackState.category else null
+            )
         }
     }
 

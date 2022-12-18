@@ -94,7 +94,6 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="@{musicItem.author}"
                     android:textSize="10sp"
                     tools:ignore="SmallSp"
                     android:textStyle="italic"
