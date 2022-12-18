@@ -8,7 +8,6 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.annotation.IntRange
 import com.yurii.youtubemusic.R
 import kotlin.math.asin
 import kotlin.math.cos
@@ -35,17 +34,18 @@ class TwisterController(context: Context, attributeSet: AttributeSet) : View(con
 
     private val dialPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val markerPointPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val marginOfInnerCircle = 30f
+    private val marginDialPointsFromInnerCircle = 10f
+    private var angle = 0f
 
     var listener: ((value: Int) -> Unit)? = null
 
-    private var angle = 0f
-    private val marginOfInnerCircle = 30f
-    private val marginDialPointsFromInnerCircle = 10f
-
-    fun setValue(@IntRange(from = 0, to = 100) value: Int) {
-        angle = if (value in 0..80) (value / 0.4).toFloat() else (value - 240).toFloat()
-        invalidate()
-    }
+    var value: Int = 0
+        set(v) {
+            angle = if (v in 0..80) (v / 0.4).toFloat() else (v - 240).toFloat()
+            field = v
+            invalidate()
+        }
 
     fun setEnable(enable: Boolean) {
         isEnabled = enable

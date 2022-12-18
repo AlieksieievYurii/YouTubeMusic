@@ -36,17 +36,17 @@
             tools:visibility="gone"
             android:text="@string/label_no_playlist"/>
 
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/create"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:icon="@drawable/ic_add"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="50dp"
             app:backgroundTint="@color/colorAccent"
-            app:iconTint="@color/white"
-            android:textColor="@color/white"
-            android:text="@string/label_create"/>
+            android:layout_gravity="end|bottom"
+            app:tint="@android:color/white"
+            android:src="@drawable/ic_add"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="16dp" />
+
     </RelativeLayout>
 </layout>

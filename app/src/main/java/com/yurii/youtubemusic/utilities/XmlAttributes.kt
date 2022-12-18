@@ -1,6 +1,8 @@
 package com.yurii.youtubemusic.utilities
 
+import android.view.View
 import android.widget.ImageView
+import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import com.squareup.picasso.Picasso
 import com.yurii.youtubemusic.R
@@ -17,4 +19,9 @@ fun loadImage(view: ImageView, url: String) {
 @BindingAdapter("imageSrc")
 fun decodeImage(view: ImageView, path: String?) {
     view.setImageDrawable(createFromPathOrReturnMock(view.context, path))
+}
+
+@BindingAdapter("isVisible")
+fun isVisible(view: View, isVisible: Boolean) {
+    view.isVisible = isVisible
 }

@@ -1,21 +1,22 @@
 package com.yurii.youtubemusic.utilities
 
+import android.app.Application
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 
 object ServiceLocator {
-    var preferences: IPreferences? = null
+    var preferences: Preferences? = null
         @VisibleForTesting set
 
-    fun providePreferences(context: Context): IPreferences {
-        synchronized(this) {
-            return preferences ?: createPreferences(context)
-        }
-    }
-
-    private fun createPreferences(context: Context): IPreferences {
-        return Preferences(context).also {
-            preferences = it
-        }
-    }
+//    fun providePreferences(application: Application)): Preferences {
+//        synchronized(this) {
+//            return preferences ?: createPreferences(application)
+//        }
+//    }
+//
+//    private fun createPreferences(application: Application): Preferences {
+//        return Preferences.getInstance(application).also {
+//            preferences = it
+//        }
+//    }
 }

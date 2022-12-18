@@ -5,12 +5,17 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import timber.log.Timber
 
 class Application : Application() {
     override fun onCreate() {
         super.onCreate()
         createMediaPlayerNotificationChannel()
         createMusicsDownloadingNotificationChannel()
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
     }
 
     private fun createMediaPlayerNotificationChannel() {

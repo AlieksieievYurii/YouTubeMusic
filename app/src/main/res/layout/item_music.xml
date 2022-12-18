@@ -10,7 +10,7 @@
 
         <variable
             name="musicItem"
-            type="com.yurii.youtubemusic.models.MediaMetaData" />
+            type="com.yurii.youtubemusic.models.MediaItem" />
     </data>
 
 
@@ -94,7 +94,6 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="@{musicItem.author}"
                     android:textSize="10sp"
                     tools:ignore="SmallSp"
                     android:textStyle="italic"
@@ -112,7 +111,7 @@
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
                 android:layout_toStartOf="@id/more_options"
-                android:text="@{UtilsKt.parseDurationToHumanView(musicItem.duration)}"
+                android:text="@{UtilsKt.parseDurationToHumanView(musicItem.durationInMillis)}"
                 android:textSize="12sp"
                 tools:ignore="SmallSp"
                 tools:text="3:23" />

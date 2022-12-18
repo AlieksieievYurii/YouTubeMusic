@@ -1,83 +1,82 @@
 package com.yurii.youtubemusic.screens.player
 
-import android.app.Application
-import android.content.Context
-import android.os.Handler
-import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.IntRange
 import androidx.lifecycle.*
-import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
-import com.yurii.youtubemusic.services.mediaservice.NOTHING_PLAYING
-import com.yurii.youtubemusic.models.MediaMetaData
+import com.yurii.youtubemusic.services.media.MediaServiceConnection
+import com.yurii.youtubemusic.services.media.PlaybackState
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
-class PlayerControllerViewModel(application: Application, val musicServiceConnection: MusicServiceConnection) :
-    AndroidViewModel(application) {
-    private val timeUpdater = TimeUpdater()
+class PlayerControllerViewModel(private val mediaServiceConnection: MediaServiceConnection) : ViewModel() {
 
-    val playingNow: LiveData<MediaMetaData?> = Transformations.map(musicServiceConnection.nowPlaying) {
-        if (it != NOTHING_PLAYING)
-            MediaMetaData.createFrom(it)
-        else
-            null
-    }
+    private var timerJob: Job? = null
 
-    val currentPlaybackState: LiveData<PlaybackStateCompat> = Transformations.map(musicServiceConnection.playbackState) { playback ->
-        updateTimeCounter(playback.state)
-        playback
-    }
+    private val _currentPosition: MutableStateFlow<Long> = MutableStateFlow(0)
+    val currentPosition = _currentPosition.asStateFlow()
 
-    private val _currentProgressTime: MutableLiveData<Long> = MutableLiveData()
-    val currentProgressTime: LiveData<Long> = _currentProgressTime
+    val playbackState = mediaServiceConnection.playbackState
 
-    fun isPlaying(): Boolean = currentPlaybackState.value?.state?.run {
-        this == PlaybackStateCompat.STATE_PLAYING || this == PlaybackStateCompat.STATE_BUFFERING
-    } ?: false
-
-    fun stopPlaying() = musicServiceConnection.transportControls.stop()
-
-    fun pausePlaying() = musicServiceConnection.transportControls.pause()
-
-    fun continuePlaying() = musicServiceConnection.transportControls.play()
-
-    fun moveToNextTrack() = musicServiceConnection.transportControls.skipToNext()
-
-    fun moveToPreviousTrack() = musicServiceConnection.transportControls.skipToPrevious()
-
-
-    fun onSeek(@IntRange(from = 0, to = 1000) value: Int) {
-        val duration = playingNow.value?.duration ?: 0
-        val pos = value * duration / 1000
-        musicServiceConnection.transportControls.seekTo(pos)
-    }
-
-    private fun updateTimeCounter(playbackState: Int) {
-        when (playbackState) {
-            PlaybackStateCompat.STATE_BUFFERING -> timeUpdater.stop()
-            PlaybackStateCompat.STATE_PLAYING -> timeUpdater.start()
-            PlaybackStateCompat.STATE_PAUSED -> timeUpdater.stop()
-        }
-    }
-
-    private inner class TimeUpdater : Runnable {
-        private val handler = Handler()
-        override fun run() {
-            musicServiceConnection.requestCurrentMediaTimePosition { a ->
-                _currentProgressTime.postValue(a)
-                handler.postDelayed(this, 1000L)
+    init {
+        viewModelScope.launch {
+            playbackState.collect {
+                when (it) {
+                    PlaybackState.None -> timerJob?.cancel()
+                    is PlaybackState.Playing -> {
+                        if (it.isPaused) timerJob?.cancel() else runTicker()
+                        _currentPosition.value = it.currentPosition
+                    }
+                }
             }
         }
-
-        fun start() = run()
-        fun stop() = handler.removeCallbacks(this)
     }
 
+    private fun runTicker() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                _currentPosition.value += 1000
+            }
+        }
+    }
+
+    fun pauseOrPlay() {
+        when (val it = playbackState.value) {
+            PlaybackState.None -> {
+                // Ignore
+            }
+            is PlaybackState.Playing -> if (it.isPaused) mediaServiceConnection.resume() else mediaServiceConnection.pause()
+        }
+    }
+
+    fun moveToNextTrack() = mediaServiceConnection.skipToNextTrack()
+
+    fun moveToPreviousTrack() = mediaServiceConnection.skipToPreviousTrack()
+
+
+    fun seekTo(@IntRange(from = 0, to = 1000) value: Int) {
+        timerJob?.cancel()
+        (playbackState.value as? PlaybackState.Playing)?.let {
+            mediaServiceConnection.seekTo(value * it.mediaItem.durationInMillis / 1000)
+        }
+    }
+
+    fun getCurrentMappedPosition(): Int =
+        (playbackState.value as? PlaybackState.Playing)?.let { (_currentPosition.value * 1000 / it.mediaItem.durationInMillis).toInt() } ?: 0
+
+    fun stopPlaying() = mediaServiceConnection.stop()
+
     @Suppress("UNCHECKED_CAST")
-    class Factory(private val context: Context, private val musicServiceConnection: MusicServiceConnection) :
+    class Factory(private val mediaServiceConnection: MediaServiceConnection) :
         ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(PlayerControllerViewModel::class.java))
-                return PlayerControllerViewModel(context as Application, musicServiceConnection) as T
+                return PlayerControllerViewModel(mediaServiceConnection) as T
             throw IllegalStateException("Given the model class is not assignable from PlayerBottomControllerViewModel class")
         }
     }

@@ -9,7 +9,7 @@
 
         <variable
             name="mediaItem"
-            type="com.yurii.youtubemusic.models.MediaMetaData" />
+            type="com.yurii.youtubemusic.models.MediaItem" />
 
         <variable
             name="currentTimePosition"
@@ -17,7 +17,7 @@
 
         <variable
             name="playingCategory"
-            type="String" />
+            type="com.yurii.youtubemusic.models.Category" />
 
         <variable
             name="isPlayingNow"
@@ -80,7 +80,7 @@
                         android:id="@+id/hint_playing_category"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{@string/label_playing_from(playingCategory)}"
+                        android:text="@{@string/label_playing_from(playingCategory.name)}"
                         tools:text="@tools:sample/lorem/random"
                         android:ellipsize="end"
                         android:maxLines="1"
@@ -97,7 +97,7 @@
                         android:id="@+id/time_progress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{@string/label_duration_progress(UtilsKt.parseDurationToHumanView(currentTimePosition), UtilsKt.parseDurationToHumanView(mediaItem.duration))}"
+                        android:text="@{@string/label_duration_progress(UtilsKt.parseDurationToHumanView(currentTimePosition), UtilsKt.parseDurationToHumanView(mediaItem.durationInMillis))}"
                         android:textColor="#C6C6C6"
                         tools:text="1:04 / 5:34"
                         android:textSize="12sp" />
@@ -112,7 +112,10 @@
                 android:layout_height="30dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:layout_margin="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@{isPlayingNow ? @drawable/ic_pause_48px : @drawable/ic_play_48dp}"
                 tools:ignore="ContentDescription"

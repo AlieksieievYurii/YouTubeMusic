@@ -53,7 +53,7 @@ class SelectCategoriesDialog private constructor(private val context: Context) {
         fun selectCategories(context: Context, alreadySelectedCategories: List<Category>?, onApplyCallBack: OnApplyCallBack) {
             SelectCategoriesDialog(context).apply {
                 callBack = onApplyCallBack
-                this.categories =  ServiceLocator.providePreferences(context).getMusicCategories()
+                //this.categories =  ServiceLocator.providePreferences(context).getMusicCategories()
                 this.alreadySelectedCategories = alreadySelectedCategories
             }.create()
         }

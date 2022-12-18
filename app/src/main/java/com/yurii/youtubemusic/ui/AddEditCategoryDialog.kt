@@ -8,33 +8,31 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.models.Category
-import java.lang.Exception
 
-private open class CategoryException(message: String) : Exception(message)
-private open class EmptyCategoryNameException : Exception("Category cannot be empty")
-private class CategoryNameAlreadyExistsException : CategoryException("Category name already exists")
+private typealias OnApply = (categoryName: String) -> Unit
 
-
-private typealias IsExistCategoryNameCallBack = (categoryName: String) -> Boolean
-private typealias OnEditCategoryCallBack = (renamedCategory: Category) -> Unit
-private typealias OnCreateCategoryCallBack = (categoryName: String) -> Unit
-
-class AddEditCategoryDialog : DialogFragment() {
-    private lateinit var isExistCategoryNameCategory: IsExistCategoryNameCallBack
-    private var onEditCategoryCallBack: OnEditCategoryCallBack? = null
-    private var onCreateCategoryCallBack: OnCreateCategoryCallBack? = null
-    private var currentCategory: Category? = null
-
+class AddEditCategoryDialog private constructor() : DialogFragment() {
     private lateinit var edtCategoryName: EditText
+    private var onApply: OnApply? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.dialog_rename_category, container, false)
         edtCategoryName = view.findViewById(R.id.name)
-        currentCategory = arguments?.getParcelable(EXTRA_CATEGORY)
+        val category: Category? = arguments?.getParcelable(EXTRA_CATEGORY)
 
-        setButton(view)
+        view.findViewById<Button>(R.id.on_apply).apply {
+            setOnClickListener { onButtonClicked() }
+            if (category == null) {
+                text = getString(R.string.label_create)
+            } else {
+                text = getString(R.string.label_rename)
+                edtCategoryName.setText(category.name)
+            }
+        }
+
         return view
     }
 
@@ -43,81 +41,33 @@ class AddEditCategoryDialog : DialogFragment() {
         setStyle(STYLE_NO_TITLE, android.R.style.Theme_Holo_Light_Dialog_NoActionBar_MinWidth)
     }
 
-    private fun setButton(view: View) {
-        view.findViewById<Button>(R.id.on_apply).apply {
-            if (currentCategory != null) {
-                text = getString(R.string.label_rename)
-                edtCategoryName.setText(currentCategory!!.name)
-                setOnClickListener { renameCategory() }
-            } else {
-                text = getString(R.string.label_add)
-                setOnClickListener { createNewCategory() }
-            }
-        }
-    }
-
-    private fun createNewCategory() {
-        getCategoryName { categoryName ->
-            onCreateCategoryCallBack?.invoke(categoryName)
-            dismiss()
-        }
-    }
-
-    private fun renameCategory() {
-        getCategoryName { categoryName ->
-            val category = Category(id = currentCategory!!.id, name = categoryName)
-            onEditCategoryCallBack?.invoke(category)
-            dismiss()
-        }
-    }
-
-    private fun getCategoryName(callBack: (categoryName: String) -> Unit) {
-        try {
-            val categoryName = getAndValidateCategoryName()
-            callBack.invoke(categoryName.trim())
-        } catch (error: EmptyCategoryNameException) {
-            edtCategoryName.error = requireContext().getString(R.string.label_playlist_name_cannot_be_empty)
-        } catch (error: CategoryNameAlreadyExistsException) {
-            edtCategoryName.error = requireContext().getString(R.string.label_category_already_exists)
-        }
-    }
-
-    private fun getAndValidateCategoryName(): String {
+    private fun onButtonClicked() {
         val categoryName = edtCategoryName.text.toString()
         if (TextUtils.isEmpty(categoryName))
-            throw EmptyCategoryNameException()
-        if (isExistCategoryNameCategory.invoke(categoryName))
-            throw CategoryNameAlreadyExistsException()
-
-        return categoryName
+            edtCategoryName.error = requireContext().getString(R.string.label_playlist_name_cannot_be_empty)
+        else {
+            onApply?.invoke(categoryName)
+            dismiss()
+        }
     }
-
 
     companion object {
         private const val EXTRA_CATEGORY = "com.yurii.youtubemusic.category.extra"
 
-        fun createDialogToEditCategory(
-            category: Category,
-            isExistCategoryNameCallBack: IsExistCategoryNameCallBack,
-            onEditCategoryCallBack: OnEditCategoryCallBack
-        ): AddEditCategoryDialog {
-            return AddEditCategoryDialog().apply {
-                arguments = Bundle().apply {
-                    putParcelable(EXTRA_CATEGORY, category)
-                }
-                this.isExistCategoryNameCategory = isExistCategoryNameCallBack
-                this.onEditCategoryCallBack = onEditCategoryCallBack
-            }
+        fun showToRenameCategory(fragmentManager: FragmentManager, category: Category, onApply: OnApply) {
+            val arguments = Bundle().apply { putParcelable(EXTRA_CATEGORY, category) }
+            val dialog = AddEditCategoryDialog()
+            dialog.arguments = arguments
+            dialog.onApply = onApply
+
+            dialog.show(fragmentManager, "DialogToRenameCategory")
         }
 
-        fun createDialogToCreateNewCategory(
-            isExistCategoryNameCallBack: IsExistCategoryNameCallBack,
-            onCreateNewCategoryCallBack: OnCreateCategoryCallBack
-        ): AddEditCategoryDialog {
-            return AddEditCategoryDialog().apply {
-                this.isExistCategoryNameCategory = isExistCategoryNameCallBack
-                this.onCreateCategoryCallBack = onCreateNewCategoryCallBack
-            }
+        fun showToCreateCategory(fragmentManager: FragmentManager, onApply: OnApply) {
+            val dialog = AddEditCategoryDialog()
+            dialog.onApply = onApply
+
+            dialog.show(fragmentManager, "DialogToCreateCategory")
         }
     }
 }

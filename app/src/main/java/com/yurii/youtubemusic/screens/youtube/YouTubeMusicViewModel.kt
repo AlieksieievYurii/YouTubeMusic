@@ -1,141 +1,191 @@
 package com.yurii.youtubemusic.screens.youtube
 
-import android.content.Context
-import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.api.services.youtube.model.Playlist
-import com.google.api.services.youtube.model.PlaylistItemListResponse
-import com.google.api.services.youtube.model.PlaylistListResponse
-import com.google.api.services.youtube.model.VideoListResponse
-import com.yurii.youtubemusic.utilities.GoogleAccount
+import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.Item
+import com.yurii.youtubemusic.models.Progress
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.youtube.ICanceler
-import com.yurii.youtubemusic.services.youtube.YouTubeObserver
-import com.yurii.youtubemusic.services.youtube.YouTubeService
-import com.yurii.youtubemusic.utilities.*
+import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
+import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
+import com.yurii.youtubemusic.services.downloader.ServiceConnection
+import com.yurii.youtubemusic.services.media.MediaLibraryManager
+import com.yurii.youtubemusic.utilities.GoogleAccount
+import com.yurii.youtubemusic.utilities.Preferences
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.lang.IllegalStateException
 
-interface VideosLoader {
-    fun onResult(newVideos: List<VideoItem>)
-    fun onError(error: Exception)
+abstract class VideoItemStatus(open val videoItem: Item) {
+    class Download(override val videoItem: Item) : VideoItemStatus(videoItem)
+    class Downloaded(override val videoItem: VideoItem, val size: Long) : VideoItemStatus(videoItem)
+    class Downloading(override val videoItem: VideoItem, val currentSize: Long, val size: Long) : VideoItemStatus(videoItem)
+    class Failed(override val videoItem: VideoItem, val error: Exception?) : VideoItemStatus(videoItem)
 }
 
-class YouTubeMusicViewModel(private val context: Context, googleSignInAccount: GoogleSignInAccount, private val preferences: IPreferences) :
-    ViewModel() {
-    private val credential = GoogleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount, context)
-    private val youTubeService = YouTubeService(credential)
-
-    private val _selectedPlayList: MutableLiveData<Playlist?> = MutableLiveData()
-    val selectedPlaylist: LiveData<Playlist?> = _selectedPlayList.also {
-        val currentSelectedPlaylist = preferences.getSelectedPlayList()
-        _selectedPlayList.value = currentSelectedPlaylist
+class YouTubeMusicViewModel(
+    private val mediaLibraryManager: MediaLibraryManager,
+    private val googleAccount: GoogleAccount,
+    private val downloaderServiceConnection: ServiceConnection,
+    googleSignInAccount: GoogleSignInAccount,
+    private val preferences: Preferences
+) : ViewModel() {
+    sealed class Event {
+        data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
+        data class OpenCategoriesSelector(val videoItem: VideoItem, val allCustomCategories: List<Category>) : Event()
+        object SignOut : Event()
     }
 
-    private var videoLoadingCanceler: ICanceler? = null
-    private var nextPageToken: String? = null
+    private val credential = googleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount)
+    val youTubeAPI = YouTubeAPI(credential)
 
-    var videosLoader: VideosLoader? = null
+    private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
+    val videoItems: StateFlow<PagingData<VideoItem>> = _videoItems
+
+    private val _currentPlaylistId: MutableStateFlow<Playlist?> = MutableStateFlow(preferences.getCurrentYouTubePlaylist())
+    val currentPlaylistId: StateFlow<Playlist?> = _currentPlaylistId
+
+    private val _videoItemStatus = MutableSharedFlow<VideoItemStatus>()
+    val videoItemStatus: SharedFlow<VideoItemStatus> = _videoItemStatus
+
+    private val _event = MutableSharedFlow<Event>()
+    val event: SharedFlow<Event> = _event
+
+    private var searchJob: Job? = null
 
     init {
-        deleteUnFinishedJobs()
-        if (_selectedPlayList.value != null)
-            loadVideos(null)
-    }
+        mediaLibraryManager.mediaStorage.deleteDownloadingMocks()
 
-    private fun deleteUnFinishedJobs() {
-        DataStorage.getMusicStorage(context).walk().filter { it.extension == "downloading" }.forEach {
-            it.delete()
+        viewModelScope.launch {
+            mediaLibraryManager.event.collect {
+                if (it is MediaLibraryManager.Event.ItemDeleted)
+                    _videoItemStatus.emit(VideoItemStatus.Download(it.item))
+            }
         }
-    }
 
-    fun loadPlayLists(observer: YouTubeObserver<PlaylistListResponse>, nextPageToken: String? = null): ICanceler {
-        Log.i(LOG_TAG, "Start loading playLists with next page token $nextPageToken")
-        return youTubeService.loadPlayLists(observer, nextPageToken)
+        _currentPlaylistId.value?.let { loadVideoItems(it) }
+
+        viewModelScope.launch {
+            downloaderServiceConnection.downloadingReport.collectLatest { report ->
+                when (report) {
+                    is MusicDownloaderService.DownloadingReport.Successful -> {
+                        val musicFile = mediaLibraryManager.mediaStorage.getMediaFile(report.videoItem)
+                        sendVideoItemStatus(VideoItemStatus.Downloaded(report.videoItem, musicFile.length()))
+                    }
+                    is MusicDownloaderService.DownloadingReport.Failed -> sendVideoItemStatus(VideoItemStatus.Failed(report.videoItem, report.error))
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            downloaderServiceConnection.downloadingProgress.collectLatest { progress ->
+                sendVideoItemStatus(VideoItemStatus.Downloading(progress.first, progress.second.currentSize, progress.second.totalSize))
+            }
+        }
+        downloaderServiceConnection.connect()
     }
 
     fun signOut() {
-        GoogleAccount.signOut(context)
-        cleanData()
+        googleAccount.signOut()
+        preferences.setCurrentYouTubePlaylist(null)
+        sendEvent(Event.SignOut)
     }
 
-    private fun cleanData() {
-        preferences.setSelectedPlayList(null)
-        videoLoadingCanceler?.cancel()
+    fun setPlaylist(playlist: Playlist) {
+        preferences.setCurrentYouTubePlaylist(playlist)
+        _currentPlaylistId.value = playlist
+        loadVideoItems(playlist)
     }
 
-    fun setNewPlayList(playlist: Playlist) {
-        if (playlist != _selectedPlayList.value) {
-            preferences.setSelectedPlayList(playlist)
-            _selectedPlayList.value = playlist
-            nextPageToken = null
-            loadVideos(nextPageToken)
+    fun download(item: VideoItem, categories: List<Category> = emptyList()) {
+        downloaderServiceConnection.download(item, categories)
+        sendVideoItemStatus(VideoItemStatus.Downloading(item, 0, 0))
+    }
+
+    fun openCategorySelectorFor(videoItem: VideoItem) {
+        viewModelScope.launch {
+            val allCustomCategories = mediaLibraryManager.mediaStorage.getCustomCategories()
+            _event.emit(Event.OpenCategoriesSelector(videoItem, allCustomCategories))
         }
     }
 
-    fun loadMoreVideos() {
-        loadVideos(nextPageToken)
+    fun tryToDownloadAgain(videoItem: VideoItem) {
+        downloaderServiceConnection.retryToDownload(videoItem)
+        sendVideoItemStatus(VideoItemStatus.Downloading(videoItem, 0, 0))
     }
 
-    private fun loadVideos(nextPageToken: String?) {
-        videoLoadingCanceler?.cancel()
-
-        videoLoadingCanceler = youTubeService.loadPlayListItems(_selectedPlayList.value!!.id, object : YouTubeObserver<PlaylistItemListResponse> {
-            override fun onResult(result: PlaylistItemListResponse) {
-                this@YouTubeMusicViewModel.nextPageToken = result.nextPageToken
-                retrieveVideos(result)
-            }
-
-            override fun onError(error: Exception) {
-                videosLoader?.onError(error)
-            }
-        }, nextPageToken)
+    fun cancelDownloading(item: VideoItem) {
+        downloaderServiceConnection.cancelDownloading(item)
+        sendVideoItemStatus(VideoItemStatus.Download(item))
     }
 
-    fun exists(videoItem: VideoItem): Boolean = DataStorage.getMusic(context, videoItem.videoId).exists()
-
-    fun removeVideoItem(videoItem: VideoItem) {
-        DataStorage.getMusic(context, videoItem.videoId).delete()
-        DataStorage.getMetadata(context, videoItem.videoId).delete()
-        DataStorage.getThumbnail(context, videoItem.videoId).delete()
+    fun delete(videoItem: VideoItem) {
+        viewModelScope.launch {
+            mediaLibraryManager.deleteItem(videoItem)
+        }
     }
 
-    fun isVideoPageLast() = nextPageToken.isNullOrEmpty()
+    fun showFailedItemDetails(videoItem: VideoItem) {
+        sendEvent(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
+    }
 
-    private fun retrieveVideos(playlistItemListResponse: PlaylistItemListResponse) {
-        youTubeService.loadVideosDetails(
-            playlistItemListResponse.items.map { it.snippet.resourceId.videoId },
-            object : YouTubeObserver<VideoListResponse> {
-                override fun onResult(result: VideoListResponse) {
-                    val videoItems = result.items.map { VideoItem.createFrom(it) }
-                    videosLoader?.onResult(videoItems)
-                    videoLoadingCanceler = null
+    fun getItemStatus(videoItem: VideoItem): VideoItemStatus {
+        val musicFile = mediaLibraryManager.mediaStorage.getMediaFile(videoItem)
+
+        if (musicFile.exists())
+            return VideoItemStatus.Downloaded(videoItem, musicFile.length())
+
+        if (downloaderServiceConnection.isItemDownloading(videoItem)) {
+            val progress = downloaderServiceConnection.getProgress(videoItem) ?: Progress.create()
+            return VideoItemStatus.Downloading(videoItem, progress.currentSize, progress.totalSize)
+        }
+
+        if (downloaderServiceConnection.isDownloadingFailed(videoItem))
+            return VideoItemStatus.Failed(videoItem, downloaderServiceConnection.getError(videoItem))
+
+        return VideoItemStatus.Download(videoItem)
+    }
+
+    private fun sendVideoItemStatus(videoItemStatus: VideoItemStatus) = viewModelScope.launch {
+        _videoItemStatus.emit(videoItemStatus)
+    }
+
+    private fun sendEvent(event: Event) = viewModelScope.launch {
+        _event.emit(event)
+    }
+
+    private fun loadVideoItems(playlist: Playlist) {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            Pager(config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+                pagingSourceFactory = { VideosPagingSource(youTubeAPI, playlist.id) }).flow.cachedIn(viewModelScope)
+                .collectLatest {
+                    _videoItems.emit(it)
                 }
-
-                override fun onError(error: Exception) {
-                    videosLoader?.onError(error)
-                }
-            })
-    }
-
-    companion object {
-        private const val LOG_TAG: String = "YouTubeViewModel"
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
     class Factory(
-        private val context: Context,
+        private val mediaLibraryManager: MediaLibraryManager,
+        private val googleAccount: GoogleAccount,
+        private val downloaderServiceConnection: ServiceConnection,
         private val googleSignInAccount: GoogleSignInAccount,
-        private val preferences: IPreferences
-    ) :
-        ViewModelProvider.Factory {
+        private val preferences: Preferences
+    ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
-                return YouTubeMusicViewModel(context, googleSignInAccount, preferences) as T
-            throw IllegalStateException("Given the model class is not assignable from YouTuneViewModel class")
+                return YouTubeMusicViewModel(mediaLibraryManager, googleAccount, downloaderServiceConnection, googleSignInAccount, preferences) as T
+            throw IllegalStateException("Given the model class is not assignable from YouTubeMusicViewModel class")
         }
 
     }
 }
-

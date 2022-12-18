@@ -3,28 +3,37 @@ package com.yurii.youtubemusic.services.downloader
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
-import android.os.Handler
 import android.os.IBinder
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.Progress
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.services.media.MediaLibraryManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import java.lang.Exception
 
 
 class MusicDownloaderService : Service() {
-    private lateinit var downloader: MusicDownloaderAbstract
-    private lateinit var notificationManager: NotificationManager
-    private var serviceConnectionCallback: ServiceConnection.CallBack? = null
-    private lateinit var handler: Handler
-    private var isForeground = false
-
-    override fun onCreate() {
-        super.onCreate()
-        downloader = MusicDownloaderImp(this, MusicDownloaderCallBacks())
-        notificationManager = NotificationManager(this)
-        handler = Handler(applicationContext.mainLooper)
+    sealed class DownloadingReport {
+        data class Successful(val videoItem: VideoItem) : DownloadingReport()
+        data class Failed(val videoItem: VideoItem, val error: Exception) : DownloadingReport()
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
+    private val scopeJob = Job()
+    private val serviceCoroutineScope = CoroutineScope(scopeJob)
+
+    private val mediaLibraryManager by lazy { MediaLibraryManager.getInstance(this) }
+
+    private var downloadingProgress: MutableSharedFlow<Pair<VideoItem, Progress>>? = null
+    private var downloadingReport: MutableSharedFlow<DownloadingReport>? = null
+
+    private val downloader: MusicDownloader by lazy { MusicDownloaderImpl(MusicDownloaderCallBacks(), mediaLibraryManager.mediaStorage) }
+    private val notificationManager by lazy { NotificationManager(this) }
+    private var isForeground = false
+
+    override fun onBind(intent: Intent?): IBinder {
         return ServiceInterface()
     }
 
@@ -42,27 +51,43 @@ class MusicDownloaderService : Service() {
         }
     }
 
-    private inner class MusicDownloaderCallBacks : MusicDownloaderAbstract.CallBack {
-        override fun onFinished(videoItem: VideoItem) {
+    override fun onDestroy() {
+        super.onDestroy()
+        scopeJob.cancel()
+    }
+
+    private inner class MusicDownloaderCallBacks : MusicDownloader.CallBack {
+        override fun onFinished(videoItem: VideoItem, customCategories: List<Category>) {
             stopAsForegroundIfQueueIsEmpty()
-            handler.post { serviceConnectionCallback?.onFinished(videoItem) }
+            serviceCoroutineScope.launch {
+                mediaLibraryManager.registerMediaItem(videoItem, customCategories)
+                downloadingReport?.emit(DownloadingReport.Successful(videoItem))
+            }
         }
 
         override fun onChangeProgress(videoItem: VideoItem, progress: Progress) {
             notificationManager.updateProgress(downloader.getCompletedProgress())
-            handler.post { serviceConnectionCallback?.onProgress(videoItem, progress) }
+            serviceCoroutineScope.launch {
+                downloadingProgress?.emit(videoItem to progress)
+            }
         }
 
         override fun onErrorOccurred(videoItem: VideoItem, error: Exception) {
             stopAsForegroundIfQueueIsEmpty()
-            handler.post { serviceConnectionCallback?.onError(videoItem, error) }
+            serviceCoroutineScope.launch {
+                downloadingReport?.emit(DownloadingReport.Failed(videoItem, error))
+            }
         }
-
     }
 
     inner class ServiceInterface : Binder() {
-        fun setCallBacks(callBacks: ServiceConnection.CallBack?) {
-            serviceConnectionCallback = callBacks
+
+        fun setFlowCallbacks(
+            downloadingReport: MutableSharedFlow<DownloadingReport>,
+            downloadingProgress: MutableSharedFlow<Pair<VideoItem, Progress>>
+        ) {
+            this@MusicDownloaderService.downloadingReport = downloadingReport
+            this@MusicDownloaderService.downloadingProgress = downloadingProgress
         }
 
         fun downloadMusicFrom(videoItem: VideoItem, categories: List<Category>) {

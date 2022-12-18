@@ -1,38 +1,13 @@
 package com.yurii.youtubemusic.utilities
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.view.View
-import com.google.android.material.snackbar.Snackbar
+import androidx.core.content.ContextCompat
 import com.yurii.youtubemusic.R
 import org.threeten.bp.Duration
-import java.io.File
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.TimeUnit
-
-class ErrorSnackBar private constructor() {
-    companion object {
-        fun show(view: View, details: String) {
-            val snackBar = Snackbar.make(view, details, Snackbar.LENGTH_LONG)
-            snackBar.view.setBackgroundColor(Color.RED)
-            snackBar.show()
-        }
-    }
-}
-
-object DataStorage {
-    fun getMusicStorage(context: Context): File = File(context.filesDir, "Musics")
-    private fun getThumbnailsStorage(context: Context): File = File(context.filesDir, "Thumbnails")
-    private fun getMusicMetadataStorage(context: Context): File = File(context.filesDir, "Metadata")
-
-    fun getMusic(context: Context, musicId: String): File = File(getMusicStorage(context), "$musicId.mp3")
-    fun getThumbnail(context: Context, musicId: String): File = File(getThumbnailsStorage(context), "$musicId.jpeg")
-    fun getMetadata(context: Context, musicId: String): File = File(getMusicMetadataStorage(context), "$musicId.json")
-
-    fun getAllMusicFiles(context: Context): List<File> = getMusicStorage(context).walk().filter { it.extension == "mp3" }.toList()
-}
 
 fun parseDurationToHumanView(text: String): String {
     val millis = Duration.parse(text).toMillis()
@@ -81,7 +56,7 @@ fun calculateLikeBarValue(likeCount: BigInteger, disLikeCount: BigInteger): Int 
 }
 
 fun createFromPathOrReturnMock(context: Context, path: String?): Drawable {
-    return Drawable.createFromPath(path) ?: context.getDrawable(R.drawable.ic_thumbnail_mock)!!
+    return Drawable.createFromPath(path) ?: ContextCompat.getDrawable(context, R.drawable.ic_thumbnail_mock)!!
 }
 
 

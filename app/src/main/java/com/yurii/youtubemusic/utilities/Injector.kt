@@ -1,10 +1,8 @@
 package com.yurii.youtubemusic.utilities
 
-import android.content.ComponentName
+import android.app.Application
 import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.yurii.youtubemusic.services.mediaservice.MediaService
-import com.yurii.youtubemusic.services.mediaservice.MusicServiceConnection
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.screens.categories.CategoriesEditorViewModel
 import com.yurii.youtubemusic.screens.equalizer.EqualizerViewModel
@@ -12,42 +10,41 @@ import com.yurii.youtubemusic.screens.player.PlayerControllerViewModel
 import com.yurii.youtubemusic.screens.saved.SavedMusicViewModel
 import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsViewModel
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
+import com.yurii.youtubemusic.services.downloader.ServiceConnection
+import com.yurii.youtubemusic.services.media.*
 
 object Injector {
 
-    fun provideEqualizerViewModel(context: Context): EqualizerViewModel.Factory {
-        val musicServiceConnection = provideMusicServiceConnection(context)
-        return EqualizerViewModel.Factory(context.applicationContext, musicServiceConnection)
+    fun provideEqualizerViewModel(application: Application): EqualizerViewModel.Factory {
+        val audioEffectManager = AudioEffectManager.getInstance(Preferences.getInstance(application))
+        return EqualizerViewModel.Factory(audioEffectManager)
     }
 
-    fun provideMediaItemsViewModel(context: Context, category: Category): MediaItemsViewModel {
-        val musicServiceConnection = provideMusicServiceConnection(context)
-        return MediaItemsViewModel(context, category, musicServiceConnection)
+    fun providePlayerControllerViewModel(application: Application): PlayerControllerViewModel.Factory {
+        return PlayerControllerViewModel.Factory(MediaServiceConnection.getInstance(application))
     }
 
-    fun providePlayerControllerViewModel(context: Context): PlayerControllerViewModel.Factory {
-        val applicationContext = context.applicationContext
-        val musicServiceConnection = provideMusicServiceConnection(context)
-        return PlayerControllerViewModel.Factory(applicationContext, musicServiceConnection)
+    fun provideSavedMusicViewModel(application: Application): SavedMusicViewModel.Factory {
+        return SavedMusicViewModel.Factory(MediaServiceConnection.getInstance(application), MediaLibraryManager.getInstance(application))
     }
 
-    fun provideSavedMusicViewModel(context: Context): SavedMusicViewModel.Factory {
-        val applicationContext = context.applicationContext
-        val musicServiceConnection = provideMusicServiceConnection(context)
-        return SavedMusicViewModel.Factory(applicationContext, musicServiceConnection)
+    fun provideMediaItemsViewModel(application: Application, category: Category): MediaItemsViewModel.Factory {
+        return MediaItemsViewModel.Factory(category, MediaLibraryManager.getInstance(application),  MediaServiceConnection.getInstance(application))
     }
 
-    fun provideYouTubeMusicViewModel(context: Context, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
-        val preferences = ServiceLocator.providePreferences(context)
-        return YouTubeMusicViewModel.Factory(context, googleSignInAccount, preferences)
+    fun provideYouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
+        val googleAccount = GoogleAccount(application)
+        val downloaderServiceConnection = ServiceConnection(application)
+        return YouTubeMusicViewModel.Factory(
+            MediaLibraryManager.getInstance(application),
+            googleAccount,
+            downloaderServiceConnection,
+            googleSignInAccount,
+            Preferences.getInstance(application)
+        )
     }
 
     fun provideCategoriesEditorViewMode(context: Context): CategoriesEditorViewModel.Factory {
-        val preferences = ServiceLocator.providePreferences(context)
-        return CategoriesEditorViewModel.Factory(preferences)
-    }
-
-    private fun provideMusicServiceConnection(context: Context): MusicServiceConnection {
-        return MusicServiceConnection.getInstance(context, ComponentName(context, MediaService::class.java))
+        return CategoriesEditorViewModel.Factory(MediaLibraryManager.getInstance(context))
     }
 }

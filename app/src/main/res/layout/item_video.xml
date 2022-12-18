@@ -8,21 +8,11 @@
 
         <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
 
-        <import type="com.yurii.youtubemusic.adapters.ItemState" />
-
         <import type="android.view.View" />
 
         <variable
             name="videoItem"
             type="com.yurii.youtubemusic.models.VideoItem" />
-
-        <variable
-            name="state"
-            type="ItemState" />
-
-        <variable
-            name="progress"
-            type="com.yurii.youtubemusic.services.downloader.Progress" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -65,7 +55,7 @@
                     android:layout_marginEnd="@dimen/mediumMargin"
                     android:layout_marginBottom="@dimen/mediumMargin"
                     android:background="@drawable/rectangle"
-                    android:text="@{UtilsKt.parseDurationToHumanView(videoItem.duration)}"
+                    android:text="@{UtilsKt.parseDurationToHumanView(videoItem.durationInMillis)}"
                     android:textColor="@android:color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
@@ -96,7 +86,7 @@
                     android:layout_toEndOf="@id/thumbnail"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="@{videoItem.authorChannelTitle}"
+                    android:text="@{videoItem.author}"
                     android:textSize="12sp"
                     tools:text="@tools:sample/lorem/random" />
 
@@ -125,9 +115,7 @@
                         android:layout_height="50dp"
                         android:layout_centerInParent="true"
                         android:layout_marginEnd="@dimen/mediumMargin"
-                        app:backgroundColor="@color/colorAccent"
-                        app:progress="@{progress.progress}"
-                        app:state="download" />
+                        app:backgroundColor="@color/colorAccent" />
 
                     <TextView
                         android:id="@+id/size_progress"
@@ -135,10 +123,10 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/btn_download"
                         android:layout_centerHorizontal="true"
-                        android:text="@{@string/label_size_progress(progress.currentSizeInMb, progress.totalSizeInMb)}"
+                        android:text="NONE"
                         android:textColor="@color/colorAccent"
                         android:textSize="9sp"
-                        android:visibility="@{state == ItemState.DOWNLOADING ? View.VISIBLE : View.GONE}"
+                        android:visibility="gone"
                         tools:ignore="SmallSp"
                         tools:text="10.2 / 50.2 M" />
 
@@ -151,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="@dimen/mediumPadding"
                 android:paddingEnd="@dimen/mediumPadding"
-                android:visibility="visible">
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/iv_thumb_up"

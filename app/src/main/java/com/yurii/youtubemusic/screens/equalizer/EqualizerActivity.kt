@@ -7,94 +7,116 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityEqualizerBinding
+import com.yurii.youtubemusic.models.EqualizerData
+import com.yurii.youtubemusic.ui.EqualizerView
 import com.yurii.youtubemusic.utilities.Injector
 
 
 class EqualizerActivity : AppCompatActivity() {
-    private val viewModel: EqualizerViewModel by viewModels { Injector.provideEqualizerViewModel(this) }
+    private val viewModel: EqualizerViewModel by viewModels { Injector.provideEqualizerViewModel(application) }
     private val binding: ActivityEqualizerBinding by viewBinding()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.title = getString(R.string.label_audio_effects)
-
-        binding.enableEqualizer.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.audioEffectManager.setEnableEqualizer(isChecked)
-            binding.selectPresets.isEnabled = isChecked
-            binding.equalizer.setEnable(isChecked)
-        }
-        binding.enableBassBoost.setOnCheckedChangeListener { _, isChecked ->
-            binding.bassBoost.setEnable(isChecked)
-            viewModel.audioEffectManager.setEnableBassBoost(isChecked)
-        }
-        binding.enableVirtualizer.setOnCheckedChangeListener { _, isChecked ->
-            binding.virtualizer.setEnable(isChecked)
-            viewModel.audioEffectManager.setEnableVirtualizer(isChecked)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            title = getString(R.string.label_audio_effects)
         }
 
-        binding.bassBoost.listener = { viewModel.audioEffectManager.setBassBoost(it) }
-        binding.virtualizer.listener = { viewModel.audioEffectManager.setVirtualizer(it) }
+        initVirtualizerState()
+        initBassBoostState()
+        initEqualizerData()
+    }
 
-        binding.equalizer.setBandListener { bandId, level, fromUser ->
-            if (fromUser) {
-                viewModel.audioEffectManager.setBandLevel(bandId, level)
-                getString(R.string.label_custom).apply {
-                    binding.selectPresets.text = this
-                    viewModel.audioEffectManager.data.currentPreset = this
-                }
+    private fun initEqualizerData() {
+        viewModel.getEqualizerData().let {
+            binding.equalizer.apply {
+                initEqualizer(it.lowestBandLevel.toInt(), it.highestBandLevel.toInt(), it.listOfCenterFreq)
+                setBandLevels(it.bandsLevels)
+                setEnable(it.isEnabled)
             }
-
-        }
-
-        viewModel.audioEffectManager.data.also { audioEffectsData ->
-            binding.enableEqualizer.isChecked = audioEffectsData.enableEqualizer
-            binding.enableBassBoost.isChecked = audioEffectsData.enableBassBoost
-            binding.enableVirtualizer.isChecked = audioEffectsData.enableVirtualizer
-            binding.selectPresets.text = audioEffectsData.currentPreset
-
-            binding.bassBoost.apply {
-                setValue(audioEffectsData.bassBoost)
-                setEnable(audioEffectsData.enableBassBoost)
-            }
-            binding.virtualizer.apply {
-                setValue(audioEffectsData.virtualizer)
-                setEnable(audioEffectsData.enableVirtualizer)
-            }
-
             binding.selectPresets.apply {
                 setOnClickListener { openDialogToSelectPreset() }
-                isEnabled = audioEffectsData.enableEqualizer
+                isEnabled = it.isEnabled
+                text = if (it.currentPreset == EqualizerData.CUSTOM_PRESET_ID)
+                    getText(R.string.label_custom)
+                else
+                    viewModel.getPresetName(it.currentPreset)
             }
+            binding.enableEqualizer.isChecked = it.isEnabled
+        }
+        setListenersForEqualizer()
+    }
 
-            binding.equalizer.apply {
-                setEnable(audioEffectsData.enableEqualizer)
-                setBands(audioEffectsData.bands)
-                minValue = audioEffectsData.lowestBandLevel.toInt()
-                maxValue = audioEffectsData.highestBandLevel.toInt()
-                draw()
-                setBandSettings(audioEffectsData.bandsLevels)
+    private fun initBassBoostState() {
+        viewModel.getBassBoostData().let {
+            binding.apply {
+                bassBoost.setEnable(it.isEnabled)
+                bassBoost.value = it.value
+                enableBassBoost.isChecked = it.isEnabled
             }
         }
+        setListenersForBoostBass()
+    }
+
+    private fun initVirtualizerState() {
+        viewModel.getVirtualizerData().let {
+            binding.apply {
+                virtualizer.setEnable(it.isEnabled)
+                virtualizer.value = it.value
+                enableVirtualizer.isChecked = it.isEnabled
+            }
+        }
+        setListenersForVirtualizer()
+    }
+
+    private fun setListenersForBoostBass() = binding.apply {
+        enableBassBoost.setOnCheckedChangeListener { _, isChecked ->
+            bassBoost.setEnable(isChecked)
+            viewModel.setBassBoost(isChecked, bassBoost.value)
+        }
+        bassBoost.listener = { viewModel.setBassBoost(enableBassBoost.isChecked, it) }
+    }
+
+    private fun setListenersForVirtualizer() = binding.apply {
+        enableVirtualizer.setOnCheckedChangeListener { _, isChecked ->
+            virtualizer.setEnable(isChecked)
+            viewModel.setVirtualizer(isChecked, virtualizer.value)
+        }
+        virtualizer.listener = { viewModel.setVirtualizer(enableVirtualizer.isChecked, it) }
+    }
+
+    private fun setListenersForEqualizer() = binding.apply {
+        enableEqualizer.setOnCheckedChangeListener { _, isChecked ->
+            equalizer.setEnable(isChecked)
+            binding.selectPresets.isEnabled = isChecked
+            viewModel.setEqualizerData(isChecked, equalizer.getBandsLevels())
+        }
+        equalizer.setBandListener(object : EqualizerView.OnChangeListener {
+            override fun onBandLevelChanging(bandId: Int, bandLevel: Int) {
+                viewModel.setEqualizerBandLevel(bandId, bandLevel)
+                binding.selectPresets.text = getString(R.string.label_custom)
+            }
+
+            override fun onBandLevelsChanged(bandsLevel: Map<Int, Int>) {
+                viewModel.setEqualizerData(enableEqualizer.isChecked, bandsLevel)
+                viewModel.setPreset(EqualizerData.CUSTOM_PRESET_ID)
+            }
+        })
     }
 
     private fun openDialogToSelectPreset() {
-        val dialog = AlertDialog.Builder(this).apply {
+        AlertDialog.Builder(this).apply {
             setTitle(R.string.label_presets)
             val presets = viewModel.audioEffectManager.getPresets()
             setItems(presets) { _, which ->
-                binding.selectPresets.text = presets[which]
-                viewModel.audioEffectManager.setPreset(which)
-                val bandLevels = viewModel.audioEffectManager.getBandLevelsForPreset(which)
-                viewModel.audioEffectManager.data.apply {
-                    bandsLevels = bandLevels
-                    currentPreset = presets[which]
+                binding.apply {
+                    selectPresets.text = presets[which]
+                    equalizer.setBandLevels(viewModel.getBandLevelsForPreset(which))
                 }
-                binding.equalizer.setBandSettings(bandLevels)
+                viewModel.setPreset(which)
             }
-        }.create()
-
-        dialog.show()
+        }.create().show()
     }
 
     override fun onBackPressed() {
@@ -105,10 +127,5 @@ class EqualizerActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.audioEffectManager.saveChanges()
     }
 }

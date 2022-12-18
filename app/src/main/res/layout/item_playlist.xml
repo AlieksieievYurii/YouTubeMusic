@@ -8,7 +8,7 @@
 
         <variable
             name="playlist"
-            type="com.google.api.services.youtube.model.Playlist" />
+            type="com.yurii.youtubemusic.screens.youtube.playlists.Playlist"/>
 
     </data>
 
@@ -32,7 +32,7 @@
                 android:layout_height="50dp"
                 android:layout_marginEnd="5dp"
                 android:contentDescription="@string/thumbnails_of_playlist"
-                app:imageUrl="@{playlist.snippet.thumbnails.getDefault().url}"
+                app:imageUrl="@{playlist.thumbnail}"
                 tools:src="@tools:sample/backgrounds/scenic" />
 
             <TextView
@@ -43,7 +43,7 @@
                 android:layout_toEndOf="@id/image"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@{playlist.snippet.title}"
+                android:text="@{playlist.name}"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 tools:text="@tools:sample/lorem/random" />
@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/title"
                 android:layout_toEndOf="@id/image"
-                android:text="@{@string/label_videos_count(playlist.contentDetails.itemCount)}"
+                android:text="@{@string/label_videos_count(playlist.videoCount)}"
                 tools:text="13 videos" />
 
         </RelativeLayout>
