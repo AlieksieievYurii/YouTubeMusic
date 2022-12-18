@@ -31,14 +31,11 @@ private const val TAG = "MediaBackgroundService"
 const val CATEGORIES_CONTENT = "__youtube_musics_categories__"
 const val EMPTY_CONTENT = "__empty__"
 
-const val REQUEST_MEDIA_ITEM_TIME_POSITION = "__request_command_get_media_time_position__"
-
 const val PLAYBACK_STATE_PLAYING_CATEGORY = "com.yurii.youtubemusic.playback.state.playing.category.name"
 const val PLAYBACK_STATE_MEDIA_ITEM = "com.yurii.youtubemusic.playback.state.media.item"
 const val PLAYBACK_STATE_SESSION_ID = "com.yurii.youtubemusic.playback.state.session.id"
 
 const val EXTRA_KEY_CATEGORIES = "com.yurii.youtubemusic.category"
-const val EXTRA_CURRENT_TIME_POSITION = "com.yurii.youtubemusic.current.time.position"
 
 const val FAILED_TO_LOAD_CATEGORIES = "failed_to_load_categories"
 const val FAILED_TO_LOAD_MEDIA_ITEMS = "failed_to_load_media_items"
@@ -109,6 +106,11 @@ class MediaService : MediaBrowserServiceCompat() {
                 when (event) {
                     is MediaLibraryManager.Event.ItemDeleted -> onMediaItemIsDeleted(event.item)
                     is MediaLibraryManager.Event.MediaItemIsAdded -> onMediaItemIsAdded(event.mediaItem)
+                    is MediaLibraryManager.Event.CategoryAssignment -> {
+
+                    }
+                    is MediaLibraryManager.Event.CategoryRemoved -> onCategoryRemoved(event.category)
+                    is MediaLibraryManager.Event.CategoryUpdated -> TODO()
                 }
             }
         }
@@ -339,14 +341,17 @@ class MediaService : MediaBrowserServiceCompat() {
             coroutineScope.launch { queueProvider.add(mediaItem) }
     }
 
+    private fun onCategoryRemoved(category: Category) {
+        if (queueProvider.getCurrentPlayingCategory() == category) {
+            handleStopRequest()
+            queueProvider.release()
+        }
+    }
+
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
         override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
             super.onCommand(command, extras, cb)
-            when (command) {
-                REQUEST_MEDIA_ITEM_TIME_POSITION -> cb?.send(0, Bundle().apply {
-                    putLong(EXTRA_CURRENT_TIME_POSITION, mediaPlayer?.currentPosition?.toLong() ?: 0)
-                })
-            }
+            // Not implemented yet
         }
 
         override fun onPlay() {

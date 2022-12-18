@@ -27,6 +27,15 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         return null
     }
 
+    /**
+     * Clears the queue
+     */
+    fun release() {
+        queue.clear()
+        playingCategory = null
+        currentPlayingMediaItemPosition = 0
+    }
+
     fun removeFromQueueIfExists(item: Item) {
         queue.find { it.id == item.id }?.run {
             val currentMediaItem = getCurrentQueueItem()
