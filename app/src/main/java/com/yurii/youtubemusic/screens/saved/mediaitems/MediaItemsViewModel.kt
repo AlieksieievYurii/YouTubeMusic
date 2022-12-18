@@ -55,13 +55,12 @@ class MediaItemsViewModel(
     fun onClickMediaItem(mediaItem: MediaItem) {
         when (val playbackState = playbackState.value) {
             PlaybackState.None -> mediaServiceConnection.play(mediaItem, category)
-            is PlaybackState.Paused -> if (playbackState.mediaItem == mediaItem)
-                mediaServiceConnection.resume()
-            else
-                mediaServiceConnection.play(mediaItem, category)
-            is PlaybackState.Playing -> if (playbackState.mediaItem == mediaItem)
-                mediaServiceConnection.pause()
-            else
+            is PlaybackState.Playing -> if (playbackState.mediaItem == mediaItem) {
+                if (playbackState.isPaused)
+                    mediaServiceConnection.resume()
+                else
+                    mediaServiceConnection.pause()
+            } else
                 mediaServiceConnection.play(mediaItem, category)
         }
     }

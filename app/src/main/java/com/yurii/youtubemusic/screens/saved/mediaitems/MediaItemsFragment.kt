@@ -62,8 +62,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private suspend fun startObservingPlayingItem() = viewModel.playbackState.collectLatest { playbackState ->
         when (playbackState) {
             PlaybackState.None -> mediaListAdapter.resetState()
-            is PlaybackState.Paused -> mediaListAdapter.setPlayingStateMediaItem(playbackState.mediaItem, isPlaying = false)
-            is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(playbackState.mediaItem, isPlaying = true)
+            is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(playbackState.mediaItem, isPlaying = !playbackState.isPaused)
         }
     }
 

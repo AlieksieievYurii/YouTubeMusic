@@ -3,15 +3,13 @@ package com.yurii.youtubemusic.services.media
 import android.app.Application
 import android.content.ComponentName
 import android.os.Bundle
+import android.os.SystemClock
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.yurii.youtubemusic.models.*
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import java.lang.Exception
 import java.lang.IllegalStateException
@@ -20,8 +18,20 @@ import kotlin.coroutines.suspendCoroutine
 
 sealed class PlaybackState {
     object None : PlaybackState()
-    data class Playing(val mediaItem: MediaItem, val category: Category, val currentPosition: Long) : PlaybackState()
-    data class Paused(val mediaItem: MediaItem, val category: Category, val currentPosition: Long) : PlaybackState()
+    data class Playing(
+        val mediaItem: MediaItem,
+        val category: Category,
+        val isPaused: Boolean,
+        private val position: Long,
+        private val lastUpdateTime: Long,
+        private val playbackSpeed: Float,
+    ) : PlaybackState() {
+        val currentPosition: Long
+            get() {
+                val timeDelta = SystemClock.elapsedRealtime() - lastUpdateTime
+                return (position + (timeDelta * playbackSpeed)).toLong()
+            }
+    }
 }
 
 class MediaServiceConnection private constructor(private val application: Application) {
@@ -115,17 +125,21 @@ class MediaServiceConnection private constructor(private val application: Applic
             val category = state.extras?.getParcelable<Category>(PLAYBACK_STATE_PLAYING_CATEGORY)
             when (state.state) {
                 PlaybackStateCompat.STATE_PLAYING -> {
-                    _playbackState.value = PlaybackState.Playing(mediaItem!!, category!!, state.position)
+                    _playbackState.value = PlaybackState.Playing(
+                        mediaItem!!, category!!, false, state.position, state.lastPositionUpdateTime, state.playbackSpeed
+                    )
                 }
                 PlaybackStateCompat.STATE_PAUSED -> {
-                    _playbackState.value = PlaybackState.Paused(mediaItem!!, category!!, state.position)
+                    _playbackState.value =
+                        PlaybackState.Playing(
+                            mediaItem!!, category!!, true, state.position, state.lastPositionUpdateTime, state.playbackSpeed
+                        )
                 }
                 PlaybackStateCompat.STATE_STOPPED -> _playbackState.value = PlaybackState.None
                 else -> {
                     //Do nothing
                 }
             }
-            Timber.d("MediaControllerCallback -> onPlaybackStateChanged: ${state}")
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
