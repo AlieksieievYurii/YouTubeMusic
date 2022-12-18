@@ -106,9 +106,7 @@ class MediaService : MediaBrowserServiceCompat() {
                 when (event) {
                     is MediaLibraryManager.Event.ItemDeleted -> onMediaItemIsDeleted(event.item)
                     is MediaLibraryManager.Event.MediaItemIsAdded -> onMediaItemIsAdded(event.mediaItem)
-                    is MediaLibraryManager.Event.CategoryAssignment -> {
-
-                    }
+                    is MediaLibraryManager.Event.CategoryAssignment -> onMediaItemIsAssignedToCategories(event.mediaItem, event.customCategories)
                     is MediaLibraryManager.Event.CategoryRemoved -> onCategoryRemoved(event.category)
                     is MediaLibraryManager.Event.CategoryUpdated -> TODO()
                 }
@@ -345,6 +343,19 @@ class MediaService : MediaBrowserServiceCompat() {
         if (queueProvider.getCurrentPlayingCategory() == category) {
             handleStopRequest()
             queueProvider.release()
+        }
+    }
+
+    private fun onMediaItemIsAssignedToCategories(mediaItem: MediaItem, customCategories: List<Category>) {
+        if (!queueProvider.isInitialized || queueProvider.getCurrentPlayingCategory() == Category.ALL)
+            return
+
+        if (queueProvider.getCurrentPlayingCategory() in customCategories)
+            queueProvider.addToQueueIfDoesNotContain(mediaItem)
+        else {
+            if (queueProvider.getCurrentQueueItem()?.id == mediaItem.id)
+                handleStopRequest()
+            queueProvider.removeFromQueueIfExists(mediaItem)
         }
     }
 

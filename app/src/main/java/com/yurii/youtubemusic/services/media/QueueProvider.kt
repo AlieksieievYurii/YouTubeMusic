@@ -36,6 +36,20 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         currentPlayingMediaItemPosition = 0
     }
 
+    /**
+     * Returns true if the given [mediaItem] exists in the current queue.
+     * Otherwise false, also when the queue is not initialized
+     */
+    fun contains(mediaItem: MediaItem): Boolean {
+        if (!isInitialized)
+            return false
+
+        return queue.find { it.id == mediaItem.id } != null
+    }
+
+    /**
+     * Removes an [item] from the queue if the queue has that. Otherwise ignores
+     */
     fun removeFromQueueIfExists(item: Item) {
         queue.find { it.id == item.id }?.run {
             val currentMediaItem = getCurrentQueueItem()
@@ -44,10 +58,21 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         }
     }
 
+    /**
+     * Appends [mediaItem] to the queue(if is initialized) if the queue does not contain this [mediaItem].
+     * The function will be performed even if the [mediaItem] is not assigned to the current playing category
+     */
+    fun addToQueueIfDoesNotContain(mediaItem: MediaItem) {
+        if (!isInitialized || contains(mediaItem))
+            return
+
+        queue.add(mediaItem)
+    }
+
     suspend fun add(mediaItem: MediaItem) {
         playingCategory?.run {
             val mediaItems = mediaStorage.getCategoryContainer(this).mediaItemsIds
-            if(mediaItems.contains(mediaItem.id))
+            if (mediaItems.contains(mediaItem.id))
                 queue.add(mediaItem)
         }
     }
