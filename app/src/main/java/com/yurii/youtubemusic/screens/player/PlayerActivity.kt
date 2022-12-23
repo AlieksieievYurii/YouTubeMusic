@@ -60,7 +60,9 @@ class PlayerActivity : AppCompatActivity() {
 
     private suspend fun observePlaybackState() = viewModel.playbackState.collectLatest {
         when (it) {
-            PlaybackState.None -> TODO()
+            PlaybackState.None -> {
+                //Nothing
+            }
             is PlaybackState.Playing -> {
                 binding.mediaItem = it.mediaItem
                 binding.isPlayingNow = !it.isPaused
