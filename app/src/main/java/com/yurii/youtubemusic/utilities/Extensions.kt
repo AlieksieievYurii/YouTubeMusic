@@ -55,3 +55,7 @@ fun <T> List<T>.findIndex(filter: (T) -> Boolean): Int? {
 fun Fragment.requireApplication(): Application {
     return requireActivity().application
 }
+
+fun <T> MutableList<T>.move(from: Int, to:Int) {
+    this.add(to, this.removeAt(from))
+}
