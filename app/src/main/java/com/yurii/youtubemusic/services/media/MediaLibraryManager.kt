@@ -6,6 +6,7 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.utilities.move
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -23,6 +24,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         data class CategoryCreated(val category: Category) : Event()
         data class CategoryUpdated(val category: Category) : Event()
         data class CategoryAssignment(val mediaItem: MediaItem, val customCategories: List<Category>) : Event()
+        data class MediaItemPositionChanged(val category: Category, val mediaItem: MediaItem, val from: Int, val to: Int) : Event()
         //TODO Add Delete and Update events and implement them here
     }
 
@@ -32,6 +34,19 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
     suspend fun deleteItem(item: Item) {
         mediaStorage.eliminateMediaItem(item.id)
         _event.emit(Event.ItemDeleted(item))
+    }
+
+    suspend fun changeMediaItemPosition(category: Category, item: MediaItem, from: Int, to: Int) {
+        val categoryContainer = mediaStorage.getCategoryContainer(category)
+        if (item.id != categoryContainer.mediaItemsIds[from])
+            throw IllegalStateException("Can not move media item")
+
+        val newList = categoryContainer.mediaItemsIds.toMutableList()
+        newList.move(from, to)
+        val newCategoryContainer = categoryContainer.copy(mediaItemsIds = newList)
+        mediaStorage.saveCategoryContainer(newCategoryContainer)
+
+        _event.emit(Event.MediaItemPositionChanged(category, item, from, to))
     }
 
     /**

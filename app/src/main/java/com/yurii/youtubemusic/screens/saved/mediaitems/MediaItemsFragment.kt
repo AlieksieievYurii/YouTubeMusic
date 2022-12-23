@@ -11,6 +11,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
@@ -41,6 +43,10 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
         })
     }
 
+    private val itemTouchHelper: ItemTouchHelper by lazy {
+        ItemTouchHelper(MoveListItemHelper { a, b, c -> viewModel.onMove(a, b, c) })
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launchWhenCreated {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -55,6 +61,8 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = mediaListAdapter
         }
+
+        itemTouchHelper.attachToRecyclerView(binding.mediaItems)
     }
 
     private suspend fun startObservingPlayingItem() = viewModel.playbackState.collectLatest { playbackState ->
@@ -63,7 +71,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(
                 playbackState.mediaItem,
                 isPlaying = !playbackState.isPaused,
-                category = if(playbackState.category != category) playbackState.category else null
+                category = if (playbackState.category != category) playbackState.category else null
             )
         }
     }
@@ -74,8 +82,9 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             mediaItems.isVisible = mediaItemsStatus is MediaItemsViewModel.MediaItemsStatus.Loaded
             noMediaItems.isVisible = mediaItemsStatus == MediaItemsViewModel.MediaItemsStatus.NoMediaItems
 
-            if (mediaItemsStatus is MediaItemsViewModel.MediaItemsStatus.Loaded)
+            if (mediaItemsStatus is MediaItemsViewModel.MediaItemsStatus.Loaded) {
                 mediaListAdapter.submitList(mediaItemsStatus.mediaItems)
+            }
         }
     }
 

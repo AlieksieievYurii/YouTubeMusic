@@ -10,6 +10,7 @@ import com.yurii.youtubemusic.models.isDefault
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.services.media.PlaybackState
+import com.yurii.youtubemusic.utilities.move
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -49,6 +50,15 @@ class MediaItemsViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun onMove(mediaItem: MediaItem, from: Int, to: Int) {
+        viewModelScope.launch {
+            val currentList = getMediaItemsFromCache()
+            currentList.move(from, to)
+            _mediaItemsStatus.value =  MediaItemsStatus.Loaded(currentList)
+            mediaLibraryManager.changeMediaItemPosition(category, mediaItem, from, to)
         }
     }
 

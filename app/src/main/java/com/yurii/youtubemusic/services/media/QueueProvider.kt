@@ -6,6 +6,8 @@ import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.getMediaDescriptionCompat
 import com.yurii.youtubemusic.utilities.findIndex
+import com.yurii.youtubemusic.utilities.move
+import java.lang.IllegalStateException
 
 class QueueProviderException(message: String) : Exception(message)
 
@@ -25,6 +27,18 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         if (queue.isNotEmpty())
             return queue[currentPlayingMediaItemPosition]
         return null
+    }
+
+    /**
+     * Changes the position of the given [mediaItem] in the queue
+     */
+    fun changePosition(mediaItem: MediaItem, from: Int, to: Int) {
+        if (queue[from] != mediaItem)
+            throw IllegalStateException("Can't change the position of $mediaItem in the queue")
+
+        val currentPlayingMediaItem = getCurrentQueueItem()
+        queue.move(from, to)
+        currentPlayingMediaItemPosition = queue.indexOf(currentPlayingMediaItem)
     }
 
     /**
