@@ -13,7 +13,6 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.text.TextUtils
-import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.yurii.youtubemusic.models.*
@@ -39,6 +38,7 @@ const val EXTRA_KEY_CATEGORIES = "com.yurii.youtubemusic.category"
 const val FAILED_TO_LOAD_CATEGORIES = "failed_to_load_categories"
 const val FAILED_TO_LOAD_MEDIA_ITEMS = "failed_to_load_media_items"
 const val BROKEN_MEDIA_ITEM = "broken_media_item"
+const val PLAYER_ERROR = "player_error"
 const val EXTRA_EXCEPTION = "exception"
 
 private const val VOLUME_DUCK = 0.2f
@@ -189,14 +189,6 @@ class MediaService : MediaBrowserServiceCompat() {
         mediaSession.setPlaybackState(currentPlaybackState)
     }
 
-    private fun setErrorState(@PlaybackStateCompat.ErrorCode errorCode: Int, errorMessage: String) {
-        val errorPlaybackState = getCurrentPlaybackStateBuilder().apply {
-            setErrorMessage(errorCode, errorMessage)
-        }.build()
-
-        mediaSession.setPlaybackState(errorPlaybackState)
-    }
-
     private fun sendMediaSessionError(errorEvent: String, error: Exception) =
         mediaSession.sendSessionEvent(errorEvent, Bundle().apply { putSerializable(EXTRA_EXCEPTION, error) })
 
@@ -282,7 +274,7 @@ class MediaService : MediaBrowserServiceCompat() {
         try {
             prepareMusicFromQueue()
         } catch (error: Exception) {
-            setErrorState(PlaybackStateCompat.ERROR_CODE_UNKNOWN_ERROR, error.message ?: "unknown")
+            sendMediaSessionError(PLAYER_ERROR, error)
         }
     }
 
@@ -435,7 +427,7 @@ class MediaService : MediaBrowserServiceCompat() {
         }
 
         override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
-            Toast.makeText(applicationContext, "Error has been occurred: $what", Toast.LENGTH_LONG).show()
+            sendMediaSessionError(PLAYER_ERROR, Exception("Player error: $what"))
             return true
         }
 
