@@ -111,6 +111,9 @@ class MediaService : MediaBrowserServiceCompat() {
                         queueProvider.updateCategory(event.category)
                         updateCurrentPlaybackState()
                     }
+                    is MediaLibraryManager.Event.MediaItemPositionChanged -> onMediaItemChangedPosition(
+                        event.category, event.mediaItem, event.from, event.to
+                    )
                     else -> {
                         // Ignore some cases
                     }
@@ -349,6 +352,11 @@ class MediaService : MediaBrowserServiceCompat() {
             handleStopRequest()
             queueProvider.release()
         }
+    }
+
+    private fun onMediaItemChangedPosition(category: Category, mediaItem: MediaItem, from: Int, to: Int) {
+        if (queueProvider.isInitialized && queueProvider.getCurrentPlayingCategory() == category)
+            queueProvider.changePosition(mediaItem, from, to)
     }
 
     private fun onMediaItemIsAssignedToCategories(mediaItem: MediaItem, customCategories: List<Category>) {

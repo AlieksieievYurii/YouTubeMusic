@@ -24,6 +24,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         data class CategoryCreated(val category: Category) : Event()
         data class CategoryUpdated(val category: Category) : Event()
         data class CategoryAssignment(val mediaItem: MediaItem, val customCategories: List<Category>) : Event()
+        data class MediaItemPositionChanged(val category: Category, val mediaItem: MediaItem, val from: Int, val to: Int) : Event()
         //TODO Add Delete and Update events and implement them here
     }
 
@@ -44,6 +45,8 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         newList.move(from, to)
         val newCategoryContainer = categoryContainer.copy(mediaItemsIds = newList)
         mediaStorage.saveCategoryContainer(newCategoryContainer)
+
+        _event.emit(Event.MediaItemPositionChanged(category, item, from, to))
     }
 
     /**
