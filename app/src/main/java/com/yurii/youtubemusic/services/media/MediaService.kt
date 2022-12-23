@@ -23,6 +23,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 private const val TAG = "MediaBackgroundService"
 
@@ -175,7 +177,7 @@ class MediaService : MediaBrowserServiceCompat() {
         return results
     }
 
-    private fun updateCurrentPlaybackState() {
+    private fun updateCurrentPlaybackState() = synchronized(this) {
         val extras = Bundle().apply {
             if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED) {
                 putInt(PLAYBACK_STATE_SESSION_ID, getMediaPlayer().audioSessionId)
@@ -291,7 +293,7 @@ class MediaService : MediaBrowserServiceCompat() {
         }
     }
 
-    private fun playMediaPlayer() {
+    private fun playMediaPlayer() = synchronized(this) {
         currentState = PlaybackStateCompat.STATE_PLAYING
         canPlayOnFocusGain = false
         getMediaPlayer().apply {
@@ -304,7 +306,7 @@ class MediaService : MediaBrowserServiceCompat() {
         updateCurrentPlaybackState()
     }
 
-    private fun pauseMediaPlayer() {
+    private fun pauseMediaPlayer() = synchronized(this) {
         currentState = PlaybackStateCompat.STATE_PAUSED
         getMediaPlayer().pause()
         notificationManager.showPauseNotification()
@@ -365,6 +367,8 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
+        private val preparePlayerLock = Mutex()
+
         override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
             super.onCommand(command, extras, cb)
             // Not implemented yet
@@ -379,13 +383,16 @@ class MediaService : MediaBrowserServiceCompat() {
             }
         }
 
+
         override fun onPlayFromMediaId(mediaId: String, extras: Bundle?) {
             super.onPlayFromMediaId(mediaId, extras)
             coroutineScope.launch(Dispatchers.IO) {
-                queueProvider.createQueueFor(extras?.getParcelable(EXTRA_KEY_CATEGORIES) ?: Category.ALL)
-                queueProvider.setTargetMediaItem(mediaId)
-                registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
-                handlePlayMusicQueue()
+                preparePlayerLock.withLock {
+                    queueProvider.createQueueFor(extras?.getParcelable(EXTRA_KEY_CATEGORIES) ?: Category.ALL)
+                    queueProvider.setTargetMediaItem(mediaId)
+                    registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
+                    handlePlayMusicQueue()
+                }
             }
         }
 
