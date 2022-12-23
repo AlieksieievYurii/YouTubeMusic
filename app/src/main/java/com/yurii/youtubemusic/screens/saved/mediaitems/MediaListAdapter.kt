@@ -14,6 +14,7 @@ import com.yurii.youtubemusic.databinding.ItemMusicBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.utilities.getVisibleItems
+import java.util.*
 
 class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, MediaListAdapter.MusicViewHolder>(Comparator) {
     interface Callback {
@@ -44,10 +45,22 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
     private var isPlaying = false
     private var category: Category? = null
 
+    private var modifiableList = mutableListOf<MediaItem>()
+
     fun resetState() {
         playingMediaItem = null
         isPlaying = false
         recyclerView.getVisibleItems<MusicViewHolder>().forEach { it.setNonPlayingState() }
+    }
+
+    fun moveItem(from: Int, to: Int) {
+        Collections.swap(modifiableList, to, from)
+        notifyItemMoved(from, to)
+    }
+
+    override fun submitList(list: List<MediaItem>?) {
+        modifiableList = list.orEmpty().toMutableList()
+        super.submitList(modifiableList)
     }
 
     /**
