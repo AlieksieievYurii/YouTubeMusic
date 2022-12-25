@@ -100,6 +100,11 @@ class CategoriesEditorActivity : AppCompatActivity() {
         }
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
+
     companion object {
         const val REQUEST_CODE = 1000
         fun create(context: Context): Intent {
