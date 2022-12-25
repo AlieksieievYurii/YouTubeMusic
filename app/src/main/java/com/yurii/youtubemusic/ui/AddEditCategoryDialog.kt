@@ -31,7 +31,7 @@ class AddEditCategoryDialog private constructor(
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val categoryName = inputView.text.toString()
-            if (categoryName.isNotEmpty()) {
+            if (categoryName.trim().isNotEmpty()) {
                 dialog.dismiss()
                 callback.invoke(categoryName)
             }
