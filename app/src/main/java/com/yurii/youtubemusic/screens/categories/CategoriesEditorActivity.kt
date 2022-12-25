@@ -36,7 +36,9 @@ class CategoriesEditorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initActionBar()
 
-        binding.fab.setOnClickListener { addNewCategory() }
+        binding.fab.setOnClickListener {
+            AddEditCategoryDialog.showToCreate(this) { viewModel.createCategory(it) }
+        }
 
         lifecycleScope.launchWhenCreated {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -77,19 +79,13 @@ class CategoriesEditorActivity : AppCompatActivity() {
         }
     }
 
-    private fun addNewCategory() {
-        AddEditCategoryDialog.showToCreateCategory(supportFragmentManager) { categoryName ->
-            viewModel.createCategory(categoryName)
-        }
-    }
-
     private fun inflateChip(category: Category): Chip {
         val chip = layoutInflater.inflate(R.layout.category_chip, binding.categories, false) as Chip
         chip.apply {
             id = category.id
             text = category.name
             setOnClickListener {
-                AddEditCategoryDialog.showToRenameCategory(supportFragmentManager, category) { viewModel.renameCategory(category, it) }
+                AddEditCategoryDialog.showToEdit(this@CategoriesEditorActivity, category) { viewModel.renameCategory(category, it) }
             }
             setOnCloseIconClickListener(onDeleteClick)
         }

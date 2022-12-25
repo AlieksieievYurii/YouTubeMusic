@@ -69,4 +69,6 @@
     <string name="label_custom">Custom</string>
     <string name="label_try_again">Try again</string>
     <string name="label_error">Error: %s</string>
+    <string name="label_create_playlist">Create playlist</string>
+    <string name="label_rename_playlist">Rename playlist</string>
 </resources>
