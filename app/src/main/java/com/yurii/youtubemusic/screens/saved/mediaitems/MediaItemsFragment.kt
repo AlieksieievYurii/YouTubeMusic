@@ -18,10 +18,10 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
+import com.yurii.youtubemusic.ui.showDeletionDialog
 import com.yurii.youtubemusic.utilities.requireApplication
 import com.yurii.youtubemusic.utilities.requireParcelable
 import kotlinx.coroutines.flow.collectLatest
@@ -90,12 +90,9 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
 
 
     private fun confirmRemovingMediaItem(mediaItem: MediaItem) {
-        ConfirmDeletionDialog.create(
-            titleId = R.string.dialog_confirm_deletion_music_title,
-            messageId = R.string.dialog_confirm_deletion_music_message,
-            onConfirm = { viewModel.deleteMediaItem(mediaItem) }
-        ).show(requireActivity().supportFragmentManager, "RequestToDeleteMediaItem")
-
+        showDeletionDialog(requireContext(), R.string.dialog_confirm_deletion_music_title, R.string.dialog_confirm_deletion_music_message) {
+            viewModel.deleteMediaItem(mediaItem)
+        }
     }
 
     private fun expandMoreOptionsFor(viewItem: View, mediaItem: MediaItem) {

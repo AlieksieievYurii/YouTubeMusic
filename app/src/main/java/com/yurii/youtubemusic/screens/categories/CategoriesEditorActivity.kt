@@ -14,8 +14,8 @@ import com.google.android.material.chip.Chip
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityCategoriesEditorBinding
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.AddEditCategoryDialog
+import com.yurii.youtubemusic.ui.showDeletionDialog
 import com.yurii.youtubemusic.utilities.Injector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -25,11 +25,9 @@ class CategoriesEditorActivity : AppCompatActivity() {
     private val binding: ActivityCategoriesEditorBinding by viewBinding()
 
     private val onDeleteClick = View.OnClickListener {
-        ConfirmDeletionDialog.create(
-            titleId = R.string.dialog_confirm_deletion_playlist_title,
-            messageId = R.string.dialog_confirm_deletion_playlist_message,
-            onConfirm = { viewModel.removeCategory((it as Chip).id) }
-        ).show(supportFragmentManager, "DeleteCategoryDialog")
+        showDeletionDialog(this, R.string.dialog_confirm_deletion_playlist_title, R.string.dialog_confirm_deletion_playlist_message) {
+            viewModel.removeCategory((it as Chip).id)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

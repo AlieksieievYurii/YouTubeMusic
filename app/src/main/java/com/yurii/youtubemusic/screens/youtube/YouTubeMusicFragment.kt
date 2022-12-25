@@ -16,9 +16,9 @@ import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
-import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
+import com.yurii.youtubemusic.ui.showDeletionDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
@@ -100,11 +100,9 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     }
 
     private fun showConfirmationDialogToDeleteVideoItem(videoItem: VideoItem) {
-        ConfirmDeletionDialog.create(
-            titleId = R.string.dialog_confirm_deletion_music_title,
-            messageId = R.string.dialog_confirm_deletion_music_message,
-            onConfirm = { viewModel.delete(videoItem) }
-        ).show(requireActivity().supportFragmentManager, "RequestToDeleteFile")
+        showDeletionDialog(requireContext(), R.string.dialog_confirm_deletion_music_title, R.string.dialog_confirm_deletion_music_message) {
+            viewModel.delete(videoItem)
+        }
     }
 
     private fun showFailedVideoItem(videoItem: VideoItem, error: Exception?) {
