@@ -68,4 +68,5 @@
     <string name="label_presets">Presets</string>
     <string name="label_custom">Custom</string>
     <string name="label_try_again">Try again</string>
+    <string name="label_error">Error: %s</string>
 </resources>

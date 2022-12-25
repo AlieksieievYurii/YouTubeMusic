@@ -13,7 +13,6 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.text.TextUtils
-import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.yurii.youtubemusic.models.*
@@ -24,6 +23,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 private const val TAG = "MediaBackgroundService"
 
@@ -39,6 +40,7 @@ const val EXTRA_KEY_CATEGORIES = "com.yurii.youtubemusic.category"
 const val FAILED_TO_LOAD_CATEGORIES = "failed_to_load_categories"
 const val FAILED_TO_LOAD_MEDIA_ITEMS = "failed_to_load_media_items"
 const val BROKEN_MEDIA_ITEM = "broken_media_item"
+const val PLAYER_ERROR = "player_error"
 const val EXTRA_EXCEPTION = "exception"
 
 private const val VOLUME_DUCK = 0.2f
@@ -175,7 +177,7 @@ class MediaService : MediaBrowserServiceCompat() {
         return results
     }
 
-    private fun updateCurrentPlaybackState() {
+    private fun updateCurrentPlaybackState() = synchronized(this) {
         val extras = Bundle().apply {
             if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED) {
                 putInt(PLAYBACK_STATE_SESSION_ID, getMediaPlayer().audioSessionId)
@@ -187,14 +189,6 @@ class MediaService : MediaBrowserServiceCompat() {
             setExtras(extras)
         }.build()
         mediaSession.setPlaybackState(currentPlaybackState)
-    }
-
-    private fun setErrorState(@PlaybackStateCompat.ErrorCode errorCode: Int, errorMessage: String) {
-        val errorPlaybackState = getCurrentPlaybackStateBuilder().apply {
-            setErrorMessage(errorCode, errorMessage)
-        }.build()
-
-        mediaSession.setPlaybackState(errorPlaybackState)
     }
 
     private fun sendMediaSessionError(errorEvent: String, error: Exception) =
@@ -282,7 +276,7 @@ class MediaService : MediaBrowserServiceCompat() {
         try {
             prepareMusicFromQueue()
         } catch (error: Exception) {
-            setErrorState(PlaybackStateCompat.ERROR_CODE_UNKNOWN_ERROR, error.message ?: "unknown")
+            sendMediaSessionError(PLAYER_ERROR, error)
         }
     }
 
@@ -299,7 +293,7 @@ class MediaService : MediaBrowserServiceCompat() {
         }
     }
 
-    private fun playMediaPlayer() {
+    private fun playMediaPlayer() = synchronized(this) {
         currentState = PlaybackStateCompat.STATE_PLAYING
         canPlayOnFocusGain = false
         getMediaPlayer().apply {
@@ -312,7 +306,7 @@ class MediaService : MediaBrowserServiceCompat() {
         updateCurrentPlaybackState()
     }
 
-    private fun pauseMediaPlayer() {
+    private fun pauseMediaPlayer() = synchronized(this) {
         currentState = PlaybackStateCompat.STATE_PAUSED
         getMediaPlayer().pause()
         notificationManager.showPauseNotification()
@@ -373,6 +367,8 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
+        private val preparePlayerLock = Mutex()
+
         override fun onCommand(command: String?, extras: Bundle?, cb: ResultReceiver?) {
             super.onCommand(command, extras, cb)
             // Not implemented yet
@@ -387,13 +383,16 @@ class MediaService : MediaBrowserServiceCompat() {
             }
         }
 
+
         override fun onPlayFromMediaId(mediaId: String, extras: Bundle?) {
             super.onPlayFromMediaId(mediaId, extras)
             coroutineScope.launch(Dispatchers.IO) {
-                queueProvider.createQueueFor(extras?.getParcelable(EXTRA_KEY_CATEGORIES) ?: Category.ALL)
-                queueProvider.setTargetMediaItem(mediaId)
-                registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
-                handlePlayMusicQueue()
+                preparePlayerLock.withLock {
+                    queueProvider.createQueueFor(extras?.getParcelable(EXTRA_KEY_CATEGORIES) ?: Category.ALL)
+                    queueProvider.setTargetMediaItem(mediaId)
+                    registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
+                    handlePlayMusicQueue()
+                }
             }
         }
 
@@ -435,7 +434,7 @@ class MediaService : MediaBrowserServiceCompat() {
         }
 
         override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
-            Toast.makeText(applicationContext, "Error has been occurred: $what", Toast.LENGTH_LONG).show()
+            sendMediaSessionError(PLAYER_ERROR, Exception("Player error: $what"))
             return true
         }
 

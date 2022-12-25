@@ -146,10 +146,10 @@ class MediaServiceConnection private constructor(private val application: Applic
             Timber.d("MediaControllerCallback -> onMetadataChanged: $metadata")
         }
 
-        override fun onSessionEvent(event: String, extras: Bundle?) {
+        override fun onSessionEvent(event: String, extras: Bundle) {
             super.onSessionEvent(event, extras)
-            if (event == FAILED_TO_LOAD_MEDIA_ITEMS || event == FAILED_TO_LOAD_CATEGORIES || event == BROKEN_MEDIA_ITEM)
-                _errors.tryEmit(extras?.getSerializable(EXTRA_EXCEPTION) as? Exception ?: Exception("Unknown"))
+            if (event in arrayOf(FAILED_TO_LOAD_MEDIA_ITEMS, FAILED_TO_LOAD_CATEGORIES, BROKEN_MEDIA_ITEM, PLAYER_ERROR))
+                _errors.tryEmit(extras.getSerializable(EXTRA_EXCEPTION) as Exception)
         }
 
         override fun onSessionDestroyed() {

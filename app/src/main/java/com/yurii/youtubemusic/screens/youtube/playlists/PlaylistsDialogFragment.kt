@@ -99,8 +99,7 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
         progressBar.isVisible = false
         hintListIsEmpty.isVisible = false
         layoutError.isVisible = true
-        tvError.text = "Error: $errorMessage"
-        //TODO Make it as a text resource
+        tvError.text = getString(R.string.label_error, errorMessage)
     }
 
     private fun showEmptyListLayout() = binding.apply {
