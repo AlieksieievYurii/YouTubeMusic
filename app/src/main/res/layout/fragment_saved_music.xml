@@ -4,8 +4,8 @@
 
     <com.otaliastudios.nestedscrollcoordinatorlayout.NestedScrollCoordinatorLayout
         android:layout_width="match_parent"
-        android:background="@color/white"
         android:layout_height="match_parent"
+        android:background="@color/white"
         android:clipToPadding="false">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -17,6 +17,7 @@
                 style="@style/CategoriesTabsStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
                 android:visibility="gone"
                 app:layout_scrollFlags="scroll|enterAlways|snap"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
