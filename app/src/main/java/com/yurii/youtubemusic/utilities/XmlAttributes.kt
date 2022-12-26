@@ -2,6 +2,7 @@ package com.yurii.youtubemusic.utilities
 
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import com.squareup.picasso.Picasso
@@ -19,6 +20,11 @@ fun loadImage(view: ImageView, url: String) {
 @BindingAdapter("imageSrc")
 fun decodeImage(view: ImageView, path: String?) {
     view.setImageDrawable(createFromPathOrReturnMock(view.context, path))
+}
+
+@BindingAdapter("animatedText")
+fun animatedText(textView: TextView, text: String?) {
+    text?.let { textView.setAnimatedText(it) }
 }
 
 @BindingAdapter("isVisible")
