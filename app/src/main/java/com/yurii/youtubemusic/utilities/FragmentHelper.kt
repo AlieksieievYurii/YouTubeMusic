@@ -15,6 +15,9 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
     private var activeFragment: TabFragment<*>? = null
 
     fun showSavedMusicFragment(animated: Boolean = true) {
+        if (activeFragment is SavedMusicFragment)
+            return
+
         val savedMusicFragment: TabFragment<*> = getOrCreateSavedMusicFragment()
         replaceActivityFragmentWithSavedMusicFragment(savedMusicFragment, animated)
     }
@@ -45,6 +48,9 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
     fun isNotYouTubeMusicFragmentInitialized(): Boolean = findYouTubeMusicFragment() == null
 
     fun showYouTubeMusicFragment() {
+        if (activeFragment is YouTubeMusicFragment)
+            return
+
         val youTubeMusicsFragment: TabFragment<*>? = findYouTubeMusicFragment()
         checkNotNull(youTubeMusicsFragment) { "YouTubeMusicFragment is not initialized!" }
         replaceActivityFragmentWithYouTubeMusicFragment(youTubeMusicsFragment)
