@@ -17,7 +17,7 @@ import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
 import com.yurii.youtubemusic.ui.ErrorDialog
-import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
+import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -94,7 +94,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     }
 
     private fun showDialogToSelectCategories(videoItem: VideoItem, allCustomCategories: List<Category>) {
-        SelectCategoriesDialog2(requireContext(), allCustomCategories, emptyList()) { categories ->
+        SelectCategoriesDialog(requireContext(), allCustomCategories, emptyList()) { categories ->
             viewModel.download(videoItem, categories)
         }.show()
     }

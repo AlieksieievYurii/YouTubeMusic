@@ -20,7 +20,7 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.ui.SelectCategoriesDialog2
+import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import com.yurii.youtubemusic.utilities.requireApplication
 import com.yurii.youtubemusic.utilities.requireParcelable
@@ -111,7 +111,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
 
     private fun openCategoriesEditor(mediaItem: MediaItem) {
         lifecycleScope.launch {
-            SelectCategoriesDialog2(requireContext(), viewModel.getAllCustomCategories(), viewModel.getAssignedCustomCategoriesFor(mediaItem)) {
+            SelectCategoriesDialog(requireContext(), viewModel.getAllCustomCategories(), viewModel.getAssignedCustomCategoriesFor(mediaItem)) {
                 viewModel.assignCustomCategoriesFor(mediaItem, it)
             }.show()
         }
