@@ -5,21 +5,29 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
-import com.squareup.picasso.Picasso
+import coil.load
+import coil.transform.RoundedCornersTransformation
 import com.yurii.youtubemusic.R
+import java.io.File
 
 
 @BindingAdapter("imageUrl")
 fun loadImage(view: ImageView, url: String) {
-    Picasso.get()
-        .load(url)
-        .error(R.drawable.ic_loadint_image_error)
-        .into(view)
+    view.load(url) {
+        crossfade(true)
+        error(R.drawable.ic_loadint_image_error)
+    }
 }
 
 @BindingAdapter("imageSrc")
-fun decodeImage(view: ImageView, path: String?) {
-    view.setImageDrawable(createFromPathOrReturnMock(view.context, path))
+fun decodeImage(view: ImageView, file: File?) {
+    file?.let {
+        view.load(file) {
+            crossfade(true)
+            transformations(RoundedCornersTransformation(20f, 20f, 20f, 20f))
+            error(R.drawable.ic_loadint_image_error)
+        }
+    }
 }
 
 @BindingAdapter("animatedText")
