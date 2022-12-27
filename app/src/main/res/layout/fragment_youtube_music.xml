@@ -24,12 +24,12 @@
             android:id="@+id/layout_selection_playlist"
             isVisible="@{!(viewState instanceof ViewState.NoSelectedPlaylist)}"
             android:layout_width="match_parent"
+            android:background="?attr/colorPrimary"
             android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimary"
                 android:orientation="horizontal"
                 android:paddingLeft="@dimen/mediumPadding"
                 android:paddingRight="@dimen/mediumPadding"
@@ -55,8 +55,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/mediumMargin"
                     android:minHeight="0dp"
-                    android:text="@string/select"
-                    android:textColor="@android:color/white" />
+                    android:text="@string/select" />
             </LinearLayout>
 
         </com.google.android.material.appbar.AppBarLayout>

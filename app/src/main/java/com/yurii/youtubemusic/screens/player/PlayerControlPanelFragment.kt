@@ -14,6 +14,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import coil.load
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
 import com.yurii.youtubemusic.models.Category
@@ -69,6 +70,7 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
     private fun setMediaItem(mediaItem: MediaItem, isPlaying: Boolean, category: Category) {
         binding.apply {
             this.mediaItem = mediaItem
+            thumbnail.load(mediaItem.thumbnail)
             isPlayingNow = isPlaying
             playingCategory = category
             if (!container.isVisible)

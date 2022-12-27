@@ -58,7 +58,7 @@
     <string name="label_ok">OK</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_playlists">Playlists</string>
-    <string name="label_no_media_items">You have not downloaded any musics yet</string>
+    <string name="label_no_media_items">The playlist doesn\'t contain any downloaded music yet</string>
     <string name="label_downloading_music">Downloading musics</string>
     <string name="label_percentage">%d %%</string>
     <string name="bass_boost">Bass Boost</string>
@@ -69,4 +69,6 @@
     <string name="label_custom">Custom</string>
     <string name="label_try_again">Try again</string>
     <string name="label_error">Error: %s</string>
+    <string name="label_create_playlist">Create playlist</string>
+    <string name="label_rename_playlist">Rename playlist</string>
 </resources>

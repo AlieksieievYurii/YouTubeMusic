@@ -119,11 +119,6 @@ class EqualizerActivity : AppCompatActivity() {
         }.create().show()
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finish()
-    }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true

@@ -342,7 +342,7 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun onCategoryRemoved(category: Category) {
-        if (queueProvider.getCurrentPlayingCategory() == category) {
+        if (queueProvider.isInitialized && queueProvider.getCurrentPlayingCategory() == category) {
             handleStopRequest()
             queueProvider.release()
         }

@@ -49,7 +49,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     implementation "androidx.recyclerview:recyclerview:$recycler_view_version"
-    implementation "com.squareup.picasso:picasso:$picasso_version"
     implementation "androidx.core:core-ktx:$core_ktx_version"
     implementation "androidx.fragment:fragment-ktx:$fragment_ktx_version"
     implementation "androidx.cardview:cardview:$cardview_version"
@@ -68,6 +67,8 @@ dependencies {
     implementation "com.github.yogacp:android-viewbinding:$view_biding_delegate_version"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$swiperefreshlayout_version"
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+    implementation "io.coil-kt:coil:$coil_version"
+    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 
     implementation("com.google.api-client:google-api-client-android:$google_api_client_android_version") {
         exclude group: 'org.apache.httpcomponents'

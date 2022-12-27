@@ -3,7 +3,6 @@ package com.yurii.youtubemusic.screens.main
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
@@ -24,7 +23,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         MainActivityViewModel.MainActivityViewModelFactory(MediaServiceConnection.getInstance(application))
     }
     private val activityMainBinding: ActivityMainBinding by viewBinding()
-    private var activeBottomMenuItem: Int = R.id.item_saved_music
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,23 +87,16 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         fragmentHelper.showAuthorizationFragment()
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == activeBottomMenuItem)
-            return false
-
-        activeBottomMenuItem = item.itemId
-
-        return when (activeBottomMenuItem) {
-            R.id.item_saved_music -> {
-                openSavedMusicFragment()
-                true
-            }
-            R.id.item_you_tube_music -> {
-                openYouTubeMusicFragmentIfSingedInElseOpenAuthorizationFragment()
-                true
-            }
-            else -> false
+    override fun onNavigationItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.item_saved_music -> {
+            openSavedMusicFragment()
+            true
         }
+        R.id.item_you_tube_music -> {
+            openYouTubeMusicFragmentIfSingedInElseOpenAuthorizationFragment()
+            true
+        }
+        else -> false
     }
 
     override fun onNewIntent(intent: Intent) {

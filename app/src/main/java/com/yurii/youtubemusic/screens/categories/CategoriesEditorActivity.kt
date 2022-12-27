@@ -14,8 +14,8 @@ import com.google.android.material.chip.Chip
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityCategoriesEditorBinding
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.ui.ConfirmDeletionDialog
 import com.yurii.youtubemusic.ui.AddEditCategoryDialog
+import com.yurii.youtubemusic.ui.showDeletionDialog
 import com.yurii.youtubemusic.utilities.Injector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -25,18 +25,18 @@ class CategoriesEditorActivity : AppCompatActivity() {
     private val binding: ActivityCategoriesEditorBinding by viewBinding()
 
     private val onDeleteClick = View.OnClickListener {
-        ConfirmDeletionDialog.create(
-            titleId = R.string.dialog_confirm_deletion_playlist_title,
-            messageId = R.string.dialog_confirm_deletion_playlist_message,
-            onConfirm = { viewModel.removeCategory((it as Chip).id) }
-        ).show(supportFragmentManager, "DeleteCategoryDialog")
+        showDeletionDialog(this, R.string.dialog_confirm_deletion_playlist_title, R.string.dialog_confirm_deletion_playlist_message) {
+            viewModel.removeCategory((it as Chip).id)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initActionBar()
 
-        binding.fab.setOnClickListener { addNewCategory() }
+        binding.fab.setOnClickListener {
+            AddEditCategoryDialog.showToCreate(this) { viewModel.createCategory(it) }
+        }
 
         lifecycleScope.launchWhenCreated {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -77,19 +77,13 @@ class CategoriesEditorActivity : AppCompatActivity() {
         }
     }
 
-    private fun addNewCategory() {
-        AddEditCategoryDialog.showToCreateCategory(supportFragmentManager) { categoryName ->
-            viewModel.createCategory(categoryName)
-        }
-    }
-
     private fun inflateChip(category: Category): Chip {
         val chip = layoutInflater.inflate(R.layout.category_chip, binding.categories, false) as Chip
         chip.apply {
             id = category.id
             text = category.name
             setOnClickListener {
-                AddEditCategoryDialog.showToRenameCategory(supportFragmentManager, category) { viewModel.renameCategory(category, it) }
+                AddEditCategoryDialog.showToEdit(this@CategoriesEditorActivity, category) { viewModel.renameCategory(category, it) }
             }
             setOnCloseIconClickListener(onDeleteClick)
         }
@@ -102,6 +96,11 @@ class CategoriesEditorActivity : AppCompatActivity() {
             setHomeButtonEnabled(true)
             setDisplayHomeAsUpEnabled(true)
         }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     companion object {

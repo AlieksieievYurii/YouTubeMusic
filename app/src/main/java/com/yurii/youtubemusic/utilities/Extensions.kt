@@ -3,6 +3,9 @@ package com.yurii.youtubemusic.utilities
 import android.app.Application
 import android.os.Bundle
 import android.os.Parcelable
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
@@ -56,6 +59,34 @@ fun Fragment.requireApplication(): Application {
     return requireActivity().application
 }
 
-fun <T> MutableList<T>.move(from: Int, to:Int) {
+fun <T> MutableList<T>.move(from: Int, to: Int) {
     this.add(to, this.removeAt(from))
+}
+
+/**
+ * Sets given [text] to the textview with fade in/out animation
+ */
+fun TextView.setAnimatedText(text: String) {
+    if (text == this.text)
+        return
+
+    val anim = AlphaAnimation(1.0f, 0.0f).apply {
+        duration = 200
+        repeatCount = 1
+        repeatMode = Animation.REVERSE
+        setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(p0: Animation?) {
+                // Nothing
+            }
+
+            override fun onAnimationEnd(p0: Animation?) {
+                // Nothing
+            }
+
+            override fun onAnimationRepeat(p0: Animation?) {
+                this@setAnimatedText.text = text
+            }
+        })
+    }
+    startAnimation(anim)
 }

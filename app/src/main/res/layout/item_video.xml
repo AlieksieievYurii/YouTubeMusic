@@ -58,8 +58,10 @@
                     android:text="@{UtilsKt.parseDurationToHumanView(videoItem.durationInMillis)}"
                     android:textColor="@android:color/white"
                     android:textSize="12sp"
+                    android:forceDarkAllowed="false"
                     android:textStyle="bold"
-                    tools:text="0:30" />
+                    tools:text="0:30"
+                    tools:targetApi="q" />
 
                 <TextView
                     android:id="@+id/title"
