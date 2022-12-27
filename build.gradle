@@ -36,6 +36,7 @@ buildscript {
         swiperefreshlayout_version = "1.1.0"
         paging_version = "3.1.1"
         timber_version = "5.0.1"
+        coil_version = "2.2.2"
     }
 
     repositories {
