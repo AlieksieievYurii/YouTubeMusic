@@ -15,6 +15,7 @@ import java.io.File
 fun loadImage(view: ImageView, url: String) {
     view.load(url) {
         crossfade(true)
+        transformations(RoundedCornersTransformation(10f, 10f, 10f, 10f))
         error(R.drawable.ic_loadint_image_error)
     }
 }
