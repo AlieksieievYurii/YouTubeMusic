@@ -38,6 +38,8 @@ class AddEditCategoryDialog private constructor(
             else
                 inputView.error = context.getString(R.string.label_playlist_name_cannot_be_empty)
         }
+
+        inputView.requestFocus()
     }
 
     companion object {
