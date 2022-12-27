@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import coil.load
 import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.services.media.PlaybackState
@@ -63,9 +64,10 @@ class PlayerActivity : AppCompatActivity() {
             PlaybackState.None -> {
                 //Nothing
             }
-            is PlaybackState.Playing -> {
-                binding.mediaItem = it.mediaItem
-                binding.isPlayingNow = !it.isPaused
+            is PlaybackState.Playing -> binding.apply {
+                thumbnail.load(it.mediaItem.thumbnail)
+                mediaItem = it.mediaItem
+                isPlayingNow = !it.isPaused
             }
         }
     }
