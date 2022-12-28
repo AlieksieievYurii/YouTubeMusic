@@ -98,6 +98,50 @@ class MediaStorageTest {
         assertTrue(mediaItemsOfCategoryOne.contains(mediaItemTwo))
     }
 
+    @Test
+    fun getCustomCategoryContainers_successfully_returns_onlyCustomCategories() = runTest {
+        val categoryOne = Category(1, "one")
+        val categoryTwo = Category(2, "two")
+        mediaStorage.addCategory(categoryOne)
+        mediaStorage.addCategory(categoryTwo)
+
+        val customCategories = mediaStorage.getCustomCategories()
+
+        assertFalse("getCustomCategories must return only custom categories, not including All", customCategories.contains(Category.ALL))
+        assertEquals(listOf(categoryOne, categoryTwo), customCategories)
+    }
+
+    @Test
+    fun getAllCategories_successfully_returns_allCategories() = runTest {
+        val categoryOne = Category(1, "one")
+        val categoryTwo = Category(2, "two")
+        mediaStorage.addCategory(categoryOne)
+        mediaStorage.addCategory(categoryTwo)
+
+        val allCategories = mediaStorage.getAllCategories()
+
+        assertEquals(listOf(Category.ALL, categoryOne, categoryTwo), allCategories)
+    }
+
+    @Test
+    fun getAssignedCustomCategoriesFor_mediaItemIsAssigned_returnsListOfAssignedCustomCategories() = runTest {
+        val categoryOne = Category(1, "one")
+        val categoryTwo = Category(2, "two")
+
+        mediaStorage.addCategory(categoryOne)
+        mediaStorage.addCategory(categoryTwo)
+
+        mediaStorage.assignItemToCategory(categoryOne, mediaItem)
+        mediaStorage.assignItemToCategory(categoryTwo, mediaItem)
+
+        assertEquals(mediaStorage.getAssignedCustomCategoriesFor(mediaItem), listOf(categoryOne, categoryTwo))
+    }
+
+    @Test
+    fun getAssignedCustomCategoriesFor_noCategoriesAssigned_emptyList() = runTest {
+        assertEquals(mediaStorage.getAssignedCustomCategoriesFor(mediaItem), emptyList<Category>())
+    }
+
     companion object {
         private const val CATEGORIES_FOLDER = "Categories"
         private const val DEFAULT_CATEGORY = "$CATEGORIES_FOLDER/0.json"

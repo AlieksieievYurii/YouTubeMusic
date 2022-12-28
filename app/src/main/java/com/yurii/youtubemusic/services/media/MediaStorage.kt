@@ -49,10 +49,14 @@ class MediaStorage(context: Context) {
     private suspend fun getAllCategoryContainers(): List<CategoryContainer> =
         getCustomCategoryContainers().toMutableList().apply { add(0, getDefaultCategoryContainer()) }
 
-    suspend fun getMediaItemsFor(category: Category) = getMediaItemsFor(category.id)
+    /**
+     * Returns the list of assigned media items to the given [category]
+     */
+    suspend fun getMediaItemsFor(category: Category) = getCategoryContainer(category.id).mediaItemsIds.map { getMediaItem(it) }
 
-    suspend fun getMediaItemsFor(categoryId: Int): List<MediaItem> = getCategoryContainer(categoryId).mediaItemsIds.map { getMediaItem(it) }
-
+    /**
+     * Returns the list of assigned custom categories of [mediaItem].
+     */
     suspend fun getAssignedCustomCategoriesFor(mediaItem: MediaItem): List<Category> = withContext(Dispatchers.IO) {
         val res = mutableListOf<Category>()
         getCustomCategoryContainers().forEach { categoryContainer ->
