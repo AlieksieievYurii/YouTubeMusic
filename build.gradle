@@ -29,7 +29,7 @@ buildscript {
 
         // Testing
         leakcanary_android_version = "2.4"
-        junit_version = "4.12"
+        junit_version = "4.13"
         mockito_core_version = "4.5.1"
         mockito_kotlin_version = "4.1.0"
         kotlinx_coroutines_test_version = "1.6.4"
