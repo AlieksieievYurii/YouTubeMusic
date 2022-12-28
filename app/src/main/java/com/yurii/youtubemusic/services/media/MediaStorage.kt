@@ -66,6 +66,10 @@ class MediaStorage(context: Context) {
         res
     }
 
+    /**
+     * Removes the given [mediaItem] from [category].
+     * You can not remove [mediaItem] from default category([Category.ALL])
+     */
     suspend fun demoteCategory(mediaItem: MediaItem, category: Category) {
         assert(!category.isDefault) { "Can not call demoteCategory for default category" }
 

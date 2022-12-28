@@ -5,6 +5,7 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.services.media.MediaStorage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.Assert.*
@@ -140,6 +141,35 @@ class MediaStorageTest {
     @Test
     fun getAssignedCustomCategoriesFor_noCategoriesAssigned_emptyList() = runTest {
         assertEquals(mediaStorage.getAssignedCustomCategoriesFor(mediaItem), emptyList<Category>())
+    }
+
+    @Test
+    fun demoteCategory_categoryIsAssigned_categoryDemotedFromMediaItem() = runTest {
+        val categoryOne = Category(1, "one")
+        val categoryTwo = Category(2, "two")
+        mediaStorage.addCategory(categoryOne)
+        mediaStorage.addCategory(categoryTwo)
+        mediaStorage.assignItemToCategory(categoryOne, mediaItem)
+        mediaStorage.assignItemToCategory(categoryTwo, mediaItem)
+
+        mediaStorage.demoteCategory(mediaItem, categoryTwo)
+
+        assertEquals(mediaStorage.getAssignedCustomCategoriesFor(mediaItem), listOf(categoryOne))
+    }
+
+    @Test
+    fun demoteCategory_defaultCategory_canNotDemoteFromDefaultCategory() = runTest {
+        val categoryOne = Category(1, "one")
+        mediaStorage.addCategory(categoryOne)
+        mediaStorage.assignItemToCategory(categoryOne, mediaItem)
+
+        assertThrows(AssertionError::class.java) {
+            runBlocking {
+                mediaStorage.demoteCategory(mediaItem, Category.ALL)
+            }
+        }
+
+        assertEquals(mediaStorage.getAssignedCustomCategoriesFor(mediaItem), listOf(categoryOne))
     }
 
     companion object {
