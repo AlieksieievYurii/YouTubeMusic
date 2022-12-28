@@ -75,8 +75,8 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         )
 
         mediaStorage.createMediaMetadata(mediaItem)
-        mediaStorage.assignItemToCategory(Category.ALL, mediaItem)
-        addMediaItemToAdditionalCategories(mediaItem, customCategories)
+        mediaStorage.assignItemToDefaultCategory(mediaItem)
+        assignMediaItemToCustomCategories(mediaItem, customCategories)
         _event.emit(Event.MediaItemIsAdded(mediaItem, customCategories.map { it.id }))
     }
 
@@ -106,7 +106,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         _event.emit(Event.CategoryAssignment(mediaItem, customCategories))
     }
 
-    private suspend fun addMediaItemToAdditionalCategories(mediaItem: MediaItem, additionalCustomCategories: List<Category>) {
+    private suspend fun assignMediaItemToCustomCategories(mediaItem: MediaItem, additionalCustomCategories: List<Category>) {
         val availableCategories = mediaStorage.getCustomCategories()
 
         additionalCustomCategories.forEach { targetCategory ->

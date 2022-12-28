@@ -37,6 +37,9 @@ class MediaStorage(context: Context) {
 
     fun deleteDownloadingMocks() = musicStorageFolder.walkFiles().filter { it.extension == "downloading" }.forEach { it.delete() }
 
+    /**
+     * Creates a corespondent meta data json file for the given [mediaItem]
+     */
     fun createMediaMetadata(mediaItem: MediaItem) {
         val metadataJson = getMediaMetadata(mediaItem).also { it.parentMkdir() }
         val json = gson.toJson(mediaItem)
@@ -87,18 +90,28 @@ class MediaStorage(context: Context) {
         thumbnailFile.outputStream().run { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, this) }
     }
 
+    /**
+     * Assigns given [item] to the given category. Fails if the category container does not exist. However, if [category] equals [Category.ALL],
+     * it will create it automatically if does not exist
+     */
     suspend fun assignItemToCategory(category: Category, item: Item) {
-        val categoryContainer = getCategoryContainer(category)
-        val mediaItems = categoryContainer.mediaItemsIds.toMutableList()
+        val categoryContainer = if (category == Category.ALL) getDefaultCategoryContainer() else getCategoryContainer(category)
 
-        if (mediaItems.contains(item.id))
+        if (categoryContainer.mediaItemsIds.contains(item.id))
             return
+
+        val mediaItems = categoryContainer.mediaItemsIds.toMutableList()
 
         mediaItems.add(item.id)
         val newCategoryContainer = CategoryContainer(category, mediaItems)
         saveCategoryContainer(newCategoryContainer)
     }
 
+    suspend fun assignItemToDefaultCategory(item: Item) = assignItemToCategory(Category.ALL, item)
+
+    /**
+     * Creates(json file) the given [category] and assigns none of media items to that
+     */
     suspend fun addCategory(category: Category) = withContext(Dispatchers.IO) {
         val categoryContainer = CategoryContainer(category, emptyList())
         saveCategoryContainer(categoryContainer)
