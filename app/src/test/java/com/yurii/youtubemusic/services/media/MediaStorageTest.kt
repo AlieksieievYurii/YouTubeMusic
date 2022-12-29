@@ -1,10 +1,9 @@
-package com.yurii.youtubemusic.utilities
+package com.yurii.youtubemusic.services.media
 
 import android.content.Context
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.services.media.MediaItemValidationException
-import com.yurii.youtubemusic.services.media.MediaStorage
+import com.yurii.youtubemusic.utilities.parentMkdir
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
