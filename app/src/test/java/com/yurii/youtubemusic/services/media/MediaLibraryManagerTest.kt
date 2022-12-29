@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.services.media
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.CategoryContainer
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.models.VideoItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -18,6 +19,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.io.File
+import java.math.BigInteger
 
 
 @ExperimentalCoroutinesApi
@@ -41,6 +43,18 @@ class MediaLibraryManagerTest {
         "description2",
         File("./thumbnail2.jpg"),
         File("./media2.mp3")
+    )
+
+    private val videoItem = VideoItem(
+        "id",
+        "title",
+        "author",
+        123L,
+        "description",
+        BigInteger.ONE,
+        BigInteger.TEN,
+        "http://thumbnail.jpg",
+        "http://normal_thumbnail.jpg"
     )
 
     @Mock
@@ -88,5 +102,27 @@ class MediaLibraryManagerTest {
         val newCategoryContainer = CategoryContainer(Category.ALL, listOf(mediaItemTwo.id, mediaItem.id)) // Changed order
         verify(mediaStorage, times(1)).saveCategoryContainer(newCategoryContainer)
         assertEquals(listOf(MediaLibraryManager.Event.MediaItemPositionChanged(Category.ALL, mediaItem, 0, 1)), events)
+    }
+
+    @Test
+    fun registerMediaItem_itemDoesNotExistYet_itemRegistered() = runTest(UnconfinedTestDispatcher()) {
+        val events = mutableListOf<MediaLibraryManager.Event>()
+        val existedFileMock = mock<File>()
+        whenever(existedFileMock.exists()).thenReturn(true)
+        val mediaItemMock = mediaItem.copy(thumbnail = existedFileMock, mediaFile = existedFileMock)
+
+        val job = launch {
+            mediaLibraryManager.event.collect { events.add(it) }
+        }
+
+        whenever(mediaStorage.getMediaFile(videoItem)).thenReturn(existedFileMock)
+        whenever(mediaStorage.getThumbnail(videoItem)).thenReturn(existedFileMock)
+        mediaLibraryManager.registerMediaItem(videoItem, emptyList())
+
+        verify(mediaStorage, times(1)).createMediaMetadata(mediaItemMock)
+        verify(mediaStorage, times(1)).assignItemToDefaultCategory(mediaItemMock)
+        verify(mediaStorage, times(0)).assignItemToCategory(Category.ALL, mediaItemMock)
+        assertEquals(listOf(MediaLibraryManager.Event.MediaItemIsAdded(mediaItemMock, emptyList())), events)
+        job.cancel()
     }
 }
