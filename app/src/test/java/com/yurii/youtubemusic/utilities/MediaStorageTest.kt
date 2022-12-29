@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.utilities
 import android.content.Context
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.services.media.MediaItemValidationException
 import com.yurii.youtubemusic.services.media.MediaStorage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -172,8 +173,66 @@ class MediaStorageTest {
         assertEquals(mediaStorage.getAssignedCustomCategoriesFor(mediaItem), listOf(categoryOne))
     }
 
+    @Test
+    fun getValidatedMediaItem_unvalidatedAndValidatedMediaItem_returnsMediaItem() = runTest {
+        val mockThumbnail = File(temporaryFolder.root, "$THUMBNAIL_FOLDER/${mediaItem.id}.jpeg")
+        val mockMusicFile = File(temporaryFolder.root, "$MUSIC_FOLDER/${mediaItem.id}.mp3")
+        val mediaItem = MediaItem(
+            "id",
+            "title",
+            "author",
+            123L,
+            "description",
+            mockThumbnail,
+            mockMusicFile
+        )
+
+        // Must throw exception because meta data of the media item does not exist
+        assertThrows(MediaItemValidationException::class.java) {
+            runBlocking {
+                mediaStorage.getValidatedMediaItem(mediaItem.id)
+            }
+        }
+
+        mediaStorage.createMediaMetadata(mediaItem)
+
+        // Must throw exception because now meta data exists but it does not have reference from default category
+        assertThrows(MediaItemValidationException::class.java) {
+            runBlocking { mediaStorage.getValidatedMediaItem(mediaItem.id) }
+        }
+
+        mediaStorage.createMediaMetadata(mediaItem)
+        mediaStorage.assignItemToDefaultCategory(mediaItem)
+
+        // Must throw exception because now meta data exists and is assigned to default category but media file does not exist
+        assertThrows(MediaItemValidationException::class.java) {
+            runBlocking { mediaStorage.getValidatedMediaItem(mediaItem.id) }
+        }
+
+        mediaStorage.createMediaMetadata(mediaItem)
+        mediaStorage.assignItemToDefaultCategory(mediaItem)
+        mockThumbnail.parentMkdir()
+        mockThumbnail.writeText("")
+
+        // Must throw exception because now meta data exists and is assigned to default category, media file exists but thumbnail does not
+        assertThrows(MediaItemValidationException::class.java) {
+            runBlocking { mediaStorage.getValidatedMediaItem(mediaItem.id) }
+        }
+
+        mediaStorage.createMediaMetadata(mediaItem)
+        mediaStorage.assignItemToDefaultCategory(mediaItem)
+        mockThumbnail.parentMkdir()
+        mockThumbnail.writeText("")
+        mockMusicFile.parentMkdir()
+        mockMusicFile.writeText("")
+
+        assertEquals(mediaStorage.getValidatedMediaItem(mediaItem.id), mediaItem)
+    }
+
     companion object {
         private const val CATEGORIES_FOLDER = "Categories"
+        private const val THUMBNAIL_FOLDER = "Thumbnails"
+        private const val MUSIC_FOLDER = "Musics"
         private const val DEFAULT_CATEGORY = "$CATEGORIES_FOLDER/0.json"
     }
 }

@@ -14,9 +14,6 @@ import java.lang.IllegalStateException
 
 class MediaItemValidationException(message: String) : Exception(message)
 
-//TODO Write Unit Tests for this class
-//TODO Write Docs
-
 /**
  * Represents an logical interface to the file system in order to manage media files from single repository
  */
@@ -129,23 +126,9 @@ class MediaStorage(context: Context) {
 
     suspend fun getAllCategories(): List<Category> = getCustomCategories().toMutableList().apply { add(0, getDefaultCategory()) }
 
-    suspend fun validate(mediaItem: MediaItem) {
-        if (!mediaItem.mediaFile.exists()) {
-            eliminateMediaItem(mediaItem.id)
-            throw MediaItemValidationException("Media file does not exist for ${mediaItem.id}. So eliminate that")
-        }
-
-        if (!mediaItem.thumbnail.exists()) {
-            eliminateMediaItem(mediaItem.id)
-            throw MediaItemValidationException("Thumbnail file does not exist for ${mediaItem.id}. So eliminate that")
-        }
-
-        if (getDefaultCategoryContainer().mediaItemsIds.find { it == mediaItem.id } == null) {
-            eliminateMediaItem(mediaItem.id)
-            throw MediaItemValidationException("MediaItem (${mediaItem.id}) is not listed in the Default category, so eliminate that")
-        }
-    }
-
+    /**
+     * Deletes all the information(also removes refs from all dedicated categories) of given media item by its [id]
+     */
     suspend fun eliminateMediaItem(id: String) {
         getMediaFile(id).delete()
         getMediaMetadata(id).delete()
