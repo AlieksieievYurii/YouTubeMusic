@@ -13,8 +13,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.withContext
 
 /**
- * The class is responsible for doing modification operations. It implements event-based approach. In simple words
- * when you do some changes, an event is triggered and all its subscribers are informed.
+ * The class is responsible for doing modification operations on media items and categories.
+ * It implements event-based approach. In simple words when you do some changes,
+ * an event is triggered and all its subscribers are informed.
  */
 class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
     sealed class Event {
@@ -30,11 +31,17 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
     private val _event: MutableSharedFlow<Event> = MutableSharedFlow()
     val event: SharedFlow<Event> = _event
 
+    /**
+     * Eliminates(means that all the information of item will be remove) the give media item and sends broadcast event [Event.ItemDeleted]
+     */
     suspend fun deleteItem(item: Item) {
         mediaStorage.eliminateMediaItem(item.id)
         _event.emit(Event.ItemDeleted(item))
     }
 
+    /**
+     * Changes the order of the given [item] in [category]. Also sends broadcast event [Event.MediaItemPositionChanged]
+     */
     suspend fun changeMediaItemPosition(category: Category, item: MediaItem, from: Int, to: Int) {
         val categoryContainer = mediaStorage.getCategoryContainer(category)
         if (item.id != categoryContainer.mediaItemsIds[from])
@@ -80,22 +87,38 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         _event.emit(Event.MediaItemIsAdded(mediaItem, customCategories.map { it.id }))
     }
 
+    /**
+     * Creates meta file for the given [category]. Also sends the event [Event.CategoryCreated]
+     */
     suspend fun createCategory(category: Category) {
         mediaStorage.addCategory(category)
         _event.emit(Event.CategoryCreated(category))
     }
 
+    /**
+     * Removes [category]. Also sends the event [Event.CategoryRemoved]
+     */
     suspend fun removeCategory(category: Category) {
         mediaStorage.removeCategory(category)
         _event.emit(Event.CategoryRemoved(category))
     }
 
+    /**
+     * Updates [category]. Also sends the event [Event.CategoryUpdated]
+     */
     suspend fun updateCategory(category: Category) {
         val newCategoryContainer = mediaStorage.getCategoryContainer(category).copy(category = category)
         mediaStorage.saveCategoryContainer(newCategoryContainer)
         _event.emit(Event.CategoryUpdated(category))
     }
 
+    /**
+     * Synchronises the given [customCategories] with actual of [mediaItem]. For example, it [mediaItem] is assigned to a category that is not listed
+     * in [customCategories], then the [mediaItem] will be unassigned from the category. And in the opposite way, if the media item is not assigned
+     * to one of the categories from [customCategories], then it will be assigned.
+     *
+     * Also sends broadcast event [Event.CategoryAssignment]
+     */
     suspend fun assignCategories(mediaItem: MediaItem, customCategories: List<Category>) = withContext(Dispatchers.IO) {
         mediaStorage.getAssignedCustomCategoriesFor(mediaItem).forEach { alreadyAssignedCategory ->
             if (!customCategories.contains(alreadyAssignedCategory))
@@ -106,6 +129,10 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         _event.emit(Event.CategoryAssignment(mediaItem, customCategories))
     }
 
+    /**
+     * In comparison to [assignCategories], it does not synchronise, but just assignees [additionalCustomCategories] to [mediaItem]
+     * if each category exists, and the function does not send any event
+     */
     private suspend fun assignMediaItemToCustomCategories(mediaItem: MediaItem, additionalCustomCategories: List<Category>) {
         val availableCategories = mediaStorage.getCustomCategories()
 
