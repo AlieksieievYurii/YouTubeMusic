@@ -1,23 +1,25 @@
 package com.yurii.youtubemusic.services.media
 
+import android.content.Context
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.CategoryContainer
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.utilities.parentMkdir
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import java.io.File
 import java.math.BigInteger
 
@@ -124,5 +126,67 @@ class MediaLibraryManagerTest {
         verify(mediaStorage, times(0)).assignItemToCategory(Category.ALL, mediaItemMock)
         assertEquals(listOf(MediaLibraryManager.Event.MediaItemIsAdded(mediaItemMock, emptyList())), events)
         job.cancel()
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    @Test
+    fun registerMediaItem_asynchronously_allItemsRegistered() = runTest(UnconfinedTestDispatcher()) {
+        // Initialization
+        val temporaryFolder = TemporaryFolder().also { it.create() }
+        val events = mutableListOf<MediaLibraryManager.Event>()
+        val context = mock<Context> {
+            on { filesDir } doReturn temporaryFolder.root
+        }
+        mediaStorage = MediaStorage(context)
+        mediaLibraryManager = MediaLibraryManager::class.java.getDeclaredConstructor(MediaStorage::class.java).apply {
+            isAccessible = true
+        }.newInstance(mediaStorage)
+
+        val listeningJob = launch {
+            mediaLibraryManager.event.collect { events.add(it) }
+        }
+
+        // --------------------------
+
+        // Test: register a lot of media items asynchronously
+        val mockedVideoItems = initAndGetMockedVideoItems(temporaryFolder.root)
+        mockedVideoItems.map {
+            async { mediaLibraryManager.registerMediaItem(it, emptyList())  }
+        }.awaitAll()
+
+
+        //  Check if all media items are listed in default category
+        val mediaItemsIdsInDefaultCategory = mediaStorage.getCategoryContainer(Category.ALL)
+        mockedVideoItems.forEach {
+            assertTrue(mediaItemsIdsInDefaultCategory.mediaItemsIds.contains(it.id))
+        }
+
+        assertEquals(mockedVideoItems.size, events.size)
+        events.forEach { assertTrue(it is MediaLibraryManager.Event.MediaItemIsAdded) }
+        listeningJob.cancel()
+    }
+
+    private fun initAndGetMockedVideoItems(workspaceFolder: File): List<VideoItem> {
+        return (1..100).map { id ->
+            File(workspaceFolder, "Musics/$id.mp3").also {
+                it.parentMkdir()
+                it.writeText("")
+            }
+            File(workspaceFolder, "Thumbnails/$id.jpeg").also {
+                it.parentMkdir()
+                it.writeText("")
+            }
+            VideoItem(
+                id.toString(),
+                "title-$id",
+                "author-$id",
+                id * 1000L,
+                "description-$id",
+                BigInteger.TEN,
+                BigInteger.TEN,
+                "https://thumbnail-$id.jpeg",
+                "https://normal-thumbnail-$id.jpeg"
+            )
+        }
     }
 }
