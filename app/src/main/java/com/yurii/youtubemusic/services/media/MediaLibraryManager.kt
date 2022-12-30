@@ -30,7 +30,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         data class MediaItemPositionChanged(val category: Category, val mediaItem: MediaItem, val from: Int, val to: Int) : Event()
     }
 
-    private val registerMediaItemLock = Mutex()
+    private val lock = Mutex()
 
     private val _event: MutableSharedFlow<Event> = MutableSharedFlow()
     val event: SharedFlow<Event> = _event
@@ -38,7 +38,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
     /**
      * Eliminates(means that all the information of item will be remove) the give media item and sends broadcast event [Event.ItemDeleted]
      */
-    suspend fun deleteItem(item: Item) {
+    suspend fun deleteItem(item: Item) = lock.withLock {
         mediaStorage.eliminateMediaItem(item.id)
         _event.emit(Event.ItemDeleted(item))
     }
@@ -46,7 +46,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
     /**
      * Changes the order of the given [item] in [category]. Also sends broadcast event [Event.MediaItemPositionChanged]
      */
-    suspend fun changeMediaItemPosition(category: Category, item: MediaItem, from: Int, to: Int) {
+    suspend fun changeMediaItemPosition(category: Category, item: MediaItem, from: Int, to: Int) = lock.withLock {
         val categoryContainer = mediaStorage.getCategoryContainer(category)
         if (item.id != categoryContainer.mediaItemsIds[from])
             throw IllegalStateException("Can not move media item")
@@ -64,7 +64,7 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
      * Also appends [videoItem] to the given [customCategories].
      * The function must be executed only synchronously
      */
-    suspend fun registerMediaItem(videoItem: VideoItem, customCategories: List<Category>) = registerMediaItemLock.withLock {
+    suspend fun registerMediaItem(videoItem: VideoItem, customCategories: List<Category>) = lock.withLock {
         val mediaFile = mediaStorage.getMediaFile(videoItem)
         val thumbnailFile = mediaStorage.getThumbnail(videoItem)
 
@@ -123,12 +123,14 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
      * Also sends broadcast event [Event.CategoryAssignment]
      */
     suspend fun assignCategories(mediaItem: MediaItem, customCategories: List<Category>) = withContext(Dispatchers.IO) {
-        mediaStorage.getAssignedCustomCategoriesFor(mediaItem).forEach { alreadyAssignedCategory ->
-            if (!customCategories.contains(alreadyAssignedCategory))
-                mediaStorage.demoteCategory(mediaItem, alreadyAssignedCategory)
-        }
+        lock.withLock {
+            mediaStorage.getAssignedCustomCategoriesFor(mediaItem).forEach { alreadyAssignedCategory ->
+                if (!customCategories.contains(alreadyAssignedCategory))
+                    mediaStorage.demoteCategory(mediaItem, alreadyAssignedCategory)
+            }
 
-        customCategories.forEach { category -> mediaStorage.assignItemToCategory(category, mediaItem) }
+            customCategories.forEach { category -> mediaStorage.assignItemToCategory(category, mediaItem) }
+        }
         _event.emit(Event.CategoryAssignment(mediaItem, customCategories))
     }
 
