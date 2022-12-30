@@ -122,13 +122,15 @@
             android:layout_centerHorizontal="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@{isPlayingNow ? @drawable/ic_circle_pause_72 : @drawable/ic_circle_play_72}"
+            android:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/seek_bar"
             app:layout_constraintVertical_bias="0.56"
-            tools:src="@drawable/ic_circle_play_72" />
+            tools:src="@drawable/ic_circle_play_72"
+            tools:ignore="ContentDescription" />
 
         <ImageButton
             android:id="@+id/move_to_next"
@@ -139,6 +141,7 @@
             android:layout_toEndOf="@id/action_button"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_skip_next_48dp"
+            android:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="@+id/action_button"
             app:layout_constraintStart_toEndOf="@+id/action_button"
             app:layout_constraintTop_toTopOf="@+id/action_button"
@@ -153,6 +156,7 @@
             android:layout_toEndOf="@id/action_button"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_skip_previous_48dp"
+            android:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="@+id/action_button"
             app:layout_constraintEnd_toStartOf="@+id/action_button"
             app:layout_constraintTop_toTopOf="@+id/action_button"
@@ -164,12 +168,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/move_to_previous"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2"
             app:layout_constraintVertical_bias="0.16000003"
-            app:srcCompat="@drawable/ic_baseline_equalizer_24" />
+            app:srcCompat="@drawable/ic_baseline_equalizer_24"
+            tools:ignore="ContentDescription" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>
