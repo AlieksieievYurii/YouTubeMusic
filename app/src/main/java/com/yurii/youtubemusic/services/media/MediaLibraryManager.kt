@@ -10,6 +10,8 @@ import com.yurii.youtubemusic.utilities.move
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -27,6 +29,8 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         data class CategoryAssignment(val mediaItem: MediaItem, val customCategories: List<Category>) : Event()
         data class MediaItemPositionChanged(val category: Category, val mediaItem: MediaItem, val from: Int, val to: Int) : Event()
     }
+
+    private val registerMediaItemLock = Mutex()
 
     private val _event: MutableSharedFlow<Event> = MutableSharedFlow()
     val event: SharedFlow<Event> = _event
@@ -57,11 +61,10 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
 
     /**
      * Creates Metadata file for give(downloaded) [videoItem].
-     * Also appends [videoItem] to the given [customCategories]
+     * Also appends [videoItem] to the given [customCategories].
+     * The function must be executed only synchronously
      */
-
-    //TODO Make some lock to avoid asynchronous registering items
-    suspend fun registerMediaItem(videoItem: VideoItem, customCategories: List<Category>) {
+    suspend fun registerMediaItem(videoItem: VideoItem, customCategories: List<Category>) = registerMediaItemLock.withLock {
         val mediaFile = mediaStorage.getMediaFile(videoItem)
         val thumbnailFile = mediaStorage.getThumbnail(videoItem)
 
