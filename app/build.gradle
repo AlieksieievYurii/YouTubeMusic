@@ -83,6 +83,8 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockito_core_version"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinx_coroutines_test_version"
+    testImplementation "io.mockk:mockk-android:$mockk_version"
+    testImplementation "io.mockk:mockk-agent:$mockk_version"
 //    testImplementation "org.hamcrest:hamcrest-all:$hamcrest_all_version"
 //    testImplementation "androidx.test.ext:junit-ktx:$junit_ktx_version"
 //    testImplementation "androidx.arch.core:core-testing:$arch_core_core_testing_version"
