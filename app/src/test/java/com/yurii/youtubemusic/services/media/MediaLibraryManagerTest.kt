@@ -6,6 +6,8 @@ import com.yurii.youtubemusic.models.CategoryContainer
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.utilities.parentMkdir
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -16,83 +18,47 @@ import org.junit.Test
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.rules.TemporaryFolder
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.*
 import java.io.File
 import java.math.BigInteger
 
 
 @ExperimentalCoroutinesApi
-@RunWith(MockitoJUnitRunner::class)
 class MediaLibraryManagerTest {
-    private val mediaItem = MediaItem(
-        "id",
-        "title",
-        "author",
-        123L,
-        "description",
-        File("./thumbnail.jpg"),
-        File("./media.mp3")
-    )
-
-    private val mediaItemTwo = MediaItem(
-        "id2",
-        "title2",
-        "author2",
-        123L,
-        "description2",
-        File("./thumbnail2.jpg"),
-        File("./media2.mp3")
-    )
-
-    private val videoItem = VideoItem(
-        "id",
-        "title",
-        "author",
-        123L,
-        "description",
-        BigInteger.ONE,
-        BigInteger.TEN,
-        "http://thumbnail.jpg",
-        "http://normal_thumbnail.jpg"
-    )
-
-    @Mock
+    @MockK(relaxUnitFun = true)
     private lateinit var mediaStorage: MediaStorage
+
     private lateinit var mediaLibraryManager: MediaLibraryManager
 
     @Before
     fun initialization() {
-        mediaStorage = mock()
+        MockKAnnotations.init(this)
         mediaLibraryManager = MediaLibraryManager::class.java.getDeclaredConstructor(MediaStorage::class.java).apply {
             isAccessible = true
         }.newInstance(mediaStorage)
     }
 
     @Test
-    fun deleteItem_itemExists_itemDeleted() {
+    fun deleteItem_itemExists_itemDeleted() = runTest(UnconfinedTestDispatcher()) {
         val events = mutableListOf<MediaLibraryManager.Event>()
-
-        runTest(UnconfinedTestDispatcher()) {
-            val job = launch {
-                mediaLibraryManager.event.collect { events.add(it) }
-            }
-
-            mediaLibraryManager.deleteItem(mediaItem)
-            verify(mediaStorage, times(1)).eliminateMediaItem(mediaItem.id)
-            job.cancel()
+        val job = launch {
+            mediaLibraryManager.event.collect { events.add(it) }
         }
+
+        mediaLibraryManager.deleteItem(mediaItem)
+
+        job.cancel()
         assertEquals(listOf(MediaLibraryManager.Event.ItemDeleted(mediaItem)), events)
+        coVerify {
+            mediaStorage.eliminateMediaItem(mediaItem.id)
+        }
     }
 
     @Test
     fun changeMediaItemPosition_itemsExist_changed() = runTest(UnconfinedTestDispatcher()) {
         val mockedCategoryContainer = CategoryContainer(Category.ALL, listOf(mediaItem.id, mediaItemTwo.id))
-        whenever(mediaStorage.getCategoryContainer(Category.ALL)).thenReturn(mockedCategoryContainer)
-
         val events = mutableListOf<MediaLibraryManager.Event>()
+
+        coEvery { mediaStorage.getCategoryContainer(Category.ALL) } returns mockedCategoryContainer
 
         val job = launch {
             mediaLibraryManager.event.collect { events.add(it) }
@@ -102,30 +68,40 @@ class MediaLibraryManagerTest {
         job.cancel()
 
         val newCategoryContainer = CategoryContainer(Category.ALL, listOf(mediaItemTwo.id, mediaItem.id)) // Changed order
-        verify(mediaStorage, times(1)).saveCategoryContainer(newCategoryContainer)
+
         assertEquals(listOf(MediaLibraryManager.Event.MediaItemPositionChanged(Category.ALL, mediaItem, 0, 1)), events)
+        coVerify {
+            mediaStorage.saveCategoryContainer(newCategoryContainer)
+        }
     }
 
     @Test
     fun registerMediaItem_itemDoesNotExistYet_itemRegistered() = runTest(UnconfinedTestDispatcher()) {
         val events = mutableListOf<MediaLibraryManager.Event>()
-        val existedFileMock = mock<File>()
-        whenever(existedFileMock.exists()).thenReturn(true)
+        val existedFileMock = mockk<File> {
+            every { exists() } returns true
+        }
+
         val mediaItemMock = mediaItem.copy(thumbnail = existedFileMock, mediaFile = existedFileMock)
 
         val job = launch {
             mediaLibraryManager.event.collect { events.add(it) }
         }
 
-        whenever(mediaStorage.getMediaFile(videoItem)).thenReturn(existedFileMock)
-        whenever(mediaStorage.getThumbnail(videoItem)).thenReturn(existedFileMock)
+        every { mediaStorage.getMediaFile(videoItem) } returns existedFileMock
+        every { mediaStorage.getThumbnail(videoItem) } returns existedFileMock
+        coEvery { mediaStorage.getCustomCategories() } returns emptyList()
+
         mediaLibraryManager.registerMediaItem(videoItem, emptyList())
 
-        verify(mediaStorage, times(1)).createMediaMetadata(mediaItemMock)
-        verify(mediaStorage, times(1)).assignItemToDefaultCategory(mediaItemMock)
-        verify(mediaStorage, times(0)).assignItemToCategory(Category.ALL, mediaItemMock)
-        assertEquals(listOf(MediaLibraryManager.Event.MediaItemIsAdded(mediaItemMock, emptyList())), events)
         job.cancel()
+
+        coVerify {
+            mediaStorage.createMediaMetadata(mediaItemMock)
+            mediaStorage.assignItemToDefaultCategory(mediaItemMock)
+        }
+        assertEquals(listOf(MediaLibraryManager.Event.MediaItemIsAdded(mediaItemMock, emptyList())), events)
+        coVerify(exactly = 0) { mediaStorage.assignItemToCategory(Category.ALL, mediaItemMock) }
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -134,8 +110,8 @@ class MediaLibraryManagerTest {
         // Initialization
         val temporaryFolder = TemporaryFolder().also { it.create() }
         val events = mutableListOf<MediaLibraryManager.Event>()
-        val context = mock<Context> {
-            on { filesDir } doReturn temporaryFolder.root
+        val context = mockk<Context> {
+            every { filesDir } returns  temporaryFolder.root
         }
         mediaStorage = MediaStorage(context)
         mediaLibraryManager = MediaLibraryManager::class.java.getDeclaredConstructor(MediaStorage::class.java).apply {
@@ -151,7 +127,7 @@ class MediaLibraryManagerTest {
         // Test: register a lot of media items asynchronously
         val mockedVideoItems = initAndGetMockedVideoItems(temporaryFolder.root)
         mockedVideoItems.map {
-            async { mediaLibraryManager.registerMediaItem(it, emptyList())  }
+            async { mediaLibraryManager.registerMediaItem(it, emptyList()) }
         }.awaitAll()
 
 
@@ -188,5 +164,39 @@ class MediaLibraryManagerTest {
                 "https://normal-thumbnail-$id.jpeg"
             )
         }
+    }
+
+    companion object {
+        private val mediaItem = MediaItem(
+            "id",
+            "title",
+            "author",
+            123L,
+            "description",
+            File("./thumbnail.jpg"),
+            File("./media.mp3")
+        )
+
+        private val mediaItemTwo = MediaItem(
+            "id2",
+            "title2",
+            "author2",
+            123L,
+            "description2",
+            File("./thumbnail2.jpg"),
+            File("./media2.mp3")
+        )
+
+        private val videoItem = VideoItem(
+            "id",
+            "title",
+            "author",
+            123L,
+            "description",
+            BigInteger.ONE,
+            BigInteger.TEN,
+            "http://thumbnail.jpg",
+            "http://normal_thumbnail.jpg"
+        )
     }
 }
