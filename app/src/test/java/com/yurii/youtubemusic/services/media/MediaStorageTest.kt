@@ -4,6 +4,8 @@ import android.content.Context
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.utilities.parentMkdir
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -11,44 +13,18 @@ import org.junit.Test
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.rules.TemporaryFolder
-import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.doReturn
 import java.io.File
 
 @ExperimentalCoroutinesApi
-@RunWith(MockitoJUnitRunner::class)
 class MediaStorageTest {
-
-    private val mediaItem = MediaItem(
-        "id",
-        "title",
-        "author",
-        123L,
-        "description",
-        File("./thumbnail.jpg"),
-        File("./media.mp3")
-    )
-
-    private val mediaItemTwo = MediaItem(
-        "id2",
-        "title2",
-        "author2",
-        123L,
-        "description2",
-        File("./thumbnail2.jpg"),
-        File("./media2.mp3")
-    )
-
     private lateinit var mediaStorage: MediaStorage
     private lateinit var temporaryFolder: TemporaryFolder
 
     @Before
-    fun prepareEnvironment() {
+    fun initialization() {
         temporaryFolder = TemporaryFolder().also { it.create() }
-        val context = mock<Context> {
-            on { filesDir } doReturn temporaryFolder.root
+        val context = mockk<Context> {
+            every { filesDir } returns  temporaryFolder.root
         }
         mediaStorage = MediaStorage(context)
     }
@@ -229,6 +205,26 @@ class MediaStorageTest {
     }
 
     companion object {
+        private val mediaItem = MediaItem(
+            "id",
+            "title",
+            "author",
+            123L,
+            "description",
+            File("./thumbnail.jpg"),
+            File("./media.mp3")
+        )
+
+        private val mediaItemTwo = MediaItem(
+            "id2",
+            "title2",
+            "author2",
+            123L,
+            "description2",
+            File("./thumbnail2.jpg"),
+            File("./media2.mp3")
+        )
+
         private const val CATEGORIES_FOLDER = "Categories"
         private const val THUMBNAIL_FOLDER = "Thumbnails"
         private const val MUSIC_FOLDER = "Musics"
