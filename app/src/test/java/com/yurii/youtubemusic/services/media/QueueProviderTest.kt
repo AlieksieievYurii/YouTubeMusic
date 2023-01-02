@@ -30,12 +30,12 @@ class QueueProviderTest {
     fun initialization() {
         MockKAnnotations.init(this)
         queueProvider = QueueProvider(mediaSessionCompat, mediaStorage)
+        mockkStatic("android.net.Uri")
+        every { any<File>().toUri() } returns mockk()
     }
 
     @Test
     fun createQueueFor_queueIsNotCreatedYet_queueCreated() = runTest {
-        mockkStatic("android.net.Uri")
-        every { any<File>().toUri() } returns mockk()
         val testMediaItems = prepareAndGetMediaItems(5)
         coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(testMediaItems)
 
@@ -88,8 +88,6 @@ class QueueProviderTest {
     }
     @Test
     fun createQueue_queueAlreadyCreatedForAllCategory_newQueueCreatedForAnotherCategory() = runTest {
-        mockkStatic("android.net.Uri")
-        every { any<File>().toUri() } returns mockk()
         coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(prepareAndGetMediaItems(5))
 
         queueProvider.createQueueFor(Category.ALL)
@@ -110,6 +108,20 @@ class QueueProviderTest {
         assertEquals(testMediaItems[10], queueProvider.currentQueueItem)
         queueProvider.skipToNext()
         assertEquals(testMediaItems[0], queueProvider.currentQueueItem)
+    }
+
+    @Test
+    fun changePosition_queueCreated_positionChanged() = runTest {
+        val testMediaItems = prepareAndGetMediaItems(5)
+        coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(testMediaItems)
+        queueProvider.createQueueFor(Category.ALL)
+
+        val mediaItem = testMediaItems[0]
+
+        queueProvider.changePosition(mediaItem, 0, 3)
+        assertEquals(mediaItem, queueProvider.currentQueueItem)
+        queueProvider.next()
+        assertEquals(testMediaItems[4], queueProvider.currentQueueItem)
     }
 
     private fun prepareAndGetMediaItems(n: Int): List<MediaItem> {
