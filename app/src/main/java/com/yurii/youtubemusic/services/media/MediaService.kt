@@ -181,8 +181,8 @@ class MediaService : MediaBrowserServiceCompat() {
         val extras = Bundle().apply {
             if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED) {
                 putInt(PLAYBACK_STATE_SESSION_ID, getMediaPlayer().audioSessionId)
-                putParcelable(PLAYBACK_STATE_MEDIA_ITEM, queueProvider.getCurrentQueueItem())
-                putParcelable(PLAYBACK_STATE_PLAYING_CATEGORY, queueProvider.getCurrentPlayingCategory())
+                putParcelable(PLAYBACK_STATE_MEDIA_ITEM, queueProvider.currentQueueItem)
+                putParcelable(PLAYBACK_STATE_PLAYING_CATEGORY, queueProvider.currentPlayingCategory)
             }
         }
         val currentPlaybackState = getCurrentPlaybackStateBuilder().apply {
@@ -282,13 +282,12 @@ class MediaService : MediaBrowserServiceCompat() {
 
     private fun prepareMusicFromQueue() {
         currentState = PlaybackStateCompat.STATE_BUFFERING
-        val targetMediaItem = queueProvider.getCurrentQueueItem()
-        mediaSession.setMetadata(targetMediaItem!!.toMediaMetadataCompat())
+        mediaSession.setMetadata(queueProvider.currentQueueItem.toMediaMetadataCompat())
         updateCurrentPlaybackState()
         resetOrCreateMediaPlayer()
 
         getMediaPlayer().apply {
-            setDataSource(queueProvider.getCurrentQueueItem()!!.mediaFile.absolutePath)
+            setDataSource(queueProvider.currentQueueItem.mediaFile.absolutePath)
             prepareAsync()
         }
     }
@@ -330,7 +329,7 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun onMediaItemIsDeleted(item: Item) {
-        if (queueProvider.getCurrentQueueItem()?.id == item.id) {
+        if (queueProvider.currentQueueItem.id == item.id) {
             handleStopRequest()
         }
         queueProvider.removeFromQueueIfExists(item)
@@ -342,25 +341,25 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun onCategoryRemoved(category: Category) {
-        if (queueProvider.isInitialized && queueProvider.getCurrentPlayingCategory() == category) {
+        if (queueProvider.isInitialized && queueProvider.currentPlayingCategory == category) {
             handleStopRequest()
             queueProvider.release()
         }
     }
 
     private fun onMediaItemChangedPosition(category: Category, mediaItem: MediaItem, from: Int, to: Int) {
-        if (queueProvider.isInitialized && queueProvider.getCurrentPlayingCategory() == category)
+        if (queueProvider.isInitialized && queueProvider.currentPlayingCategory == category)
             queueProvider.changePosition(mediaItem, from, to)
     }
 
     private fun onMediaItemIsAssignedToCategories(mediaItem: MediaItem, customCategories: List<Category>) {
-        if (!queueProvider.isInitialized || queueProvider.getCurrentPlayingCategory() == Category.ALL)
+        if (!queueProvider.isInitialized || queueProvider.currentPlayingCategory == Category.ALL)
             return
 
-        if (queueProvider.getCurrentPlayingCategory() in customCategories)
+        if (queueProvider.currentPlayingCategory in customCategories)
             queueProvider.addToQueueIfDoesNotContain(mediaItem)
         else {
-            if (queueProvider.getCurrentQueueItem()?.id == mediaItem.id)
+            if (queueProvider.currentQueueItem.id == mediaItem.id)
                 handleStopRequest()
             queueProvider.removeFromQueueIfExists(mediaItem)
         }
@@ -400,6 +399,7 @@ class MediaService : MediaBrowserServiceCompat() {
         override fun onStop() {
             super.onStop()
             handleStopRequest()
+            queueProvider.release()
             unregisterReceiver(becomingNoisyReceiver)
         }
 

@@ -16,17 +16,44 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     private var playingCategory: Category? = null
     private var currentPlayingMediaItemPosition = 0
 
+    /**
+     * Returns true is the queue is initialized that means [createQueueFor] was called
+     * and there are media items assigned to the category
+     */
     val isInitialized: Boolean
         get() = playingCategory != null && queue.isNotEmpty()
 
-    fun getCurrentPlayingCategory(): Category {
-        return playingCategory ?: throw QueueProviderException("Can not get category")
-    }
+    /**
+     * Returns current playing category. You should call this only is the queue is initialized
+     */
+    val currentPlayingCategory: Category
+        get() = playingCategory ?: throw QueueProviderException("Can not get category")
 
-    fun getCurrentQueueItem(): MediaItem? {
-        if (queue.isNotEmpty())
-            return queue[currentPlayingMediaItemPosition]
-        return null
+    /**
+     * Returns target item in the queue. You should call this only is the queue is initialized, otherwise exception will be thrown
+     */
+    val currentQueueItem: MediaItem
+        get() {
+            if (isInitialized)
+                return queue[currentPlayingMediaItemPosition]
+            throw QueueProviderException("Queue is not initialized")
+        }
+
+    /**
+     * Initializes new queue for given [category]. In simple words, takes all the media items assigned to [category] and build the
+     * queue in the specified sequence. If the queue is already initialized with the same category, then the process is ignored.
+     * By default, the first item is the list of [category] media items - is set as target queue item
+     */
+    suspend fun createQueueFor(category: Category) {
+        if (playingCategory == category)
+            return
+
+        playingCategory = category
+        queue.clear()
+        queue.addAll(mediaStorage.getMediaItemsFor(category))
+
+        mediaSession.setQueue(getQueueAsMediaSessionQueueItems())
+        mediaSession.setQueueTitle("Queue from '$category' category")
     }
 
     /**
@@ -36,7 +63,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         if (queue[from] != mediaItem)
             throw IllegalStateException("Can't change the position of $mediaItem in the queue")
 
-        val currentPlayingMediaItem = getCurrentQueueItem()
+        val currentPlayingMediaItem = currentQueueItem
         queue.move(from, to)
         currentPlayingMediaItemPosition = queue.indexOf(currentPlayingMediaItem)
     }
@@ -45,7 +72,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      * Replaces the current playing category with [category] if their id are the same
      */
     fun updateCategory(category: Category) {
-        if (isInitialized && getCurrentPlayingCategory().id == category.id)
+        if (isInitialized && currentPlayingCategory.id == category.id)
             playingCategory = category
     }
 
@@ -54,6 +81,8 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      */
     fun release() {
         queue.clear()
+        mediaSession.setQueue(null)
+        mediaSession.setQueueTitle(null)
         playingCategory = null
         currentPlayingMediaItemPosition = 0
     }
@@ -74,7 +103,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      */
     fun removeFromQueueIfExists(item: Item) {
         queue.find { it.id == item.id }?.run {
-            val currentMediaItem = getCurrentQueueItem()
+            val currentMediaItem = currentQueueItem
             queue.remove(this)
             currentPlayingMediaItemPosition = queue.indexOf(currentMediaItem)
         }
@@ -97,18 +126,6 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
             if (mediaItems.contains(mediaItem.id))
                 queue.add(mediaItem)
         }
-    }
-
-    suspend fun createQueueFor(category: Category) {
-        if (playingCategory == category)
-            return
-
-        playingCategory = category
-        queue.clear()
-        queue.addAll(mediaStorage.getMediaItemsFor(category))
-
-        mediaSession.setQueue(getQueueAsMediaSessionQueueItems())
-        mediaSession.setQueueTitle("Queue from '$category' category")
     }
 
     fun setTargetMediaItem(mediaItemId: String) {
