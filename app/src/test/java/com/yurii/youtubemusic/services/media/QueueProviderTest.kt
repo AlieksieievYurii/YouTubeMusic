@@ -55,6 +55,38 @@ class QueueProviderTest {
         verify { mediaSessionCompat.setQueueTitle(null) }
     }
 
+    @Test
+    fun currentCategoryAndQueueItem_queueIsNotInitialized_exceptionThrown() {
+        assertThrows(QueueProviderException::class.java) {
+            queueProvider.currentQueueItem
+        }
+
+        assertThrows(QueueProviderException::class.java) {
+            queueProvider.currentPlayingCategory
+        }
+
+        assertThrows(QueueProviderException::class.java) {
+            queueProvider.changePosition(
+                MediaItem(
+                    "id",
+                    "title",
+                    "author",
+                    1000L,
+                    "description",
+                    mockk(), mockk()
+                ), 1, 2
+            )
+        }
+
+        assertThrows(QueueProviderException::class.java) {
+            queueProvider.skipToNext()
+        }
+
+        assertThrows(QueueProviderException::class.java) {
+            queueProvider.skipToPrevious()
+        }
+    }
+
     private fun prepareAndGetMediaItems(): List<MediaItem> {
         return (0..10).map { id ->
             MediaItem(id.toString(), "title-$id", "author-$id", id * 1000L, "description-$id", mockk(), mockk())

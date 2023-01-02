@@ -27,16 +27,18 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      * Returns current playing category. You should call this only is the queue is initialized
      */
     val currentPlayingCategory: Category
-        get() = playingCategory ?: throw QueueProviderException("Can not get category")
+        get() {
+            assertQueueInitialization()
+            return playingCategory!!
+        }
 
     /**
      * Returns target item in the queue. You should call this only is the queue is initialized, otherwise exception will be thrown
      */
     val currentQueueItem: MediaItem
         get() {
-            if (isInitialized)
-                return queue[currentPlayingMediaItemPosition]
-            throw QueueProviderException("Queue is not initialized")
+            assertQueueInitialization()
+            return queue[currentPlayingMediaItemPosition]
         }
 
     /**
@@ -60,6 +62,8 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      * Changes the position of the given [mediaItem] in the queue
      */
     fun changePosition(mediaItem: MediaItem, from: Int, to: Int) {
+        assertQueueInitialization()
+
         if (queue[from] != mediaItem)
             throw IllegalStateException("Can't change the position of $mediaItem in the queue")
 
@@ -139,7 +143,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     }
 
     fun skipToNext() {
-        validateIfQueueIsPrepared()
+        assertQueueInitialization()
         if (currentPlayingMediaItemPosition < queue.lastIndex)
             currentPlayingMediaItemPosition++
         else
@@ -147,16 +151,16 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     }
 
     fun skipToPrevious() {
-        validateIfQueueIsPrepared()
+        assertQueueInitialization()
         if (currentPlayingMediaItemPosition > 0)
             currentPlayingMediaItemPosition--
         else
             currentPlayingMediaItemPosition = queue.lastIndex
     }
 
-    private fun validateIfQueueIsPrepared() {
-        if (playingCategory == null || queue.isEmpty())
-            throw QueueProviderException("Queue is not prepared")
+    private fun assertQueueInitialization() {
+        if (!isInitialized)
+            throw QueueProviderException("Queue is not initalized. Call createQueueFor firstly")
     }
 
 
