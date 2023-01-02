@@ -36,7 +36,7 @@ class QueueProviderTest {
     fun createQueueFor_queueIsNotCreatedYet_queueCreated() = runTest {
         mockkStatic("android.net.Uri")
         every { any<File>().toUri() } returns mockk()
-        val testMediaItems = prepareAndGetMediaItems()
+        val testMediaItems = prepareAndGetMediaItems(5)
         coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(testMediaItems)
 
         queueProvider.createQueueFor(Category.ALL)
@@ -86,9 +86,34 @@ class QueueProviderTest {
             queueProvider.skipToPrevious()
         }
     }
+    @Test
+    fun createQueue_queueAlreadyCreatedForAllCategory_newQueueCreatedForAnotherCategory() = runTest {
+        mockkStatic("android.net.Uri")
+        every { any<File>().toUri() } returns mockk()
+        coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(prepareAndGetMediaItems(5))
 
-    private fun prepareAndGetMediaItems(): List<MediaItem> {
-        return (0..10).map { id ->
+        queueProvider.createQueueFor(Category.ALL)
+
+        // ---- Start test ---
+        val testMediaItems = prepareAndGetMediaItems(10)
+        val testCategory = Category(1, "Custom")
+        coEvery { mediaStorage.getMediaItemsFor(testCategory) }.returns(testMediaItems)
+        queueProvider.createQueueFor(testCategory)
+        assertTrue(queueProvider.isInitialized)
+        assertEquals(queueProvider.currentPlayingCategory, testCategory)
+        assertEquals(testMediaItems[0], queueProvider.currentQueueItem)
+        queueProvider.next()
+        assertEquals(testMediaItems[1], queueProvider.currentQueueItem)
+        queueProvider.skipToPrevious()
+        assertEquals(testMediaItems[0], queueProvider.currentQueueItem)
+        queueProvider.skipToPrevious()
+        assertEquals(testMediaItems[10], queueProvider.currentQueueItem)
+        queueProvider.skipToNext()
+        assertEquals(testMediaItems[0], queueProvider.currentQueueItem)
+    }
+
+    private fun prepareAndGetMediaItems(n: Int): List<MediaItem> {
+        return (0..n).map { id ->
             MediaItem(id.toString(), "title-$id", "author-$id", id * 1000L, "description-$id", mockk(), mockk())
         }
     }
