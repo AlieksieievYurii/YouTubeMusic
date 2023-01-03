@@ -76,7 +76,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      * Replaces the current playing category with [category] if their id are the same
      */
     fun updateCategory(category: Category) {
-        if (isInitialized && currentPlayingCategory.id == category.id){
+        if (isInitialized && currentPlayingCategory.id == category.id) {
             playingCategory = category
             mediaSession.setQueueTitle("Queue from '$category' category")
         }
@@ -126,6 +126,11 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         queue.add(mediaItem)
     }
 
+    /**
+     * Appends given [mediaItem] to the queue. Also, it checks if the given media item belongs the [currentPlayingCategory].
+     * If the media item does not belong then nothing is happened.
+     * This method only must be called if the queue is [isInitialized]
+     */
     suspend fun add(mediaItem: MediaItem) {
         val mediaItems = mediaStorage.getCategoryContainer(currentPlayingCategory).mediaItemsIds
         if (mediaItems.contains(mediaItem.id))

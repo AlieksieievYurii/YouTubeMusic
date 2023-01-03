@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.services.media
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.net.toUri
 import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.CategoryContainer
 import com.yurii.youtubemusic.models.MediaItem
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -58,14 +59,6 @@ class QueueProviderTest {
 
     @Test
     fun currentCategoryAndQueueItem_queueIsNotInitialized_exceptionThrown() {
-        val mediaItem = MediaItem(
-            "id",
-            "title",
-            "author",
-            1000L,
-            "description",
-            mockk(), mockk()
-        )
         assertThrows(QueueProviderException::class.java) {
             queueProvider.currentQueueItem
         }
@@ -74,10 +67,10 @@ class QueueProviderTest {
             queueProvider.currentPlayingCategory
         }
 
-        assertThrows(QueueProviderException::class.java) { queueProvider.changePosition(mediaItem, 1, 2) }
+        assertThrows(QueueProviderException::class.java) { queueProvider.changePosition(TEST_MEDIA_ITEM, 1, 2) }
         assertThrows(QueueProviderException::class.java) { queueProvider.skipToNext() }
         assertThrows(QueueProviderException::class.java) { queueProvider.skipToPrevious() }
-        assertThrows(QueueProviderException::class.java) { runBlocking { queueProvider.add(mediaItem) } }
+        assertThrows(QueueProviderException::class.java) { runBlocking { queueProvider.add(TEST_MEDIA_ITEM) } }
     }
 
     @Test
@@ -119,13 +112,23 @@ class QueueProviderTest {
     }
 
     @Test
-    fun add_queueIsInitialized_itemAddedToStack() {
-        //TODO
+    fun add_queueIsInitialized_itemAddedToStack() = runTest {
+        val testMediaItems = prepareAndGetMediaItems(5)
+        coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(testMediaItems)
+        coEvery { mediaStorage.getCategoryContainer(Category.ALL) }.returns(
+            CategoryContainer(
+                Category.ALL,
+                testMediaItems.map { it.id } + TEST_MEDIA_ITEM.id))
+        queueProvider.createQueueFor(Category.ALL)
+
+        queueProvider.add(TEST_MEDIA_ITEM)
+        queueProvider.skipToPrevious()
+        assertEquals(TEST_MEDIA_ITEM, queueProvider.currentQueueItem)
     }
 
     @Test
     fun setTargetMediaItem_queueIsInitialized_isSet() {
-       //TODO
+        //TODO
     }
 
     @Test
@@ -135,12 +138,23 @@ class QueueProviderTest {
 
     @Test
     fun removeFromQueueIfExists_queueIsInitialized_itemRemoved() {
-       //TODO
+        //TODO
     }
 
     private fun prepareAndGetMediaItems(n: Int): List<MediaItem> {
         return (0..n).map { id ->
             MediaItem(id.toString(), "title-$id", "author-$id", id * 1000L, "description-$id", mockk(), mockk())
         }
+    }
+
+    companion object {
+        private val TEST_MEDIA_ITEM = MediaItem(
+            "id",
+            "title",
+            "author",
+            1000L,
+            "description",
+            mockk(), mockk()
+        )
     }
 }
