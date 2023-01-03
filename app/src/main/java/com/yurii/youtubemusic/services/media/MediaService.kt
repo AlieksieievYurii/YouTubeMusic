@@ -1,14 +1,12 @@
 package com.yurii.youtubemusic.services.media
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.*
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.os.Bundle
-import android.os.PowerManager
-import android.os.ResultReceiver
-import android.os.SystemClock
+import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -79,10 +77,15 @@ class MediaService : MediaBrowserServiceCompat() {
         startHandlingMediaLibraryEvents()
     }
 
+
     private fun initMediaSession() {
         val sessionActivityPendingIntent = packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
             sessionIntent.putExtra(MainActivity.EXTRA_LAUNCH_FRAGMENT, MainActivity.EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC)
-            PendingIntent.getActivity(this, 0, sessionIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            else
+                PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.getActivity(this, 0, sessionIntent, flags)
         }
 
         val mediaButtonReceiver = ComponentName(applicationContext, MediaButtonReceiver::class.java)
@@ -90,6 +93,7 @@ class MediaService : MediaBrowserServiceCompat() {
             setClass(applicationContext, MediaButtonReceiver::class.java)
         }
 
+        @SuppressLint("UnspecifiedImmutableFlag")
         val pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, 0)
 
         mediaSession = MediaSessionCompat(baseContext, TAG, mediaButtonReceiver, null).apply {
