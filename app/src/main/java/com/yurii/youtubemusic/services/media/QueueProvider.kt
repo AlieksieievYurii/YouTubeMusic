@@ -11,6 +11,10 @@ import java.lang.IllegalStateException
 
 class QueueProviderException(message: String) : Exception(message)
 
+/**
+ * Provides encapsulated logic for queue of media items.
+ * Before any operations the queue must be initialized via [createQueueFor]
+ */
 class QueueProvider(private val mediaSession: MediaSessionCompat, private val mediaStorage: MediaStorage) {
     private val queue = ArrayList<MediaItem>()
     private var playingCategory: Category? = null
@@ -111,7 +115,10 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         queue.find { it.id == item.id }?.run {
             val currentMediaItem = currentQueueItem
             queue.remove(this)
-            currentPlayingMediaItemPosition = queue.indexOf(currentMediaItem)
+            if (queue.isEmpty())
+                release()
+            else if (currentMediaItem.id != item.id)
+                currentPlayingMediaItemPosition = queue.indexOf(currentMediaItem)
         }
     }
 
@@ -129,7 +136,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     /**
      * Appends given [mediaItem] to the queue. Also, it checks if the given media item belongs the [currentPlayingCategory].
      * If the media item does not belong then nothing is happened.
-     * This method only must be called if the queue is [isInitialized]
+     * This method only must be called if the queue [isInitialized]
      */
     suspend fun add(mediaItem: MediaItem) {
         val mediaItems = mediaStorage.getCategoryContainer(currentPlayingCategory).mediaItemsIds
@@ -137,7 +144,12 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
             queue.add(mediaItem)
     }
 
+    /**
+     * Sets the target media item if it is exists in the current queue.
+     * This method only must be called if the queue [isInitialized]
+     */
     fun setTargetMediaItem(mediaItemId: String) {
+        assertQueueInitialization()
         queue.findIndex { it.id == mediaItemId }?.run {
             currentPlayingMediaItemPosition = this
         } ?: throw QueueProviderException("Can not find media item with id '$mediaItemId' in the queue")

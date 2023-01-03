@@ -12,8 +12,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.junit.internal.runners.JUnit38ClassRunner
-import org.junit.runner.RunWith
 import org.junit.Assert.*
 import java.io.File
 
@@ -38,8 +36,7 @@ class QueueProviderTest {
 
     @Test
     fun createQueueFor_queueIsNotCreatedYet_queueCreated() = runTest {
-        val testMediaItems = prepareAndGetMediaItems(5)
-        coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(testMediaItems)
+        val testMediaItems = initQueueProviderWithDefaultCategory(5)
 
         queueProvider.createQueueFor(Category.ALL)
 
@@ -75,9 +72,7 @@ class QueueProviderTest {
 
     @Test
     fun createQueue_queueAlreadyCreatedForAllCategory_newQueueCreatedForAnotherCategory() = runTest {
-        coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(prepareAndGetMediaItems(5))
-
-        queueProvider.createQueueFor(Category.ALL)
+        initQueueProviderWithDefaultCategory(5)
 
         // ---- Start test ---
         val testMediaItems = prepareAndGetMediaItems(10)
@@ -99,9 +94,7 @@ class QueueProviderTest {
 
     @Test
     fun changePosition_queueCreated_positionChanged() = runTest {
-        val testMediaItems = prepareAndGetMediaItems(5)
-        coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(testMediaItems)
-        queueProvider.createQueueFor(Category.ALL)
+        val testMediaItems = initQueueProviderWithDefaultCategory(5)
 
         val mediaItem = testMediaItems[0]
 
@@ -113,13 +106,11 @@ class QueueProviderTest {
 
     @Test
     fun add_queueIsInitialized_itemAddedToStack() = runTest {
-        val testMediaItems = prepareAndGetMediaItems(5)
-        coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(testMediaItems)
+        val testMediaItems = initQueueProviderWithDefaultCategory(5)
         coEvery { mediaStorage.getCategoryContainer(Category.ALL) }.returns(
             CategoryContainer(
                 Category.ALL,
                 testMediaItems.map { it.id } + TEST_MEDIA_ITEM.id))
-        queueProvider.createQueueFor(Category.ALL)
 
         queueProvider.add(TEST_MEDIA_ITEM)
         queueProvider.skipToPrevious()
@@ -127,18 +118,51 @@ class QueueProviderTest {
     }
 
     @Test
-    fun setTargetMediaItem_queueIsInitialized_isSet() {
-        //TODO
+    fun setTargetMediaItem_queueIsInitialized_isSet() = runTest {
+        val testMediaItems = initQueueProviderWithDefaultCategory(5)
+
+        assertThrows(QueueProviderException::class.java) {
+            runBlocking { queueProvider.setTargetMediaItem(TEST_MEDIA_ITEM.id) }
+        }
+
+        queueProvider.setTargetMediaItem(testMediaItems[0].id)
+        assertEquals(testMediaItems[0], queueProvider.currentQueueItem)
     }
 
     @Test
-    fun addToQueueIfDoesNotContain_queueIsInitialized_isAdded() {
-        //TODO
+    fun addToQueueIfDoesNotContain_queueIsInitialized_isAdded() = runTest {
+        val testMediaItems = initQueueProviderWithDefaultCategory(5)
+
+        queueProvider.addToQueueIfDoesNotContain(testMediaItems[0])
+        queueProvider.skipToPrevious()
+        assertEquals(testMediaItems[5], queueProvider.currentQueueItem)
+
+        queueProvider.addToQueueIfDoesNotContain(TEST_MEDIA_ITEM)
+        queueProvider.skipToNext()
+        assertEquals(TEST_MEDIA_ITEM, queueProvider.currentQueueItem)
     }
 
     @Test
-    fun removeFromQueueIfExists_queueIsInitialized_itemRemoved() {
-        //TODO
+    fun removeFromQueueIfExists_queueIsInitialized_itemRemoved() = runTest {
+       val testMediaItems = initQueueProviderWithDefaultCategory(5)
+
+        queueProvider.removeFromQueueIfExists(testMediaItems[0])
+        assertEquals(testMediaItems[1], queueProvider.currentQueueItem)
+
+        queueProvider.removeFromQueueIfExists(testMediaItems[1])
+        queueProvider.removeFromQueueIfExists(testMediaItems[2])
+        queueProvider.removeFromQueueIfExists(testMediaItems[3])
+        queueProvider.removeFromQueueIfExists(testMediaItems[4])
+        queueProvider.removeFromQueueIfExists(testMediaItems[5])
+
+        assertFalse(queueProvider.isInitialized)
+    }
+
+    private suspend fun initQueueProviderWithDefaultCategory(n: Int): List<MediaItem> {
+        val testMediaItems = prepareAndGetMediaItems(5)
+        coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(testMediaItems)
+        queueProvider.createQueueFor(Category.ALL)
+        return testMediaItems
     }
 
     private fun prepareAndGetMediaItems(n: Int): List<MediaItem> {
