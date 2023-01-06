@@ -50,8 +50,7 @@ android {
 }
 
 dependencies {
-    api "androidx.media:media:$media_api_version"
-
+    implementation "androidx.media:media:$media_api_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     implementation "androidx.recyclerview:recyclerview:$recycler_view_version"
