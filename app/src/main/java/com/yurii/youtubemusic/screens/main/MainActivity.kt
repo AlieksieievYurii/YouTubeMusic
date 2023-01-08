@@ -105,8 +105,12 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             onNavigationItemSelected(
                 activityMainBinding.bottomNavigationView.menu.findItem(
                     when (fragmentExtra) {
-                        EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC -> R.id.item_saved_music
-                        EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC -> R.id.item_you_tube_music
+                        EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC ->R.id.item_saved_music.also {
+                            activityMainBinding.bottomNavigationView.selectedItemId = it
+                        }
+                        EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC -> R.id.item_you_tube_music.also {
+                            activityMainBinding.bottomNavigationView.selectedItemId = it
+                        }
                         else -> throw IllegalStateException("Cannot open fragment with $fragmentExtra")
                     }
                 )

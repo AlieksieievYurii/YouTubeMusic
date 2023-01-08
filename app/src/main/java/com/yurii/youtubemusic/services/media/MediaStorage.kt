@@ -14,9 +14,6 @@ import java.lang.IllegalStateException
 
 class MediaItemValidationException(message: String) : Exception(message)
 
-//TODO Write Unit Tests for this class
-//TODO Write Docs
-
 /**
  * Represents an logical interface to the file system in order to manage media files from single repository
  */
@@ -31,25 +28,27 @@ class MediaStorage(context: Context) {
 
     fun getThumbnail(item: Item): File = getThumbnail(item.id)
 
-    fun getThumbnail(id: String): File = File(thumbnailStorage, "$id.jpeg")
-
     fun getDownloadingMockFile(videoItem: VideoItem): File = File(musicStorageFolder, "${videoItem.id}.downloading")
 
     fun deleteDownloadingMocks() = musicStorageFolder.walkFiles().filter { it.extension == "downloading" }.forEach { it.delete() }
 
+    /**
+     * Creates a corespondent meta data json file for the given [mediaItem]
+     */
     fun createMediaMetadata(mediaItem: MediaItem) {
         val metadataJson = getMediaMetadata(mediaItem).also { it.parentMkdir() }
         val json = gson.toJson(mediaItem)
         metadataJson.writeText(json)
     }
 
-    private suspend fun getAllCategoryContainers(): List<CategoryContainer> =
-        getCustomCategoryContainers().toMutableList().apply { add(0, getDefaultCategoryContainer()) }
+    /**
+     * Returns the list of assigned media items to the given [category]
+     */
+    suspend fun getMediaItemsFor(category: Category) = getCategoryContainer(category.id).mediaItemsIds.map { getMediaItem(it) }
 
-    suspend fun getMediaItemsFor(category: Category) = getMediaItemsFor(category.id)
-
-    suspend fun getMediaItemsFor(categoryId: Int): List<MediaItem> = getCategoryContainer(categoryId).mediaItemsIds.map { getMediaItem(it) }
-
+    /**
+     * Returns the list of assigned custom categories of [mediaItem].
+     */
     suspend fun getAssignedCustomCategoriesFor(mediaItem: MediaItem): List<Category> = withContext(Dispatchers.IO) {
         val res = mutableListOf<Category>()
         getCustomCategoryContainers().forEach { categoryContainer ->
@@ -59,6 +58,10 @@ class MediaStorage(context: Context) {
         res
     }
 
+    /**
+     * Removes the given [mediaItem] from [category].
+     * You can not remove [mediaItem] from default category([Category.ALL])
+     */
     suspend fun demoteCategory(mediaItem: MediaItem, category: Category) {
         assert(!category.isDefault) { "Can not call demoteCategory for default category" }
 
@@ -87,18 +90,28 @@ class MediaStorage(context: Context) {
         thumbnailFile.outputStream().run { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, this) }
     }
 
+    /**
+     * Assigns given [item] to the given category. Fails if the category container does not exist. However, if [category] equals [Category.ALL],
+     * it will create it automatically if does not exist
+     */
     suspend fun assignItemToCategory(category: Category, item: Item) {
-        val categoryContainer = getCategoryContainer(category)
-        val mediaItems = categoryContainer.mediaItemsIds.toMutableList()
+        val categoryContainer = if (category == Category.ALL) getDefaultCategoryContainer() else getCategoryContainer(category)
 
-        if (mediaItems.contains(item.id))
+        if (categoryContainer.mediaItemsIds.contains(item.id))
             return
+
+        val mediaItems = categoryContainer.mediaItemsIds.toMutableList()
 
         mediaItems.add(item.id)
         val newCategoryContainer = CategoryContainer(category, mediaItems)
         saveCategoryContainer(newCategoryContainer)
     }
 
+    suspend fun assignItemToDefaultCategory(item: Item) = assignItemToCategory(Category.ALL, item)
+
+    /**
+     * Creates(json file) the given [category] and assigns none of media items to that
+     */
     suspend fun addCategory(category: Category) = withContext(Dispatchers.IO) {
         val categoryContainer = CategoryContainer(category, emptyList())
         saveCategoryContainer(categoryContainer)
@@ -113,49 +126,9 @@ class MediaStorage(context: Context) {
 
     suspend fun getAllCategories(): List<Category> = getCustomCategories().toMutableList().apply { add(0, getDefaultCategory()) }
 
-    private fun getMediaFile(id: String): File = File(musicStorageFolder, "${id}.mp3")
-
-    private suspend fun getMediaItem(id: String): MediaItem = withContext(Dispatchers.IO) {
-        gson.fromJson(getMediaMetadata(id).readText(), MediaItem::class.java)!!
-    }
-
-    suspend fun validate(mediaItem: MediaItem) {
-        if (!mediaItem.mediaFile.exists()) {
-            eliminateMediaItem(mediaItem.id)
-            throw MediaItemValidationException("Media file does not exist for ${mediaItem.id}. So eliminate that")
-        }
-
-        if (!mediaItem.thumbnail.exists()) {
-            eliminateMediaItem(mediaItem.id)
-            throw MediaItemValidationException("Thumbnail file does not exist for ${mediaItem.id}. So eliminate that")
-        }
-
-        if (getDefaultCategoryContainer().mediaItemsIds.find { it == mediaItem.id } == null) {
-            eliminateMediaItem(mediaItem.id)
-            throw MediaItemValidationException("MediaItem (${mediaItem.id}) is not listed in the Default category, so eliminate that")
-        }
-    }
-
-    private fun getCategoryContainerFile(category: Category): File = getCategoryContainerFile(category.id)
-
-    private fun getCategoryContainerFile(categoryId: Int): File = File(categoriesContainersStorage, "$categoryId.json")
-
-    private fun getCategoryFile(category: Category): File = File(categoriesContainersStorage, "${category.id}.json")
-
-    private fun getMediaMetadata(item: Item): File = getMediaMetadata(item.id)
-
-    private fun getMediaMetadata(id: String): File = File(musicMetadataStorage, "$id.json")
-
-    private suspend fun getDefaultCategoryContainer(): CategoryContainer = withContext(Dispatchers.IO) {
-        val file = getCategoryFile(Category.ALL)
-        if (file.exists())
-            gson.fromJson(file.readText(), CategoryContainer::class.java)
-        else CategoryContainer(Category.ALL, mutableListOf()).also {
-            file.parentMkdir()
-            file.writeText(text = gson.toJson(it))
-        }
-    }
-
+    /**
+     * Deletes all the information(also removes refs from all dedicated categories) of given media item by its [id]
+     */
     suspend fun eliminateMediaItem(id: String) {
         getMediaFile(id).delete()
         getMediaMetadata(id).delete()
@@ -168,14 +141,6 @@ class MediaStorage(context: Context) {
                 saveCategoryContainer(newContainerCategory)
             }
         }
-    }
-
-    private suspend fun getDefaultCategory(): Category = getDefaultCategoryContainer().category
-
-    private suspend fun getCustomCategoryContainers(): List<CategoryContainer> = withContext(Dispatchers.IO) {
-        categoriesContainersStorage.walkFiles().filter { it.name != "${Category.ALL.id}.json" }.map {
-            gson.fromJson(it.readText(), CategoryContainer::class.java)
-        }.toList()
     }
 
     suspend fun getCategoryContainer(category: Category): CategoryContainer = getCategoryContainer(category.id)
@@ -223,5 +188,42 @@ class MediaStorage(context: Context) {
         val json = gson.toJson(categoryContainer)
         val categoryFile = getCategoryContainerFile(categoryContainer.category).also { it.parentMkdir() }
         categoryFile.writeText(json)
+    }
+
+    private suspend fun getAllCategoryContainers(): List<CategoryContainer> =
+        getCustomCategoryContainers().toMutableList().apply { add(0, getDefaultCategoryContainer()) }
+
+    private suspend fun getMediaItem(id: String): MediaItem = withContext(Dispatchers.IO) {
+        gson.fromJson(getMediaMetadata(id).readText(), MediaItem::class.java)!!
+    }
+
+    private fun getCategoryContainerFile(category: Category): File = getCategoryContainerFile(category.id)
+
+    private fun getCategoryContainerFile(categoryId: Int): File = File(categoriesContainersStorage, "$categoryId.json")
+
+    private fun getMediaMetadata(item: Item): File = getMediaMetadata(item.id)
+
+    private fun getMediaMetadata(id: String): File = File(musicMetadataStorage, "$id.json")
+
+    private fun getMediaFile(id: String): File = File(musicStorageFolder, "${id}.mp3")
+
+    private fun getThumbnail(id: String): File = File(thumbnailStorage, "$id.jpeg")
+
+    private suspend fun getDefaultCategoryContainer(): CategoryContainer = withContext(Dispatchers.IO) {
+        val file = getCategoryContainerFile(Category.ALL)
+        if (file.exists())
+            gson.fromJson(file.readText(), CategoryContainer::class.java)
+        else CategoryContainer(Category.ALL, mutableListOf()).also {
+            file.parentMkdir()
+            file.writeText(text = gson.toJson(it))
+        }
+    }
+
+    private suspend fun getDefaultCategory(): Category = getDefaultCategoryContainer().category
+
+    private suspend fun getCustomCategoryContainers(): List<CategoryContainer> = withContext(Dispatchers.IO) {
+        categoriesContainersStorage.walkFiles().filter { it.name != "${Category.ALL.id}.json" }.map {
+            gson.fromJson(it.readText(), CategoryContainer::class.java)
+        }.toList()
     }
 }

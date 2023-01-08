@@ -41,11 +41,16 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+
+    testOptions {
+        unitTests {
+            unitTests.returnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
-    api "androidx.media:media:$media_api_version"
-
+    implementation "androidx.media:media:$media_api_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     implementation "androidx.recyclerview:recyclerview:$recycler_view_version"
@@ -80,13 +85,16 @@ dependencies {
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_android_version"
 
     testImplementation "junit:junit:$junit_version"
-    testImplementation "org.hamcrest:hamcrest-all:$hamcrest_all_version"
-    testImplementation "androidx.test.ext:junit-ktx:$junit_ktx_version"
-    testImplementation "androidx.arch.core:core-testing:$arch_core_core_testing_version"
-    testImplementation "org.robolectric:robolectric:$robolectric_version"
-    testImplementation "androidx.test:core:$androidx_test_core_version"
-    androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
-    androidTestImplementation "androidx.test:core-ktx:$core_ktx_version"
-    androidTestImplementation "androidx.test.espresso:espresso-contrib:$espresso_contrib_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinx_coroutines_test_version"
+    testImplementation "io.mockk:mockk-android:$mockk_version"
+    testImplementation "io.mockk:mockk-agent:$mockk_version"
+//    testImplementation "org.hamcrest:hamcrest-all:$hamcrest_all_version"
+//    testImplementation "androidx.test.ext:junit-ktx:$junit_ktx_version"
+//    testImplementation "androidx.arch.core:core-testing:$arch_core_core_testing_version"
+//    testImplementation "org.robolectric:robolectric:$robolectric_version"
+//    testImplementation "androidx.test:core:$androidx_test_core_version"
+//    androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
+//    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
+//    androidTestImplementation "androidx.test:core-ktx:$core_ktx_version"
+//    androidTestImplementation "androidx.test.espresso:espresso-contrib:$espresso_contrib_version"
 }
