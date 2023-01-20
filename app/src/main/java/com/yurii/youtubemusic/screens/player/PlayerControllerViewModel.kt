@@ -21,6 +21,8 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
 
     val isQueueLooped = mediaServiceConnection.isQueueLooped
 
+    val isShuffled = mediaServiceConnection.isQueueShuffle
+
     init {
         viewModelScope.launch {
             playbackState.collect {
@@ -48,6 +50,12 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
     fun loopStateClick() {
         viewModelScope.launch {
             mediaServiceConnection.setLoopState(!isQueueLooped.first())
+        }
+    }
+
+    fun shuffleStateClick() {
+        viewModelScope.launch {
+            mediaServiceConnection.setShuffleState(!isShuffled.first())
         }
     }
 

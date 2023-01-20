@@ -29,17 +29,18 @@ class PlayerActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { observePlaybackState() }
                 launch { observePlayingPosition() }
-                launch { observeQueueModes() }
+                launch { observeLoopMode() }
+                launch { observeShuffleMode() }
             }
         }
-
-        binding.loopMode.setOnClickListener { viewModel.loopStateClick() }
 
         binding.apply {
             actionButton.setOnClickListener { viewModel.pauseOrPlay() }
             openAudioEffects.setOnClickListener { startActivity(Intent(applicationContext, EqualizerActivity::class.java)) }
             moveToNext.setOnClickListener { viewModel.moveToNextTrack() }
             moveToPrevious.setOnClickListener { viewModel.moveToPreviousTrack() }
+            loopMode.setOnClickListener { viewModel.loopStateClick() }
+            shuffleMode.setOnClickListener { viewModel.shuffleStateClick() }
         }
 
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -58,8 +59,12 @@ class PlayerActivity : AppCompatActivity() {
         })
     }
 
-    private suspend fun observeQueueModes() = viewModel.isQueueLooped.collect { isLooped ->
+    private suspend fun observeLoopMode() = viewModel.isQueueLooped.collect { isLooped ->
         binding.loopMode.setTint(if (isLooped) R.color.colorAccent else R.color.gray)
+    }
+
+    private suspend fun observeShuffleMode() = viewModel.isShuffled.collect { isShuffled ->
+        binding.shuffleMode.setTint(if (isShuffled) R.color.colorAccent else R.color.gray)
     }
 
     private suspend fun observePlayingPosition() = viewModel.currentPosition.collectLatest {
