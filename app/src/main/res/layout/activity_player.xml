@@ -173,8 +173,21 @@
             app:layout_constraintEnd_toStartOf="@+id/move_to_previous"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2"
-            app:layout_constraintVertical_bias="0.16000003"
+            app:layout_constraintVertical_bias="0.13999999"
             app:srcCompat="@drawable/ic_baseline_equalizer_24"
+            tools:ignore="ContentDescription" />
+
+        <ImageButton
+            android:id="@+id/loop_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="?attr/colorAccent"
+            app:layout_constraintBottom_toBottomOf="@+id/open_audio_effects"
+            app:layout_constraintStart_toEndOf="@+id/open_audio_effects"
+            app:layout_constraintTop_toTopOf="@+id/open_audio_effects"
+            app:srcCompat="@drawable/ic_baseline_loop_40"
             tools:ignore="ContentDescription" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
