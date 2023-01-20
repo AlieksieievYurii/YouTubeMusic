@@ -54,6 +54,7 @@ class MediaService : MediaBrowserServiceCompat() {
     private val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     private val notificationManager by lazy { NotificationManager(baseContext, sessionToken!!) }
     private val audioEffectManager by lazy { AudioEffectManager.getInstance(Preferences.getInstance(application)) }
+    private val queueModesRepository by lazy { QueueModesRepository.getInstance(application) }
     private lateinit var mediaSession: MediaSessionCompat
 
     private var mediaPlayer: MediaPlayer? = null
@@ -75,6 +76,7 @@ class MediaService : MediaBrowserServiceCompat() {
         initMediaSession()
         updateCurrentPlaybackState()
         startHandlingMediaLibraryEvents()
+        observeQueueModes()
     }
 
 
@@ -103,6 +105,12 @@ class MediaService : MediaBrowserServiceCompat() {
             setSessionActivity(sessionActivityPendingIntent)
         }
         sessionToken = mediaSession.sessionToken
+    }
+
+    private fun observeQueueModes() {
+        coroutineScope.launch {
+            queueModesRepository.getIsLooped().collect { isLooped -> queueProvider.isLooped = isLooped }
+        }
     }
 
     private fun startHandlingMediaLibraryEvents() {

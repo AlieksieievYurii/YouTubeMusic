@@ -21,6 +21,11 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     private var currentPlayingMediaItemPosition = 0
 
     /**
+     * Represents looping of current playing media item
+     */
+    var isLooped = false
+
+    /**
      * Returns true is the queue is initialized that means [createQueueFor] was called
      * and there are media items assigned to the category
      */
@@ -156,7 +161,8 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     }
 
     fun next() {
-        skipToNext()
+        if (!isLooped)
+            skipToNext()
     }
 
     fun skipToNext() {
