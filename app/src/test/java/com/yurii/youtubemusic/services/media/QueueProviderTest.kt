@@ -38,7 +38,7 @@ class QueueProviderTest {
     fun createQueueFor_queueIsNotCreatedYet_queueCreated() = runTest {
         val testMediaItems = initQueueProviderWithDefaultCategory(5)
 
-        queueProvider.createQueueFor(Category.ALL)
+        queueProvider.createQueueFor(Category.ALL, false)
 
         assertTrue(queueProvider.isInitialized)
         assertEquals(Category.ALL, queueProvider.currentPlayingCategory)
@@ -78,7 +78,7 @@ class QueueProviderTest {
         val testMediaItems = prepareAndGetMediaItems(10)
         val testCategory = Category(1, "Custom")
         coEvery { mediaStorage.getMediaItemsFor(testCategory) }.returns(testMediaItems)
-        queueProvider.createQueueFor(testCategory)
+        queueProvider.createQueueFor(testCategory, false)
         assertTrue(queueProvider.isInitialized)
         assertEquals(queueProvider.currentPlayingCategory, testCategory)
         assertEquals(testMediaItems[0], queueProvider.currentQueueItem)
@@ -161,7 +161,7 @@ class QueueProviderTest {
     private suspend fun initQueueProviderWithDefaultCategory(n: Int): List<MediaItem> {
         val testMediaItems = prepareAndGetMediaItems(5)
         coEvery { mediaStorage.getMediaItemsFor(Category.ALL) }.returns(testMediaItems)
-        queueProvider.createQueueFor(Category.ALL)
+        queueProvider.createQueueFor(Category.ALL, false)
         return testMediaItems
     }
 
