@@ -55,16 +55,12 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      * queue in the specified sequence. If the queue is already initialized with the same category, then the process is ignored.
      * By default, the first item is the list of [category] media items - is set as target queue item
      */
-    suspend fun createQueueFor(category: Category) {
+    suspend fun createQueueFor(category: Category, shuffle: Boolean) {
         if (playingCategory == category)
             return
 
         playingCategory = category
-        queue.clear()
-        queue.addAll(mediaStorage.getMediaItemsFor(category))
-
-        mediaSession.setQueue(getQueueAsMediaSessionQueueItems())
-        mediaSession.setQueueTitle("Queue from '$category' category")
+        createQueue(category, shuffle)
     }
 
     /**
@@ -100,6 +96,20 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
         mediaSession.setQueueTitle(null)
         playingCategory = null
         currentPlayingMediaItemPosition = 0
+    }
+
+    /**
+     * Sets shuffle state. If [isShuffled] is true, the queue is shuffled. Otherwise, the queue is retained to the original state
+     */
+    suspend fun setShuffleState(isShuffled: Boolean) {
+        if (isShuffled) {
+            queue.shuffle()
+            syncMediaSessionQueue()
+        } else {
+            val currentPlayingMediaItem = currentQueueItem
+            createQueue(currentPlayingCategory, false)
+            currentPlayingMediaItemPosition = queue.findIndex { it == currentPlayingMediaItem } ?: 0
+        }
     }
 
     /**
@@ -181,11 +191,23 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
             currentPlayingMediaItemPosition = queue.lastIndex
     }
 
+    private suspend fun createQueue(category: Category, shuffle: Boolean = false) {
+        queue.clear()
+        queue.addAll(mediaStorage.getMediaItemsFor(category))
+
+        if (shuffle)
+            queue.shuffle()
+
+        syncMediaSessionQueue()
+        mediaSession.setQueueTitle("Queue from '$category' category")
+    }
+
     private fun assertQueueInitialization() {
         if (!isInitialized)
             throw QueueProviderException("Queue is not initalized. Call createQueueFor firstly")
     }
 
+    private fun syncMediaSessionQueue() = mediaSession.setQueue(getQueueAsMediaSessionQueueItems())
 
     private fun getQueueAsMediaSessionQueueItems(): List<MediaSessionCompat.QueueItem> {
         var id = 0L
