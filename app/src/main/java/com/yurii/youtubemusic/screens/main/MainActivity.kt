@@ -14,13 +14,19 @@ import com.yurii.youtubemusic.screens.player.PlayerControlPanelFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
+import com.yurii.youtubemusic.services.media.QueueModesRepository
 import com.yurii.youtubemusic.utilities.*
 import kotlinx.coroutines.flow.collectLatest
 import java.lang.IllegalStateException
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private val viewModel: MainActivityViewModel by viewModels {
-        MainActivityViewModel.MainActivityViewModelFactory(MediaServiceConnection.getInstance(application))
+        MainActivityViewModel.MainActivityViewModelFactory(
+            MediaServiceConnection.getInstance(
+                application,
+                QueueModesRepository.getInstance(application)
+            )
+        )
     }
     private val activityMainBinding: ActivityMainBinding by viewBinding()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
@@ -105,7 +111,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             onNavigationItemSelected(
                 activityMainBinding.bottomNavigationView.menu.findItem(
                     when (fragmentExtra) {
-                        EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC ->R.id.item_saved_music.also {
+                        EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC -> R.id.item_saved_music.also {
                             activityMainBinding.bottomNavigationView.selectedItemId = it
                         }
                         EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC -> R.id.item_you_tube_music.also {

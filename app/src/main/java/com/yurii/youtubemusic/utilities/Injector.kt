@@ -21,15 +21,22 @@ object Injector {
     }
 
     fun providePlayerControllerViewModel(application: Application): PlayerControllerViewModel.Factory {
-        return PlayerControllerViewModel.Factory(MediaServiceConnection.getInstance(application))
+        return PlayerControllerViewModel.Factory(MediaServiceConnection.getInstance(application, QueueModesRepository.getInstance(application)))
     }
 
     fun provideSavedMusicViewModel(application: Application): SavedMusicViewModel.Factory {
-        return SavedMusicViewModel.Factory(MediaServiceConnection.getInstance(application), MediaLibraryManager.getInstance(application))
+        return SavedMusicViewModel.Factory(
+            MediaServiceConnection.getInstance(application, QueueModesRepository.getInstance(application)),
+            MediaLibraryManager.getInstance(application)
+        )
     }
 
     fun provideMediaItemsViewModel(application: Application, category: Category): MediaItemsViewModel.Factory {
-        return MediaItemsViewModel.Factory(category, MediaLibraryManager.getInstance(application),  MediaServiceConnection.getInstance(application))
+        return MediaItemsViewModel.Factory(
+            category,
+            MediaLibraryManager.getInstance(application),
+            MediaServiceConnection.getInstance(application, QueueModesRepository.getInstance(application))
+        )
     }
 
     fun provideYouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {

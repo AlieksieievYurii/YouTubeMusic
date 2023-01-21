@@ -128,9 +128,9 @@
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/seek_bar"
-            app:layout_constraintVertical_bias="0.56"
-            tools:src="@drawable/ic_circle_play_72"
-            tools:ignore="ContentDescription" />
+            app:layout_constraintVertical_bias="0.7"
+            tools:ignore="ContentDescription"
+            tools:src="@drawable/ic_circle_play_72" />
 
         <ImageButton
             android:id="@+id/move_to_next"
@@ -173,8 +173,34 @@
             app:layout_constraintEnd_toStartOf="@+id/move_to_previous"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2"
-            app:layout_constraintVertical_bias="0.16000003"
+            app:layout_constraintVertical_bias="0.13999999"
             app:srcCompat="@drawable/ic_baseline_equalizer_24"
+            tools:ignore="ContentDescription" />
+
+        <ImageButton
+            android:id="@+id/loop_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="?attr/colorAccent"
+            app:layout_constraintBottom_toBottomOf="@+id/open_audio_effects"
+            app:layout_constraintStart_toEndOf="@+id/open_audio_effects"
+            app:layout_constraintTop_toTopOf="@+id/open_audio_effects"
+            app:srcCompat="@drawable/ic_baseline_loop_40"
+            tools:ignore="ContentDescription" />
+
+        <ImageButton
+            android:id="@+id/shuffle_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="?attr/colorAccent"
+            app:layout_constraintBottom_toBottomOf="@+id/loop_mode"
+            app:layout_constraintStart_toEndOf="@+id/loop_mode"
+            app:layout_constraintTop_toTopOf="@+id/loop_mode"
+            app:srcCompat="@drawable/ic_baseline_shuffle_40"
             tools:ignore="ContentDescription" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

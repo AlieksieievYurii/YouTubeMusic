@@ -34,9 +34,13 @@ sealed class PlaybackState {
     }
 }
 
-class MediaServiceConnection private constructor(private val application: Application) {
+class MediaServiceConnection private constructor(private val application: Application, private val queueModesRepository: QueueModesRepository) {
     private val _isMediaControllerConnected = MutableStateFlow(false)
     val isMediaControllerConnected = _isMediaControllerConnected.asStateFlow()
+
+    val isQueueShuffle = queueModesRepository.getIsShuffle()
+
+    val isQueueLooped = queueModesRepository.getIsLooped()
 
     private val _errors: MutableSharedFlow<Exception> = MutableSharedFlow(extraBufferCapacity = 1)
     val errors = _errors.asSharedFlow()
@@ -76,6 +80,10 @@ class MediaServiceConnection private constructor(private val application: Applic
     fun skipToPreviousTrack() = getMediaController().transportControls.skipToPrevious()
 
     fun seekTo(position: Long) = getMediaController().transportControls.seekTo(position)
+
+    suspend fun setLoopState(isLooped: Boolean) = queueModesRepository.setLoop(isLooped)
+
+    suspend fun setShuffleState(isShuffled: Boolean) = queueModesRepository.setShuffle(isShuffled)
 
     suspend fun getMediaItemsFor(category: Category): List<MediaItem> = suspendCoroutine { callback ->
         val mediaItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
@@ -163,10 +171,10 @@ class MediaServiceConnection private constructor(private val application: Applic
         @Volatile
         private var instance: MediaServiceConnection? = null
 
-        fun getInstance(application: Application): MediaServiceConnection {
+        fun getInstance(application: Application, queueModesRepository: QueueModesRepository): MediaServiceConnection {
             if (instance == null)
                 synchronized(this) {
-                    instance = MediaServiceConnection(application)
+                    instance = MediaServiceConnection(application, queueModesRepository)
                 }
             return instance!!
         }

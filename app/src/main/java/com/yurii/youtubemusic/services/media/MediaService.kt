@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -54,6 +55,7 @@ class MediaService : MediaBrowserServiceCompat() {
     private val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     private val notificationManager by lazy { NotificationManager(baseContext, sessionToken!!) }
     private val audioEffectManager by lazy { AudioEffectManager.getInstance(Preferences.getInstance(application)) }
+    private val queueModesRepository by lazy { QueueModesRepository.getInstance(application) }
     private lateinit var mediaSession: MediaSessionCompat
 
     private var mediaPlayer: MediaPlayer? = null
@@ -75,6 +77,7 @@ class MediaService : MediaBrowserServiceCompat() {
         initMediaSession()
         updateCurrentPlaybackState()
         startHandlingMediaLibraryEvents()
+        observeQueueModes()
     }
 
 
@@ -103,6 +106,19 @@ class MediaService : MediaBrowserServiceCompat() {
             setSessionActivity(sessionActivityPendingIntent)
         }
         sessionToken = mediaSession.sessionToken
+    }
+
+    private fun observeQueueModes() {
+        coroutineScope.launch {
+            queueModesRepository.getIsLooped().collect { isLooped -> queueProvider.isLooped = isLooped }
+        }
+
+        coroutineScope.launch {
+            queueModesRepository.getIsShuffle().collect { isShuffled ->
+                if (queueProvider.isInitialized)
+                    queueProvider.setShuffleState(isShuffled)
+            }
+        }
     }
 
     private fun startHandlingMediaLibraryEvents() {
@@ -389,9 +405,11 @@ class MediaService : MediaBrowserServiceCompat() {
 
         override fun onPlayFromMediaId(mediaId: String, extras: Bundle?) {
             super.onPlayFromMediaId(mediaId, extras)
+
             coroutineScope.launch(Dispatchers.IO) {
                 preparePlayerLock.withLock {
-                    queueProvider.createQueueFor(extras?.getParcelable(EXTRA_KEY_CATEGORIES) ?: Category.ALL)
+                    val category = extras?.getParcelable(EXTRA_KEY_CATEGORIES) ?: Category.ALL
+                    queueProvider.createQueueFor(category, queueModesRepository.getIsShuffle().first())
                     queueProvider.setTargetMediaItem(mediaId)
                     registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
                     handlePlayMusicQueue()

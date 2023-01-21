@@ -6,9 +6,7 @@ import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.services.media.PlaybackState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
@@ -20,6 +18,10 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
     val currentPosition = _currentPosition.asStateFlow()
 
     val playbackState = mediaServiceConnection.playbackState
+
+    val isQueueLooped = mediaServiceConnection.isQueueLooped
+
+    val isShuffled = mediaServiceConnection.isQueueShuffle
 
     init {
         viewModelScope.launch {
@@ -42,6 +44,18 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
                 delay(1000)
                 _currentPosition.value += 1000
             }
+        }
+    }
+
+    fun loopStateClick() {
+        viewModelScope.launch {
+            mediaServiceConnection.setLoopState(!isQueueLooped.first())
+        }
+    }
+
+    fun shuffleStateClick() {
+        viewModelScope.launch {
+            mediaServiceConnection.setShuffleState(!isShuffled.first())
         }
     }
 

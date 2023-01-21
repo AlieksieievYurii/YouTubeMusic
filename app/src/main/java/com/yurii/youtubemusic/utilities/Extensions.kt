@@ -1,11 +1,16 @@
 package com.yurii.youtubemusic.utilities
 
 import android.app.Application
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
@@ -89,4 +94,11 @@ fun TextView.setAnimatedText(text: String) {
         })
     }
     startAnimation(anim)
+}
+
+/**
+ * Alternative to ImageView.tint in xml
+ */
+fun ImageView.setTint(@ColorRes colorRes: Int) {
+    ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(ContextCompat.getColor(context, colorRes)))
 }
