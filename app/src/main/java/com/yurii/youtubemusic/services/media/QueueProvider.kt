@@ -50,6 +50,8 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
             return queue[currentPlayingMediaItemPosition]
         }
 
+    private var isShuffled = false
+
     /**
      * Initializes new queue for given [category]. In simple words, takes all the media items assigned to [category] and build the
      * queue in the specified sequence. If the queue is already initialized with the same category, then the process is ignored.
@@ -64,10 +66,13 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     }
 
     /**
-     * Changes the position of the given [mediaItem] in the queue
+     * Changes the position of the given [mediaItem] in the queue. The method is ignored when the queue is shuffled.
      */
     fun changePosition(mediaItem: MediaItem, from: Int, to: Int) {
         assertQueueInitialization()
+
+        if (isShuffled)
+            return
 
         if (queue[from] != mediaItem)
             throw IllegalStateException("Can't change the position of $mediaItem in the queue")
@@ -102,6 +107,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      * Sets shuffle state. If [isShuffled] is true, the queue is shuffled. Otherwise, the queue is retained to the original state
      */
     suspend fun setShuffleState(isShuffled: Boolean) {
+
         if (isShuffled) {
             queue.shuffle()
             syncMediaSessionQueue()
@@ -110,6 +116,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
             createQueue(currentPlayingCategory, false)
             currentPlayingMediaItemPosition = queue.findIndex { it == currentPlayingMediaItem } ?: 0
         }
+        this.isShuffled = isShuffled
     }
 
     /**
@@ -194,6 +201,8 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     private suspend fun createQueue(category: Category, shuffle: Boolean = false) {
         queue.clear()
         queue.addAll(mediaStorage.getMediaItemsFor(category))
+
+        isShuffled = shuffle
 
         if (shuffle)
             queue.shuffle()

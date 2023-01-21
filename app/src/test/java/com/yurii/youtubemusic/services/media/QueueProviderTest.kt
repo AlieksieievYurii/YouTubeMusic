@@ -5,6 +5,7 @@ import androidx.core.net.toUri
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.CategoryContainer
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.utilities.findIndex
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
