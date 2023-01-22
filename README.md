@@ -1,28 +1,24 @@
 # YouTube Music
 Simple Android application to download and listen music from YouTube. 
-The application consists of two main parts: Saved Music and YouTube Music where you can download music from YouTube.
+The application consists of two main parts: 
+* [Saved Music](#saved_music)
+* [YouTube Music](#youtube_music_downloader)
 
-<img src="gitRes/6.jpg" width=200>&nbsp;
+I also use this application to integrate new things I am learning in Android Development. 
+
+## <a name="saved_music"></a> Saved Music
+This fragment is responsible for browsing downloaded media items and playing them. The fragment works along with [MediaBrowserService](https://developer.android.com/guide/topics/media-apps/audio-app/building-an-audio-app) so the app can also work with smartwatches and cars.
+
 <img src="gitRes/2.jpg" width=200>&nbsp;
-<img src="gitRes/1.jpg" width=200>&nbsp;
 
-The app also contains an equalizer
+You can create local playlists and add media items to them:
 
-<img src="gitRes/8.jpg" width=200>&nbsp;
+You are also able to change media item possition in visible playlist. (When new media item is downloaded, it is added at the latest position)
 
-You can create your own playlists and append downloaded musics
 
-<img src="gitRes/7.jpg" width=200>&nbsp;
-<img src="gitRes/5.jpg" width=200>&nbsp;
 
-Once you've downloaded the music, you can listen to it
-
-<img src="gitRes/4.jpg" width=200>&nbsp;
-<img src="gitRes/9.jpg" width=200>&nbsp;
-
-Media Service is implemented along with the media-compat library. So the app is integrated with smartwatches and cars.
-
---------------------------------------------------------------------------------------------------------------
+## <a name="youtube_music_downloader"></a> YouTube Music
+The fragment is responsible for downloading music from YouTube. The app just fetches audio track from the video.
 
 **Downloading musics from YouTube is **not stable**, because Youtube often changes web structure of its pages.**
 
