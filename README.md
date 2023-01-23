@@ -26,6 +26,8 @@ The app also contains simple Equalizer.
 ## <a name="youtube_music_downloader"></a> YouTube Music
 The fragment is responsible for downloading music from YouTube. The app just fetches audio track from the video.
 
+<img src="https://user-images.githubusercontent.com/39415360/214073349-3ea0f44c-cad2-451b-ac8d-eca1575f9e56.gif" width=200>&nbsp;
+
 **Downloading musics from YouTube is **not stable**, because Youtube often changes web structure of its pages.**
 
 **WARNING**: Youtube API does not support a video download. In fact, it is prohibited - [Terms of Service - II. Prohibitions](https://developers.google.com/youtube/terms/api-services-terms-of-service). 
