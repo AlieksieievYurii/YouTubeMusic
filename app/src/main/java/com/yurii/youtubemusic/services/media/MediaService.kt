@@ -349,7 +349,7 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun onMediaItemIsDeleted(item: Item) {
-        if (queueProvider.currentQueueItem.id == item.id) {
+        if (queueProvider.isInitialized && queueProvider.currentQueueItem.id == item.id) {
             handleStopRequest()
         }
         queueProvider.removeFromQueueIfExists(item)
