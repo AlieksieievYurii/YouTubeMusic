@@ -181,7 +181,7 @@ class YouTubeMusicViewModel(
         private val googleSignInAccount: GoogleSignInAccount,
         private val preferences: Preferences
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
                 return YouTubeMusicViewModel(mediaLibraryManager, googleAccount, downloaderServiceConnection, googleSignInAccount, preferences) as T
             throw IllegalStateException("Given the model class is not assignable from YouTubeMusicViewModel class")

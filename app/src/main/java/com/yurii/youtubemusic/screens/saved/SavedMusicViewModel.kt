@@ -47,7 +47,7 @@ class SavedMusicViewModel(
         private val mediaServiceConnection: MediaServiceConnection,
         private val mediaLibraryManager: MediaLibraryManager
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(SavedMusicViewModel::class.java))
                 return SavedMusicViewModel(mediaServiceConnection, mediaLibraryManager) as T
             throw IllegalStateException("Given the model class is not assignable from SavedMusicViewModel class")

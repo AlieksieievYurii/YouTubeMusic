@@ -125,7 +125,7 @@ class MediaItemsViewModel(
         private val mediaLibraryManager: MediaLibraryManager,
         private val mediaServiceConnection: MediaServiceConnection
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(MediaItemsViewModel::class.java))
                 return MediaItemsViewModel(category, mediaLibraryManager, mediaServiceConnection) as T
             throw IllegalStateException("Given the model class is not assignable from MediaItemsViewModel class")

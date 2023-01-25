@@ -88,7 +88,7 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
     @Suppress("UNCHECKED_CAST")
     class Factory(private val mediaServiceConnection: MediaServiceConnection) :
         ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(PlayerControllerViewModel::class.java))
                 return PlayerControllerViewModel(mediaServiceConnection) as T
             throw IllegalStateException("Given the model class is not assignable from PlayerBottomControllerViewModel class")

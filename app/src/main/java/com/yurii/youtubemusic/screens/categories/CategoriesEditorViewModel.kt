@@ -69,7 +69,7 @@ class CategoriesEditorViewModel(private val mediaLibraryManager: MediaLibraryMan
 
     @Suppress("UNCHECKED_CAST")
     class Factory(private val mediaLibraryManager: MediaLibraryManager) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(CategoriesEditorViewModel::class.java))
                 return CategoriesEditorViewModel(mediaLibraryManager) as T
             throw IllegalStateException("Given the model class is not assignable from CategoriesEditorViewModel class")

@@ -40,7 +40,7 @@ class EqualizerViewModel(val audioEffectManager: AudioEffectManager) : ViewModel
 
     @Suppress("UNCHECKED_CAST")
     class Factory(private val audioEffectManager: AudioEffectManager) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(EqualizerViewModel::class.java))
                 return EqualizerViewModel(audioEffectManager) as T
             throw IllegalStateException("Given the model class is not assignable from EqualizerViewModel class")

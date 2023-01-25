@@ -34,7 +34,7 @@ class MainActivityViewModel(private val mediaServiceConnection: MediaServiceConn
     private fun sendEvent(event: Event) = viewModelScope.launch { _event.emit(event) }
 
     class MainActivityViewModelFactory(private val mediaServiceConnection: MediaServiceConnection) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(MainActivityViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
                 return MainActivityViewModel(mediaServiceConnection) as T
