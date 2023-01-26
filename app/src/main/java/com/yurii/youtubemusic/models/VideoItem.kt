@@ -19,20 +19,16 @@ data class VideoItem(
     val likeCount: BigInteger,
     val thumbnail: String,
     val normalThumbnail: String
-) : Item(id, title, author, durationInMillis) {
+) : Item(id, title, author, durationInMillis)
 
-    companion object {
-        fun createFrom(video: Video): VideoItem =
-            VideoItem(
-                id = video.id,
-                title = video.snippet.title,
-                author = video.snippet.channelTitle,
-                durationInMillis = Duration.parse(video.contentDetails.duration).toMillis(),
-                description = video.snippet.description,
-                viewCount = video.statistics.viewCount,
-                likeCount = video.statistics.likeCount,
-                thumbnail = video.snippet.thumbnails.default.url,
-                normalThumbnail = video.snippet.thumbnails.medium.url
-            )
-    }
-}
+fun Video.toVideoItem() = VideoItem(
+    id = id,
+    title = snippet.title,
+    author = snippet.channelTitle,
+    durationInMillis = Duration.parse(contentDetails.duration).toMillis(),
+    description = snippet.description,
+    viewCount = statistics.viewCount,
+    likeCount = statistics.likeCount,
+    thumbnail = snippet.thumbnails.default.url,
+    normalThumbnail = snippet.thumbnails.medium.url
+)
