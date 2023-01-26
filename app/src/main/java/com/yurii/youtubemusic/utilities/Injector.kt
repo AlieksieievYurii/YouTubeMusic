@@ -12,6 +12,7 @@ import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsViewModel
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicViewModel
 import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.media.*
+import dagger.assisted.AssistedFactory
 
 object Injector {
     fun provideMediaItemsViewModel(application: Application, category: Category): MediaItemsViewModel.Factory {
@@ -19,18 +20,6 @@ object Injector {
             category,
             MediaLibraryManager.getInstance(application),
             MediaServiceConnection.getInstance(application, QueueModesRepository.getInstance(application))
-        )
-    }
-
-    fun provideYouTubeMusicViewModel(application: Application, googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel.Factory {
-        val googleAccount = GoogleAccount(application)
-        val downloaderServiceConnection = ServiceConnection(application)
-        return YouTubeMusicViewModel.Factory(
-            MediaLibraryManager.getInstance(application),
-            googleAccount,
-            downloaderServiceConnection,
-            googleSignInAccount,
-            Preferences.getInstance(application)
         )
     }
 }

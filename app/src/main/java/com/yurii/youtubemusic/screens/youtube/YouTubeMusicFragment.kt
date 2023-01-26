@@ -19,11 +19,12 @@ import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.lang.IllegalArgumentException
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     layoutId = R.layout.fragment_youtube_music,
     titleStringId = R.string.label_fragment_title_youtube_musics,
@@ -38,8 +39,11 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     }
 
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
+    @Inject
+    lateinit var assistedFactory: YouTubeMusicViewModelAssistedFactory
+
     private val viewModel: YouTubeMusicViewModel by viewModels {
-        Injector.provideYouTubeMusicViewModel(requireApplication(), getGoogleSignInAccount())
+        YouTubeMusicViewModel.Factory(assistedFactory, requireArguments().requireParcelable(GOOGLE_SIGN_IN))
     }
 
     private val listAdapter: VideoItemsListAdapter by lazy {
@@ -89,7 +93,10 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         when (event) {
             is YouTubeMusicViewModel.Event.SignOut -> mainActivityViewModel.logOut()
             is YouTubeMusicViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(event.videoItem, event.error)
-            is YouTubeMusicViewModel.Event.OpenCategoriesSelector -> showDialogToSelectCategories(event.videoItem, event.allCustomCategories)
+            is YouTubeMusicViewModel.Event.OpenCategoriesSelector -> showDialogToSelectCategories(
+                event.videoItem,
+                event.allCustomCategories
+            )
         }
     }
 
@@ -148,10 +155,6 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         requireActivity().supportFragmentManager,
         viewModel.youTubeAPI, currentPlaylist, viewModel::setPlaylist
     )
-
-    private fun getGoogleSignInAccount(): GoogleSignInAccount {
-        return this.arguments?.getParcelable(GOOGLE_SIGN_IN) ?: throw IllegalArgumentException("GoogleSignIn is required!")
-    }
 
     companion object {
         private const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"

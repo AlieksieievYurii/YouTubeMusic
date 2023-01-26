@@ -11,13 +11,17 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.services.youtube.YouTubeScopes
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.lang.Exception
+import javax.inject.Inject
+import javax.inject.Singleton
 
 class IsNotSignedIn : Exception("The user is not signed in")
 
 class DoesNotHaveRequiredScopes : Exception("Require the scopes")
 
-class GoogleAccount(private val context: Context) {
+@Singleton
+class GoogleAccount @Inject constructor(@ApplicationContext private val context: Context) {
     private val scopes = arrayOf(Scope(YouTubeScopes.YOUTUBE_READONLY))
     private val googleSignInOptions: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestScopes(scopes.first(), *scopes)

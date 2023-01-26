@@ -18,11 +18,13 @@ import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.utilities.Preferences
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.lang.Exception
-import java.lang.IllegalStateException
 
 abstract class VideoItemStatus(open val videoItem: Item) {
     class Download(override val videoItem: Item) : VideoItemStatus(videoItem)
@@ -31,11 +33,11 @@ abstract class VideoItemStatus(open val videoItem: Item) {
     class Failed(override val videoItem: VideoItem, val error: Exception?) : VideoItemStatus(videoItem)
 }
 
-class YouTubeMusicViewModel(
+class YouTubeMusicViewModel @AssistedInject constructor(
     private val mediaLibraryManager: MediaLibraryManager,
     private val googleAccount: GoogleAccount,
     private val downloaderServiceConnection: ServiceConnection,
-    googleSignInAccount: GoogleSignInAccount,
+    @Assisted googleSignInAccount: GoogleSignInAccount,
     private val preferences: Preferences
 ) : ViewModel() {
     sealed class Event {
@@ -80,7 +82,12 @@ class YouTubeMusicViewModel(
                         val musicFile = mediaLibraryManager.mediaStorage.getMediaFile(report.videoItem)
                         sendVideoItemStatus(VideoItemStatus.Downloaded(report.videoItem, musicFile.length()))
                     }
-                    is MusicDownloaderService.DownloadingReport.Failed -> sendVideoItemStatus(VideoItemStatus.Failed(report.videoItem, report.error))
+                    is MusicDownloaderService.DownloadingReport.Failed -> sendVideoItemStatus(
+                        VideoItemStatus.Failed(
+                            report.videoItem,
+                            report.error
+                        )
+                    )
                 }
             }
         }
@@ -173,19 +180,17 @@ class YouTubeMusicViewModel(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    class Factory(
-        private val mediaLibraryManager: MediaLibraryManager,
-        private val googleAccount: GoogleAccount,
-        private val downloaderServiceConnection: ServiceConnection,
-        private val googleSignInAccount: GoogleSignInAccount,
-        private val preferences: Preferences
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
-                return YouTubeMusicViewModel(mediaLibraryManager, googleAccount, downloaderServiceConnection, googleSignInAccount, preferences) as T
-            throw IllegalStateException("Given the model class is not assignable from YouTubeMusicViewModel class")
-        }
 
+    @Suppress("UNCHECKED_CAST")
+    class Factory(private val assistedFactory: YouTubeMusicViewModelAssistedFactory, private val googleSignInAccount: GoogleSignInAccount) :
+        ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return assistedFactory.create(googleSignInAccount) as T
+        }
     }
+}
+
+@AssistedFactory
+interface YouTubeMusicViewModelAssistedFactory {
+    fun create(googleSignInAccount: GoogleSignInAccount): YouTubeMusicViewModel
 }
