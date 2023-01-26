@@ -128,7 +128,7 @@ class EqualizerView @JvmOverloads constructor(context: Context, attrs: Attribute
             bv.progressDrawable = ResourcesCompat.getDrawable(resources, progressDrawable, null)
             bv.thumb = ResourcesCompat.getDrawable(resources, thumb, null)
             bv.max = maxBand
-            bv.progress = levels[index]?.let { (it - minValue) * maxBand / (maxValue - minValue) } ?: maxBand / 2
+            bv.progress = levels[index]?.let { (it - minValue) * maxBand / (maxValue - minValue) } ?: (maxBand / 2)
             bv.id = index
             bv.setPadding(toPx(BAND_PADDING), 0, toPx(BAND_PADDING), 0)
             bv.setOnSeekBarChangeListener(this)

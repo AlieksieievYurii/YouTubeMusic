@@ -348,10 +348,5 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         const val DEFAULT_BACKGROUND_COLOR = Color.GRAY
         const val DEFAULT_PROGRESS_COLOR = Color.WHITE
         const val DEFAULT_ICON_COLOR = Color.WHITE
-
-        const val STATE_DOWNLOAD: Int = 0
-        const val STATE_DOWNLOADING: Int = 1
-        const val STATE_DOWNLOADED: Int = 2
-        const val STATE_FAILED: Int = 3
     }
 }
