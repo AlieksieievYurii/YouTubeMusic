@@ -11,14 +11,16 @@ import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.utilities.move
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.lang.IllegalStateException
 
-class MediaItemsViewModel(
-    private val category: Category,
+class MediaItemsViewModel @AssistedInject constructor(
+    @Assisted private val category: Category,
     private val mediaLibraryManager: MediaLibraryManager,
     private val mediaServiceConnection: MediaServiceConnection
 ) : ViewModel() {
@@ -44,7 +46,10 @@ class MediaItemsViewModel(
                 when (event) {
                     is MediaLibraryManager.Event.ItemDeleted -> handleItemIsRemoved(event.item)
                     is MediaLibraryManager.Event.MediaItemIsAdded -> handleMediaItemIsAdded(event.mediaItem, event.assignedCategoriesIds)
-                    is MediaLibraryManager.Event.CategoryAssignment -> handleCustomCategoryAssignment(event.mediaItem, event.customCategories)
+                    is MediaLibraryManager.Event.CategoryAssignment -> handleCustomCategoryAssignment(
+                        event.mediaItem,
+                        event.customCategories
+                    )
                     else -> {
                         // Ignore some events
                     }
@@ -57,7 +62,7 @@ class MediaItemsViewModel(
         viewModelScope.launch {
             val currentList = getMediaItemsFromCache()
             currentList.move(from, to)
-            _mediaItemsStatus.value =  MediaItemsStatus.Loaded(currentList)
+            _mediaItemsStatus.value = MediaItemsStatus.Loaded(currentList)
             mediaLibraryManager.changeMediaItemPosition(category, mediaItem, from, to)
         }
     }
@@ -116,19 +121,20 @@ class MediaItemsViewModel(
         }
     }
 
-    private suspend fun getMediaItemsFromCache(): MutableList<MediaItem> = ((_mediaItemsStatus.value as? MediaItemsStatus.Loaded)?.mediaItems
-        ?: mediaServiceConnection.getMediaItemsFor(category)).toMutableList()
+    private suspend fun getMediaItemsFromCache(): MutableList<MediaItem> =
+        ((_mediaItemsStatus.value as? MediaItemsStatus.Loaded)?.mediaItems
+            ?: mediaServiceConnection.getMediaItemsFor(category)).toMutableList()
 
     @Suppress("UNCHECKED_CAST")
     class Factory(
-        private val category: Category,
-        private val mediaLibraryManager: MediaLibraryManager,
-        private val mediaServiceConnection: MediaServiceConnection
+        private val assistedFactory: MediaItemsViewModelAssistedFactory,
+        private val category: Category
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(MediaItemsViewModel::class.java))
-                return MediaItemsViewModel(category, mediaLibraryManager, mediaServiceConnection) as T
-            throw IllegalStateException("Given the model class is not assignable from MediaItemsViewModel class")
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = assistedFactory.create(category) as T
     }
+}
+
+@AssistedFactory
+interface MediaItemsViewModelAssistedFactory {
+    fun create(category: Category): MediaItemsViewModel
 }
