@@ -13,6 +13,7 @@ interface MusicDownloader {
         fun onErrorOccurred(videoItem: VideoItem, error: Exception)
     }
 
+    fun setCallback(callBack: CallBack)
     fun download(videoItem: VideoItem, customCategories: List<Category>)
     fun retryToDownload(videoItem: VideoItem)
     fun cancel(videoItem: VideoItem)
