@@ -101,7 +101,7 @@ class MediaServiceConnection @Inject constructor(
                     children: MutableList<MediaBrowserCompat.MediaItem>
                 ) {
                     super.onChildrenLoaded(parentId, children)
-                    callback.resume(children.map { MediaItem.createFrom(it) })
+                    callback.resume(children.map { it.toMediaItem() })
                 }
             }
 

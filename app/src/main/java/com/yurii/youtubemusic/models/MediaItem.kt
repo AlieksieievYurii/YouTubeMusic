@@ -21,22 +21,17 @@ data class MediaItem(
     val description: String,
     val thumbnail: File,
     val mediaFile: File,
-) : Item(id, title, author, durationInMillis) {
-    companion object {
-        fun createFrom(mediaItem: MediaBrowserCompat.MediaItem): MediaItem {
-            val extras = mediaItem.description.extras!!
-            return MediaItem(
-                id = mediaItem.mediaId!!,
-                title = mediaItem.description.title.toString(),
-                description = mediaItem.description.description.toString(),
-                author = extras.getString(MediaMetadataCompat.METADATA_KEY_AUTHOR)!!,
-                durationInMillis = extras.getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
-                thumbnail = mediaItem.description.iconUri!!.toFile(),
-                mediaFile = mediaItem.description.mediaUri!!.toFile(),
-            )
-        }
-    }
-}
+) : Item(id, title, author, durationInMillis)
+
+fun MediaBrowserCompat.MediaItem.toMediaItem() = MediaItem(
+    id = mediaId!!,
+    title = description.title.toString(),
+    description = description.description.toString(),
+    author = description.extras?.getString(MediaMetadataCompat.METADATA_KEY_AUTHOR) ?: "Unknown",
+    durationInMillis = description.extras?.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) ?: 0L,
+    thumbnail = description.iconUri!!.toFile(),
+    mediaFile = description.mediaUri!!.toFile(),
+)
 
 fun MediaItem.getMediaDescriptionCompat(): MediaDescriptionCompat {
     val extras = Bundle().also {
