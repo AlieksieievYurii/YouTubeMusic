@@ -15,7 +15,8 @@ import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 
 class AuthorizationFragment : TabFragment<FragmentAuthorizationBinding>(
     layoutId = R.layout.fragment_authorization,
-    titleStringId = R.string.label_fragment_title_youtube_musics
+    titleStringId = R.string.label_fragment_title_youtube_musics,
+    optionMenuId = null
 ) {
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val googleAccount: GoogleAccount by lazy { GoogleAccount(requireContext()) }

@@ -1,7 +1,6 @@
 package com.yurii.youtubemusic.screens.saved
 
 import android.content.Intent
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
@@ -11,18 +10,18 @@ import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.TabFragment
-import com.yurii.youtubemusic.utilities.requireApplication
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 
 
+@AndroidEntryPoint
 class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
     layoutId = R.layout.fragment_saved_music,
     titleStringId = R.string.label_fragment_title_saved_music,
     optionMenuId = R.menu.saved_musics_fragment_menu
 ) {
-    private val viewModel: SavedMusicViewModel by viewModels { Injector.provideSavedMusicViewModel(requireApplication()) }
+    private val viewModel: SavedMusicViewModel by viewModels()
 
     override fun onClickOption(id: Int) {
         when (id) {

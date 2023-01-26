@@ -7,17 +7,21 @@ import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.utilities.parentMkdir
 import com.yurii.youtubemusic.utilities.walkFiles
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.lang.IllegalStateException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 class MediaItemValidationException(message: String) : Exception(message)
 
 /**
  * Represents an logical interface to the file system in order to manage media files from single repository
  */
-class MediaStorage(context: Context) {
+@Singleton
+class MediaStorage @Inject constructor(@ApplicationContext context: Context) {
     private val gson = Gson()
     private val musicStorageFolder = File(context.filesDir, "Musics")
     private val thumbnailStorage = File(context.filesDir, "Thumbnails")

@@ -15,7 +15,7 @@ import com.yurii.youtubemusic.R
 abstract class TabFragment<T : ViewDataBinding>(
     private val layoutId: Int,
     private val titleStringId: Int,
-    private val optionMenuId: Int? = null
+    private val optionMenuId: Int?
 ) : Fragment() {
     private lateinit var toolbar: Toolbar
     lateinit var binding: T
