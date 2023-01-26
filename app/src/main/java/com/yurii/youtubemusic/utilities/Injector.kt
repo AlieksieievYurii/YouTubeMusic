@@ -14,12 +14,6 @@ import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.media.*
 
 object Injector {
-
-    fun provideEqualizerViewModel(application: Application): EqualizerViewModel.Factory {
-        val audioEffectManager = AudioEffectManager.getInstance(Preferences.getInstance(application))
-        return EqualizerViewModel.Factory(audioEffectManager)
-    }
-
     fun provideMediaItemsViewModel(application: Application, category: Category): MediaItemsViewModel.Factory {
         return MediaItemsViewModel.Factory(
             category,

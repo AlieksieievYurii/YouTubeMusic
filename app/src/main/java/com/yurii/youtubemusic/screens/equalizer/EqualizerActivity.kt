@@ -9,11 +9,11 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityEqualizerBinding
 import com.yurii.youtubemusic.models.EqualizerData
 import com.yurii.youtubemusic.ui.EqualizerView
-import com.yurii.youtubemusic.utilities.Injector
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class EqualizerActivity : AppCompatActivity() {
-    private val viewModel: EqualizerViewModel by viewModels { Injector.provideEqualizerViewModel(application) }
+    private val viewModel: EqualizerViewModel by viewModels()
     private val binding: ActivityEqualizerBinding by viewBinding()
 
     override fun onCreate(savedInstanceState: Bundle?) {

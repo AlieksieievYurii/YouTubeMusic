@@ -3,9 +3,12 @@ package com.yurii.youtubemusic.screens.equalizer
 import androidx.lifecycle.*
 import com.yurii.youtubemusic.models.TwisterData
 import com.yurii.youtubemusic.services.media.AudioEffectManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.lang.IllegalStateException
+import javax.inject.Inject
 
-class EqualizerViewModel(val audioEffectManager: AudioEffectManager) : ViewModel() {
+@HiltViewModel
+class EqualizerViewModel @Inject constructor(val audioEffectManager: AudioEffectManager) : ViewModel() {
 
     fun getBassBoostData() = audioEffectManager.getBassBoostData()
 
@@ -37,14 +40,5 @@ class EqualizerViewModel(val audioEffectManager: AudioEffectManager) : ViewModel
     fun getPresetName(presetId: Int): String = audioEffectManager.getPresetName(presetId)
 
     fun getBandLevelsForPreset(presetId: Int) = audioEffectManager.getBandLevelsForPreset(presetId)
-
-    @Suppress("UNCHECKED_CAST")
-    class Factory(private val audioEffectManager: AudioEffectManager) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(EqualizerViewModel::class.java))
-                return EqualizerViewModel(audioEffectManager) as T
-            throw IllegalStateException("Given the model class is not assignable from EqualizerViewModel class")
-        }
-    }
 }
 
