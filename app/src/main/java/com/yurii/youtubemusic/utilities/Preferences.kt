@@ -6,17 +6,19 @@ import com.google.gson.Gson
 import com.yurii.youtubemusic.models.EqualizerData
 import com.yurii.youtubemusic.models.TwisterData
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class Preferences private constructor(private val application: Application) {
+class Preferences @Inject constructor(@ApplicationContext private val context: Context) {
 
     fun getBassBoostData(): TwisterData {
-        val sharedPreferences = application.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         val audioEffectsDataJson = sharedPreferences.getString(SH_KEY_BASS_BOOST_DATA, null) ?: return TwisterData.create()
         return Gson().fromJson(audioEffectsDataJson, TwisterData::class.java)
     }
 
     fun setBassBoostData(bassBoostData: TwisterData) {
-        val sharedPreferences = application.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         with(sharedPreferences.edit()) {
             putString(SH_KEY_BASS_BOOST_DATA, Gson().toJson(bassBoostData))
             apply()
@@ -24,13 +26,13 @@ class Preferences private constructor(private val application: Application) {
     }
 
     fun getVirtualizerData(): TwisterData {
-        val sharedPreferences = application.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         val audioEffectsDataJson = sharedPreferences.getString(SH_KEY_VIRTUALIZER_DATA, null) ?: return TwisterData.create()
         return Gson().fromJson(audioEffectsDataJson, TwisterData::class.java)
     }
 
     fun setVirtualizerData(virtualizerData: TwisterData) {
-        val sharedPreferences = application.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         with(sharedPreferences.edit()) {
             putString(SH_KEY_VIRTUALIZER_DATA, Gson().toJson(virtualizerData))
             apply()
@@ -38,13 +40,13 @@ class Preferences private constructor(private val application: Application) {
     }
 
     fun getEqualizerData(): EqualizerData {
-        val sharedPreferences = application.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         val audioEffectsDataJson = sharedPreferences.getString(SH_KEY_EQUALIZER_DATA, null) ?: return EqualizerData.create()
         return Gson().fromJson(audioEffectsDataJson, EqualizerData::class.java)
     }
 
     fun setEqualizerData(equalizerData: EqualizerData) {
-        val sharedPreferences = application.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         with(sharedPreferences.edit()) {
             putString(SH_KEY_EQUALIZER_DATA, Gson().toJson(equalizerData))
             apply()
@@ -52,7 +54,7 @@ class Preferences private constructor(private val application: Application) {
     }
 
     fun setCurrentYouTubePlaylist(playlist: Playlist?) {
-        val sharedPreferences = application.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         with(sharedPreferences.edit()) {
             putString(KEY_CURRENT_PLAYLIST, Gson().toJson(playlist))
             apply()
@@ -60,7 +62,7 @@ class Preferences private constructor(private val application: Application) {
     }
 
     fun getCurrentYouTubePlaylist(): Playlist? {
-        val sharedPreferences = application.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(DEFAULT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
         val playlistJson: String = sharedPreferences.getString(KEY_CURRENT_PLAYLIST, null) ?: return null
         return Gson().fromJson(playlistJson, Playlist::class.java)
     }

@@ -13,21 +13,14 @@ import com.google.android.material.snackbar.Snackbar
 import com.yurii.youtubemusic.screens.player.PlayerControlPanelFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
-import com.yurii.youtubemusic.services.media.MediaServiceConnection
-import com.yurii.youtubemusic.services.media.QueueModesRepository
 import com.yurii.youtubemusic.utilities.*
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import java.lang.IllegalStateException
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
-    private val viewModel: MainActivityViewModel by viewModels {
-        MainActivityViewModel.MainActivityViewModelFactory(
-            MediaServiceConnection.getInstance(
-                application,
-                QueueModesRepository.getInstance(application)
-            )
-        )
-    }
+    private val viewModel: MainActivityViewModel by viewModels()
     private val activityMainBinding: ActivityMainBinding by viewBinding()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
 

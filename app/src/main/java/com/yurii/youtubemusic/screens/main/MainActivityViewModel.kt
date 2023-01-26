@@ -1,17 +1,21 @@
 package com.yurii.youtubemusic.screens.main
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.lang.Exception
+import javax.inject.Inject
 
-class MainActivityViewModel(private val mediaServiceConnection: MediaServiceConnection) : ViewModel() {
+@HiltViewModel
+class MainActivityViewModel @Inject constructor(
+    private val mediaServiceConnection: MediaServiceConnection
+) : ViewModel() {
     sealed class Event {
         object LogOutEvent : Event()
         data class LogInEvent(val account: GoogleSignInAccount) : Event()
@@ -32,14 +36,4 @@ class MainActivityViewModel(private val mediaServiceConnection: MediaServiceConn
     fun logOut() = sendEvent(Event.LogOutEvent)
 
     private fun sendEvent(event: Event) = viewModelScope.launch { _event.emit(event) }
-
-    class MainActivityViewModelFactory(private val mediaServiceConnection: MediaServiceConnection) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(MainActivityViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return MainActivityViewModel(mediaServiceConnection) as T
-            }
-            throw IllegalArgumentException("Unable to construct viewModel")
-        }
-    }
 }
