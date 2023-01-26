@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.services.media
 
-import android.app.Application
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -35,17 +34,5 @@ class QueueModesRepository @Inject constructor(@ApplicationContext private val c
     companion object {
         private val IS_SHUFFLE = booleanPreferencesKey("is_shuffle")
         private val IS_LOOPED = booleanPreferencesKey("is_looped")
-
-        @Volatile
-        private var instance: QueueModesRepository? = null
-
-        fun getInstance(application: Application): QueueModesRepository {
-            if (instance == null)
-                synchronized(this) {
-                    instance = QueueModesRepository(application)
-                }
-
-            return instance!!
-        }
     }
 }

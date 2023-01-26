@@ -133,17 +133,4 @@ class AudioEffectManager @Inject constructor(private val preferences: Preference
     private fun getDefaultEqualizer(): Equalizer = Equalizer(0, 0).apply { enabled = false }
 
     private fun convertToAudioEffectRange(value: Int): Short = (value * 10).toShort()
-
-    companion object {
-        @Volatile
-        private var instance: AudioEffectManager? = null
-
-        fun getInstance(preferences: Preferences): AudioEffectManager {
-            if (instance == null)
-                synchronized(this) {
-                    instance = AudioEffectManager(preferences)
-                }
-            return instance!!
-        }
-    }
 }

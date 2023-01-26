@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.services.media
 
-import android.content.Context
 import com.yurii.youtubemusic.models.Category
 
 import com.yurii.youtubemusic.models.Item
@@ -147,17 +146,6 @@ class MediaLibraryManager @Inject constructor(val mediaStorage: MediaStorage) {
         additionalCustomCategories.forEach { targetCategory ->
             val category = availableCategories.find { it.id == targetCategory.id }
             category?.let { mediaStorage.assignItemToCategory(it, mediaItem) }
-        }
-    }
-
-    companion object {
-        private var instance: MediaLibraryManager? = null
-
-        fun getInstance(context: Context): MediaLibraryManager {
-            if (instance == null)
-                instance = MediaLibraryManager(MediaStorage(context))
-
-            return instance!!
         }
     }
 }

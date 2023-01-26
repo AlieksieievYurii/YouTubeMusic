@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.utilities
 
-import android.app.Application
 import android.content.Context
 import com.google.gson.Gson
 import com.yurii.youtubemusic.models.EqualizerData
@@ -73,17 +72,5 @@ class Preferences @Inject constructor(@ApplicationContext private val context: C
         private const val SH_KEY_BASS_BOOST_DATA: String = "com.yurii.youtubemusic.bass.boost"
         private const val SH_KEY_VIRTUALIZER_DATA: String = "com.yurii.youtubemusic.virtualizer"
         private const val SH_KEY_EQUALIZER_DATA: String = "com.yurii.youtubemusic.bass.equalizer"
-
-
-        @Volatile
-        private var instance: Preferences? = null
-
-        fun getInstance(application: Application): Preferences {
-            if (instance == null)
-                synchronized(this) {
-                    instance = Preferences(application)
-                }
-            return instance!!
-        }
     }
 }

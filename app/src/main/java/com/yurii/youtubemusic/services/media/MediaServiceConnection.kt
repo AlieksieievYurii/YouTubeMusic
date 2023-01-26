@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.services.media
 
-import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
@@ -199,23 +198,6 @@ class MediaServiceConnection @Inject constructor(
         override fun onSessionDestroyed() {
             super.onSessionDestroyed()
             Timber.d("MediaControllerCallback -> onSessionDestroyed")
-        }
-    }
-
-    companion object {
-
-        @Volatile
-        private var instance: MediaServiceConnection? = null
-
-        fun getInstance(
-            application: Application,
-            queueModesRepository: QueueModesRepository
-        ): MediaServiceConnection {
-            if (instance == null)
-                synchronized(this) {
-                    instance = MediaServiceConnection(application, queueModesRepository)
-                }
-            return instance!!
         }
     }
 }
