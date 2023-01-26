@@ -15,7 +15,7 @@ import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.main.MainActivity
-import com.yurii.youtubemusic.utilities.Preferences
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import javax.inject.Inject
 
 private const val TAG = "MediaBackgroundService"
 
@@ -51,11 +52,25 @@ private enum class AudioFocus {
     Focused
 }
 
+@AndroidEntryPoint
 class MediaService : MediaBrowserServiceCompat() {
-    private val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+    @Inject
+    lateinit var audioManager: AudioManager
+
+    @Inject
+    lateinit var audioEffectManager: AudioEffectManager
+
+    @Inject
+    lateinit var queueModesRepository: QueueModesRepository
+
+    @Inject
+    lateinit var mediaLibraryManager: MediaLibraryManager
+
+    @Inject
+    lateinit var queueProvider: QueueProvider
+
     private val notificationManager by lazy { NotificationManager(baseContext, sessionToken!!) }
-    private val audioEffectManager by lazy { AudioEffectManager.getInstance(Preferences.getInstance(application)) }
-    private val queueModesRepository by lazy { QueueModesRepository.getInstance(application) }
+
     private lateinit var mediaSession: MediaSessionCompat
 
     private var mediaPlayer: MediaPlayer? = null
@@ -64,11 +79,6 @@ class MediaService : MediaBrowserServiceCompat() {
     private var currentAudioFocus = AudioFocus.NoFocus
     private val becomingNoisyReceiver = BecomingNoisyReceiver()
     private val playbackStateBuilder = PlaybackStateCompat.Builder()
-
-    private val mediaLibraryManager: MediaLibraryManager by lazy { MediaLibraryManager.getInstance(this) }
-
-    private val queueProvider by lazy { QueueProvider(mediaSession, mediaLibraryManager.mediaStorage) }
-
     private val coroutineScopeJob = Job()
     private val coroutineScope = CoroutineScope(coroutineScopeJob)
 
@@ -127,7 +137,10 @@ class MediaService : MediaBrowserServiceCompat() {
                 when (event) {
                     is MediaLibraryManager.Event.ItemDeleted -> onMediaItemIsDeleted(event.item)
                     is MediaLibraryManager.Event.MediaItemIsAdded -> onMediaItemIsAdded(event.mediaItem)
-                    is MediaLibraryManager.Event.CategoryAssignment -> onMediaItemIsAssignedToCategories(event.mediaItem, event.customCategories)
+                    is MediaLibraryManager.Event.CategoryAssignment -> onMediaItemIsAssignedToCategories(
+                        event.mediaItem,
+                        event.customCategories
+                    )
                     is MediaLibraryManager.Event.CategoryRemoved -> onCategoryRemoved(event.category)
                     is MediaLibraryManager.Event.CategoryUpdated -> {
                         queueProvider.updateCategory(event.category)
@@ -219,7 +232,12 @@ class MediaService : MediaBrowserServiceCompat() {
 
         return playbackStateBuilder.apply {
             setActions(getAvailableActions())
-            setState(currentState, position, if (currentState == PlaybackStateCompat.STATE_PAUSED) 0f else 1.0f, SystemClock.elapsedRealtime())
+            setState(
+                currentState,
+                position,
+                if (currentState == PlaybackStateCompat.STATE_PAUSED) 0f else 1.0f,
+                SystemClock.elapsedRealtime()
+            )
         }
     }
 
@@ -450,7 +468,8 @@ class MediaService : MediaBrowserServiceCompat() {
         }
     }
 
-    private inner class MediaPlayerCallBacks : MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+    private inner class MediaPlayerCallBacks : MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
+        MediaPlayer.OnCompletionListener {
         override fun onPrepared(mp: MediaPlayer?) {
             playMediaPlayer()
         }
