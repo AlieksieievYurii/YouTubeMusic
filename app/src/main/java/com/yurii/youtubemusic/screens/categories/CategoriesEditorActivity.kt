@@ -16,12 +16,13 @@ import com.yurii.youtubemusic.databinding.ActivityCategoriesEditorBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.ui.AddEditCategoryDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
-import com.yurii.youtubemusic.utilities.Injector
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class CategoriesEditorActivity : AppCompatActivity() {
-    private val viewModel by viewModels<CategoriesEditorViewModel> { Injector.provideCategoriesEditorViewMode(this) }
+    private val viewModel: CategoriesEditorViewModel by viewModels()
     private val binding: ActivityCategoriesEditorBinding by viewBinding()
 
     private val onDeleteClick = View.OnClickListener {
@@ -49,7 +50,7 @@ class CategoriesEditorActivity : AppCompatActivity() {
         viewModel.state.collectLatest {
             when (it) {
                 is CategoriesEditorViewModel.State.Loaded ->
-                    if (it.categories.isNullOrEmpty()) setNoCategories() else setCategories(it.categories)
+                    if (it.categories.isEmpty()) setNoCategories() else setCategories(it.categories)
                 CategoriesEditorViewModel.State.Loading -> {
                     //nothing
                 }

@@ -39,8 +39,4 @@ object Injector {
             Preferences.getInstance(application)
         )
     }
-
-    fun provideCategoriesEditorViewMode(context: Context): CategoriesEditorViewModel.Factory {
-        return CategoriesEditorViewModel.Factory(MediaLibraryManager.getInstance(context))
-    }
 }
