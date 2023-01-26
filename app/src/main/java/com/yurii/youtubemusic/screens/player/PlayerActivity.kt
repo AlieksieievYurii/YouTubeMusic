@@ -14,13 +14,14 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.utilities.setTint
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class PlayerActivity : AppCompatActivity() {
-    private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(application) }
+    private val viewModel: PlayerControllerViewModel by viewModels()
     private val binding: ActivityPlayerBinding by viewBinding()
     private var isSeekBarChanging = false
     override fun onCreate(savedInstanceState: Bundle?) {

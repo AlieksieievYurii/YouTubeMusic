@@ -21,15 +21,15 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.ui.startValueAnimation
-import com.yurii.youtubemusic.utilities.Injector
-import com.yurii.youtubemusic.utilities.requireApplication
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 
+@AndroidEntryPoint
 class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_panel) {
-    private val viewModel: PlayerControllerViewModel by viewModels { Injector.providePlayerControllerViewModel(requireApplication()) }
+    private val viewModel: PlayerControllerViewModel by viewModels()
     private val binding: FragmentPlayerControlPanelBinding by viewBinding()
 
     private var clickX = 0f
@@ -47,7 +47,7 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
             false
         }
 
-        lifecycleScope.launchWhenCreated {
+        viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { observePlaybackState() }
                 launch { observePlayingPosition() }
@@ -122,7 +122,8 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
         viewModel.stopPlaying()
     }
 
-    private fun returnViewToCenter() = startValueAnimation(binding.container.x, 0f) { binding.container.x = it }
+    private fun returnViewToCenter() =
+        startValueAnimation(binding.container.x, 0f) { binding.container.x = it }
 
     private fun swipeViewAway() {
         if (!binding.container.isVisible)

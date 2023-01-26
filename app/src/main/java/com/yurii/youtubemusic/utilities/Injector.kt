@@ -20,10 +20,6 @@ object Injector {
         return EqualizerViewModel.Factory(audioEffectManager)
     }
 
-    fun providePlayerControllerViewModel(application: Application): PlayerControllerViewModel.Factory {
-        return PlayerControllerViewModel.Factory(MediaServiceConnection.getInstance(application, QueueModesRepository.getInstance(application)))
-    }
-
     fun provideMediaItemsViewModel(application: Application, category: Category): MediaItemsViewModel.Factory {
         return MediaItemsViewModel.Factory(
             category,

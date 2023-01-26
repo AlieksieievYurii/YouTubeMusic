@@ -4,13 +4,15 @@ import androidx.annotation.IntRange
 import androidx.lifecycle.*
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.services.media.PlaybackState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.lang.IllegalStateException
+import javax.inject.Inject
 
-class PlayerControllerViewModel(private val mediaServiceConnection: MediaServiceConnection) : ViewModel() {
+@HiltViewModel
+class PlayerControllerViewModel @Inject constructor (private val mediaServiceConnection: MediaServiceConnection) : ViewModel() {
 
     private var timerJob: Job? = null
 
@@ -84,14 +86,4 @@ class PlayerControllerViewModel(private val mediaServiceConnection: MediaService
         (playbackState.value as? PlaybackState.Playing)?.let { (_currentPosition.value * 1000 / it.mediaItem.durationInMillis).toInt() } ?: 0
 
     fun stopPlaying() = mediaServiceConnection.stop()
-
-    @Suppress("UNCHECKED_CAST")
-    class Factory(private val mediaServiceConnection: MediaServiceConnection) :
-        ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(PlayerControllerViewModel::class.java))
-                return PlayerControllerViewModel(mediaServiceConnection) as T
-            throw IllegalStateException("Given the model class is not assignable from PlayerBottomControllerViewModel class")
-        }
-    }
 }
