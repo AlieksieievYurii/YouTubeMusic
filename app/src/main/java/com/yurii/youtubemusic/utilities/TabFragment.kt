@@ -6,7 +6,6 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -36,11 +35,13 @@ abstract class TabFragment<T : ViewDataBinding>(
         return binding.root
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden)
+            changeTitle()
+    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        changeTitle() // I know this is bad place for that...
-        // but currently I do not know where I can catch the moment when the fragment is shown to user.
-        // onResume is called only during the initialization!!!
 
         inflateOptionsMenuIfRequired(menu, inflater)
         super.onCreateOptionsMenu(menu, inflater)
