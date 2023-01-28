@@ -4,24 +4,26 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 
 import android.widget.Toast
-import androidx.fragment.app.activityViewModels
 import com.google.android.gms.common.api.ApiException
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.FragmentAuthorizationBinding
+import com.yurii.youtubemusic.databinding.FragmentAuthenticationBinding
 import com.yurii.youtubemusic.utilities.DoesNotHaveRequiredScopes
 import com.yurii.youtubemusic.utilities.GoogleAccount
 import com.yurii.youtubemusic.utilities.TabFragment
-import com.yurii.youtubemusic.screens.main.MainActivityViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-class AuthorizationFragment : TabFragment<FragmentAuthorizationBinding>(
-    layoutId = R.layout.fragment_authorization,
+@AndroidEntryPoint
+class AuthenticationFragment : TabFragment<FragmentAuthenticationBinding>(
+    layoutId = R.layout.fragment_authentication,
     titleStringId = R.string.label_fragment_title_youtube_musics,
     optionMenuId = null
 ) {
-    private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    private val googleAccount: GoogleAccount by lazy { GoogleAccount(requireContext()) }
 
-    override fun onInflatedView(viewDataBinding: FragmentAuthorizationBinding) {
+    @Inject
+    lateinit var googleAccount: GoogleAccount
+
+    override fun onInflatedView(viewDataBinding: FragmentAuthenticationBinding) {
         binding.signInButton.setOnClickListener {
             binding.signInButton.isEnabled = false
             googleAccount.startSignInActivity(this)
@@ -30,8 +32,7 @@ class AuthorizationFragment : TabFragment<FragmentAuthorizationBinding>(
 
     private fun handleSignInResult(result: Intent) {
         try {
-            val account = googleAccount.obtainAccountFromIntent(result)
-            mainActivityViewModel.signIn(account)
+            googleAccount.signIn(result)
         } catch (error: ApiException) {
             Toast.makeText(context, "${error.message}, code:${error.statusCode}", Toast.LENGTH_LONG).show()
             binding.signInButton.isEnabled = true
@@ -60,6 +61,6 @@ class AuthorizationFragment : TabFragment<FragmentAuthorizationBinding>(
     }
 
     companion object {
-        fun createInstance(): AuthorizationFragment = AuthorizationFragment()
+        fun createInstance() = AuthenticationFragment()
     }
 }

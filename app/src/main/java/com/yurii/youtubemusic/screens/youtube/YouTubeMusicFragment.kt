@@ -1,18 +1,14 @@
 package com.yurii.youtubemusic.screens.youtube
 
 
-import android.os.Bundle
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.databinding.FragmentYoutubeMusicBinding
 import com.yurii.youtubemusic.utilities.*
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.screens.main.MainActivityViewModel
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
@@ -22,7 +18,6 @@ import com.yurii.youtubemusic.ui.showDeletionDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
@@ -38,13 +33,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         object Error : ViewState()
     }
 
-    private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
-    @Inject
-    lateinit var assistedFactory: YouTubeMusicViewModelAssistedFactory
-
-    private val viewModel: YouTubeMusicViewModel by viewModels {
-        YouTubeMusicViewModel.Factory(assistedFactory, requireArguments().requireParcelable(GOOGLE_SIGN_IN))
-    }
+    private val viewModel: YouTubeMusicViewModel by viewModels()
 
     private val listAdapter: VideoItemsListAdapter by lazy {
         VideoItemsListAdapter(object : VideoItemsListAdapter.Callback {
@@ -91,7 +80,6 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
 
     private suspend fun startHandlingEvents() = viewModel.event.collectLatest { event ->
         when (event) {
-            is YouTubeMusicViewModel.Event.SignOut -> mainActivityViewModel.logOut()
             is YouTubeMusicViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(event.videoItem, event.error)
             is YouTubeMusicViewModel.Event.OpenCategoriesSelector -> showDialogToSelectCategories(
                 event.videoItem,
@@ -157,16 +145,6 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     )
 
     companion object {
-        private const val GOOGLE_SIGN_IN = "com.yurii.youtubemusic.youtubefragment.google.sign.in"
-
-        fun createInstance(googleSignInAccount: GoogleSignInAccount): YouTubeMusicFragment {
-            val youTubeMusicsFragment = YouTubeMusicFragment()
-
-            youTubeMusicsFragment.arguments = Bundle().apply {
-                this.putParcelable(GOOGLE_SIGN_IN, googleSignInAccount)
-            }
-
-            return youTubeMusicsFragment
-        }
+        fun createInstance() = YouTubeMusicFragment()
     }
 }

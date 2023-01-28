@@ -4,7 +4,6 @@ import androidx.lifecycle.*
 import com.yurii.youtubemusic.models.TwisterData
 import com.yurii.youtubemusic.services.media.AudioEffectManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.lang.IllegalStateException
 import javax.inject.Inject
 
 @HiltViewModel
