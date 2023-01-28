@@ -30,7 +30,8 @@ class QueueProviderTest {
     @Before
     fun initialization() {
         MockKAnnotations.init(this)
-        queueProvider = QueueProvider(mediaSessionCompat, mediaStorage)
+        queueProvider = QueueProvider(mediaStorage)
+        queueProvider.mediaSession = mediaSessionCompat
         mockkStatic("android.net.Uri")
         every { any<File>().toUri() } returns mockk()
     }
