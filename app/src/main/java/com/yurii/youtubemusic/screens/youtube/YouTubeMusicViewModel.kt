@@ -15,7 +15,7 @@ import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.utilities.GoogleAccount
-import com.yurii.youtubemusic.utilities.Preferences
+import com.yurii.youtubemusic.utilities.YouTubePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -34,7 +34,7 @@ abstract class VideoItemStatus(open val videoItem: Item) {
 class YouTubeMusicViewModel @Inject constructor(
     private val mediaLibraryManager: MediaLibraryManager,
     private val downloaderServiceConnection: ServiceConnection,
-    private val preferences: Preferences,
+    private val youTubePreferences: YouTubePreferences,
     val youTubeAPI: YouTubeAPI,
     private val googleAccount: GoogleAccount
 ) : ViewModel() {
@@ -46,7 +46,7 @@ class YouTubeMusicViewModel @Inject constructor(
     private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
     val videoItems: StateFlow<PagingData<VideoItem>> = _videoItems
 
-    private val _currentPlaylistId: MutableStateFlow<Playlist?> = MutableStateFlow(preferences.getCurrentYouTubePlaylist())
+    private val _currentPlaylistId: MutableStateFlow<Playlist?> = MutableStateFlow(youTubePreferences.getCurrentYouTubePlaylist())
     val currentPlaylistId: StateFlow<Playlist?> = _currentPlaylistId
 
     private val _videoItemStatus = MutableSharedFlow<VideoItemStatus>()
@@ -93,11 +93,11 @@ class YouTubeMusicViewModel @Inject constructor(
 
     fun signOut() {
         googleAccount.signOut()
-        preferences.setCurrentYouTubePlaylist(null)
+        youTubePreferences.setCurrentYouTubePlaylist(null)
     }
 
     fun setPlaylist(playlist: Playlist) {
-        preferences.setCurrentYouTubePlaylist(playlist)
+        youTubePreferences.setCurrentYouTubePlaylist(playlist)
         _currentPlaylistId.value = playlist
         loadVideoItems(playlist)
     }

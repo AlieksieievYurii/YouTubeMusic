@@ -5,12 +5,12 @@ import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import com.yurii.youtubemusic.models.EqualizerData
 import com.yurii.youtubemusic.models.TwisterData
-import com.yurii.youtubemusic.utilities.Preferences
+import com.yurii.youtubemusic.utilities.EqualizerPreferences
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AudioEffectManager @Inject constructor(private val preferences: Preferences) {
+class AudioEffectManager @Inject constructor(private val preferences: EqualizerPreferences) {
     private var currentSessionId: Int? = null
 
     private var bassBoost: BassBoost? = null
