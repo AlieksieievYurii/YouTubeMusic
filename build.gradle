@@ -28,6 +28,7 @@ buildscript {
         coil_version = "2.2.2"
         data_store_version = "1.0.0"
         hilt_version = "2.44"
+        room_version = "2.5.0"
 
         // Testing
         leakcanary_android_version = "2.4"

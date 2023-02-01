@@ -77,6 +77,11 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
+    // Room
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+
     implementation("com.google.api-client:google-api-client-android:$google_api_client_android_version") {
         exclude group: 'org.apache.httpcomponents'
     }
