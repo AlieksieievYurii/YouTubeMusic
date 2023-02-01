@@ -8,31 +8,38 @@ import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.Progress
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.lang.Exception
+import javax.inject.Inject
 
 
+@AndroidEntryPoint
 class MusicDownloaderService : Service() {
     sealed class DownloadingReport {
         data class Successful(val videoItem: VideoItem) : DownloadingReport()
         data class Failed(val videoItem: VideoItem, val error: Exception) : DownloadingReport()
     }
 
+    @Inject lateinit var mediaLibraryManager: MediaLibraryManager
+    @Inject lateinit var downloader: MusicDownloader
+    @Inject lateinit var notificationManager: NotificationManager
+
     private val scopeJob = Job()
     private val serviceCoroutineScope = CoroutineScope(scopeJob)
-
-    private val mediaLibraryManager by lazy { MediaLibraryManager.getInstance(this) }
 
     private var downloadingProgress: MutableSharedFlow<Pair<VideoItem, Progress>>? = null
     private var downloadingReport: MutableSharedFlow<DownloadingReport>? = null
 
-    private val downloader: MusicDownloader by lazy { MusicDownloaderImpl(MusicDownloaderCallBacks(), mediaLibraryManager.mediaStorage) }
-    private val notificationManager by lazy { NotificationManager(this) }
     private var isForeground = false
 
+    override fun onCreate() {
+        super.onCreate()
+        downloader.setCallback(MusicDownloaderCallBacks())
+    }
     override fun onBind(intent: Intent?): IBinder {
         return ServiceInterface()
     }

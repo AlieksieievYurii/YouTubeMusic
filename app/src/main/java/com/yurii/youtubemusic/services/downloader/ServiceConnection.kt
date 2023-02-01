@@ -8,14 +8,17 @@ import android.os.IBinder
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.Progress
 import com.yurii.youtubemusic.models.VideoItem
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-
 import java.lang.Exception
+import javax.inject.Inject
+import javax.inject.Singleton
 
 class ServiceConnectionException : Exception("Cannot connect to the service")
 
-class ServiceConnection(private val context: Context) : ServiceConnection {
+@Singleton
+class ServiceConnection @Inject constructor(@ApplicationContext private val context: Context) : ServiceConnection {
 
     private val _downloadingReport: MutableSharedFlow<MusicDownloaderService.DownloadingReport> = MutableSharedFlow()
     val downloadingReport = _downloadingReport.asSharedFlow()

@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.services.media
 
-import android.content.Context
 import com.yurii.youtubemusic.models.Category
 
 import com.yurii.youtubemusic.models.Item
@@ -13,13 +12,16 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * The class is responsible for doing modification operations on media items and categories.
  * It implements event-based approach. In simple words when you do some changes,
  * an event is triggered and all its subscribers are informed.
  */
-class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
+@Singleton
+class MediaLibraryManager @Inject constructor(val mediaStorage: MediaStorage) {
     sealed class Event {
         data class ItemDeleted(val item: Item) : Event()
         data class MediaItemIsAdded(val mediaItem: MediaItem, val assignedCategoriesIds: List<Int>) : Event()
@@ -144,17 +146,6 @@ class MediaLibraryManager private constructor(val mediaStorage: MediaStorage) {
         additionalCustomCategories.forEach { targetCategory ->
             val category = availableCategories.find { it.id == targetCategory.id }
             category?.let { mediaStorage.assignItemToCategory(it, mediaItem) }
-        }
-    }
-
-    companion object {
-        private var instance: MediaLibraryManager? = null
-
-        fun getInstance(context: Context): MediaLibraryManager {
-            if (instance == null)
-                instance = MediaLibraryManager(MediaStorage(context))
-
-            return instance!!
         }
     }
 }

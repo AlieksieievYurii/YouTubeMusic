@@ -1,13 +1,11 @@
 package com.yurii.youtubemusic.screens.youtube
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.Progress
@@ -17,12 +15,13 @@ import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.utilities.GoogleAccount
-import com.yurii.youtubemusic.utilities.Preferences
+import com.yurii.youtubemusic.utilities.YouTubePreferences
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.lang.Exception
-import java.lang.IllegalStateException
+import javax.inject.Inject
 
 abstract class VideoItemStatus(open val videoItem: Item) {
     class Download(override val videoItem: Item) : VideoItemStatus(videoItem)
@@ -31,26 +30,23 @@ abstract class VideoItemStatus(open val videoItem: Item) {
     class Failed(override val videoItem: VideoItem, val error: Exception?) : VideoItemStatus(videoItem)
 }
 
-class YouTubeMusicViewModel(
+@HiltViewModel
+class YouTubeMusicViewModel @Inject constructor(
     private val mediaLibraryManager: MediaLibraryManager,
-    private val googleAccount: GoogleAccount,
     private val downloaderServiceConnection: ServiceConnection,
-    googleSignInAccount: GoogleSignInAccount,
-    private val preferences: Preferences
+    private val youTubePreferences: YouTubePreferences,
+    val youTubeAPI: YouTubeAPI,
+    private val googleAccount: GoogleAccount
 ) : ViewModel() {
     sealed class Event {
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
         data class OpenCategoriesSelector(val videoItem: VideoItem, val allCustomCategories: List<Category>) : Event()
-        object SignOut : Event()
     }
-
-    private val credential = googleAccount.getGoogleAccountCredentialUsingOAuth2(googleSignInAccount)
-    val youTubeAPI = YouTubeAPI(credential)
 
     private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
     val videoItems: StateFlow<PagingData<VideoItem>> = _videoItems
 
-    private val _currentPlaylistId: MutableStateFlow<Playlist?> = MutableStateFlow(preferences.getCurrentYouTubePlaylist())
+    private val _currentPlaylistId: MutableStateFlow<Playlist?> = MutableStateFlow(youTubePreferences.getCurrentYouTubePlaylist())
     val currentPlaylistId: StateFlow<Playlist?> = _currentPlaylistId
 
     private val _videoItemStatus = MutableSharedFlow<VideoItemStatus>()
@@ -80,7 +76,9 @@ class YouTubeMusicViewModel(
                         val musicFile = mediaLibraryManager.mediaStorage.getMediaFile(report.videoItem)
                         sendVideoItemStatus(VideoItemStatus.Downloaded(report.videoItem, musicFile.length()))
                     }
-                    is MusicDownloaderService.DownloadingReport.Failed -> sendVideoItemStatus(VideoItemStatus.Failed(report.videoItem, report.error))
+                    is MusicDownloaderService.DownloadingReport.Failed -> sendVideoItemStatus(
+                        VideoItemStatus.Failed(report.videoItem, report.error)
+                    )
                 }
             }
         }
@@ -95,12 +93,11 @@ class YouTubeMusicViewModel(
 
     fun signOut() {
         googleAccount.signOut()
-        preferences.setCurrentYouTubePlaylist(null)
-        sendEvent(Event.SignOut)
+        youTubePreferences.setCurrentYouTubePlaylist(null)
     }
 
     fun setPlaylist(playlist: Playlist) {
-        preferences.setCurrentYouTubePlaylist(playlist)
+        youTubePreferences.setCurrentYouTubePlaylist(playlist)
         _currentPlaylistId.value = playlist
         loadVideoItems(playlist)
     }
@@ -171,21 +168,5 @@ class YouTubeMusicViewModel(
                     _videoItems.emit(it)
                 }
         }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    class Factory(
-        private val mediaLibraryManager: MediaLibraryManager,
-        private val googleAccount: GoogleAccount,
-        private val downloaderServiceConnection: ServiceConnection,
-        private val googleSignInAccount: GoogleSignInAccount,
-        private val preferences: Preferences
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(YouTubeMusicViewModel::class.java))
-                return YouTubeMusicViewModel(mediaLibraryManager, googleAccount, downloaderServiceConnection, googleSignInAccount, preferences) as T
-            throw IllegalStateException("Given the model class is not assignable from YouTubeMusicViewModel class")
-        }
-
     }
 }

@@ -21,9 +21,10 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 
-class MusicDownloaderImpl(private val callBack: MusicDownloader.CallBack, private val mediaStorage: MediaStorage) : MusicDownloader {
+class MusicDownloaderImpl @Inject constructor(private val mediaStorage: MediaStorage) : MusicDownloader {
     private val youtubeDownloader = YoutubeDownloader()
 
     private val keepAliveTime = 1L
@@ -39,6 +40,11 @@ class MusicDownloaderImpl(private val callBack: MusicDownloader.CallBack, privat
         keepAliveTimeUnit,
         decodeWorkQueue
     )
+    private var callBack: MusicDownloader.CallBack? = null
+
+    override fun setCallback(callBack: MusicDownloader.CallBack) {
+        this.callBack = callBack
+    }
 
     override fun download(videoItem: VideoItem, customCategories: List<Category>) {
         val task = Task(videoItem, customCategories)
@@ -99,7 +105,7 @@ class MusicDownloaderImpl(private val callBack: MusicDownloader.CallBack, privat
                 lastError = error
                 failedTasks.add(this)
                 executionTasks.remove(this)
-                callBack.onErrorOccurred(videoItem, error)
+                callBack?.onErrorOccurred(videoItem, error)
             }
         }
 
@@ -112,7 +118,7 @@ class MusicDownloaderImpl(private val callBack: MusicDownloader.CallBack, privat
                 return
             }
             executionTasks.remove(this)
-            callBack.onFinished(videoItem, customCategories)
+            callBack?.onFinished(videoItem, customCategories)
         }
 
         fun interruptTask() {
@@ -197,7 +203,7 @@ class MusicDownloaderImpl(private val callBack: MusicDownloader.CallBack, privat
                         if (newProgress > progress) {
                             progress = newProgress
                             this.progress.update(progress, total.toLong(), totalSize)
-                            callBack.onChangeProgress(videoItem, this.progress)
+                            callBack?.onChangeProgress(videoItem, this.progress)
                         }
                     }
                 }

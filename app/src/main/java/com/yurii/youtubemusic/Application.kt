@@ -5,8 +5,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
-
+@HiltAndroidApp
 class Application : Application() {
     override fun onCreate() {
         super.onCreate()

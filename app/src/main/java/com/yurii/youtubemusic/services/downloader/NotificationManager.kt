@@ -9,13 +9,15 @@ import androidx.core.app.NotificationManagerCompat
 import com.yurii.youtubemusic.Application
 import com.yurii.youtubemusic.screens.main.MainActivity
 import com.yurii.youtubemusic.R
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class NotificationManager(private val context: Context) {
+class NotificationManager @Inject constructor(@ApplicationContext private val context: Context) {
     private val notificationManager = NotificationManagerCompat.from(context)
     private val notificationBuilder = NotificationCompat.Builder(context, Application.YOUTUBE_DOWNLOADER_NOTIFICATION_CHANNEL)
-    private val sessionActivityPendingIntent = context.packageManager?.getLaunchIntentForPackage(context.packageName)?.let { sessionIntent ->
-        sessionIntent.putExtra(MainActivity.EXTRA_LAUNCH_FRAGMENT, MainActivity.EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC)
-        PendingIntent.getActivity(context, 0, sessionIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+    private val sessionActivityPendingIntent = context.packageManager?.getLaunchIntentForPackage(context.packageName)?.let {
+        it.putExtra(MainActivity.EXTRA_LAUNCH_FRAGMENT, MainActivity.EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC)
+        PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     fun buildNotification(@IntRange(from = 0, to = 100) progress: Int): Notification {

@@ -8,6 +8,8 @@ import com.yurii.youtubemusic.models.getMediaDescriptionCompat
 import com.yurii.youtubemusic.utilities.findIndex
 import com.yurii.youtubemusic.utilities.move
 import java.lang.IllegalStateException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 class QueueProviderException(message: String) : Exception(message)
 
@@ -15,7 +17,8 @@ class QueueProviderException(message: String) : Exception(message)
  * Provides encapsulated logic for queue of media items.
  * Before any operations the queue must be initialized via [createQueueFor]
  */
-class QueueProvider(private val mediaSession: MediaSessionCompat, private val mediaStorage: MediaStorage) {
+@Singleton
+class QueueProvider @Inject constructor(private val mediaStorage: MediaStorage) {
     private val queue = ArrayList<MediaItem>()
     private var playingCategory: Category? = null
     private var currentPlayingMediaItemPosition = 0
@@ -31,6 +34,8 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      */
     val isInitialized: Boolean
         get() = playingCategory != null && queue.isNotEmpty()
+
+    var mediaSession: MediaSessionCompat? = null
 
     /**
      * Returns current playing category. You should call this only is the queue is initialized
@@ -88,7 +93,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
     fun updateCategory(category: Category) {
         if (isInitialized && currentPlayingCategory.id == category.id) {
             playingCategory = category
-            mediaSession.setQueueTitle("Queue from '$category' category")
+            mediaSession?.setQueueTitle("Queue from '$category' category")
         }
     }
 
@@ -97,8 +102,8 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
      */
     fun release() {
         queue.clear()
-        mediaSession.setQueue(null)
-        mediaSession.setQueueTitle(null)
+        mediaSession?.setQueue(null)
+        mediaSession?.setQueueTitle(null)
         playingCategory = null
         currentPlayingMediaItemPosition = 0
     }
@@ -208,7 +213,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
             queue.shuffle()
 
         syncMediaSessionQueue()
-        mediaSession.setQueueTitle("Queue from '$category' category")
+        mediaSession?.setQueueTitle("Queue from '$category' category")
     }
 
     private fun assertQueueInitialization() {
@@ -216,7 +221,7 @@ class QueueProvider(private val mediaSession: MediaSessionCompat, private val me
             throw QueueProviderException("Queue is not initalized. Call createQueueFor firstly")
     }
 
-    private fun syncMediaSessionQueue() = mediaSession.setQueue(getQueueAsMediaSessionQueueItems())
+    private fun syncMediaSessionQueue() = mediaSession?.setQueue(getQueueAsMediaSessionQueueItems())
 
     private fun getQueueAsMediaSessionQueueItems(): List<MediaSessionCompat.QueueItem> {
         var id = 0L

@@ -12,24 +12,26 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.utilities.Injector
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.ui.SelectCategoriesDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
-import com.yurii.youtubemusic.utilities.requireApplication
 import com.yurii.youtubemusic.utilities.requireParcelable
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     private val category: Category by lazy { requireArguments().requireParcelable(EXTRA_CATEGORY) }
-    private val viewModel: MediaItemsViewModel by viewModels { Injector.provideMediaItemsViewModel(requireApplication(), category) }
+    @Inject
+    lateinit var assistedFactory: MediaItemsViewModelAssistedFactory
+    private val viewModel: MediaItemsViewModel by viewModels { MediaItemsViewModel.Factory(assistedFactory, category) }
     private val binding: FragmentMediaItemsBinding by viewBinding()
 
     private val mediaListAdapter: MediaListAdapter by lazy {
@@ -111,7 +113,11 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
 
     private fun openCategoriesEditor(mediaItem: MediaItem) {
         lifecycleScope.launch {
-            SelectCategoriesDialog(requireContext(), viewModel.getAllCustomCategories(), viewModel.getAssignedCustomCategoriesFor(mediaItem)) {
+            SelectCategoriesDialog(
+                requireContext(),
+                viewModel.getAllCustomCategories(),
+                viewModel.getAssignedCustomCategoriesFor(mediaItem)
+            ) {
                 viewModel.assignCustomCategoriesFor(mediaItem, it)
             }.show()
         }

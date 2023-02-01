@@ -7,99 +7,66 @@ import android.view.MenuItem
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.yurii.youtubemusic.screens.player.PlayerControlPanelFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
-import com.yurii.youtubemusic.services.media.MediaServiceConnection
-import com.yurii.youtubemusic.services.media.QueueModesRepository
 import com.yurii.youtubemusic.utilities.*
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
-    private val viewModel: MainActivityViewModel by viewModels {
-        MainActivityViewModel.MainActivityViewModelFactory(
-            MediaServiceConnection.getInstance(
-                application,
-                QueueModesRepository.getInstance(application)
-            )
-        )
-    }
+    private val viewModel: MainActivityViewModel by viewModels()
     private val activityMainBinding: ActivityMainBinding by viewBinding()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSupportActionBar(activityMainBinding.toolbar)
-        setupBottomNavigationMenu(activityMainBinding)
+        activityMainBinding.bottomNavigationView.setOnNavigationItemSelectedListener(this)
 
         fragmentHelper.showSavedMusicFragment(animated = false)
 
         lifecycleScope.launchWhenCreated {
-            viewModel.event.collectLatest {
-                if (it is MainActivityViewModel.Event.LogInEvent)
-                    handleSignIn(it.account)
-                else if (it is MainActivityViewModel.Event.LogOutEvent)
-                    handleSignOut()
-
-                if (it is MainActivityViewModel.Event.MediaServiceError) {
-                    Snackbar.make(activityMainBinding.coordinatorLayout, it.exception.message ?: "Unknown", Snackbar.LENGTH_LONG)
-                        .setAnchorView(activityMainBinding.bottomNavigationView).show()
-                }
-            }
+            launch { observeEvents() }
+            launch { observeYouTubeAuthenticationState() }
         }
 
         supportFragmentManager.beginTransaction().replace(R.id.player_view_holder, PlayerControlPanelFragment()).commit()
     }
 
-    private fun setupBottomNavigationMenu(activityMainBinding: ActivityMainBinding) {
-        activityMainBinding.bottomNavigationView.setOnNavigationItemSelectedListener(this)
-    }
-
-    private fun initAndOpenYouTubeMusicFragment() {
-        try {
-            val account = GoogleAccount(this).getLastSignedInAccount()
-            fragmentHelper.initYouTubeMusicFragment(account)
-            fragmentHelper.showYouTubeMusicFragment()
-        } catch (e: IsNotSignedIn) {
-            fragmentHelper.showAuthorizationFragment()
-        } catch (e: DoesNotHaveRequiredScopes) {
-            fragmentHelper.showAuthorizationFragment()
+    private suspend fun observeYouTubeAuthenticationState() {
+        viewModel.isAuthenticatedAndAuthorized.collect { isAuthenticated ->
+            if (fragmentHelper.isYouTubeMusicFragmentActive && !isAuthenticated)
+                fragmentHelper.showAuthenticationFragment()
+            else if (fragmentHelper.isAuthenticationFragmentActive && isAuthenticated)
+                fragmentHelper.showYouTubeMusicFragment()
         }
     }
 
-    private fun openSavedMusicFragment() {
-        fragmentHelper.showSavedMusicFragment()
-    }
-
-    private fun openYouTubeMusicFragmentIfSingedInElseOpenAuthorizationFragment() {
-        if (fragmentHelper.isNotYouTubeMusicFragmentInitialized())
-            initAndOpenYouTubeMusicFragment()
-        else
-            fragmentHelper.showYouTubeMusicFragment()
-    }
-
-    private fun handleSignIn(googleSignInAccount: GoogleSignInAccount) {
-        fragmentHelper.initYouTubeMusicFragment(googleSignInAccount)
-        fragmentHelper.removeAuthorizationFragment()
-        fragmentHelper.showYouTubeMusicFragment()
-    }
-
-    private fun handleSignOut() {
-        fragmentHelper.removeYouTubeMusicFragment()
-        fragmentHelper.showAuthorizationFragment()
+    private suspend fun observeEvents() {
+        viewModel.event.collectLatest {
+            if (it is MainActivityViewModel.Event.MediaServiceError) {
+                Snackbar.make(activityMainBinding.coordinatorLayout, it.exception.message ?: "Unknown", Snackbar.LENGTH_LONG)
+                    .setAnchorView(activityMainBinding.bottomNavigationView).show()
+            }
+        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.item_saved_music -> {
-            openSavedMusicFragment()
+            fragmentHelper.showSavedMusicFragment()
             true
         }
         R.id.item_you_tube_music -> {
-            openYouTubeMusicFragmentIfSingedInElseOpenAuthorizationFragment()
+            if (viewModel.isAuthenticatedAndAuthorized.value)
+                fragmentHelper.showYouTubeMusicFragment()
+            else
+                fragmentHelper.showAuthenticationFragment()
             true
         }
         else -> false

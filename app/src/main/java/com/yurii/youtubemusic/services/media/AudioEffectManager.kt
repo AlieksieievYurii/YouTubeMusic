@@ -5,9 +5,12 @@ import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import com.yurii.youtubemusic.models.EqualizerData
 import com.yurii.youtubemusic.models.TwisterData
-import com.yurii.youtubemusic.utilities.Preferences
+import com.yurii.youtubemusic.utilities.EqualizerPreferences
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AudioEffectManager private constructor(private val preferences: Preferences) {
+@Singleton
+class AudioEffectManager @Inject constructor(private val preferences: EqualizerPreferences) {
     private var currentSessionId: Int? = null
 
     private var bassBoost: BassBoost? = null
@@ -130,17 +133,4 @@ class AudioEffectManager private constructor(private val preferences: Preference
     private fun getDefaultEqualizer(): Equalizer = Equalizer(0, 0).apply { enabled = false }
 
     private fun convertToAudioEffectRange(value: Int): Short = (value * 10).toShort()
-
-    companion object {
-        @Volatile
-        private var instance: AudioEffectManager? = null
-
-        fun getInstance(preferences: Preferences): AudioEffectManager {
-            if (instance == null)
-                synchronized(this) {
-                    instance = AudioEffectManager(preferences)
-                }
-            return instance!!
-        }
-    }
 }

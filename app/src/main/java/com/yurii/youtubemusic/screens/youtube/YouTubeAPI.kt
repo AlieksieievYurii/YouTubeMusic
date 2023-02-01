@@ -1,22 +1,25 @@
 package com.yurii.youtubemusic.screens.youtube
 
-import com.google.api.client.extensions.android.http.AndroidHttp
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.HttpTransport
 import com.google.api.client.json.JsonFactory
-import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
+import com.yurii.youtubemusic.utilities.GoogleAccount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @Suppress("BlockingMethodInNonBlockingContext")
-class YouTubeAPI(credential: GoogleAccountCredential) {
-    private val transport: HttpTransport = AndroidHttp.newCompatibleTransport()
-    private val jsonFactory: JsonFactory = JacksonFactory.getDefaultInstance()
-    private var service: YouTube = YouTube.Builder(transport, jsonFactory, credential).build()
+class YouTubeAPI @Inject constructor(
+    private val transport: HttpTransport,
+    private val jsonFactory: JsonFactory,
+    private val googleAccount: GoogleAccount
+) {
+    private val service: YouTube by lazy {
+        YouTube.Builder(transport, jsonFactory, googleAccount.getGoogleAccountCredentialUsingOAuth2()).build()
+    }
 
     suspend fun getMyPlaylists(pageToken: String? = null, maxResult: Long = 10): PlaylistListResponse =
         withContext(Dispatchers.IO) {

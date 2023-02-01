@@ -3,12 +3,15 @@ package com.yurii.youtubemusic.screens.categories
 import androidx.lifecycle.*
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
+import javax.inject.Inject
 
-class CategoriesEditorViewModel(private val mediaLibraryManager: MediaLibraryManager) : ViewModel() {
+@HiltViewModel
+class CategoriesEditorViewModel @Inject constructor(private val mediaLibraryManager: MediaLibraryManager) : ViewModel() {
     sealed class State {
         object Loading : State()
         data class Loaded(val categories: List<Category>) : State()
@@ -65,15 +68,6 @@ class CategoriesEditorViewModel(private val mediaLibraryManager: MediaLibraryMan
             id++
         reservedIds.add(id)
         return id
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    class Factory(private val mediaLibraryManager: MediaLibraryManager) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(CategoriesEditorViewModel::class.java))
-                return CategoriesEditorViewModel(mediaLibraryManager) as T
-            throw IllegalStateException("Given the model class is not assignable from CategoriesEditorViewModel class")
-        }
     }
 }
 
