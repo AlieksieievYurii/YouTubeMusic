@@ -71,13 +71,13 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     private var mPath = Path()
 
     private val mGestureClickListener = GestureDetectorCompat(context, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onDown(e: MotionEvent?) = true
-        override fun onSingleTapUp(e: MotionEvent?): Boolean {
+        override fun onDown(e: MotionEvent) = true
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
             invokeClickListenerCallBack()
             return true
         }
 
-        override fun onLongPress(e: MotionEvent?) {
+        override fun onLongPress(e: MotionEvent) {
             super.onLongPress(e)
             if (state == State.Download)
                 onLongClickDownloadListener?.invoke(this@DownloadButton).also {
