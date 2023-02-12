@@ -46,6 +46,10 @@ android {
             unitTests.returnDefaultValues = true
         }
     }
+
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
 }
 
 dependencies {
@@ -100,6 +104,8 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidx_rules_version"
     androidTestImplementation "androidx.test.ext:junit:$androidx_junit_ext_version"
     androidTestImplementation "com.google.truth:truth:$truth_version"
+    androidTestImplementation "io.mockk:mockk-android:$mockk_version"
+    androidTestImplementation "io.mockk:mockk-agent:$mockk_version"
 }
 
 kapt {
