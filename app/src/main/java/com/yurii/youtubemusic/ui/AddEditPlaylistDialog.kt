@@ -16,7 +16,7 @@ class AddEditPlaylistDialog private constructor(
 ) {
     @SuppressLint("InflateParams")
     fun show() {
-        val view = LayoutInflater.from(context).inflate(R.layout.dialog_rename_category, null)
+        val view = LayoutInflater.from(context).inflate(R.layout.dialog_rename_playlist, null)
         val inputView = view.findViewById<EditText>(R.id.input)
 
 

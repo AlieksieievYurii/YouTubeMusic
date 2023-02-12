@@ -8,12 +8,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.databinding.FragmentYoutubeMusicBinding
 import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
 import com.yurii.youtubemusic.ui.ErrorDialog
-import com.yurii.youtubemusic.ui.SelectCategoriesDialog
+import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -81,15 +81,15 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     private suspend fun startHandlingEvents() = viewModel.event.collectLatest { event ->
         when (event) {
             is YouTubeMusicViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(event.videoItem, event.error)
-            is YouTubeMusicViewModel.Event.OpenCategoriesSelector -> showDialogToSelectCategories(
+            is YouTubeMusicViewModel.Event.OpenPlaylistSelector -> showDialogToSelectPlaylists(
                 event.videoItem,
-                event.allCustomCategories
+                event.playlists
             )
         }
     }
 
-    private fun showDialogToSelectCategories(videoItem: VideoItem, allCustomCategories: List<Category>) {
-        SelectCategoriesDialog(requireContext(), allCustomCategories, emptyList()) { categories ->
+    private fun showDialogToSelectPlaylists(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
+        SelectPlaylistsDialog(requireContext(), playlists, emptyList()) { categories ->
             viewModel.download(videoItem, categories)
         }.show()
     }

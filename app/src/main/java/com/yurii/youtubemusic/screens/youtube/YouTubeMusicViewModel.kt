@@ -6,15 +6,13 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.Item
-import com.yurii.youtubemusic.models.Progress
-import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.utilities.GoogleAccount
+import com.yurii.youtubemusic.utilities.PlaylistRepository
 import com.yurii.youtubemusic.utilities.YouTubePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -35,12 +33,13 @@ class YouTubeMusicViewModel @Inject constructor(
     private val mediaLibraryManager: MediaLibraryManager,
     private val downloaderServiceConnection: ServiceConnection,
     private val youTubePreferences: YouTubePreferences,
+    private val playlistRepository: PlaylistRepository,
     val youTubeAPI: YouTubeAPI,
     private val googleAccount: GoogleAccount
 ) : ViewModel() {
     sealed class Event {
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
-        data class OpenCategoriesSelector(val videoItem: VideoItem, val allCustomCategories: List<Category>) : Event()
+        data class OpenPlaylistSelector(val videoItem: VideoItem, val playlists: List<MediaItemPlaylist>) : Event()
     }
 
     private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
@@ -102,15 +101,14 @@ class YouTubeMusicViewModel @Inject constructor(
         loadVideoItems(playlist)
     }
 
-    fun download(item: VideoItem, categories: List<Category> = emptyList()) {
-        downloaderServiceConnection.download(item, categories)
+    fun download(item: VideoItem, playlists: List<MediaItemPlaylist> = emptyList()) {
+        downloaderServiceConnection.download(item, playlists)
         sendVideoItemStatus(VideoItemStatus.Downloading(item, 0, 0))
     }
 
     fun openCategorySelectorFor(videoItem: VideoItem) {
         viewModelScope.launch {
-            val allCustomCategories = mediaLibraryManager.mediaStorage.getCustomCategories()
-            _event.emit(Event.OpenCategoriesSelector(videoItem, allCustomCategories))
+            _event.emit(Event.OpenPlaylistSelector(videoItem, playlistRepository.getAllPlaylists()))
         }
     }
 

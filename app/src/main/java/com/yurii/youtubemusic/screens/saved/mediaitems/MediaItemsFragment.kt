@@ -18,7 +18,7 @@ import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.ui.SelectCategoriesDialog
+import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import com.yurii.youtubemusic.utilities.requireParcelable
 import dagger.hilt.android.AndroidEntryPoint
@@ -112,14 +112,15 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
 
     private fun openCategoriesEditor(mediaItem: MediaItem) {
+        //TODO Implement with the db
         lifecycleScope.launch {
-            SelectCategoriesDialog(
-                requireContext(),
-                viewModel.getAllCustomCategories(),
-                viewModel.getAssignedCustomCategoriesFor(mediaItem)
-            ) {
-                viewModel.assignCustomCategoriesFor(mediaItem, it)
-            }.show()
+//            SelectPlaylistsDialog(
+//                requireContext(),
+//                viewModel.getAllCustomCategories(),
+//                viewModel.getAssignedCustomCategoriesFor(mediaItem)
+//            ) {
+//                viewModel.assignCustomCategoriesFor(mediaItem, it)
+//            }.show()
         }
     }
 

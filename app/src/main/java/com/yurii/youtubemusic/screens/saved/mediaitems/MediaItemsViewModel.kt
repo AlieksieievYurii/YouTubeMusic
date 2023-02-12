@@ -10,6 +10,7 @@ import com.yurii.youtubemusic.models.isDefault
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.services.media.PlaybackState
+import com.yurii.youtubemusic.utilities.PlaylistRepository
 import com.yurii.youtubemusic.utilities.move
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -22,7 +23,8 @@ import kotlinx.coroutines.launch
 class MediaItemsViewModel @AssistedInject constructor(
     @Assisted private val category: Category,
     private val mediaLibraryManager: MediaLibraryManager,
-    private val mediaServiceConnection: MediaServiceConnection
+    private val mediaServiceConnection: MediaServiceConnection,
+    private val playlistRepository: PlaylistRepository
 ) : ViewModel() {
     sealed class MediaItemsStatus {
         object Loading : MediaItemsStatus()
@@ -84,10 +86,10 @@ class MediaItemsViewModel @AssistedInject constructor(
         viewModelScope.launch { mediaLibraryManager.deleteItem(mediaItem) }
     }
 
-    suspend fun getAssignedCustomCategoriesFor(mediaItem: MediaItem) =
+    suspend fun getAssignedPlaylists(mediaItem: MediaItem) =
         mediaLibraryManager.mediaStorage.getAssignedCustomCategoriesFor(mediaItem)
 
-    suspend fun getAllCustomCategories() = mediaLibraryManager.mediaStorage.getCustomCategories()
+    suspend fun getPlaylists() = playlistRepository.getAllPlaylists()
 
     fun assignCustomCategoriesFor(mediaItem: MediaItem, categories: List<Category>) {
         viewModelScope.launch {
