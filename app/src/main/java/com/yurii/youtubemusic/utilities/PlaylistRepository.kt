@@ -3,10 +3,9 @@ package com.yurii.youtubemusic.utilities
 import com.yurii.youtubemusic.db.MediaItemPlayListAssignment
 import com.yurii.youtubemusic.db.PlaylistDao
 import com.yurii.youtubemusic.db.PlaylistEntity
-import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.models.MediaItemPlaylist
-import com.yurii.youtubemusic.models.toMediaItemPlaylists
-import com.yurii.youtubemusic.models.toMediaItems
+import com.yurii.youtubemusic.models.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
@@ -28,6 +27,16 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
 
     suspend fun getAllPlaylists(): List<MediaItemPlaylist> {
         return playlistDao.getAllPlaylists().toMediaItemPlaylists()
+    }
+
+    fun getPlaylistFlow(): Flow<List<MediaItemPlaylist>> = playlistDao.getPlaylistsFlow().map { it.toMediaItemPlaylists() }
+
+    suspend fun renamePlaylist(mediaItemPlaylist: MediaItemPlaylist, newName: String) {
+        playlistDao.update(mediaItemPlaylist.copy(name = newName).toPlaylistEntity())
+    }
+
+    suspend fun removePlaylist(mediaItemPlaylist: MediaItemPlaylist) {
+        playlistDao.delete(mediaItemPlaylist.toPlaylistEntity())
     }
 
     suspend fun getMediaItemsFor(mediaItemPlaylist: MediaItemPlaylist): List<MediaItem> {

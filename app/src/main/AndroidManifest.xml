@@ -27,7 +27,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".screens.categories.CategoriesEditorActivity"
+            android:name=".screens.categories.PlaylistEditorActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.main.MainActivity"

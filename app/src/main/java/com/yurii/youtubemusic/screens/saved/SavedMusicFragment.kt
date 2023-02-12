@@ -5,7 +5,7 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import com.google.android.material.tabs.TabLayoutMediator
-import com.yurii.youtubemusic.screens.categories.CategoriesEditorActivity
+import com.yurii.youtubemusic.screens.categories.PlaylistEditorActivity
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
@@ -50,8 +50,8 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
     }
 
     private fun openCategoriesEditor() {
-        val activity = CategoriesEditorActivity.create(requireContext())
-        startActivityForResult(activity, CategoriesEditorActivity.REQUEST_CODE)
+        val activity = PlaylistEditorActivity.create(requireContext())
+        startActivityForResult(activity, PlaylistEditorActivity.REQUEST_CODE)
     }
 
     private fun initCategoriesLayout(categories: List<Category>) {
