@@ -18,7 +18,7 @@ data class MediaItemEntity(
 
 @Entity(tableName = "playlists")
 data class PlaylistEntity(
-    @PrimaryKey(autoGenerate = true) val playlistId: Int = 0,
+    @PrimaryKey(autoGenerate = true) val playlistId: Long = 0,
     val name: String,
 )
 
@@ -26,8 +26,8 @@ data class PlaylistEntity(
 @Entity(tableName = "media_item_playlist_assignment", primaryKeys = ["mediaItemId", "playlistId"])
 data class MediaItemPlayListAssignment(
     val mediaItemId: String,
-    val playlistId: Int,
-    @ColumnInfo() val position: Int
+    val playlistId: Long,
+    val position: Int
 )
 
 data class PlaylistWithMediaItems(
