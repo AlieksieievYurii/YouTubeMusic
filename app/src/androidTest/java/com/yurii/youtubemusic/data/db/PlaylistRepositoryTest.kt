@@ -120,4 +120,18 @@ class PlaylistRepositoryTest {
         val targetMediaItemTwo = mediaItemsForPlaylistB.toMediaItems().first()
         assertThat(playlistRepository.getAssignedPlaylistsFor(targetMediaItemTwo).map { it.name }).isEqualTo(listOf("B"))
     }
+
+    @Test
+    fun test_deletePlaylist_crossReferencesAreRemovedAsWell() = runBlocking {
+        val mediaItemsForPlaylistA = createMediaItemEntities(5, "A").onEach { item -> database.mediaItemDao().insert(item) }
+        val mediaItemsForPlaylistB = createMediaItemEntities(10, "B").onEach { item -> database.mediaItemDao().insert(item) }
+        val playlistA = MediaItemPlaylist(id = playlistRepository.addPlaylist("A"), "A")
+        val playlistB = MediaItemPlaylist(id = playlistRepository.addPlaylist("B"), "B")
+        mediaItemsForPlaylistA.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistA)) }
+        mediaItemsForPlaylistB.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistB)) }
+
+        playlistRepository.removePlaylist(playlistA)
+
+        assertThat(playlistRepository.getAssignedPlaylistsFor(mediaItemsForPlaylistA.toMediaItems().first())).isEmpty()
+    }
 }
