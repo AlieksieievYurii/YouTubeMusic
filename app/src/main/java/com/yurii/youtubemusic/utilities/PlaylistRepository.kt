@@ -19,15 +19,11 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
         playlistDao.setPlaylist(mediaItem.id, playlists.map { PlaylistEntity(it.id, it.name) })
     }
 
-    suspend fun getAllPlaylists(): List<MediaItemPlaylist> = withContext(Dispatchers.IO) {
-        playlistDao.getAllPlaylists().toMediaItemPlaylists()
-    }
-
     suspend fun getAssignedPlaylistsFor(mediaItem: MediaItem) = withContext(Dispatchers.IO) {
         playlistDao.getAssignedPlaylists(mediaItem.id).toMediaItemPlaylists()
     }
 
-    fun getPlaylistFlow(): Flow<List<MediaItemPlaylist>> = playlistDao.getPlaylistsFlow().map { it.toMediaItemPlaylists() }
+    fun getPlaylists(): Flow<List<MediaItemPlaylist>> = playlistDao.getPlaylists().map { it.toMediaItemPlaylists() }
 
     suspend fun renamePlaylist(mediaItemPlaylist: MediaItemPlaylist, newName: String) = withContext(Dispatchers.IO) {
         playlistDao.update(mediaItemPlaylist.copy(name = newName).toPlaylistEntity())

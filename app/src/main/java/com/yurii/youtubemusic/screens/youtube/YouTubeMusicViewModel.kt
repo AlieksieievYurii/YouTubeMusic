@@ -108,7 +108,7 @@ class YouTubeMusicViewModel @Inject constructor(
 
     fun openCategorySelectorFor(videoItem: VideoItem) {
         viewModelScope.launch {
-            _event.emit(Event.OpenPlaylistSelector(videoItem, playlistRepository.getAllPlaylists()))
+            _event.emit(Event.OpenPlaylistSelector(videoItem, playlistRepository.getPlaylists().first()))
         }
     }
 

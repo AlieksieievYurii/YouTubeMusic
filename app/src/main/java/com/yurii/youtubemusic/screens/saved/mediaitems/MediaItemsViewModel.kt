@@ -12,13 +12,8 @@ import com.yurii.youtubemusic.utilities.move
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MediaItemsViewModel @AssistedInject constructor(
     @Assisted private val category: Category,
@@ -88,7 +83,7 @@ class MediaItemsViewModel @AssistedInject constructor(
 
     suspend fun getAssignedPlaylists(mediaItem: MediaItem) = playlistRepository.getAssignedPlaylistsFor(mediaItem)
 
-    suspend fun getPlaylists() = playlistRepository.getAllPlaylists()
+    suspend fun getPlaylists() = playlistRepository.getPlaylists().first()
 
     fun assignPlaylists(mediaItem: MediaItem, playlists: List<MediaItemPlaylist>) {
         viewModelScope.launch {
