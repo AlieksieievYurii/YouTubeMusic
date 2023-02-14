@@ -36,13 +36,24 @@ interface PlaylistDao {
             media_items.thumbnail, 
             media_items.mediaFile,
             media_item_playlist_assignment.position 
-        FROM media_item_playlist_assignment INNER JOIN media_items 
+        FROM media_item_playlist_assignment 
+        INNER JOIN media_items 
         ON media_items.mediaItemId = media_item_playlist_assignment.mediaItemId
         WHERE media_item_playlist_assignment.playlistId = :playlistId
         ORDER BY media_item_playlist_assignment.position ASC
         """
     )
     suspend fun getMediaItemsForPlaylist(playlistId: Long): List<MediaItemEntity>
+
+    @Query(
+        """
+            SELECT  playlists.playlistId, playlists.name
+            FROM media_item_playlist_assignment
+            INNER JOIN playlists ON media_item_playlist_assignment.playlistId = playlists.playlistId
+            WHERE media_item_playlist_assignment.mediaItemId = :mediaItemId
+        """
+    )
+    suspend fun getAssignedPlaylists(mediaItemId: String): List<PlaylistEntity>
 
     @Transaction
     suspend fun changePosition(mediaItemId: String, playlistId: Long, from: Int, to: Int) {

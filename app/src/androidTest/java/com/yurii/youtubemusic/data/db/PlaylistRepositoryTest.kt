@@ -91,8 +91,33 @@ class PlaylistRepositoryTest {
     fun test_assignNoPlaylists_playlistsAreNotAssigned() = runBlocking {
         val mediaItem = createMediaItemEntities(1).onEach { item ->
             database.mediaItemDao().insert(item)
-        }.first()
+        }.toMediaItems().first()
 
-        playlistRepository.assignMediaItemToPlaylists(mediaItem.mediaItemId, emptyList())
+        playlistRepository.assignMediaItemToPlaylists(mediaItem.id, emptyList())
+        assertThat(playlistRepository.getAssignedPlaylistsFor(mediaItem)).isEmpty()
+    }
+
+    @Test
+    fun test_getAssignedPlaylists_playlistsReturned() = runBlocking {
+        val mediaItemsForPlaylistA = createMediaItemEntities(5, "A").onEach { item -> database.mediaItemDao().insert(item) }
+        val mediaItemsForPlaylistB = createMediaItemEntities(10, "B").onEach { item -> database.mediaItemDao().insert(item) }
+
+        val playlistA = MediaItemPlaylist(id = playlistRepository.addPlaylist("A"), "A")
+        val playlistB = MediaItemPlaylist(id = playlistRepository.addPlaylist("B"), "B")
+        val playlistC = MediaItemPlaylist(id = playlistRepository.addPlaylist("C"), "C")
+        val playlistD = MediaItemPlaylist(id = playlistRepository.addPlaylist("D"), "D")
+
+
+        mediaItemsForPlaylistA.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistA)) }
+        mediaItemsForPlaylistB.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistB)) }
+
+        val targetMediaItem = mediaItemsForPlaylistA.toMediaItems().first()
+
+        playlistRepository.assignMediaItemToPlaylists(targetMediaItem.id, listOf(playlistC, playlistD))
+
+        assertThat(playlistRepository.getAssignedPlaylistsFor(targetMediaItem).map { it.name }).isEqualTo(listOf("A", "C", "D"))
+
+        val targetMediaItemTwo = mediaItemsForPlaylistB.toMediaItems().first()
+        assertThat(playlistRepository.getAssignedPlaylistsFor(targetMediaItemTwo).map { it.name }).isEqualTo(listOf("B"))
     }
 }

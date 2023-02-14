@@ -29,6 +29,8 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
         return playlistDao.getAllPlaylists().toMediaItemPlaylists()
     }
 
+    suspend fun getAssignedPlaylistsFor(mediaItem: MediaItem) = playlistDao.getAssignedPlaylists(mediaItem.id)
+
     fun getPlaylistFlow(): Flow<List<MediaItemPlaylist>> = playlistDao.getPlaylistsFlow().map { it.toMediaItemPlaylists() }
 
     suspend fun renamePlaylist(mediaItemPlaylist: MediaItemPlaylist, newName: String) {
