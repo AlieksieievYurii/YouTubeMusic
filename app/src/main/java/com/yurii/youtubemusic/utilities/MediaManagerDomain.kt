@@ -13,11 +13,11 @@ class MediaManagerDomain @Inject constructor(
 ) {
 
     suspend fun createMediaItem(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
-        registerMediaItem(videoItem)
-        playlistRepository.assignMediaItemToPlaylists(videoItem.id, playlists)
+        val createdMediaItem = registerMediaItem(videoItem)
+        playlistRepository.assignMediaItemToPlaylists(createdMediaItem, playlists)
     }
 
-    private suspend fun registerMediaItem(videoItem: VideoItem) {
+    private suspend fun registerMediaItem(videoItem: VideoItem): MediaItem {
         val mediaFile = mediaStorage.getMediaFile(videoItem)
         val thumbnailFile = mediaStorage.getThumbnail(videoItem)
 
@@ -38,5 +38,7 @@ class MediaManagerDomain @Inject constructor(
         )
 
         mediaRepository.addMediaItem(mediaItem)
+
+        return mediaItem
     }
 }

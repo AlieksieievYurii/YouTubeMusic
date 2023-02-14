@@ -3,10 +3,7 @@ package com.yurii.youtubemusic.screens.saved.mediaitems
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.Item
-import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.models.isDefault
+import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.services.media.PlaybackState
@@ -15,16 +12,19 @@ import com.yurii.youtubemusic.utilities.move
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MediaItemsViewModel @AssistedInject constructor(
     @Assisted private val category: Category,
     private val mediaLibraryManager: MediaLibraryManager,
     private val mediaServiceConnection: MediaServiceConnection,
-    private val playlistRepository: PlaylistRepository
+    private val playlistRepository: PlaylistRepository,
 ) : ViewModel() {
     sealed class MediaItemsStatus {
         object Loading : MediaItemsStatus()
@@ -86,14 +86,13 @@ class MediaItemsViewModel @AssistedInject constructor(
         viewModelScope.launch { mediaLibraryManager.deleteItem(mediaItem) }
     }
 
-    suspend fun getAssignedPlaylists(mediaItem: MediaItem) =
-        mediaLibraryManager.mediaStorage.getAssignedCustomCategoriesFor(mediaItem)
+    suspend fun getAssignedPlaylists(mediaItem: MediaItem) = playlistRepository.getAssignedPlaylistsFor(mediaItem)
 
     suspend fun getPlaylists() = playlistRepository.getAllPlaylists()
 
-    fun assignCustomCategoriesFor(mediaItem: MediaItem, categories: List<Category>) {
+    fun assignPlaylists(mediaItem: MediaItem, playlists: List<MediaItemPlaylist>) {
         viewModelScope.launch {
-            mediaLibraryManager.assignCategories(mediaItem, categories)
+            playlistRepository.assignMediaItemToPlaylists(mediaItem, playlists)
         }
     }
 

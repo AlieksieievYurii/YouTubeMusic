@@ -112,15 +112,14 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
 
     private fun openCategoriesEditor(mediaItem: MediaItem) {
-        //TODO Implement with the db
         lifecycleScope.launch {
-//            SelectPlaylistsDialog(
-//                requireContext(),
-//                viewModel.getAllCustomCategories(),
-//                viewModel.getAssignedCustomCategoriesFor(mediaItem)
-//            ) {
-//                viewModel.assignCustomCategoriesFor(mediaItem, it)
-//            }.show()
+            SelectPlaylistsDialog(
+                requireContext(),
+                viewModel.getPlaylists(),
+                viewModel.getAssignedPlaylists(mediaItem)
+            ) {
+                viewModel.assignPlaylists(mediaItem, it)
+            }.show()
         }
     }
 

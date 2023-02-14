@@ -26,6 +26,9 @@ interface PlaylistDao {
     @Query("SELECT MAX(position) + 1 from media_item_playlist_assignment WHERE playlistId = :playlistId")
     fun getAvailablePosition(playlistId: Long): Int?
 
+    @Query("DELETE FROM media_item_playlist_assignment WHERE mediaItemId = :mediaItemId")
+    fun removeAllAssignments(mediaItemId: String)
+
     @Query(
         """
         SELECT 

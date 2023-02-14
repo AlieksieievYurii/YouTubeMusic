@@ -7,6 +7,7 @@ import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import com.yurii.youtubemusic.db.DataBase
 import com.yurii.youtubemusic.models.MediaItemPlaylist
+import com.yurii.youtubemusic.models.toMediaItem
 import com.yurii.youtubemusic.models.toMediaItems
 import com.yurii.youtubemusic.utilities.PlaylistRepository
 import kotlinx.coroutines.runBlocking
@@ -52,11 +53,11 @@ class PlaylistRepositoryTest {
 
 
         mediaItemsForPlaylistA.forEach {
-            playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistA))
+            playlistRepository.assignMediaItemToPlaylists(it.toMediaItem(), listOf(playlistA))
         }
 
         mediaItemsForPlaylistB.forEach {
-            playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistB))
+            playlistRepository.assignMediaItemToPlaylists(it.toMediaItem(), listOf(playlistB))
         }
 
         val resultMediaItemsForPlaylistA = playlistRepository.getMediaItemsFor(playlistA)
@@ -76,8 +77,8 @@ class PlaylistRepositoryTest {
         val playlistB = MediaItemPlaylist(id = playlistRepository.addPlaylist("B"), "B")
 
 
-        mediaItemsForPlaylistA.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistA)) }
-        mediaItemsForPlaylistB.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistB)) }
+        mediaItemsForPlaylistA.forEach { playlistRepository.assignMediaItemToPlaylists(it.toMediaItem(), listOf(playlistA)) }
+        mediaItemsForPlaylistB.forEach { playlistRepository.assignMediaItemToPlaylists(it.toMediaItem(), listOf(playlistB)) }
 
         val mediaItem = mediaItemsForPlaylistA.toMediaItems()[3]
         playlistRepository.changePositionInPlaylist(playlistA, mediaItem, 3, 0)
@@ -93,7 +94,7 @@ class PlaylistRepositoryTest {
             database.mediaItemDao().insert(item)
         }.toMediaItems().first()
 
-        playlistRepository.assignMediaItemToPlaylists(mediaItem.id, emptyList())
+        playlistRepository.assignMediaItemToPlaylists(mediaItem, emptyList())
         assertThat(playlistRepository.getAssignedPlaylistsFor(mediaItem)).isEmpty()
     }
 
@@ -108,14 +109,14 @@ class PlaylistRepositoryTest {
         val playlistD = MediaItemPlaylist(id = playlistRepository.addPlaylist("D"), "D")
 
 
-        mediaItemsForPlaylistA.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistA)) }
-        mediaItemsForPlaylistB.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistB)) }
+        mediaItemsForPlaylistA.forEach { playlistRepository.assignMediaItemToPlaylists(it.toMediaItem(), listOf(playlistA)) }
+        mediaItemsForPlaylistB.forEach { playlistRepository.assignMediaItemToPlaylists(it.toMediaItem(), listOf(playlistB)) }
 
         val targetMediaItem = mediaItemsForPlaylistA.toMediaItems().first()
 
-        playlistRepository.assignMediaItemToPlaylists(targetMediaItem.id, listOf(playlistC, playlistD))
+        playlistRepository.assignMediaItemToPlaylists(targetMediaItem, listOf(playlistC, playlistD))
 
-        assertThat(playlistRepository.getAssignedPlaylistsFor(targetMediaItem).map { it.name }).isEqualTo(listOf("A", "C", "D"))
+        assertThat(playlistRepository.getAssignedPlaylistsFor(targetMediaItem).map { it.name }).isEqualTo(listOf("C", "D"))
 
         val targetMediaItemTwo = mediaItemsForPlaylistB.toMediaItems().first()
         assertThat(playlistRepository.getAssignedPlaylistsFor(targetMediaItemTwo).map { it.name }).isEqualTo(listOf("B"))
@@ -127,8 +128,8 @@ class PlaylistRepositoryTest {
         val mediaItemsForPlaylistB = createMediaItemEntities(10, "B").onEach { item -> database.mediaItemDao().insert(item) }
         val playlistA = MediaItemPlaylist(id = playlistRepository.addPlaylist("A"), "A")
         val playlistB = MediaItemPlaylist(id = playlistRepository.addPlaylist("B"), "B")
-        mediaItemsForPlaylistA.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistA)) }
-        mediaItemsForPlaylistB.forEach { playlistRepository.assignMediaItemToPlaylists(it.mediaItemId, listOf(playlistB)) }
+        mediaItemsForPlaylistA.forEach { playlistRepository.assignMediaItemToPlaylists(it.toMediaItem(), listOf(playlistA)) }
+        mediaItemsForPlaylistB.forEach { playlistRepository.assignMediaItemToPlaylists(it.toMediaItem(), listOf(playlistB)) }
 
         playlistRepository.removePlaylist(playlistA)
 

@@ -66,17 +66,14 @@ fun MediaItem.toMediaMetadataCompat(): MediaMetadataCompat = MediaMetadataCompat
     it.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, this.durationInMillis)
 }.build()
 
+fun MediaItemEntity.toMediaItem() = MediaItem(
+    id = mediaItemId,
+    title = title,
+    author = author,
+    durationInMillis = durationInMillis,
+    description = "",
+    thumbnail = thumbnail,
+    mediaFile = mediaFile
+)
 
-fun List<MediaItemEntity>.toMediaItems(): List<MediaItem> {
-    return map {
-        MediaItem(
-            id = it.mediaItemId,
-            title = it.title,
-            author = it.author,
-            durationInMillis = it.durationInMillis,
-            description = "",
-            thumbnail = it.thumbnail,
-            mediaFile = it.mediaFile
-        )
-    }
-}
+fun List<MediaItemEntity>.toMediaItems() = map { it.toMediaItem() }
