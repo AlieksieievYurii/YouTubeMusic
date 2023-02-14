@@ -23,6 +23,20 @@ interface PlaylistDao {
     @Insert
     fun insertMediaItemPlaylist(vararg mediaItemPlayListAssignment: MediaItemPlayListAssignment)
 
+    @Transaction
+    fun setPlaylist(mediaItemId: String, playlists: List<PlaylistEntity>) {
+        removeAllAssignments(mediaItemId)
+        val mediaItemPlaylists = playlists.map {
+            MediaItemPlayListAssignment(
+                mediaItemId,
+                it.playlistId,
+                getAvailablePosition(it.playlistId) ?: 0
+            )
+        }
+
+        insertMediaItemPlaylist(*mediaItemPlaylists.toTypedArray())
+    }
+
     @Query("SELECT MAX(position) + 1 from media_item_playlist_assignment WHERE playlistId = :playlistId")
     fun getAvailablePosition(playlistId: Long): Int?
 
@@ -47,6 +61,25 @@ interface PlaylistDao {
         """
     )
     suspend fun getMediaItemsForPlaylist(playlistId: Long): List<MediaItemEntity>
+
+    @Query(
+        """
+        SELECT 
+            media_items.mediaItemId, 
+            media_items.title, 
+            media_items.author, 
+            media_items.duration, 
+            media_items.thumbnail, 
+            media_items.mediaFile,
+            media_item_playlist_assignment.position 
+        FROM media_item_playlist_assignment 
+        INNER JOIN media_items 
+        ON media_items.mediaItemId = media_item_playlist_assignment.mediaItemId
+        WHERE media_item_playlist_assignment.playlistId = :playlistId
+        ORDER BY media_item_playlist_assignment.position ASC
+        """
+    )
+    fun getMediaItemsForPlaylistFlow(playlistId: Long): Flow<List<MediaItemEntity>>
 
     @Query(
         """
