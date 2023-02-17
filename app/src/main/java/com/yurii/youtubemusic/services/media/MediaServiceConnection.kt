@@ -9,6 +9,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.yurii.youtubemusic.models.*
+import com.yurii.youtubemusic.utilities.PlaylistRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
@@ -40,7 +41,8 @@ sealed class PlaybackState {
 @Singleton
 class MediaServiceConnection @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val queueModesRepository: QueueModesRepository
+    private val queueModesRepository: QueueModesRepository,
+    private val playlistRepository: PlaylistRepository
 ) {
     private val _isMediaControllerConnected = MutableStateFlow(false)
     val isMediaControllerConnected = _isMediaControllerConnected.asStateFlow()
@@ -48,6 +50,8 @@ class MediaServiceConnection @Inject constructor(
     val isQueueShuffle = queueModesRepository.getIsShuffle()
 
     val isQueueLooped = queueModesRepository.getIsLooped()
+
+    val allPlaylists: Flow<List<MediaItemPlaylist>> = playlistRepository.getPlaylists()
 
     private val _errors: MutableSharedFlow<Exception> = MutableSharedFlow(extraBufferCapacity = 1)
     val errors = _errors.asSharedFlow()
