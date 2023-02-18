@@ -62,6 +62,11 @@ class MediaStorage @Inject constructor(@ApplicationContext context: Context) {
         res
     }
 
+    fun deleteMediaFiles(item: Item) {
+        getMediaFile(item).delete()
+        getThumbnail(item).delete()
+    }
+
     /**
      * Removes the given [mediaItem] from [category].
      * You can not remove [mediaItem] from default category([Category.ALL])

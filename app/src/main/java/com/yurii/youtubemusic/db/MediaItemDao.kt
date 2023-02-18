@@ -1,15 +1,16 @@
 package com.yurii.youtubemusic.db
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MediaItemDao {
     @Insert
     suspend fun insert(mediaItemEntity: MediaItemEntity)
+
+    @Transaction
+    @Query("DELETE FROM media_items WHERE mediaItemId = :mediaItemId")
+    suspend fun deleteById(mediaItemId: String)
 
     @Query("SELECT * FROM media_items ORDER BY position ASC")
     fun getAllSortedMediaItems(): Flow<List<MediaItemEntity>>

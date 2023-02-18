@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
+import com.yurii.youtubemusic.utilities.MediaRepository
 import com.yurii.youtubemusic.utilities.PlaylistRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -16,6 +17,7 @@ class MediaItemsViewModel @AssistedInject constructor(
     @Assisted private val playlist: MediaItemPlaylist,
     private val mediaServiceConnection: MediaServiceConnection,
     private val playlistRepository: PlaylistRepository,
+    private val mediaRepository: MediaRepository
 ) : ViewModel() {
     sealed class MediaItemsStatus {
         object Loading : MediaItemsStatus()
@@ -55,7 +57,9 @@ class MediaItemsViewModel @AssistedInject constructor(
     }
 
     fun deleteMediaItem(mediaItem: MediaItem) {
-        // TODO Implement deleting media item
+        viewModelScope.launch {
+            mediaRepository.delete(mediaItem)
+        }
     }
 
     suspend fun getAssignedPlaylists(mediaItem: MediaItem) = playlistRepository.getAssignedPlaylistsFor(mediaItem)
