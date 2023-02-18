@@ -57,25 +57,6 @@ interface PlaylistDao {
         ORDER BY media_item_playlist_assignment.position ASC
         """
     )
-    suspend fun getMediaItemsForPlaylist(playlistId: Long): List<MediaItemEntity>
-
-    @Query(
-        """
-        SELECT 
-            media_items.mediaItemId, 
-            media_items.title, 
-            media_items.author, 
-            media_items.duration, 
-            media_items.thumbnail, 
-            media_items.mediaFile,
-            media_item_playlist_assignment.position 
-        FROM media_item_playlist_assignment 
-        INNER JOIN media_items 
-        ON media_items.mediaItemId = media_item_playlist_assignment.mediaItemId
-        WHERE media_item_playlist_assignment.playlistId = :playlistId
-        ORDER BY media_item_playlist_assignment.position ASC
-        """
-    )
     fun getMediaItemsForPlaylistFlow(playlistId: Long): Flow<List<MediaItemEntity>>
 
     @Query(

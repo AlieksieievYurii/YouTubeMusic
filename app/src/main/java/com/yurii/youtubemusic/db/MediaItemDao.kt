@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MediaItemDao {
@@ -11,7 +12,7 @@ interface MediaItemDao {
     suspend fun insert(mediaItemEntity: MediaItemEntity)
 
     @Query("SELECT * FROM media_items ORDER BY position ASC")
-    suspend fun getAllSortedMediaItems(): List<MediaItemEntity>
+    fun getAllSortedMediaItems(): Flow<List<MediaItemEntity>>
 
     @Query("SELECT MAX(position) + 1 from media_items")
     suspend fun getAvailablePosition(): Int?

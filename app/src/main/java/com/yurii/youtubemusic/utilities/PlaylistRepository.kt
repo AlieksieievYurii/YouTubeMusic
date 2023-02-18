@@ -35,9 +35,8 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
         playlistDao.delete(mediaItemPlaylist.toPlaylistEntity())
     }
 
-    suspend fun getMediaItemsFor(mediaItemPlaylist: MediaItemPlaylist) = withContext(Dispatchers.IO) {
-        playlistDao.getMediaItemsForPlaylist(mediaItemPlaylist.id).toMediaItems()
-    }
+    fun getMediaItemsFor(mediaItemPlaylist: MediaItemPlaylist) =
+        playlistDao.getMediaItemsForPlaylistFlow(mediaItemPlaylist.id).map { it.toMediaItems() }
 
     suspend fun addPlaylist(name: String): Long = withContext(Dispatchers.IO) {
         playlistDao.insert(PlaylistEntity(name = name))

@@ -10,6 +10,7 @@ import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.toMediaItem
 import com.yurii.youtubemusic.models.toMediaItems
 import com.yurii.youtubemusic.utilities.PlaylistRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
@@ -38,7 +39,7 @@ class PlaylistRepositoryTest {
         playlistRepository.addPlaylist(playlistNameTwo)
 
 
-        val names = playlistRepository.getAllPlaylists().map { it.name }
+        val names = playlistRepository.getPlaylists().first().map { it.name }
         assertThat(names).contains(playlistNameOne)
         assertThat(names).contains(playlistNameTwo)
     }
@@ -60,11 +61,11 @@ class PlaylistRepositoryTest {
             playlistRepository.assignMediaItemToPlaylists(it.toMediaItem(), listOf(playlistB))
         }
 
-        val resultMediaItemsForPlaylistA = playlistRepository.getMediaItemsFor(playlistA)
+        val resultMediaItemsForPlaylistA = playlistRepository.getMediaItemsFor(playlistA).first()
         assertThat(resultMediaItemsForPlaylistA.size).isEqualTo(5)
         assertThat(resultMediaItemsForPlaylistA.first().id).isEqualTo(mediaItemsForPlaylistA.first().mediaItemId)
 
-        val resultMediaItemsForPlaylistB = playlistRepository.getMediaItemsFor(playlistB)
+        val resultMediaItemsForPlaylistB = playlistRepository.getMediaItemsFor(playlistB).first()
         assertThat(resultMediaItemsForPlaylistB.size).isEqualTo(10)
     }
 
@@ -83,8 +84,8 @@ class PlaylistRepositoryTest {
         val mediaItem = mediaItemsForPlaylistA.toMediaItems()[3]
         playlistRepository.changePositionInPlaylist(playlistA, mediaItem, 3, 0)
 
-        val resultMediaItemsForPlaylistA = playlistRepository.getMediaItemsFor(playlistA)
-        println(database.playlistDao().getMediaItemsForPlaylist(playlistA.id).map { it.mediaItemId to it.position })
+        val resultMediaItemsForPlaylistA = playlistRepository.getMediaItemsFor(playlistA).first()
+        println(database.playlistDao().getMediaItemsForPlaylistFlow(playlistA.id).first().map { it.mediaItemId to it.position })
         assertThat(resultMediaItemsForPlaylistA[0].id).isEqualTo(mediaItem.id)
     }
 

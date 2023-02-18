@@ -11,6 +11,8 @@ data class MediaItemPlaylist(val id: Long, val name: String) : Parcelable {
     }
 }
 
+fun MediaItemPlaylist.isDefault() = this == MediaItemPlaylist.ALL
+
 fun MediaItemPlaylist.toPlaylistEntity() = PlaylistEntity(id, name)
 
 fun List<PlaylistEntity>.toMediaItemPlaylists(): List<MediaItemPlaylist> {
