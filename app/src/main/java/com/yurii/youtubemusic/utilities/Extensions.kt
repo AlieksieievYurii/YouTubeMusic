@@ -1,7 +1,7 @@
 package com.yurii.youtubemusic.utilities
 
-import android.app.Application
 import android.content.res.ColorStateList
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.animation.AlphaAnimation
@@ -11,7 +11,6 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
 import java.lang.IllegalStateException
@@ -32,8 +31,8 @@ fun <T : RecyclerView.ViewHolder> RecyclerView.getVisibleItems(): List<T> {
     return arrayList
 }
 
-fun <T : Parcelable> Bundle.requireParcelable(key: String): T {
-    return this.getParcelable(key) ?: throw IllegalStateException("This bundle argument is required: $key")
+inline fun <reified T : Parcelable> Bundle.requireParcelable(key: String): T {
+    return this.parcelable(key) ?: throw IllegalStateException("This bundle argument is required: $key")
 }
 
 /**
@@ -97,4 +96,14 @@ fun TextView.setAnimatedText(text: String) {
  */
 fun ImageView.setTint(@ColorRes colorRes: Int) {
     ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(ContextCompat.getColor(context, colorRes)))
+}
+
+inline fun <reified T : Parcelable> Bundle.parcelable(key: String): T? = when {
+    SDK_INT >= 33 -> getParcelable(key, T::class.java)
+    else -> @Suppress("DEPRECATION") getParcelable(key) as? T
+}
+
+inline fun <reified T : java.io.Serializable> Bundle.serializable(key: String): T? = when {
+    SDK_INT >= 33 -> getSerializable(key, T::class.java)
+    else -> @Suppress("DEPRECATION") getSerializable(key) as? T
 }

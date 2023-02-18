@@ -29,7 +29,7 @@ private const val TAG = "MediaBackgroundService"
 const val CATEGORIES_CONTENT = "__youtube_musics_categories__"
 const val EMPTY_CONTENT = "__empty__"
 
-const val PLAYBACK_STATE_PLAYING_CATEGORY = "com.yurii.youtubemusic.playback.state.playing.category.name"
+const val PLAYBACK_STATE_PLAYING_PLAYLIST = "com.yurii.youtubemusic.playback.state.playing.category.name"
 const val PLAYBACK_STATE_MEDIA_ITEM = "com.yurii.youtubemusic.playback.state.media.item"
 const val PLAYBACK_STATE_SESSION_ID = "com.yurii.youtubemusic.playback.state.session.id"
 
@@ -170,7 +170,7 @@ class MediaService : MediaBrowserServiceCompat() {
             if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED) {
                 putInt(PLAYBACK_STATE_SESSION_ID, getMediaPlayer().audioSessionId)
                 putParcelable(PLAYBACK_STATE_MEDIA_ITEM, queueProvider.playingMediaItem)
-                putParcelable(PLAYBACK_STATE_PLAYING_CATEGORY, queueProvider.playingPlaylist)
+                putParcelable(PLAYBACK_STATE_PLAYING_PLAYLIST, queueProvider.playingPlaylist)
             }
         }
         val currentPlaybackState = getCurrentPlaybackStateBuilder().apply {

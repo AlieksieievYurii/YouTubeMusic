@@ -11,6 +11,8 @@ import android.support.v4.media.session.PlaybackStateCompat
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.utilities.MediaRepository
 import com.yurii.youtubemusic.utilities.PlaylistRepository
+import com.yurii.youtubemusic.utilities.parcelable
+import com.yurii.youtubemusic.utilities.serializable
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
@@ -25,7 +27,7 @@ sealed class PlaybackState {
     object None : PlaybackState()
     data class Playing(
         val mediaItem: MediaItem,
-        val category: Category,
+        val playlist: MediaItemPlaylist?,
         val isPaused: Boolean,
         private val position: Long,
         private val lastUpdateTime: Long,
@@ -161,13 +163,13 @@ class MediaServiceConnection @Inject constructor(
 
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-            val mediaItem = state.extras?.getParcelable<MediaItem>(PLAYBACK_STATE_MEDIA_ITEM)
-            val category = state.extras?.getParcelable<MediaItemPlaylist>(PLAYBACK_STATE_PLAYING_CATEGORY)
+            val mediaItem = state.extras?.parcelable<MediaItem>(PLAYBACK_STATE_MEDIA_ITEM)
+            val playlist = state.extras?.parcelable<MediaItemPlaylist>(PLAYBACK_STATE_PLAYING_PLAYLIST)
             when (state.state) {
                 PlaybackStateCompat.STATE_PLAYING -> {
                     _playbackState.value = PlaybackState.Playing(
                         mediaItem!!,
-                        Category(category!!.id.toInt(), category.name),
+                        playlist,
                         false,
                         state.position,
                         state.lastPositionUpdateTime,
@@ -178,7 +180,7 @@ class MediaServiceConnection @Inject constructor(
                     _playbackState.value =
                         PlaybackState.Playing(
                             mediaItem!!,
-                            Category(category!!.id.toInt(), category.name),
+                            playlist,
                             true,
                             state.position,
                             state.lastPositionUpdateTime,
@@ -205,7 +207,7 @@ class MediaServiceConnection @Inject constructor(
                     PLAYER_ERROR
                 )
             )
-                _errors.tryEmit(extras.getSerializable(EXTRA_EXCEPTION) as Exception)
+                _errors.tryEmit(extras.serializable(EXTRA_EXCEPTION) ?: Exception("None"))
         }
 
         override fun onSessionDestroyed() {
