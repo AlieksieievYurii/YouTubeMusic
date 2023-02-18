@@ -36,6 +36,7 @@ class QueueProvider @Inject constructor(
 
     var mediaSession: MediaSessionCompat? = null
 
+    var playingItemRemovedCallback: (() -> Unit)? = null
 
     suspend fun prepareQueue(playlist: MediaItemPlaylist) {
         if (playlist == playingPlaylist)
@@ -114,6 +115,10 @@ class QueueProvider @Inject constructor(
 
     private suspend fun setQueue(mediaItems: List<MediaItem>) {
         val finishJob = Job()
+
+        if (playingMediaItem != null && !mediaItems.contains(playingMediaItem))
+            playingItemRemovedCallback?.invoke()
+
         observingShuffleModeJob?.cancel()
         observingShuffleModeJob = queueScope.launch {
             queueModesRepository.getIsShuffle().collect { isShuffled ->

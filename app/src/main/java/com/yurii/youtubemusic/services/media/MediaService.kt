@@ -81,8 +81,12 @@ class MediaService : MediaBrowserServiceCompat() {
         super.onCreate()
         initMediaSession()
         updateCurrentPlaybackState()
-    }
 
+        queueProvider.playingItemRemovedCallback = {
+            if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED)
+                handleStopRequest()
+        }
+    }
 
     private fun initMediaSession() {
         val sessionActivityPendingIntent = packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
@@ -357,7 +361,6 @@ class MediaService : MediaBrowserServiceCompat() {
         override fun onStop() {
             super.onStop()
             handleStopRequest()
-            //queueProvider.release()
             unregisterReceiver(becomingNoisyReceiver)
         }
 
