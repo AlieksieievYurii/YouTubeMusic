@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
+import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.utilities.MediaRepository
 import com.yurii.youtubemusic.utilities.PlaylistRepository
 import dagger.assisted.Assisted
@@ -39,21 +40,22 @@ class MediaItemsViewModel @AssistedInject constructor(
     }
 
     fun onMove(mediaItem: MediaItem, from: Int, to: Int) {
-        //TODO Implement changing position of media items
+        viewModelScope.launch {
+            mediaRepository.changePosition(mediaItem, from, to)
+        }
     }
 
     fun onClickMediaItem(mediaItem: MediaItem) {
-        //TODO Implement clicking media item
-//        when (val playbackState = playbackState.value) {
-//            PlaybackState.None -> mediaServiceConnection.play(mediaItem, category)
-//            is PlaybackState.Playing -> if (playbackState.mediaItem == mediaItem) {
-//                if (playbackState.isPaused)
-//                    mediaServiceConnection.resume()
-//                else
-//                    mediaServiceConnection.pause()
-//            } else
-//                mediaServiceConnection.play(mediaItem, category)
-//        }
+        when (val playbackState = playbackState.value) {
+            PlaybackState.None -> mediaServiceConnection.play(mediaItem, playlist)
+            is PlaybackState.Playing -> if (playbackState.mediaItem == mediaItem) {
+                if (playbackState.isPaused)
+                    mediaServiceConnection.resume()
+                else
+                    mediaServiceConnection.pause()
+            } else
+                mediaServiceConnection.play(mediaItem, playlist)
+        }
     }
 
     fun deleteMediaItem(mediaItem: MediaItem) {

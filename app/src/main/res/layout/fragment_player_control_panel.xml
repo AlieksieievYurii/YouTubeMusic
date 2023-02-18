@@ -16,8 +16,8 @@
             type="Long" />
 
         <variable
-            name="playingCategory"
-            type="com.yurii.youtubemusic.models.Category" />
+            name="playingPlaylist"
+            type="com.yurii.youtubemusic.models.MediaItemPlaylist" />
 
         <variable
             name="isPlayingNow"
@@ -85,7 +85,7 @@
                         android:maxLines="1"
                         android:textColor="#C6C6C6"
                         android:textSize="12sp"
-                        app:animatedText="@{@string/label_playing_from(playingCategory.name)}"
+                        app:animatedText="@{@string/label_playing_from(playingPlaylist.name)}"
                         tools:text="@tools:sample/lorem/random" />
 
                     <View

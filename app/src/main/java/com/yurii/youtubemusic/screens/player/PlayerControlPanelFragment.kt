@@ -17,8 +17,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import coil.load
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
-import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.ui.startValueAnimation
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,17 +62,17 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
     private suspend fun observePlaybackState() = viewModel.playbackState.collectLatest {
         when (it) {
             PlaybackState.None -> swipeViewAway()
-            is PlaybackState.Playing -> setMediaItem(it.mediaItem, !it.isPaused, it.category)
+            is PlaybackState.Playing -> setMediaItem(it.mediaItem, !it.isPaused, it.playlist)
         }
     }
 
 
-    private fun setMediaItem(mediaItem: MediaItem, isPlaying: Boolean, category: Category) {
+    private fun setMediaItem(mediaItem: MediaItem, isPlaying: Boolean, playlist: MediaItemPlaylist?) {
         binding.apply {
             this.mediaItem = mediaItem
             thumbnail.load(mediaItem.thumbnail)
             isPlayingNow = isPlaying
-            playingCategory = category
+            playingPlaylist = playlist
             if (!container.isVisible)
                 showMusicPlayerPanel()
         }
@@ -138,9 +138,10 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
 
     private fun vibrationEffect() {
         val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= 26)
             vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
         else
-            vibrator.vibrate(40)
+           vibrator.vibrate(40)
     }
 }

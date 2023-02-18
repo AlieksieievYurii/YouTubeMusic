@@ -28,7 +28,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
-    private val playlist: MediaItemPlaylist by lazy { requireArguments().requireParcelable(EXTRA_CATEGORY) }
+    private val playlist: MediaItemPlaylist by lazy { requireArguments().requireParcelable(EXTRA_PLAYLIST) }
+
     @Inject
     lateinit var assistedFactory: MediaItemsViewModelAssistedFactory
     private val viewModel: MediaItemsViewModel by viewModels { MediaItemsViewModel.Factory(assistedFactory, playlist) }
@@ -73,7 +74,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(
                 playbackState.mediaItem,
                 isPlaying = !playbackState.isPaused,
-                category = if (playbackState.category.id != playlist.id.toInt()) playbackState.category else null
+                playlist = if (playbackState.playlist != playlist) playbackState.playlist else null
             )
         }
     }
@@ -124,10 +125,10 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
 
     companion object {
-        private const val EXTRA_CATEGORY: String = "com.yurii.youtubemusic.media.items.category"
+        private const val EXTRA_PLAYLIST: String = "com.yurii.youtubemusic.media.items.playlist"
         fun create(category: MediaItemPlaylist): MediaItemsFragment = MediaItemsFragment().apply {
             arguments = Bundle().apply {
-                putParcelable(EXTRA_CATEGORY, category)
+                putParcelable(EXTRA_PLAYLIST, category)
             }
         }
     }

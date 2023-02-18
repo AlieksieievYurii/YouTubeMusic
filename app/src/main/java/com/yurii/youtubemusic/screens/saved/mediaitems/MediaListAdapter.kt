@@ -11,8 +11,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemMusicBinding
-import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.utilities.getVisibleItems
 import java.util.*
 
@@ -43,7 +43,7 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
     */
     private var playingMediaItem: MediaItem? = null
     private var isPlaying = false
-    private var category: Category? = null
+    private var playlist: MediaItemPlaylist? = null
 
     private var modifiableList = mutableListOf<MediaItem>()
 
@@ -68,12 +68,12 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
      * @param: [category] - playing category. When [category] is null, It means that the current item is playing from original category.
      * It is used to show that media item is playing from another category
      */
-    fun setPlayingStateMediaItem(mediaItem: MediaItem, isPlaying: Boolean, category: Category?) {
+    fun setPlayingStateMediaItem(mediaItem: MediaItem, isPlaying: Boolean, playlist: MediaItemPlaylist?) {
         if (mediaItem != playingMediaItem)
             resetState()
         playingMediaItem = mediaItem
         this.isPlaying = isPlaying
-        this.category = category
+        this.playlist = playlist
         findVisibleViewHolder(mediaItem)?.setPlayingState(isPlaying)
     }
 
@@ -117,8 +117,8 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
                 container.setCardBackgroundColor(ContextCompat.getColor(root.context, R.color.lightGray))
                 thumbnailState.isVisible = true
                 thumbnailState.setImageDrawable(itemIcon)
-                if (category != null) {
-                    hintPlayingCategory.text = root.context.getString(R.string.label_playing_from, category?.name)
+                if (playlist != null) {
+                    hintPlayingCategory.text = root.context.getString(R.string.label_playing_from, playlist?.name)
                     hintPlayingCategory.isVisible = true
                 } else
                     hintPlayingCategory.isVisible = false
