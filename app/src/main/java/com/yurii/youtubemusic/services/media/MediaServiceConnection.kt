@@ -83,9 +83,9 @@ class MediaServiceConnection @Inject constructor(
             playlistRepository.getMediaItemsFor(mediaItemPlaylist)
     }
 
-    fun play(mediaItem: MediaItem, category: Category) {
+    fun play(mediaItem: MediaItem, playlist: MediaItemPlaylist) {
         val extras = Bundle().apply {
-            putParcelable(EXTRA_KEY_CATEGORIES, category)
+            putParcelable(EXTRA_KEY_PLAYLIST, playlist)
         }
         getMediaController().transportControls.playFromMediaId(mediaItem.id, extras)
     }
@@ -162,12 +162,12 @@ class MediaServiceConnection @Inject constructor(
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
             val mediaItem = state.extras?.getParcelable<MediaItem>(PLAYBACK_STATE_MEDIA_ITEM)
-            val category = state.extras?.getParcelable<Category>(PLAYBACK_STATE_PLAYING_CATEGORY)
+            val category = state.extras?.getParcelable<MediaItemPlaylist>(PLAYBACK_STATE_PLAYING_CATEGORY)
             when (state.state) {
                 PlaybackStateCompat.STATE_PLAYING -> {
                     _playbackState.value = PlaybackState.Playing(
                         mediaItem!!,
-                        category!!,
+                        Category(category!!.id.toInt(), category.name),
                         false,
                         state.position,
                         state.lastPositionUpdateTime,
@@ -178,7 +178,7 @@ class MediaServiceConnection @Inject constructor(
                     _playbackState.value =
                         PlaybackState.Playing(
                             mediaItem!!,
-                            category!!,
+                            Category(category!!.id.toInt(), category.name),
                             true,
                             state.position,
                             state.lastPositionUpdateTime,

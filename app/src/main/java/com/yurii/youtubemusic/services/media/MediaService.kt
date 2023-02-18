@@ -19,8 +19,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -35,7 +33,7 @@ const val PLAYBACK_STATE_PLAYING_CATEGORY = "com.yurii.youtubemusic.playback.sta
 const val PLAYBACK_STATE_MEDIA_ITEM = "com.yurii.youtubemusic.playback.state.media.item"
 const val PLAYBACK_STATE_SESSION_ID = "com.yurii.youtubemusic.playback.state.session.id"
 
-const val EXTRA_KEY_CATEGORIES = "com.yurii.youtubemusic.category"
+const val EXTRA_KEY_PLAYLIST = "com.yurii.youtubemusic.playlist"
 
 const val FAILED_TO_LOAD_CATEGORIES = "failed_to_load_categories"
 const val FAILED_TO_LOAD_MEDIA_ITEMS = "failed_to_load_media_items"
@@ -61,9 +59,6 @@ class MediaService : MediaBrowserServiceCompat() {
     lateinit var audioEffectManager: AudioEffectManager
 
     @Inject
-    lateinit var queueModesRepository: QueueModesRepository
-
-    @Inject
     lateinit var mediaLibraryManager: MediaLibraryManager
 
     @Inject
@@ -86,8 +81,6 @@ class MediaService : MediaBrowserServiceCompat() {
         super.onCreate()
         initMediaSession()
         updateCurrentPlaybackState()
-        startHandlingMediaLibraryEvents()
-        observeQueueModes()
     }
 
 
@@ -116,45 +109,7 @@ class MediaService : MediaBrowserServiceCompat() {
             setSessionActivity(sessionActivityPendingIntent)
         }
         sessionToken = mediaSession.sessionToken
-    }
-
-    private fun observeQueueModes() {
-        coroutineScope.launch {
-            queueModesRepository.getIsLooped().collect { isLooped -> queueProvider.isLooped = isLooped }
-        }
-
-        coroutineScope.launch {
-            queueModesRepository.getIsShuffle().collect { isShuffled ->
-                if (queueProvider.isInitialized)
-                    queueProvider.setShuffleState(isShuffled)
-            }
-        }
-    }
-
-    private fun startHandlingMediaLibraryEvents() {
-        coroutineScope.launch {
-            mediaLibraryManager.event.collectLatest { event ->
-                when (event) {
-                    is MediaLibraryManager.Event.ItemDeleted -> onMediaItemIsDeleted(event.item)
-                    is MediaLibraryManager.Event.MediaItemIsAdded -> onMediaItemIsAdded(event.mediaItem)
-                    is MediaLibraryManager.Event.CategoryAssignment -> onMediaItemIsAssignedToCategories(
-                        event.mediaItem,
-                        event.customCategories
-                    )
-                    is MediaLibraryManager.Event.CategoryRemoved -> onCategoryRemoved(event.category)
-                    is MediaLibraryManager.Event.CategoryUpdated -> {
-                        queueProvider.updateCategory(event.category)
-                        updateCurrentPlaybackState()
-                    }
-                    is MediaLibraryManager.Event.MediaItemPositionChanged -> onMediaItemChangedPosition(
-                        event.category, event.mediaItem, event.from, event.to
-                    )
-                    else -> {
-                        // Ignore some cases
-                    }
-                }
-            }
-        }
+        queueProvider.mediaSession = mediaSession
     }
 
     override fun onLoadChildren(parentId: String, result: Result<List<MediaBrowserCompat.MediaItem>>) {
@@ -214,8 +169,8 @@ class MediaService : MediaBrowserServiceCompat() {
         val extras = Bundle().apply {
             if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED) {
                 putInt(PLAYBACK_STATE_SESSION_ID, getMediaPlayer().audioSessionId)
-                putParcelable(PLAYBACK_STATE_MEDIA_ITEM, queueProvider.currentQueueItem)
-                putParcelable(PLAYBACK_STATE_PLAYING_CATEGORY, queueProvider.currentPlayingCategory)
+                putParcelable(PLAYBACK_STATE_MEDIA_ITEM, queueProvider.playingMediaItem)
+                putParcelable(PLAYBACK_STATE_PLAYING_CATEGORY, queueProvider.playingPlaylist)
             }
         }
         val currentPlaybackState = getCurrentPlaybackStateBuilder().apply {
@@ -242,7 +197,7 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun getAvailableActions(): Long {
-        return if (queueProvider.isInitialized) {
+        return if (queueProvider.playingPlaylist != null) {
             val defaultActions: Long = PlaybackStateCompat.ACTION_PLAY or
                     PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID or
                     PlaybackStateCompat.ACTION_STOP
@@ -320,12 +275,12 @@ class MediaService : MediaBrowserServiceCompat() {
 
     private fun prepareMusicFromQueue() {
         currentState = PlaybackStateCompat.STATE_BUFFERING
-        mediaSession.setMetadata(queueProvider.currentQueueItem.toMediaMetadataCompat())
+        mediaSession.setMetadata(queueProvider.playingMediaItem!!.toMediaMetadataCompat())
         updateCurrentPlaybackState()
         resetOrCreateMediaPlayer()
 
         getMediaPlayer().apply {
-            setDataSource(queueProvider.currentQueueItem.mediaFile.absolutePath)
+            setDataSource(queueProvider.playingMediaItem!!.mediaFile.absolutePath)
             prepareAsync()
         }
     }
@@ -366,43 +321,6 @@ class MediaService : MediaBrowserServiceCompat() {
         stopSelf()
     }
 
-    private fun onMediaItemIsDeleted(item: Item) {
-        if (queueProvider.isInitialized && queueProvider.currentQueueItem.id == item.id) {
-            handleStopRequest()
-        }
-        queueProvider.removeFromQueueIfExists(item)
-    }
-
-    private fun onMediaItemIsAdded(mediaItem: MediaItem) {
-        if (queueProvider.isInitialized)
-            coroutineScope.launch { queueProvider.add(mediaItem) }
-    }
-
-    private fun onCategoryRemoved(category: Category) {
-        if (queueProvider.isInitialized && queueProvider.currentPlayingCategory == category) {
-            handleStopRequest()
-            queueProvider.release()
-        }
-    }
-
-    private fun onMediaItemChangedPosition(category: Category, mediaItem: MediaItem, from: Int, to: Int) {
-        if (queueProvider.isInitialized && queueProvider.currentPlayingCategory == category)
-            queueProvider.changePosition(mediaItem, from, to)
-    }
-
-    private fun onMediaItemIsAssignedToCategories(mediaItem: MediaItem, customCategories: List<Category>) {
-        if (!queueProvider.isInitialized || queueProvider.currentPlayingCategory == Category.ALL)
-            return
-
-        if (queueProvider.currentPlayingCategory in customCategories)
-            queueProvider.addToQueueIfDoesNotContain(mediaItem)
-        else {
-            if (queueProvider.currentQueueItem.id == mediaItem.id)
-                handleStopRequest()
-            queueProvider.removeFromQueueIfExists(mediaItem)
-        }
-    }
-
     private inner class MediaSessionCallBacks : MediaSessionCompat.Callback() {
         private val preparePlayerLock = Mutex()
 
@@ -426,9 +344,9 @@ class MediaService : MediaBrowserServiceCompat() {
 
             coroutineScope.launch(Dispatchers.IO) {
                 preparePlayerLock.withLock {
-                    val category = extras?.getParcelable(EXTRA_KEY_CATEGORIES) ?: Category.ALL
-                    queueProvider.createQueueFor(category, queueModesRepository.getIsShuffle().first())
-                    queueProvider.setTargetMediaItem(mediaId)
+                    val playlist = extras?.getParcelable(EXTRA_KEY_PLAYLIST) ?: MediaItemPlaylist.ALL
+                    queueProvider.prepareQueue(playlist)
+                    queueProvider.play(mediaId)
                     registerReceiver(becomingNoisyReceiver, becomingNoisyReceiver.becomingNoisyIntent)
                     handlePlayMusicQueue()
                 }
@@ -439,7 +357,7 @@ class MediaService : MediaBrowserServiceCompat() {
         override fun onStop() {
             super.onStop()
             handleStopRequest()
-            queueProvider.release()
+            //queueProvider.release()
             unregisterReceiver(becomingNoisyReceiver)
         }
 
@@ -480,8 +398,10 @@ class MediaService : MediaBrowserServiceCompat() {
         }
 
         override fun onCompletion(mp: MediaPlayer?) {
-            queueProvider.next()
-            handlePlayMusicQueue()
+            coroutineScope.launch {
+                queueProvider.next()
+                handlePlayMusicQueue()
+            }
         }
     }
 
@@ -503,6 +423,7 @@ class MediaService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         super.onDestroy()
+        queueProvider.releaseQueue()
         coroutineScopeJob.cancel()
         mediaSession.run {
             isActive = false
