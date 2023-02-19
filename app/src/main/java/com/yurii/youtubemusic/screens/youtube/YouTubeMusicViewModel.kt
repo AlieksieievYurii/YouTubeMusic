@@ -11,9 +11,9 @@ import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.media.MediaLibraryManager
-import com.yurii.youtubemusic.utilities.GoogleAccount
-import com.yurii.youtubemusic.utilities.PlaylistRepository
-import com.yurii.youtubemusic.utilities.YouTubePreferences
+import com.yurii.youtubemusic.source.GoogleAccount
+import com.yurii.youtubemusic.source.PlaylistRepository
+import com.yurii.youtubemusic.source.YouTubePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*

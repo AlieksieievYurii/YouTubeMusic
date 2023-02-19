@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.utilities
+package com.yurii.youtubemusic.source
 
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.MediaItemPlaylist

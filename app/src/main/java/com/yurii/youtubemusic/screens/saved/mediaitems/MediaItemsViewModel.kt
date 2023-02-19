@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.utilities.MediaRepository
-import com.yurii.youtubemusic.utilities.PlaylistRepository
+import com.yurii.youtubemusic.source.MediaRepository
+import com.yurii.youtubemusic.source.PlaylistRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

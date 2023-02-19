@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.utilities
+package com.yurii.youtubemusic.source
 
 import com.yurii.youtubemusic.db.PlaylistDao
 import com.yurii.youtubemusic.db.PlaylistEntity

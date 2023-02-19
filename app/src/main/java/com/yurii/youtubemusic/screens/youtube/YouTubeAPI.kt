@@ -6,7 +6,7 @@ import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.VideoListResponse
-import com.yurii.youtubemusic.utilities.GoogleAccount
+import com.yurii.youtubemusic.source.GoogleAccount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

@@ -9,8 +9,9 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.yurii.youtubemusic.models.*
-import com.yurii.youtubemusic.utilities.MediaRepository
-import com.yurii.youtubemusic.utilities.PlaylistRepository
+import com.yurii.youtubemusic.source.MediaRepository
+import com.yurii.youtubemusic.source.PlaylistRepository
+import com.yurii.youtubemusic.source.QueueModesRepository
 import com.yurii.youtubemusic.utilities.parcelable
 import com.yurii.youtubemusic.utilities.serializable
 import dagger.hilt.android.qualifiers.ApplicationContext

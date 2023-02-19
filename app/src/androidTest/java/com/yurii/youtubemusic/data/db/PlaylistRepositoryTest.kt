@@ -9,7 +9,7 @@ import com.yurii.youtubemusic.db.DataBase
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.toMediaItem
 import com.yurii.youtubemusic.models.toMediaItems
-import com.yurii.youtubemusic.utilities.PlaylistRepository
+import com.yurii.youtubemusic.source.PlaylistRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before

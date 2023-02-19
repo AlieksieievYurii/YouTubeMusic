@@ -2,7 +2,7 @@ package com.yurii.youtubemusic.utilities
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.yurii.youtubemusic.*
+import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.screens.authorization.AuthenticationFragment
 import com.yurii.youtubemusic.screens.saved.SavedMusicFragment
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicFragment

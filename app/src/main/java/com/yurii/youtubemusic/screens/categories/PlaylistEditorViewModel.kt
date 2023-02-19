@@ -2,7 +2,7 @@ package com.yurii.youtubemusic.screens.categories
 
 import androidx.lifecycle.*
 import com.yurii.youtubemusic.models.MediaItemPlaylist
-import com.yurii.youtubemusic.utilities.PlaylistRepository
+import com.yurii.youtubemusic.source.PlaylistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

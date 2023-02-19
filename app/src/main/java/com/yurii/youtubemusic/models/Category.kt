@@ -37,3 +37,5 @@ fun Category.toMediaItem(): MediaBrowserCompat.MediaItem {
 data class CategoryContainer(val category: Category, val mediaItemsIds: List<String>) : Parcelable
 
 fun List<Category>.toPlaylists() = map { MediaItemPlaylist(it.id.toLong(), it.name) }
+
+fun List<MediaItemPlaylist>.toCategories() = map { Category(it.id.toInt(), it.name) }

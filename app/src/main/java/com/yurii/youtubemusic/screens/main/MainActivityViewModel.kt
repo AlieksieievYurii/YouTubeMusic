@@ -3,7 +3,7 @@ package com.yurii.youtubemusic.screens.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
-import com.yurii.youtubemusic.utilities.GoogleAccount
+import com.yurii.youtubemusic.source.GoogleAccount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

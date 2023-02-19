@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.services.media
+package com.yurii.youtubemusic.source
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey

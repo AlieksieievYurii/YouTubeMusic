@@ -5,8 +5,9 @@ import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.getMediaDescriptionCompat
 import com.yurii.youtubemusic.models.isDefault
-import com.yurii.youtubemusic.utilities.MediaRepository
-import com.yurii.youtubemusic.utilities.PlaylistRepository
+import com.yurii.youtubemusic.source.MediaRepository
+import com.yurii.youtubemusic.source.PlaylistRepository
+import com.yurii.youtubemusic.source.QueueModesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first

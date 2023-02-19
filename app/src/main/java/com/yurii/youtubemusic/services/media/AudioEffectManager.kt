@@ -5,7 +5,7 @@ import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import com.yurii.youtubemusic.models.EqualizerData
 import com.yurii.youtubemusic.models.TwisterData
-import com.yurii.youtubemusic.utilities.EqualizerPreferences
+import com.yurii.youtubemusic.source.EqualizerPreferences
 import javax.inject.Inject
 import javax.inject.Singleton
 
