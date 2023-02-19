@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.source.MediaRepository
+import com.yurii.youtubemusic.source.MediaLibraryDomain
 import com.yurii.youtubemusic.source.PlaylistRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -18,7 +18,7 @@ class MediaItemsViewModel @AssistedInject constructor(
     @Assisted private val playlist: MediaItemPlaylist,
     private val mediaServiceConnection: MediaServiceConnection,
     private val playlistRepository: PlaylistRepository,
-    private val mediaRepository: MediaRepository
+    private val mediaLibraryDomain: MediaLibraryDomain
 ) : ViewModel() {
     sealed class MediaItemsStatus {
         object Loading : MediaItemsStatus()
@@ -33,7 +33,7 @@ class MediaItemsViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            mediaServiceConnection.getMediaItems(if (playlist.isDefault()) null else playlist).collectLatest {
+            mediaLibraryDomain.getMediaItems(playlist).collect {
                 _mediaItemsStatus.value = if (it.isEmpty()) MediaItemsStatus.NoMediaItems else MediaItemsStatus.Loaded(it)
             }
         }
@@ -41,7 +41,7 @@ class MediaItemsViewModel @AssistedInject constructor(
 
     fun onMove(mediaItem: MediaItem, from: Int, to: Int) {
         viewModelScope.launch {
-            mediaRepository.changePosition(mediaItem, from, to)
+            mediaLibraryDomain.changePosition(playlist, mediaItem, from, to)
         }
     }
 
@@ -60,7 +60,7 @@ class MediaItemsViewModel @AssistedInject constructor(
 
     fun deleteMediaItem(mediaItem: MediaItem) {
         viewModelScope.launch {
-            mediaRepository.delete(mediaItem)
+            mediaLibraryDomain.deleteMediaItem(mediaItem)
         }
     }
 

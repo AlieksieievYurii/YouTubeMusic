@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.source
 
 import com.yurii.youtubemusic.db.*
+import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.toMediaItems
 import com.yurii.youtubemusic.services.media.MediaStorage
@@ -19,9 +20,9 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
 
     fun getOrderedMediaItems(): Flow<List<MediaItem>> = mediaItemDao.getAllSortedMediaItems().map { it.toMediaItems() }
 
-    suspend fun delete(mediaItem: MediaItem) = withContext(Dispatchers.IO) {
-        mediaItemDao.deleteById(mediaItem.id)
-        mediaStorage.deleteMediaFiles(mediaItem)
+    suspend fun delete(item: Item) = withContext(Dispatchers.IO) {
+        mediaItemDao.deleteAndCorrectPositions(item.id)
+        mediaStorage.deleteMediaFiles(item)
     }
 
     suspend fun addMediaItem(mediaItem: MediaItem) = lock.withLock {

@@ -8,9 +8,22 @@ interface MediaItemDao {
     @Insert
     suspend fun insert(mediaItemEntity: MediaItemEntity)
 
-    @Transaction
     @Query("DELETE FROM media_items WHERE mediaItemId = :mediaItemId")
-    suspend fun deleteById(mediaItemId: String)
+    suspend fun mDeleteById(mediaItemId: String)
+
+    @Query(
+        """
+        UPDATE media_items SET position = position - 1 WHERE position >
+        (SELECT position FROM media_items WHERE mediaItemId = :mediaItemId)
+        """
+    )
+    suspend fun mDecreasePositionFrom(mediaItemId: String)
+
+    @Transaction
+    suspend fun deleteAndCorrectPositions(mediaItemId: String) {
+        mDecreasePositionFrom(mediaItemId)
+        mDeleteById(mediaItemId)
+    }
 
     @Query("SELECT * FROM media_items ORDER BY position ASC")
     fun getAllSortedMediaItems(): Flow<List<MediaItemEntity>>
@@ -19,21 +32,21 @@ interface MediaItemDao {
     suspend fun getAvailablePosition(): Int?
 
     @Query("UPDATE media_items SET position = :position WHERE mediaItemId = :mediaItemId")
-    suspend fun setPosition(mediaItemId: String, position: Int)
+    suspend fun mSetPosition(mediaItemId: String, position: Int)
 
     @Query("UPDATE media_items SET position = position - 1 WHERE position > :from AND position <= :to")
-    suspend fun decreasePositionInRange(from: Int, to: Int)
+    suspend fun mDecreasePositionInRange(from: Int, to: Int)
 
     @Query("UPDATE media_items SET position = position + 1 WHERE position < :from AND position >= :to")
-    suspend fun increasePositionInRange(from: Int, to: Int)
+    suspend fun mIncreasePositionInRange(from: Int, to: Int)
 
     @Transaction
     suspend fun updatePosition(mediaItemId: String, from: Int, to: Int) {
         if (from > to)
-            increasePositionInRange(from, to)
+            mIncreasePositionInRange(from, to)
         else
-            decreasePositionInRange(from, to)
+            mDecreasePositionInRange(from, to)
 
-        setPosition(mediaItemId, to)
+        mSetPosition(mediaItemId, to)
     }
 }
