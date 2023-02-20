@@ -33,9 +33,11 @@ class MediaRegisterRepositoryTest {
     private lateinit var mediaRepository: MediaRepository
     private lateinit var temporaryFolder: TemporaryFolder
 
+    private lateinit var database: DataBase
+
     @Before
     fun createDataBase() {
-        val database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), DataBase::class.java)
+        database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), DataBase::class.java)
             .allowMainThreadQueries()
             .build()
 
@@ -55,9 +57,9 @@ class MediaRegisterRepositoryTest {
         val videoItem = createVideoItem(1).first()
         mediaManagerDomain.createMediaItem(videoItem, emptyList())
 
-        val mediaItemEntity = mediaRepository.getOrderedMediaItems().first()
-        assertThat(mediaItemEntity.first().id).isEqualTo(videoItem.id)
-//        assertThat(mediaItemEntity.position).isEqualTo(0)
+        val mediaItemEntity = database.mediaItemDao().getAllSortedMediaItems().first().first()
+        assertThat(mediaItemEntity.mediaItemId).isEqualTo(videoItem.id)
+        assertThat(mediaItemEntity.position).isEqualTo(0)
     }
 
     @Test
@@ -65,11 +67,11 @@ class MediaRegisterRepositoryTest {
         val videoItems = createVideoItem(100)
         videoItems.forEach { mediaManagerDomain.createMediaItem(it, emptyList()) }
 
-        val mediaItemEntities = mediaRepository.getOrderedMediaItems().first()
-        println(mediaItemEntities.toString())
-        assertThat(mediaItemEntities.first().id).isEqualTo(videoItems.first().id)
-        assertThat(mediaItemEntities.last().id).isEqualTo(videoItems.last().id)
-//        assertThat(mediaItemEntities.last()).isEqualTo(99)
+        val mediaItemEntities = database.mediaItemDao().getAllSortedMediaItems().first()
+
+        assertThat(mediaItemEntities.first().mediaItemId).isEqualTo(videoItems.first().id)
+        assertThat(mediaItemEntities.last().mediaItemId).isEqualTo(videoItems.last().id)
+        assertThat(mediaItemEntities.last().position).isEqualTo(99)
     }
 
     @Test
@@ -77,9 +79,9 @@ class MediaRegisterRepositoryTest {
         val videoItems = createVideoItem(100)
         videoItems.map { async { mediaManagerDomain.createMediaItem(it, emptyList()) } }.awaitAll()
 
-        val mediaItemEntities = mediaRepository.getOrderedMediaItems().first()
-        assertThat(mediaItemEntities.last().id).isEqualTo(videoItems.last().id)
-//        assertThat(mediaItemEntities.last().position).isEqualTo(99)
+        val mediaItemEntities = database.mediaItemDao().getAllSortedMediaItems().first()
+        assertThat(mediaItemEntities.last().mediaItemId).isEqualTo(videoItems.last().id)
+        assertThat(mediaItemEntities.last().position).isEqualTo(99)
     }
 
     private fun createVideoItem(n: Int) = (0 until n).map { id ->
