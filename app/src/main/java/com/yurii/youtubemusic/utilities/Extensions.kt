@@ -1,6 +1,8 @@
 package com.yurii.youtubemusic.utilities
 
+import android.app.Service
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Parcelable
@@ -106,4 +108,11 @@ inline fun <reified T : Parcelable> Bundle.parcelable(key: String): T? = when {
 inline fun <reified T : java.io.Serializable> Bundle.serializable(key: String): T? = when {
     SDK_INT >= 33 -> getSerializable(key, T::class.java)
     else -> @Suppress("DEPRECATION") getSerializable(key) as? T
+}
+
+fun Service.stopForegroundCompat(removeNotification: Boolean) {
+    if (SDK_INT >= Build.VERSION_CODES.N)
+        stopForeground(if(removeNotification) Service.STOP_FOREGROUND_REMOVE else Service.STOP_FOREGROUND_DETACH)
+    else
+        @Suppress("DEPRECATION") stopForeground(removeNotification)
 }

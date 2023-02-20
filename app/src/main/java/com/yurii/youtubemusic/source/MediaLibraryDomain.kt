@@ -34,6 +34,7 @@ class MediaLibraryDomain @Inject constructor(
     }
 
     suspend fun deleteMediaItem(item: Item) {
+        playlistRepository.removeItemFromPlaylists(item)
         mediaRepository.delete(item)
         _itemDeleted.emit(item)
     }

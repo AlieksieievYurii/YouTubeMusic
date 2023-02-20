@@ -6,15 +6,7 @@ import java.io.File
 
 
 fun createMediaItemEntities(n: Int, prefix: String = ""): List<MediaItemEntity> = (0 until n).map {
-    MediaItemEntity(
-        mediaItemId = "$prefix$it",
-        title = "title-$prefix$it",
-        author = "author-$prefix$it",
-        durationInMillis = it.toLong(),
-        thumbnail = File("/thumbnails/$prefix$it.jpg"),
-        mediaFile = File("/media-files/$prefix$it.mp3"),
-        position = it
-    )
+    createMediaItemEntity(it, prefix)
 }
 
 fun createMediaItems(n: Int): List<MediaItem> = (0 until n).map {
@@ -28,3 +20,13 @@ fun createMediaItems(n: Int): List<MediaItem> = (0 until n).map {
         mediaFile = File("/media-files/$it.mp3"),
     )
 }
+
+fun createMediaItemEntity(id: Int, prefix: String = "") = MediaItemEntity(
+    mediaItemId = "$prefix$id",
+    title = "title-$prefix$id",
+    author = "author-$prefix$id",
+    durationInMillis = id.toLong(),
+    thumbnail = File("/thumbnails/$prefix$id.jpg"),
+    mediaFile = File("/media-files/$prefix$id.mp3"),
+    position = id
+)

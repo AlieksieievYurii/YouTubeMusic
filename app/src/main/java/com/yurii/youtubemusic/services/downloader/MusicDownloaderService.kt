@@ -3,10 +3,10 @@ package com.yurii.youtubemusic.services.downloader
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
-import android.os.Build
 import android.os.IBinder
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.source.MediaCreator
+import com.yurii.youtubemusic.utilities.stopForegroundCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -52,10 +52,7 @@ class MusicDownloaderService : Service() {
 
     private fun stopAsForegroundIfQueueIsEmpty() {
         if (isForeground && downloader.isQueueEmpty()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                stopForeground(STOP_FOREGROUND_DETACH)
-            else
-                @Suppress("DEPRECATION") stopForeground(true)
+            stopForegroundCompat(true)
             isForeground = false
         }
     }

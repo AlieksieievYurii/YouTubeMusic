@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic.data.db
 
+import android.util.Log
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -11,6 +12,7 @@ import com.yurii.youtubemusic.models.toMediaItem
 import com.yurii.youtubemusic.models.toMediaItems
 import com.yurii.youtubemusic.source.PlaylistRepository
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
@@ -135,5 +137,50 @@ class PlaylistRepositoryTest {
         playlistRepository.removePlaylist(playlistA)
 
         assertThat(playlistRepository.getAssignedPlaylistsFor(mediaItemsForPlaylistA.toMediaItems().first())).isEmpty()
+    }
+
+    @Test
+    fun test_deleteMediaItemFromPlaylist_positionsAreUpdated() = runBlocking {
+        val a = createMediaItemEntity(0)
+        val b = createMediaItemEntity(1)
+        val c = createMediaItemEntity(2)
+        val d = createMediaItemEntity(3)
+        val e = createMediaItemEntity(4)
+        val f = createMediaItemEntity(5)
+
+        val playlistA = MediaItemPlaylist(id = playlistRepository.addPlaylist("A"), "A")
+        val playlistB = MediaItemPlaylist(id = playlistRepository.addPlaylist("B"), "B")
+
+        database.mediaItemDao().run {
+            insert(a)
+            insert(b)
+            insert(c)
+            insert(d)
+            insert(e)
+            insert(f)
+        }
+
+        playlistRepository.assignMediaItemToPlaylists(a.toMediaItem(), listOf(playlistA, playlistB))
+        playlistRepository.assignMediaItemToPlaylists(b.toMediaItem(), listOf(playlistA, playlistB))
+        playlistRepository.assignMediaItemToPlaylists(c.toMediaItem(), listOf(playlistA))
+        playlistRepository.assignMediaItemToPlaylists(d.toMediaItem(), listOf(playlistA))
+        playlistRepository.assignMediaItemToPlaylists(e.toMediaItem(), listOf(playlistB))
+        playlistRepository.assignMediaItemToPlaylists(f.toMediaItem(), listOf(playlistB))
+
+
+
+        playlistRepository.removeItemFromPlaylists(a.toMediaItem())
+
+        assertThat(database.playlistDao().getAssignedPlaylists(a.mediaItemId)).isEmpty()
+
+        validatePositioning(database.playlistDao().getMediaItemsForPlaylistFlow(playlistA.id).first().map { it.position })
+        validatePositioning(database.playlistDao().getMediaItemsForPlaylistFlow(playlistB.id).first().map { it.position })
+    }
+
+    private fun validatePositioning(items: List<Int>) {
+        var p = 0
+        items.forEach {
+            assertThat(it).isEqualTo(p++)
+        }
     }
 }

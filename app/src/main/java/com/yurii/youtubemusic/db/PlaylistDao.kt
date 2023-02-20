@@ -21,24 +21,33 @@ interface PlaylistDao {
     fun insertMediaItemPlaylist(vararg mediaItemPlayListAssignment: MediaItemPlayListAssignment)
 
     @Transaction
-    fun setPlaylist(mediaItemId: String, playlists: List<PlaylistEntity>) {
-        removeAllAssignments(mediaItemId)
-        val mediaItemPlaylists = playlists.map {
-            MediaItemPlayListAssignment(
-                mediaItemId,
-                it.playlistId,
-                getAvailablePosition(it.playlistId) ?: 0
-            )
-        }
+    fun setPlaylist(mediaItemId: String, playlistId: Long) {
+        val mediaItemPlaylist = MediaItemPlayListAssignment(
+            mediaItemId,
+            playlistId,
+            getAvailablePosition(playlistId) ?: 0
+        )
 
-        insertMediaItemPlaylist(*mediaItemPlaylists.toTypedArray())
+        insertMediaItemPlaylist(mediaItemPlaylist)
     }
+
 
     @Query("SELECT MAX(position) + 1 from media_item_playlist_assignment WHERE playlistId = :playlistId")
     fun getAvailablePosition(playlistId: Long): Int?
 
-    @Query("DELETE FROM media_item_playlist_assignment WHERE mediaItemId = :mediaItemId")
-    fun removeAllAssignments(mediaItemId: String)
+    @Transaction
+    suspend fun detachPlaylist(mediaItemId: String, playlistId: Long) {
+        mDecreasePositionsInPlaylists(mediaItemId, playlistId)
+        mRemovePlaylistAssignment(mediaItemId, playlistId)
+    }
+
+    @Transaction
+    suspend fun removeMediaItemFromPlaylists(mediaItemId: String) {
+        getAssignedPlaylists(mediaItemId).forEach {
+            mDecreasePositionsInPlaylists(mediaItemId, it.playlistId)
+        }
+        mRemoveAllAssignments(mediaItemId)
+    }
 
     @Query(
         """
@@ -72,11 +81,11 @@ interface PlaylistDao {
     @Transaction
     suspend fun changePosition(mediaItemId: String, playlistId: Long, from: Int, to: Int) {
         if (from > to)
-            increasePositionInRange(playlistId, from, to)
+            mIncreasePositionInRange(playlistId, from, to)
         else
-            decreasePositionInRange(playlistId, from, to)
+            mDecreasePositionInRange(playlistId, from, to)
 
-        setPosition(mediaItemId, playlistId, to)
+        mSetPosition(mediaItemId, playlistId, to)
     }
 
     @Query(
@@ -85,7 +94,7 @@ interface PlaylistDao {
         WHERE mediaItemId = :mediaItemId AND playlistId = :playlistId
          """
     )
-    suspend fun setPosition(mediaItemId: String, playlistId: Long, position: Int)
+    suspend fun mSetPosition(mediaItemId: String, playlistId: Long, position: Int)
 
     @Query(
         """
@@ -93,7 +102,7 @@ interface PlaylistDao {
         WHERE position > :from AND position <= :to AND playlistId = :playlistId
         """
     )
-    suspend fun decreasePositionInRange(playlistId: Long, from: Int, to: Int)
+    suspend fun mDecreasePositionInRange(playlistId: Long, from: Int, to: Int)
 
     @Query(
         """
@@ -101,5 +110,19 @@ interface PlaylistDao {
         WHERE position < :from AND position >= :to AND playlistId = :playlistId
     """
     )
-    suspend fun increasePositionInRange(playlistId: Long, from: Int, to: Int)
+    suspend fun mIncreasePositionInRange(playlistId: Long, from: Int, to: Int)
+
+    @Query(
+        """
+        UPDATE media_item_playlist_assignment SET position = position - 1 WHERE playlistId = :playlistId AND position > 
+        (SELECT position FROM media_item_playlist_assignment WHERE mediaItemId = :mediaItemId AND playlistId = :playlistId)
+    """
+    )
+    fun mDecreasePositionsInPlaylists(mediaItemId: String, playlistId: Long)
+
+    @Query("DELETE FROM media_item_playlist_assignment WHERE mediaItemId = :mediaItemId")
+    fun mRemoveAllAssignments(mediaItemId: String)
+
+    @Query("DELETE FROM media_item_playlist_assignment WHERE mediaItemId = :mediaItemId AND playlistId = :playlistId")
+    fun mRemovePlaylistAssignment(mediaItemId: String, playlistId: Long)
 }
