@@ -30,7 +30,7 @@ class GoogleAccount @Inject constructor(
     @YouTubeGoogleClient private val googleClient: GoogleSignInClient
 ) {
 
-    private val _isAuthenticatedAndAuthorized = MutableStateFlow(isAuthenticatedAndAuthorized())
+    private val _isAuthenticatedAndAuthorized: MutableStateFlow<Boolean> = MutableStateFlow(isAuthenticatedAndAuthorized())
     val isAuthenticatedAndAuthorized = _isAuthenticatedAndAuthorized.asStateFlow()
 
     @Throws(ApiException::class, DoesNotHaveRequiredScopes::class)
