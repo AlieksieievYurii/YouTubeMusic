@@ -100,7 +100,7 @@ class MediaServiceConnection @Inject constructor(
 
     suspend fun setShuffleState(isShuffled: Boolean) = queueModesRepository.setShuffle(isShuffled)
 
-    suspend fun getMediaItemsFor(category: Category): List<MediaItem> =
+    suspend fun getMediaItemsFor(playlist: MediaItemPlaylist): List<MediaItem> =
         suspendCoroutine { callback ->
             val mediaItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
                 override fun onChildrenLoaded(
@@ -112,21 +112,21 @@ class MediaServiceConnection @Inject constructor(
                 }
             }
 
-            mediaBrowser.subscribe(category.id.toString(), mediaItemsSubscription)
+            mediaBrowser.subscribe(playlist.id.toString(), mediaItemsSubscription)
         }
 
     private fun getMediaController(): MediaControllerCompat =
         mediaController
             ?: throw IllegalStateException("Can not get mediaController because it is not initialized")
 
-    suspend fun getCategories(): List<Category> = suspendCoroutine { callback ->
+    suspend fun getPlaylists(): List<MediaItemPlaylist> = suspendCoroutine { callback ->
         val categoryItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
             override fun onChildrenLoaded(
                 parentId: String,
                 children: MutableList<MediaBrowserCompat.MediaItem>
             ) {
                 super.onChildrenLoaded(parentId, children)
-                callback.resume(children.map { Category.createFrom(it) })
+                callback.resume(children.map { MediaItemPlaylist.createFrom(it) })
             }
         }
         mediaBrowser.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)

@@ -1,7 +1,6 @@
 package com.yurii.youtubemusic.services.downloader
 
 import androidx.annotation.IntRange
-import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.Progress
 import com.yurii.youtubemusic.models.VideoItem

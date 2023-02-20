@@ -9,7 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.yurii.youtubemusic.db.DataBase
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.media.MediaStorage
-import com.yurii.youtubemusic.source.MediaManagerDomain
+import com.yurii.youtubemusic.source.MediaCreator
 import com.yurii.youtubemusic.source.MediaRepository
 import com.yurii.youtubemusic.source.PlaylistRepository
 import com.yurii.youtubemusic.utilities.*
@@ -29,7 +29,7 @@ import java.math.BigInteger
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class MediaRegisterRepositoryTest {
-    private lateinit var mediaManagerDomain: MediaManagerDomain
+    private lateinit var mediaManagerDomain: MediaCreator
     private lateinit var mediaRepository: MediaRepository
     private lateinit var temporaryFolder: TemporaryFolder
 
@@ -43,8 +43,8 @@ class MediaRegisterRepositoryTest {
         val context = mockk<Context> {
             every { filesDir } returns temporaryFolder.root
         }
-        mediaRepository = MediaRepository(database.mediaItemDao())
-        mediaManagerDomain = MediaManagerDomain(
+        mediaRepository = MediaRepository(database.mediaItemDao(), mockk())
+        mediaManagerDomain = MediaCreator(
             mediaRepository, PlaylistRepository(database.playlistDao()), MediaStorage(context)
         )
 

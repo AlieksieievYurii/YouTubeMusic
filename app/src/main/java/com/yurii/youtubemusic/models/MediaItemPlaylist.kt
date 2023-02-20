@@ -10,6 +10,10 @@ import kotlinx.android.parcel.Parcelize
 data class MediaItemPlaylist(val id: Long, val name: String) : Parcelable {
     companion object {
         val ALL = MediaItemPlaylist(-1, "All")
+
+        fun createFrom(mediaItem: MediaBrowserCompat.MediaItem): MediaItemPlaylist {
+            return MediaItemPlaylist(mediaItem.mediaId!!.toLong(), mediaItem.description.title.toString())
+        }
     }
 }
 
