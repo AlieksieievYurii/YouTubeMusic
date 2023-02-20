@@ -3,10 +3,10 @@ package com.yurii.youtubemusic.services.downloader
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import com.yurii.youtubemusic.models.*
-import com.yurii.youtubemusic.services.media.MediaLibraryManager
-import com.yurii.youtubemusic.source.MediaManagerDomain
+import com.yurii.youtubemusic.source.MediaCreator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -23,10 +23,9 @@ class MusicDownloaderService : Service() {
         data class Failed(val videoItem: VideoItem, val error: Exception) : DownloadingReport()
     }
 
-    @Inject lateinit var mediaLibraryManager: MediaLibraryManager
     @Inject lateinit var downloader: MusicDownloader
     @Inject lateinit var notificationManager: NotificationManager
-    @Inject lateinit var mediaManagerDomain: MediaManagerDomain
+    @Inject lateinit var mediaCreator: MediaCreator
 
     private val scopeJob = Job()
     private val serviceCoroutineScope = CoroutineScope(scopeJob)
@@ -53,7 +52,10 @@ class MusicDownloaderService : Service() {
 
     private fun stopAsForegroundIfQueueIsEmpty() {
         if (isForeground && downloader.isQueueEmpty()) {
-            stopForeground(true)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                stopForeground(STOP_FOREGROUND_DETACH)
+            else
+                @Suppress("DEPRECATION") stopForeground(true)
             isForeground = false
         }
     }
@@ -67,8 +69,7 @@ class MusicDownloaderService : Service() {
         override fun onFinished(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
             stopAsForegroundIfQueueIsEmpty()
             serviceCoroutineScope.launch {
-                mediaManagerDomain.createMediaItem(videoItem, playlists)
-                mediaLibraryManager.registerMediaItem(videoItem, playlists.toCategories())
+                mediaCreator.createMediaItem(videoItem, playlists)
                 downloadingReport?.emit(DownloadingReport.Successful(videoItem))
             }
         }

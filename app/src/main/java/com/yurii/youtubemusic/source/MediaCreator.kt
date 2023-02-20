@@ -6,7 +6,7 @@ import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.media.MediaStorage
 import javax.inject.Inject
 
-class MediaManagerDomain @Inject constructor(
+class MediaCreator @Inject constructor(
     private val mediaRepository: MediaRepository,
     private val playlistRepository: PlaylistRepository,
     private val mediaStorage: MediaStorage
