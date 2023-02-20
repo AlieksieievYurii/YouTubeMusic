@@ -88,6 +88,9 @@ interface PlaylistDao {
         mSetPosition(mediaItemId, playlistId, to)
     }
 
+    @Query("DELETE FROM media_item_playlist_assignment WHERE playlistId = :playlistId")
+    suspend fun removePlaylistAssignments(playlistId: Long)
+
     @Query(
         """
         UPDATE media_item_playlist_assignment SET position = :position

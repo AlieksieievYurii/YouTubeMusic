@@ -39,6 +39,7 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
 
     suspend fun removePlaylist(mediaItemPlaylist: MediaItemPlaylist) = lock.withLock {
         withContext(Dispatchers.IO) {
+            playlistDao.removePlaylistAssignments(mediaItemPlaylist.id)
             playlistDao.delete(mediaItemPlaylist.toPlaylistEntity())
         }
     }
