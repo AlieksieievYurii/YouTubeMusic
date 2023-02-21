@@ -5,20 +5,36 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import com.yurii.youtubemusic.source.Validator
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
+
 @HiltAndroidApp
 class Application : Application() {
+
+    @Inject
+    lateinit var validator: Validator
+
     override fun onCreate() {
         super.onCreate()
         createMediaPlayerNotificationChannel()
         createMusicsDownloadingNotificationChannel()
+        validateMediaItems()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
     }
 
+    private fun validateMediaItems() {
+        MainScope().launch {
+            validator.removeDownloadingMocks()
+            validator.validateMediaItems()
+        }
+    }
     private fun createMediaPlayerNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "MediaPlayerNotification"

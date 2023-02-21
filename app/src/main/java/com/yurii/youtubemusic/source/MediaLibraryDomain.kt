@@ -4,6 +4,7 @@ import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.isDefault
+import com.yurii.youtubemusic.services.media.MediaStorage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -13,7 +14,8 @@ import javax.inject.Singleton
 @Singleton
 class MediaLibraryDomain @Inject constructor(
     private val playlistRepository: PlaylistRepository,
-    private val mediaRepository: MediaRepository
+    private val mediaRepository: MediaRepository,
+    private val mediaStorage: MediaStorage
 ) {
 
     private val _itemDeleted = MutableSharedFlow<Item>()
@@ -36,6 +38,7 @@ class MediaLibraryDomain @Inject constructor(
     suspend fun deleteMediaItem(item: Item) {
         playlistRepository.removeItemFromPlaylists(item)
         mediaRepository.delete(item)
+        mediaStorage.deleteMediaFiles(item)
         _itemDeleted.emit(item)
     }
 }
