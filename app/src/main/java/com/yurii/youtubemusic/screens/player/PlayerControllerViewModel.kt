@@ -31,8 +31,8 @@ class PlayerControllerViewModel @Inject constructor (private val mediaServiceCon
                 when (it) {
                     PlaybackState.None -> timerJob?.cancel()
                     is PlaybackState.Playing -> {
-                        if (it.isPaused) timerJob?.cancel() else runTicker()
                         _currentPosition.value = it.currentPosition
+                        if (it.isPaused) timerJob?.cancel() else runTicker()
                     }
                 }
             }

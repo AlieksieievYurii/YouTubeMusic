@@ -27,9 +27,9 @@ sealed class PlaybackState {
     object None : PlaybackState()
     data class Playing(
         val mediaItem: MediaItem,
-        val playlist: MediaItemPlaylist?,
+        val playlist: MediaItemPlaylist,
         val isPaused: Boolean,
-        private val position: Long,
+        val position: Long,
         private val lastUpdateTime: Long,
         private val playbackSpeed: Float,
     ) : PlaybackState() {
@@ -161,7 +161,7 @@ class MediaServiceConnection @Inject constructor(
                 PlaybackStateCompat.STATE_PLAYING -> {
                     _playbackState.value = PlaybackState.Playing(
                         mediaItem!!,
-                        playlist,
+                        playlist!!,
                         false,
                         state.position,
                         state.lastPositionUpdateTime,
@@ -172,7 +172,7 @@ class MediaServiceConnection @Inject constructor(
                     _playbackState.value =
                         PlaybackState.Playing(
                             mediaItem!!,
-                            playlist,
+                            playlist!!,
                             true,
                             state.position,
                             state.lastPositionUpdateTime,
