@@ -44,7 +44,9 @@ class PlayerControllerViewModel @Inject constructor (private val mediaServiceCon
         timerJob = viewModelScope.launch {
             while (true) {
                 delay(1000)
-                _currentPosition.value += 1000
+                _currentPosition.update {
+                    it + 1000
+                }
             }
         }
     }
