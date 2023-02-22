@@ -17,7 +17,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import java.lang.Exception
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -81,20 +80,20 @@ class MediaServiceConnection @Inject constructor(
         val extras = Bundle().apply {
             putParcelable(EXTRA_KEY_PLAYLIST, playlist)
         }
-        getMediaController().transportControls.playFromMediaId(mediaItem.id, extras)
+        mediaController?.transportControls?.playFromMediaId(mediaItem.id, extras)
     }
 
-    fun pause() = getMediaController().transportControls.pause()
+    fun pause() = mediaController?.transportControls?.pause()
 
-    fun resume() = getMediaController().transportControls.play()
+    fun resume() = mediaController?.transportControls?.play()
 
-    fun stop() = getMediaController().transportControls.stop()
+    fun stop() = mediaController?.transportControls?.stop()
 
-    fun skipToNextTrack() = getMediaController().transportControls.skipToNext()
+    fun skipToNextTrack() = mediaController?.transportControls?.skipToNext()
 
-    fun skipToPreviousTrack() = getMediaController().transportControls.skipToPrevious()
+    fun skipToPreviousTrack() = mediaController?.transportControls?.skipToPrevious()
 
-    fun seekTo(position: Long) = getMediaController().transportControls.seekTo(position)
+    fun seekTo(position: Long) = mediaController?.transportControls?.seekTo(position)
 
     suspend fun setLoopState(isLooped: Boolean) = queueModesRepository.setLoop(isLooped)
 
@@ -115,11 +114,7 @@ class MediaServiceConnection @Inject constructor(
             mediaBrowser.subscribe(playlist.id.toString(), mediaItemsSubscription)
         }
 
-    private fun getMediaController(): MediaControllerCompat =
-        mediaController
-            ?: throw IllegalStateException("Can not get mediaController because it is not initialized")
-
-    suspend fun getPlaylists(): List<MediaItemPlaylist> = suspendCoroutine { callback ->
+     suspend fun getPlaylists(): List<MediaItemPlaylist> = suspendCoroutine { callback ->
         val categoryItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
             override fun onChildrenLoaded(
                 parentId: String,
