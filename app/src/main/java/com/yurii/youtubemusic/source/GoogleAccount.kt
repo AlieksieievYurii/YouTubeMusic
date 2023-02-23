@@ -15,6 +15,7 @@ import com.yurii.youtubemusic.di.YouTubeScope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -74,10 +75,13 @@ class GoogleAccount @Inject constructor(
     }
 
     private fun isAuthenticatedAndAuthorized(): Boolean = try {
-        !getLastSignedInAccount().isExpired
+        getLastSignedInAccount()
+        true
     } catch (_: IsNotSignedIn) {
+        Timber.d("Google Account is not signed in")
         false
     } catch (_: DoesNotHaveRequiredScopes) {
+        Timber.d("Google Account does not have required scope")
         false
     }
 
