@@ -59,8 +59,6 @@ class YouTubeMusicViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     init {
-        //mediaLibraryManager.mediaStorage.deleteDownloadingMocks()
-
         viewModelScope.launch {
             mediaLibraryDomain.itemDeleted.collect {
                 _videoItemStatus.emit(VideoItemStatus.Download(it))
