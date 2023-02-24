@@ -125,7 +125,6 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/btn_download"
                         android:layout_centerHorizontal="true"
-                        android:text="NONE"
                         android:textColor="@color/colorAccent"
                         android:textSize="9sp"
                         android:visibility="gone"
