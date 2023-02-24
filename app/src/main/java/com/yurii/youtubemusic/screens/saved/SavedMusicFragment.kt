@@ -50,8 +50,7 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
     }
 
     private fun openCategoriesEditor() {
-        val activity = PlaylistEditorActivity.create(requireContext())
-        startActivityForResult(activity, PlaylistEditorActivity.REQUEST_CODE)
+        startActivity(Intent(requireContext(), PlaylistEditorActivity::class.java))
     }
 
     private fun initCategoriesLayout(categories: List<MediaItemPlaylist>) {
