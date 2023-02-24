@@ -6,7 +6,7 @@ import com.github.kiulian.downloader.YoutubeDownloader
 import com.github.kiulian.downloader.YoutubeException
 import com.github.kiulian.downloader.model.YoutubeVideo
 import com.github.kiulian.downloader.model.formats.AudioFormat
-import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.Progress
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.media.MediaStorage
@@ -46,8 +46,8 @@ class MusicDownloaderImpl @Inject constructor(private val mediaStorage: MediaSto
         this.callBack = callBack
     }
 
-    override fun download(videoItem: VideoItem, customCategories: List<Category>) {
-        val task = Task(videoItem, customCategories)
+    override fun download(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
+        val task = Task(videoItem, playlists)
         executeTask(task)
     }
 
@@ -92,7 +92,7 @@ class MusicDownloaderImpl @Inject constructor(private val mediaStorage: MediaSto
 
     private fun findFailedTask(videoItem: VideoItem): Task? = failedTasks.find { it.videoItem.id == videoItem.id }
 
-    private inner class Task(val videoItem: VideoItem, private val customCategories: List<Category>) : Runnable {
+    private inner class Task(val videoItem: VideoItem, private val playlists: List<MediaItemPlaylist>) : Runnable {
         var progress: Progress = Progress.create()
         private var isInterrupted = false
 
@@ -118,7 +118,7 @@ class MusicDownloaderImpl @Inject constructor(private val mediaStorage: MediaSto
                 return
             }
             executionTasks.remove(this)
-            callBack?.onFinished(videoItem, customCategories)
+            callBack?.onFinished(videoItem, playlists)
         }
 
         fun interruptTask() {

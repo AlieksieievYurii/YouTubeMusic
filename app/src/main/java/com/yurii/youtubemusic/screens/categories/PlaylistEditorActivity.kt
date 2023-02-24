@@ -12,53 +12,43 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.chip.Chip
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.ActivityCategoriesEditorBinding
-import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.ui.AddEditCategoryDialog
+import com.yurii.youtubemusic.databinding.ActivityPlaylistEditorBinding
+import com.yurii.youtubemusic.models.MediaItemPlaylist
+import com.yurii.youtubemusic.ui.AddEditPlaylistDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class CategoriesEditorActivity : AppCompatActivity() {
-    private val viewModel: CategoriesEditorViewModel by viewModels()
-    private val binding: ActivityCategoriesEditorBinding by viewBinding()
-
-    private val onDeleteClick = View.OnClickListener {
-        showDeletionDialog(this, R.string.dialog_confirm_deletion_playlist_title, R.string.dialog_confirm_deletion_playlist_message) {
-            viewModel.removeCategory((it as Chip).id)
-        }
-    }
+class PlaylistEditorActivity : AppCompatActivity() {
+    private val viewModel: PlaylistEditorViewModel by viewModels()
+    private val binding: ActivityPlaylistEditorBinding by viewBinding()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initActionBar()
 
         binding.fab.setOnClickListener {
-            AddEditCategoryDialog.showToCreate(this) { viewModel.createCategory(it) }
+            AddEditPlaylistDialog.showToCreate(this) { viewModel.createCategory(it) }
         }
 
         lifecycleScope.launchWhenCreated {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { observeCategoriesState() }
+                launch { observePlaylists() }
             }
         }
     }
 
-    private suspend fun observeCategoriesState() {
-        viewModel.state.collectLatest {
-            when (it) {
-                is CategoriesEditorViewModel.State.Loaded ->
-                    if (it.categories.isEmpty()) setNoCategories() else setCategories(it.categories)
-                CategoriesEditorViewModel.State.Loading -> {
-                    //nothing
-                }
-            }
+    private suspend fun observePlaylists() {
+        viewModel.playlistsFlow.collect {
+            if (it.isEmpty())
+                setNoCategories()
+            else
+                setCategories(it)
         }
     }
 
-    private fun setCategories(categoriesList: List<Category>) {
+    private fun setCategories(categoriesList: List<MediaItemPlaylist>) {
         binding.categories.apply {
             removeAllViews()
             categoriesList.forEach { category -> addView(inflateChip(category)) }
@@ -78,15 +68,23 @@ class CategoriesEditorActivity : AppCompatActivity() {
         }
     }
 
-    private fun inflateChip(category: Category): Chip {
+    private fun inflateChip(playlist: MediaItemPlaylist): Chip {
         val chip = layoutInflater.inflate(R.layout.category_chip, binding.categories, false) as Chip
         chip.apply {
-            id = category.id
-            text = category.name
+            id = playlist.id.toInt()
+            text = playlist.name
             setOnClickListener {
-                AddEditCategoryDialog.showToEdit(this@CategoriesEditorActivity, category) { viewModel.renameCategory(category, it) }
+                AddEditPlaylistDialog.showToEdit(this@PlaylistEditorActivity, playlist) { viewModel.renameCategory(playlist, it) }
             }
-            setOnCloseIconClickListener(onDeleteClick)
+            setOnCloseIconClickListener {
+                showDeletionDialog(
+                    this@PlaylistEditorActivity,
+                    R.string.dialog_confirm_deletion_playlist_title,
+                    R.string.dialog_confirm_deletion_playlist_message
+                ) {
+                    viewModel.removePlaylist(playlist)
+                }
+            }
         }
         return chip
     }
@@ -100,14 +98,14 @@ class CategoriesEditorActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
+        onBackPressedDispatcher.onBackPressed()
         return true
     }
 
     companion object {
         const val REQUEST_CODE = 1000
         fun create(context: Context): Intent {
-            return Intent(context, CategoriesEditorActivity::class.java)
+            return Intent(context, PlaylistEditorActivity::class.java)
         }
     }
 }

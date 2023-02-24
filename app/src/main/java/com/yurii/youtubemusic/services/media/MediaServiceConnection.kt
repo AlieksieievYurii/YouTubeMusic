@@ -9,11 +9,14 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.yurii.youtubemusic.models.*
+import com.yurii.youtubemusic.source.PlaylistRepository
+import com.yurii.youtubemusic.source.QueueModesRepository
+import com.yurii.youtubemusic.utilities.parcelable
+import com.yurii.youtubemusic.utilities.serializable
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import java.lang.Exception
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -23,9 +26,9 @@ sealed class PlaybackState {
     object None : PlaybackState()
     data class Playing(
         val mediaItem: MediaItem,
-        val category: Category,
+        val playlist: MediaItemPlaylist,
         val isPaused: Boolean,
-        private val position: Long,
+        val position: Long,
         private val lastUpdateTime: Long,
         private val playbackSpeed: Float,
     ) : PlaybackState() {
@@ -40,7 +43,8 @@ sealed class PlaybackState {
 @Singleton
 class MediaServiceConnection @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val queueModesRepository: QueueModesRepository
+    private val queueModesRepository: QueueModesRepository,
+    playlistRepository: PlaylistRepository,
 ) {
     private val _isMediaControllerConnected = MutableStateFlow(false)
     val isMediaControllerConnected = _isMediaControllerConnected.asStateFlow()
@@ -48,6 +52,8 @@ class MediaServiceConnection @Inject constructor(
     val isQueueShuffle = queueModesRepository.getIsShuffle()
 
     val isQueueLooped = queueModesRepository.getIsLooped()
+
+    val allPlaylists: Flow<List<MediaItemPlaylist>> = playlistRepository.getPlaylists()
 
     private val _errors: MutableSharedFlow<Exception> = MutableSharedFlow(extraBufferCapacity = 1)
     val errors = _errors.asSharedFlow()
@@ -70,30 +76,30 @@ class MediaServiceConnection @Inject constructor(
         mediaBrowser.connect()
     }
 
-    fun play(mediaItem: MediaItem, category: Category) {
+    fun play(mediaItem: MediaItem, playlist: MediaItemPlaylist) {
         val extras = Bundle().apply {
-            putParcelable(EXTRA_KEY_CATEGORIES, category)
+            putParcelable(EXTRA_KEY_PLAYLIST, playlist)
         }
-        getMediaController().transportControls.playFromMediaId(mediaItem.id, extras)
+        mediaController?.transportControls?.playFromMediaId(mediaItem.id, extras)
     }
 
-    fun pause() = getMediaController().transportControls.pause()
+    fun pause() = mediaController?.transportControls?.pause()
 
-    fun resume() = getMediaController().transportControls.play()
+    fun resume() = mediaController?.transportControls?.play()
 
-    fun stop() = getMediaController().transportControls.stop()
+    fun stop() = mediaController?.transportControls?.stop()
 
-    fun skipToNextTrack() = getMediaController().transportControls.skipToNext()
+    fun skipToNextTrack() = mediaController?.transportControls?.skipToNext()
 
-    fun skipToPreviousTrack() = getMediaController().transportControls.skipToPrevious()
+    fun skipToPreviousTrack() = mediaController?.transportControls?.skipToPrevious()
 
-    fun seekTo(position: Long) = getMediaController().transportControls.seekTo(position)
+    fun seekTo(position: Long) = mediaController?.transportControls?.seekTo(position)
 
     suspend fun setLoopState(isLooped: Boolean) = queueModesRepository.setLoop(isLooped)
 
     suspend fun setShuffleState(isShuffled: Boolean) = queueModesRepository.setShuffle(isShuffled)
 
-    suspend fun getMediaItemsFor(category: Category): List<MediaItem> =
+    suspend fun getMediaItemsFor(playlist: MediaItemPlaylist): List<MediaItem> =
         suspendCoroutine { callback ->
             val mediaItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
                 override fun onChildrenLoaded(
@@ -105,21 +111,17 @@ class MediaServiceConnection @Inject constructor(
                 }
             }
 
-            mediaBrowser.subscribe(category.id.toString(), mediaItemsSubscription)
+            mediaBrowser.subscribe(playlist.id.toString(), mediaItemsSubscription)
         }
 
-    private fun getMediaController(): MediaControllerCompat =
-        mediaController
-            ?: throw IllegalStateException("Can not get mediaController because it is not initialized")
-
-    suspend fun getCategories(): List<Category> = suspendCoroutine { callback ->
+     suspend fun getPlaylists(): List<MediaItemPlaylist> = suspendCoroutine { callback ->
         val categoryItemsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
             override fun onChildrenLoaded(
                 parentId: String,
                 children: MutableList<MediaBrowserCompat.MediaItem>
             ) {
                 super.onChildrenLoaded(parentId, children)
-                callback.resume(children.map { Category.createFrom(it) })
+                callback.resume(children.map { MediaItemPlaylist.createFrom(it) })
             }
         }
         mediaBrowser.subscribe(CATEGORIES_CONTENT, categoryItemsSubscription)
@@ -148,13 +150,13 @@ class MediaServiceConnection @Inject constructor(
 
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-            val mediaItem = state.extras?.getParcelable<MediaItem>(PLAYBACK_STATE_MEDIA_ITEM)
-            val category = state.extras?.getParcelable<Category>(PLAYBACK_STATE_PLAYING_CATEGORY)
+            val mediaItem = state.extras?.parcelable<MediaItem>(PLAYBACK_STATE_MEDIA_ITEM)
+            val playlist = state.extras?.parcelable<MediaItemPlaylist>(PLAYBACK_STATE_PLAYING_PLAYLIST)
             when (state.state) {
                 PlaybackStateCompat.STATE_PLAYING -> {
                     _playbackState.value = PlaybackState.Playing(
                         mediaItem!!,
-                        category!!,
+                        playlist!!,
                         false,
                         state.position,
                         state.lastPositionUpdateTime,
@@ -165,7 +167,7 @@ class MediaServiceConnection @Inject constructor(
                     _playbackState.value =
                         PlaybackState.Playing(
                             mediaItem!!,
-                            category!!,
+                            playlist!!,
                             true,
                             state.position,
                             state.lastPositionUpdateTime,
@@ -192,7 +194,7 @@ class MediaServiceConnection @Inject constructor(
                     PLAYER_ERROR
                 )
             )
-                _errors.tryEmit(extras.getSerializable(EXTRA_EXCEPTION) as Exception)
+                _errors.tryEmit(extras.serializable(EXTRA_EXCEPTION) ?: Exception("None"))
         }
 
         override fun onSessionDestroyed() {

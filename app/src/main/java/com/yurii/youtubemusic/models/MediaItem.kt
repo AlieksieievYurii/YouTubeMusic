@@ -6,6 +6,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.yurii.youtubemusic.db.MediaItemEntity
 import kotlinx.android.parcel.Parcelize
 import java.io.File
 
@@ -64,3 +65,15 @@ fun MediaItem.toMediaMetadataCompat(): MediaMetadataCompat = MediaMetadataCompat
     it.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, this.mediaFile.toString())
     it.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, this.durationInMillis)
 }.build()
+
+fun MediaItemEntity.toMediaItem() = MediaItem(
+    id = mediaItemId,
+    title = title,
+    author = author,
+    durationInMillis = durationInMillis,
+    description = "",
+    thumbnail = thumbnail,
+    mediaFile = mediaFile
+)
+
+fun List<MediaItemEntity>.toMediaItems() = map { it.toMediaItem() }

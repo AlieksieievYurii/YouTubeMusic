@@ -3,26 +3,22 @@ package com.yurii.youtubemusic.screens.saved.mediaitems
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.Item
-import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.models.isDefault
-import com.yurii.youtubemusic.services.media.MediaLibraryManager
+import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.services.media.MediaServiceConnection
 import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.utilities.move
+import com.yurii.youtubemusic.source.MediaLibraryDomain
+import com.yurii.youtubemusic.source.PlaylistRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MediaItemsViewModel @AssistedInject constructor(
-    @Assisted private val category: Category,
-    private val mediaLibraryManager: MediaLibraryManager,
-    private val mediaServiceConnection: MediaServiceConnection
+    @Assisted private val playlist: MediaItemPlaylist,
+    private val mediaServiceConnection: MediaServiceConnection,
+    private val playlistRepository: PlaylistRepository,
+    private val mediaLibraryDomain: MediaLibraryDomain
 ) : ViewModel() {
     sealed class MediaItemsStatus {
         object Loading : MediaItemsStatus()
@@ -37,104 +33,57 @@ class MediaItemsViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            val mediaItems = mediaServiceConnection.getMediaItemsFor(category)
-            _mediaItemsStatus.value = if (mediaItems.isNotEmpty()) MediaItemsStatus.Loaded(mediaItems) else MediaItemsStatus.NoMediaItems
-        }
-
-        viewModelScope.launch {
-            mediaLibraryManager.event.collectLatest { event ->
-                when (event) {
-                    is MediaLibraryManager.Event.ItemDeleted -> handleItemIsRemoved(event.item)
-                    is MediaLibraryManager.Event.MediaItemIsAdded -> handleMediaItemIsAdded(event.mediaItem, event.assignedCategoriesIds)
-                    is MediaLibraryManager.Event.CategoryAssignment -> handleCustomCategoryAssignment(
-                        event.mediaItem,
-                        event.customCategories
-                    )
-                    else -> {
-                        // Ignore some events
-                    }
-                }
+            mediaLibraryDomain.getMediaItems(playlist).collect {
+                _mediaItemsStatus.value = if (it.isEmpty()) MediaItemsStatus.NoMediaItems else MediaItemsStatus.Loaded(it)
             }
         }
     }
 
     fun onMove(mediaItem: MediaItem, from: Int, to: Int) {
         viewModelScope.launch {
-            val currentList = getMediaItemsFromCache()
-            currentList.move(from, to)
-            _mediaItemsStatus.value = MediaItemsStatus.Loaded(currentList)
-            mediaLibraryManager.changeMediaItemPosition(category, mediaItem, from, to)
+            mediaLibraryDomain.changePosition(playlist, mediaItem, from, to)
         }
     }
 
     fun onClickMediaItem(mediaItem: MediaItem) {
         when (val playbackState = playbackState.value) {
-            PlaybackState.None -> mediaServiceConnection.play(mediaItem, category)
+            PlaybackState.None -> mediaServiceConnection.play(mediaItem, playlist)
             is PlaybackState.Playing -> if (playbackState.mediaItem == mediaItem) {
                 if (playbackState.isPaused)
                     mediaServiceConnection.resume()
                 else
                     mediaServiceConnection.pause()
             } else
-                mediaServiceConnection.play(mediaItem, category)
+                mediaServiceConnection.play(mediaItem, playlist)
         }
     }
 
     fun deleteMediaItem(mediaItem: MediaItem) {
-        viewModelScope.launch { mediaLibraryManager.deleteItem(mediaItem) }
-    }
-
-    suspend fun getAssignedCustomCategoriesFor(mediaItem: MediaItem) =
-        mediaLibraryManager.mediaStorage.getAssignedCustomCategoriesFor(mediaItem)
-
-    suspend fun getAllCustomCategories() = mediaLibraryManager.mediaStorage.getCustomCategories()
-
-    fun assignCustomCategoriesFor(mediaItem: MediaItem, categories: List<Category>) {
         viewModelScope.launch {
-            mediaLibraryManager.assignCategories(mediaItem, categories)
+            mediaLibraryDomain.deleteMediaItem(mediaItem)
         }
     }
 
-    private suspend fun handleItemIsRemoved(item: Item) {
-        val newList = getMediaItemsFromCache().filterNot { it.id == item.id }
-        _mediaItemsStatus.value = MediaItemsStatus.Loaded(newList)
-    }
+    suspend fun getAssignedPlaylists(mediaItem: MediaItem) = playlistRepository.getAssignedPlaylistsFor(mediaItem)
 
-    private suspend fun handleMediaItemIsAdded(mediaItem: MediaItem, customAssignedCategoriesIds: List<Int>) {
-        if (category.isDefault || category.id in customAssignedCategoriesIds) {
-            val newList = getMediaItemsFromCache().apply { add(mediaItem) }
-            _mediaItemsStatus.value = MediaItemsStatus.Loaded(newList)
+    suspend fun getPlaylists() = playlistRepository.getPlaylists().first()
+
+    fun assignPlaylists(mediaItem: MediaItem, playlists: List<MediaItemPlaylist>) {
+        viewModelScope.launch {
+            playlistRepository.assignMediaItemToPlaylists(mediaItem, playlists)
         }
     }
-
-    private suspend fun handleCustomCategoryAssignment(mediaItem: MediaItem, customCategories: List<Category>) {
-        if (category.isDefault)
-            return
-
-        val mediaItems = getMediaItemsFromCache()
-        if (customCategories.contains(category) && !mediaItems.contains(mediaItem)) {
-            mediaItems.add(mediaItem)
-            _mediaItemsStatus.value = MediaItemsStatus.Loaded(mediaItems)
-        } else if (!customCategories.contains(category) && mediaItems.contains(mediaItem)) {
-            mediaItems.remove(mediaItem)
-            _mediaItemsStatus.value = MediaItemsStatus.Loaded(mediaItems)
-        }
-    }
-
-    private suspend fun getMediaItemsFromCache(): MutableList<MediaItem> =
-        ((_mediaItemsStatus.value as? MediaItemsStatus.Loaded)?.mediaItems
-            ?: mediaServiceConnection.getMediaItemsFor(category)).toMutableList()
 
     @Suppress("UNCHECKED_CAST")
     class Factory(
         private val assistedFactory: MediaItemsViewModelAssistedFactory,
-        private val category: Category
+        private val playlist: MediaItemPlaylist
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T = assistedFactory.create(category) as T
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = assistedFactory.create(playlist) as T
     }
 }
 
 @AssistedFactory
 interface MediaItemsViewModelAssistedFactory {
-    fun create(category: Category): MediaItemsViewModel
+    fun create(playlist: MediaItemPlaylist): MediaItemsViewModel
 }

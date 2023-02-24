@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.utilities
+package com.yurii.youtubemusic.source
 
 import android.content.Context
 import android.content.Intent
@@ -15,6 +15,7 @@ import com.yurii.youtubemusic.di.YouTubeScope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,7 +31,7 @@ class GoogleAccount @Inject constructor(
     @YouTubeGoogleClient private val googleClient: GoogleSignInClient
 ) {
 
-    private val _isAuthenticatedAndAuthorized = MutableStateFlow(isAuthenticatedAndAuthorized())
+    private val _isAuthenticatedAndAuthorized: MutableStateFlow<Boolean> = MutableStateFlow(isAuthenticatedAndAuthorized())
     val isAuthenticatedAndAuthorized = _isAuthenticatedAndAuthorized.asStateFlow()
 
     @Throws(ApiException::class, DoesNotHaveRequiredScopes::class)
@@ -74,10 +75,13 @@ class GoogleAccount @Inject constructor(
     }
 
     private fun isAuthenticatedAndAuthorized(): Boolean = try {
-        !getLastSignedInAccount().isExpired
+        getLastSignedInAccount()
+        true
     } catch (_: IsNotSignedIn) {
+        Timber.d("Google Account is not signed in")
         false
     } catch (_: DoesNotHaveRequiredScopes) {
+        Timber.d("Google Account does not have required scope")
         false
     }
 

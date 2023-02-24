@@ -7,16 +7,16 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.MediaItemPlaylist
 
-class AddEditCategoryDialog private constructor(
+class AddEditPlaylistDialog private constructor(
     private val context: Context,
     private val currentCategoryName: String? = null,
     private val callback: (String) -> Unit
 ) {
     @SuppressLint("InflateParams")
     fun show() {
-        val view = LayoutInflater.from(context).inflate(R.layout.dialog_rename_category, null)
+        val view = LayoutInflater.from(context).inflate(R.layout.dialog_rename_playlist, null)
         val inputView = view.findViewById<EditText>(R.id.input)
 
 
@@ -44,9 +44,9 @@ class AddEditCategoryDialog private constructor(
 
     companion object {
         fun showToCreate(context: Context, callback: (String) -> Unit) =
-            AddEditCategoryDialog(context, null, callback).show()
+            AddEditPlaylistDialog(context, null, callback).show()
 
-        fun showToEdit(context: Context, category: Category, callback: (String) -> Unit) =
-            AddEditCategoryDialog(context, category.name, callback).show()
+        fun showToEdit(context: Context, playlist: MediaItemPlaylist, callback: (String) -> Unit) =
+            AddEditPlaylistDialog(context, playlist.name, callback).show()
     }
 }

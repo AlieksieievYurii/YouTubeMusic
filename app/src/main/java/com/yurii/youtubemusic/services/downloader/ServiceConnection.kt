@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import com.yurii.youtubemusic.models.Category
+import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.Progress
 import com.yurii.youtubemusic.models.VideoItem
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -38,7 +38,7 @@ class ServiceConnection @Inject constructor(@ApplicationContext private val cont
     }
 
 
-    fun download(videoItem: VideoItem, categories: List<Category>) = service?.downloadMusicFrom(videoItem, categories)
+    fun download(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) = service?.downloadMusicFrom(videoItem, playlists)
 
     fun retryToDownload(videoItem: VideoItem) = service?.retryToDownload(videoItem)
 

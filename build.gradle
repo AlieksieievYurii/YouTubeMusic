@@ -28,12 +28,19 @@ buildscript {
         coil_version = "2.2.2"
         data_store_version = "1.0.0"
         hilt_version = "2.44"
+        room_version = "2.5.0"
 
         // Testing
         leakcanary_android_version = "2.4"
         junit_version = "4.13"
         kotlinx_coroutines_test_version = "1.6.4"
         mockk_version = "1.13.3"
+
+        // Instrumented Testing
+        androidx_runner_version = "1.5.2"
+        androidx_rules_version = "1.5.0"
+        androidx_junit_ext_version = "1.1.5"
+        truth_version = "1.0.1"
     }
 
     repositories {

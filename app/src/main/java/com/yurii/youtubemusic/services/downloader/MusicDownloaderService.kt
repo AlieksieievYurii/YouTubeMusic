@@ -4,10 +4,9 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.Progress
-import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.media.MediaLibraryManager
+import com.yurii.youtubemusic.models.*
+import com.yurii.youtubemusic.source.MediaCreator
+import com.yurii.youtubemusic.utilities.stopForegroundCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -24,9 +23,9 @@ class MusicDownloaderService : Service() {
         data class Failed(val videoItem: VideoItem, val error: Exception) : DownloadingReport()
     }
 
-    @Inject lateinit var mediaLibraryManager: MediaLibraryManager
     @Inject lateinit var downloader: MusicDownloader
     @Inject lateinit var notificationManager: NotificationManager
+    @Inject lateinit var mediaCreator: MediaCreator
 
     private val scopeJob = Job()
     private val serviceCoroutineScope = CoroutineScope(scopeJob)
@@ -53,7 +52,7 @@ class MusicDownloaderService : Service() {
 
     private fun stopAsForegroundIfQueueIsEmpty() {
         if (isForeground && downloader.isQueueEmpty()) {
-            stopForeground(true)
+            stopForegroundCompat(true)
             isForeground = false
         }
     }
@@ -64,10 +63,10 @@ class MusicDownloaderService : Service() {
     }
 
     private inner class MusicDownloaderCallBacks : MusicDownloader.CallBack {
-        override fun onFinished(videoItem: VideoItem, customCategories: List<Category>) {
+        override fun onFinished(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
             stopAsForegroundIfQueueIsEmpty()
             serviceCoroutineScope.launch {
-                mediaLibraryManager.registerMediaItem(videoItem, customCategories)
+                mediaCreator.createMediaItem(videoItem, playlists)
                 downloadingReport?.emit(DownloadingReport.Successful(videoItem))
             }
         }
@@ -97,9 +96,9 @@ class MusicDownloaderService : Service() {
             this@MusicDownloaderService.downloadingProgress = downloadingProgress
         }
 
-        fun downloadMusicFrom(videoItem: VideoItem, categories: List<Category>) {
+        fun downloadMusicFrom(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
             startAsForegroundService()
-            downloader.download(videoItem, categories)
+            downloader.download(videoItem, playlists)
         }
 
         fun retryToDownload(videoItem: VideoItem) {

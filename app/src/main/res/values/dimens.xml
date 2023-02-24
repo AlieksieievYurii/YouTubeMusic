@@ -2,7 +2,6 @@
 <resources>
     <dimen name="mediumMargin">7dp</dimen>
     <dimen name="defMargin">5dp</dimen>
-    <dimen name="smallMargin">3dp</dimen>
 
     <dimen name="defCornerRadius">5dp</dimen>
 

@@ -15,10 +15,10 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
-import com.yurii.youtubemusic.models.Category
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.ui.SelectCategoriesDialog
+import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import com.yurii.youtubemusic.utilities.requireParcelable
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,10 +28,11 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
-    private val category: Category by lazy { requireArguments().requireParcelable(EXTRA_CATEGORY) }
+    private val playlist: MediaItemPlaylist by lazy { requireArguments().requireParcelable(EXTRA_PLAYLIST) }
+
     @Inject
     lateinit var assistedFactory: MediaItemsViewModelAssistedFactory
-    private val viewModel: MediaItemsViewModel by viewModels { MediaItemsViewModel.Factory(assistedFactory, category) }
+    private val viewModel: MediaItemsViewModel by viewModels { MediaItemsViewModel.Factory(assistedFactory, playlist) }
     private val binding: FragmentMediaItemsBinding by viewBinding()
 
     private val mediaListAdapter: MediaListAdapter by lazy {
@@ -73,7 +74,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(
                 playbackState.mediaItem,
                 isPlaying = !playbackState.isPaused,
-                category = if (playbackState.category != category) playbackState.category else null
+                playlist = if (playbackState.playlist != playlist) playbackState.playlist else null
             )
         }
     }
@@ -113,21 +114,21 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
 
     private fun openCategoriesEditor(mediaItem: MediaItem) {
         lifecycleScope.launch {
-            SelectCategoriesDialog(
+            SelectPlaylistsDialog(
                 requireContext(),
-                viewModel.getAllCustomCategories(),
-                viewModel.getAssignedCustomCategoriesFor(mediaItem)
+                viewModel.getPlaylists(),
+                viewModel.getAssignedPlaylists(mediaItem)
             ) {
-                viewModel.assignCustomCategoriesFor(mediaItem, it)
+                viewModel.assignPlaylists(mediaItem, it)
             }.show()
         }
     }
 
     companion object {
-        private const val EXTRA_CATEGORY: String = "com.yurii.youtubemusic.media.items.category"
-        fun create(category: Category): MediaItemsFragment = MediaItemsFragment().apply {
+        private const val EXTRA_PLAYLIST: String = "com.yurii.youtubemusic.media.items.playlist"
+        fun create(category: MediaItemPlaylist): MediaItemsFragment = MediaItemsFragment().apply {
             arguments = Bundle().apply {
-                putParcelable(EXTRA_CATEGORY, category)
+                putParcelable(EXTRA_PLAYLIST, category)
             }
         }
     }

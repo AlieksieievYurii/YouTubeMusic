@@ -6,16 +6,15 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.yurii.youtubemusic.models.Category
-import com.yurii.youtubemusic.models.Item
-import com.yurii.youtubemusic.models.Progress
-import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.services.downloader.MusicDownloaderService
 import com.yurii.youtubemusic.services.downloader.ServiceConnection
-import com.yurii.youtubemusic.services.media.MediaLibraryManager
-import com.yurii.youtubemusic.utilities.GoogleAccount
-import com.yurii.youtubemusic.utilities.YouTubePreferences
+import com.yurii.youtubemusic.services.media.MediaStorage
+import com.yurii.youtubemusic.source.GoogleAccount
+import com.yurii.youtubemusic.source.MediaLibraryDomain
+import com.yurii.youtubemusic.source.PlaylistRepository
+import com.yurii.youtubemusic.source.YouTubePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -32,15 +31,17 @@ abstract class VideoItemStatus(open val videoItem: Item) {
 
 @HiltViewModel
 class YouTubeMusicViewModel @Inject constructor(
-    private val mediaLibraryManager: MediaLibraryManager,
     private val downloaderServiceConnection: ServiceConnection,
     private val youTubePreferences: YouTubePreferences,
+    private val playlistRepository: PlaylistRepository,
     val youTubeAPI: YouTubeAPI,
-    private val googleAccount: GoogleAccount
+    private val googleAccount: GoogleAccount,
+    private val mediaLibraryDomain: MediaLibraryDomain,
+    private val mediaStorage: MediaStorage
 ) : ViewModel() {
     sealed class Event {
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
-        data class OpenCategoriesSelector(val videoItem: VideoItem, val allCustomCategories: List<Category>) : Event()
+        data class OpenPlaylistSelector(val videoItem: VideoItem, val playlists: List<MediaItemPlaylist>) : Event()
     }
 
     private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
@@ -58,12 +59,9 @@ class YouTubeMusicViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     init {
-        mediaLibraryManager.mediaStorage.deleteDownloadingMocks()
-
         viewModelScope.launch {
-            mediaLibraryManager.event.collect {
-                if (it is MediaLibraryManager.Event.ItemDeleted)
-                    _videoItemStatus.emit(VideoItemStatus.Download(it.item))
+            mediaLibraryDomain.itemDeleted.collect {
+                _videoItemStatus.emit(VideoItemStatus.Download(it))
             }
         }
 
@@ -73,7 +71,7 @@ class YouTubeMusicViewModel @Inject constructor(
             downloaderServiceConnection.downloadingReport.collectLatest { report ->
                 when (report) {
                     is MusicDownloaderService.DownloadingReport.Successful -> {
-                        val musicFile = mediaLibraryManager.mediaStorage.getMediaFile(report.videoItem)
+                        val musicFile = mediaStorage.getMediaFile(report.videoItem)
                         sendVideoItemStatus(VideoItemStatus.Downloaded(report.videoItem, musicFile.length()))
                     }
                     is MusicDownloaderService.DownloadingReport.Failed -> sendVideoItemStatus(
@@ -102,15 +100,14 @@ class YouTubeMusicViewModel @Inject constructor(
         loadVideoItems(playlist)
     }
 
-    fun download(item: VideoItem, categories: List<Category> = emptyList()) {
-        downloaderServiceConnection.download(item, categories)
+    fun download(item: VideoItem, playlists: List<MediaItemPlaylist> = emptyList()) {
+        downloaderServiceConnection.download(item, playlists)
         sendVideoItemStatus(VideoItemStatus.Downloading(item, 0, 0))
     }
 
     fun openCategorySelectorFor(videoItem: VideoItem) {
         viewModelScope.launch {
-            val allCustomCategories = mediaLibraryManager.mediaStorage.getCustomCategories()
-            _event.emit(Event.OpenCategoriesSelector(videoItem, allCustomCategories))
+            _event.emit(Event.OpenPlaylistSelector(videoItem, playlistRepository.getPlaylists().first()))
         }
     }
 
@@ -126,7 +123,7 @@ class YouTubeMusicViewModel @Inject constructor(
 
     fun delete(videoItem: VideoItem) {
         viewModelScope.launch {
-            mediaLibraryManager.deleteItem(videoItem)
+            mediaLibraryDomain.deleteMediaItem(videoItem)
         }
     }
 
@@ -135,7 +132,7 @@ class YouTubeMusicViewModel @Inject constructor(
     }
 
     fun getItemStatus(videoItem: VideoItem): VideoItemStatus {
-        val musicFile = mediaLibraryManager.mediaStorage.getMediaFile(videoItem)
+        val musicFile = mediaStorage.getMediaFile(videoItem)
 
         if (musicFile.exists())
             return VideoItemStatus.Downloaded(videoItem, musicFile.length())
