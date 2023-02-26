@@ -1,8 +1,9 @@
 package com.yurii.youtubemusic.source
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.fragment.app.Fragment
+import androidx.activity.result.contract.ActivityResultContract
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -30,6 +31,8 @@ class GoogleAccount @Inject constructor(
     @YouTubeScope private val scopes: Array<Scope>,
     @YouTubeGoogleClient private val googleClient: GoogleSignInClient
 ) {
+
+    val signInIntent = googleClient.signInIntent
 
     private val _isAuthenticatedAndAuthorized: MutableStateFlow<Boolean> = MutableStateFlow(isAuthenticatedAndAuthorized())
     val isAuthenticatedAndAuthorized = _isAuthenticatedAndAuthorized.asStateFlow()
@@ -59,11 +62,6 @@ class GoogleAccount @Inject constructor(
         }
     }
 
-
-    fun startSignInActivity(fragment: Fragment) {
-        fragment.startActivityForResult(googleClient.signInIntent, REQUEST_SIGN_IN)
-    }
-
     @Throws(IsNotSignedIn::class, DoesNotHaveRequiredScopes::class)
     private fun getLastSignedInAccount(): GoogleSignInAccount {
         val account = GoogleSignIn.getLastSignedInAccount(context) ?: throw IsNotSignedIn()
@@ -85,8 +83,16 @@ class GoogleAccount @Inject constructor(
         false
     }
 
-
     companion object {
-        const val REQUEST_SIGN_IN = 10003
+        val singInContractor = object : ActivityResultContract<Intent, Intent?>() {
+            override fun createIntent(context: Context, input: Intent) = input
+
+            override fun parseResult(resultCode: Int, intent: Intent?): Intent? {
+                return if (resultCode == Activity.RESULT_OK)
+                    intent ?: throw IllegalStateException("Intent must not be null")
+                else
+                    null
+            }
+        }
     }
 }
