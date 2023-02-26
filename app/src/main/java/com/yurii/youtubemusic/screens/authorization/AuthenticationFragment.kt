@@ -1,8 +1,6 @@
 package com.yurii.youtubemusic.screens.authorization
 
-import android.app.Activity.RESULT_OK
 import android.content.Intent
-
 import android.widget.Toast
 import com.google.android.gms.common.api.ApiException
 import com.yurii.youtubemusic.R
@@ -23,10 +21,17 @@ class AuthenticationFragment : TabFragment<FragmentAuthenticationBinding>(
     @Inject
     lateinit var googleAccount: GoogleAccount
 
+    private val signInWithGoogleLauncher = registerForActivityResult(GoogleAccount.singInContractor) {
+        if (it != null)
+            handleSignInResult(it)
+        else
+            handleDeclinedSignIn()
+    }
+
     override fun onInflatedView(viewDataBinding: FragmentAuthenticationBinding) {
         binding.signInButton.setOnClickListener {
             binding.signInButton.isEnabled = false
-            googleAccount.startSignInActivity(this)
+            signInWithGoogleLauncher.launch(googleAccount.signInIntent)
         }
     }
 
@@ -42,22 +47,8 @@ class AuthenticationFragment : TabFragment<FragmentAuthenticationBinding>(
         }
     }
 
-
     private fun handleDeclinedSignIn() {
         binding.signInButton.isEnabled = true
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        when (requestCode) {
-            GoogleAccount.REQUEST_SIGN_IN -> {
-                if (resultCode == RESULT_OK)
-                    handleSignInResult(data!!)
-                else
-                    handleDeclinedSignIn()
-            }
-        }
     }
 
     companion object {

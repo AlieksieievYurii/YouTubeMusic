@@ -1,7 +1,5 @@
 package com.yurii.youtubemusic.screens.categories
 
-import android.content.Context
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -100,12 +98,5 @@ class PlaylistEditorActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return true
-    }
-
-    companion object {
-        const val REQUEST_CODE = 1000
-        fun create(context: Context): Intent {
-            return Intent(context, PlaylistEditorActivity::class.java)
-        }
     }
 }
