@@ -80,6 +80,7 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:$data_store_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
 
     // Room
     implementation "androidx.room:room-runtime:$room_version"
