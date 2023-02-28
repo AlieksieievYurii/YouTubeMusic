@@ -5,6 +5,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.*
 import com.yurii.youtubemusic.source.Validator
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.MainScope
@@ -13,10 +15,14 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
-class Application : Application() {
+class Application : Application(), Configuration.Provider {
 
     @Inject
     lateinit var validator: Validator
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
 
     override fun onCreate() {
         super.onCreate()
@@ -29,12 +35,17 @@ class Application : Application() {
         }
     }
 
+    override fun getWorkManagerConfiguration(): Configuration {
+        return Configuration.Builder().setWorkerFactory(workerFactory).build()
+    }
+
     private fun validateMediaItems() {
         MainScope().launch {
             validator.removeDownloadingMocks()
             validator.validateMediaItems()
         }
     }
+
     private fun createMediaPlayerNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "MediaPlayerNotification"
