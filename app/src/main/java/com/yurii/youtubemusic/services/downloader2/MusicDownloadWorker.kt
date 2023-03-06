@@ -34,16 +34,23 @@ class MusicDownloadWorker @AssistedInject constructor(
         val videoId = inputData.getString(ARG_VIDEO_ID) ?: throw IllegalStateException("Worker requires <string> ARG_VIDEO_ID argument")
         val thumbnailUrl = inputData.getString(ARG_VIDEO_THUMBNAIL_URL)
             ?: throw IllegalStateException("Worker requires <string> ARG_VIDEO_THUMBNAIL_URL argument")
-        val video = tryToParseVideo(videoId)
-        checkIfVideoIsLive(video)
 
         return try {
-            val mediaFileSize = download(video)
-            downloadAndSaveThumbnail(thumbnailUrl, videoId)
+            val mediaFileSize = download(videoId, thumbnailUrl)
             Result.success(workDataOf(MEDIA_SIZE to mediaFileSize))
         } catch (error: Exception) {
             Result.failure(workDataOf(ERROR_MESSAGE to error.message))
         }
+    }
+
+    private suspend fun download(videoId: String, thumbnailUrl: String): Long {
+        val video = tryToParseVideo(videoId)
+        checkIfVideoIsLive(video)
+
+        val mediaFileSize = download(video)
+        downloadAndSaveThumbnail(thumbnailUrl, videoId)
+
+        return mediaFileSize
     }
 
     private suspend fun downloadAndSaveThumbnail(thumbnailUrl: String, videoId: String) {
