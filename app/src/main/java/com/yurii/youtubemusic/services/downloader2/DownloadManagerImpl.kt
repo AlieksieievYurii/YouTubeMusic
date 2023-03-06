@@ -5,6 +5,7 @@ import androidx.work.*
 import com.yurii.youtubemusic.di.MainScope
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.models.toMediaItem
 import com.yurii.youtubemusic.services.media.MediaStorage
 import com.yurii.youtubemusic.source.MediaCreator
 import com.yurii.youtubemusic.source.MediaRepository
@@ -30,8 +31,7 @@ class DownloadManagerImpl @Inject constructor(
     private val statusesFlow = MutableSharedFlow<DownloadManager.Status>()
 
     init {
-
-        //coroutineScope.launch { synchronize() }
+        coroutineScope.launch { synchronize() }
         coroutineScope.launch { bindSynchronizationOfCacheWithMediaItems() }
         coroutineScope.launch { observeWorkManagerStatuses() }
     }
@@ -80,7 +80,10 @@ class DownloadManagerImpl @Inject constructor(
         mediaRepository.mediaItemEntities.first().forEach {
             if (it.downloadingJobId != null) {
                 val workInfo: WorkInfo? = workManager.getWorkInfoById(it.downloadingJobId).await()
-                Log.i("MyApp", workInfo?.toString() ?: "Null for ${it.downloadingJobId}")
+                if (workInfo == null) {
+                    Log.i("MyApp", "Work is not found for ${it.downloadingJobId}")
+                    mediaRepository.delete(it.toMediaItem())
+                }
             }
         }
     }
