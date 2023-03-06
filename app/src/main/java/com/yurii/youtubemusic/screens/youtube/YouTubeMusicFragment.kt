@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.screens.youtube
 
 
+import android.util.Log
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
@@ -12,6 +13,7 @@ import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
+import com.yurii.youtubemusic.services.downloader2.DownloadManager
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
@@ -37,7 +39,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
 
     private val listAdapter: VideoItemsListAdapter by lazy {
         VideoItemsListAdapter(object : VideoItemsListAdapter.Callback {
-            override fun getItemStatus(videoItem: VideoItem): VideoItemStatus = viewModel.getItemStatus(videoItem)
+            override fun getItemStatus(videoItem: VideoItem): DownloadManager.Status = viewModel.getItemStatus(videoItem)
             override fun onDownload(videoItem: VideoItem) = viewModel.download(videoItem)
             override fun onDownloadAndAssignedCategories(videoItem: VideoItem) = viewModel.openCategorySelectorFor(videoItem)
             override fun onCancelDownloading(videoItem: VideoItem) = viewModel.cancelDownloading(videoItem)
@@ -67,7 +69,10 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             launch { viewModel.videoItems.collectLatest { listAdapter.submitData(it) } }
             launch { startHandlingListLoadState() }
             launch { startHandlingEvents() }
-            launch { viewModel.videoItemStatus.collectLatest { listAdapter.updateItem(it) } }
+            launch { viewModel.videoItemStatus.collectLatest {
+            Log.i("MyApp", "STATUS: $it")
+                listAdapter.updateItem(it)
+            } }
         }
 
         binding.apply {

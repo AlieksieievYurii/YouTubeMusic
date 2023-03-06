@@ -62,7 +62,7 @@ interface PlaylistDao {
         FROM media_item_playlist_assignment 
         INNER JOIN media_items 
         ON media_items.mediaItemId = media_item_playlist_assignment.mediaItemId
-        WHERE media_item_playlist_assignment.playlistId = :playlistId
+        WHERE media_item_playlist_assignment.playlistId = :playlistId AND media_items.downloadingJobId IS NULL
         ORDER BY media_item_playlist_assignment.position ASC
         """
     )

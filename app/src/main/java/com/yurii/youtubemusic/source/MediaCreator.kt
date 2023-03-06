@@ -4,6 +4,11 @@ import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.services.media.MediaStorage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import java.util.UUID
 import javax.inject.Inject
 
 class MediaCreator @Inject constructor(
@@ -12,20 +17,31 @@ class MediaCreator @Inject constructor(
     private val mediaStorage: MediaStorage
 ) {
 
-    suspend fun createMediaItem(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
-        val createdMediaItem = registerMediaItem(videoItem)
-        playlistRepository.assignMediaItemToPlaylists(createdMediaItem, playlists)
+    private val lock = Mutex()
+
+    suspend fun createMediaItem(videoItem: VideoItem, playlists: List<MediaItemPlaylist>, downloadingJobId: UUID) = lock.withLock {
+        if (mediaRepository.getMediaItem(videoItem.id) == null) {
+            val createdMediaItem = registerMediaItem(videoItem, downloadingJobId)
+            playlistRepository.assignMediaItemToPlaylists(createdMediaItem, playlists)
+        }
     }
 
-    private suspend fun registerMediaItem(videoItem: VideoItem): MediaItem {
+    suspend fun registerDownloadingMediaItem(videoItem: VideoItem, playlists: List<MediaItemPlaylist>, downloadingJobId: UUID) {
+        if (mediaRepository.getMediaItem(videoItem.id) == null) {
+            val createdMediaItem = registerMediaItem(videoItem, downloadingJobId)
+            playlistRepository.assignMediaItemToPlaylists(createdMediaItem, playlists)
+        } else {
+            mediaRepository.updateDownloadingJobId(videoItem, downloadingJobId)
+        }
+    }
+
+    suspend fun setMediaItemAsDownloaded(itemId: String) = withContext(Dispatchers.IO) {
+        mediaRepository.setMediaItemAsDownloaded(itemId)
+    }
+
+    private suspend fun registerMediaItem(videoItem: VideoItem, downloadingJobId: UUID): MediaItem {
         val mediaFile = mediaStorage.getMediaFile(videoItem)
         val thumbnailFile = mediaStorage.getThumbnail(videoItem)
-
-        if (!mediaFile.exists())
-            throw IllegalStateException("Media file does not exist")
-
-        if (!thumbnailFile.exists())
-            throw IllegalStateException("Thumbnail file does not exist")
 
         val mediaItem = MediaItem(
             id = videoItem.id,
@@ -37,7 +53,7 @@ class MediaCreator @Inject constructor(
             description = ""
         )
 
-        mediaRepository.addMediaItem(mediaItem)
+        mediaRepository.addDownloadingMediaItem(mediaItem, downloadingJobId)
 
         return mediaItem
     }

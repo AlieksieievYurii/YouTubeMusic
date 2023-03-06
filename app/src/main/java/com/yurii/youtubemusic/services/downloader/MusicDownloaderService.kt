@@ -66,7 +66,7 @@ class MusicDownloaderService : Service() {
         override fun onFinished(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
             stopAsForegroundIfQueueIsEmpty()
             serviceCoroutineScope.launch {
-                mediaCreator.createMediaItem(videoItem, playlists)
+               // mediaCreator.createMediaItem(videoItem, playlists)
                 downloadingReport?.emit(DownloadingReport.Successful(videoItem))
             }
         }

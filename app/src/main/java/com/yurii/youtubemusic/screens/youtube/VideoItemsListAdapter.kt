@@ -12,13 +12,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.services.downloader2.DownloadManager
 import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.ui.getValueAnimator
 
 class VideoItemsListAdapter(private val callback: Callback) :
     PagingDataAdapter<VideoItem, VideoItemsListAdapter.MyViewHolder>(Comparator) {
     interface Callback {
-        fun getItemStatus(videoItem: VideoItem): VideoItemStatus
+        fun getItemStatus(videoItem: VideoItem): DownloadManager.Status
         fun onDownload(videoItem: VideoItem)
         fun onDownloadAndAssignedCategories(videoItem: VideoItem)
         fun onCancelDownloading(videoItem: VideoItem)
@@ -29,8 +30,8 @@ class VideoItemsListAdapter(private val callback: Callback) :
     private var expandedItem: VideoItem? = null
     private lateinit var recyclerView: RecyclerView
 
-    fun updateItem(videoItemStatus: VideoItemStatus) {
-        findVisibleViewHolder(videoItemStatus.videoItem.id)?.updateStatus(videoItemStatus)
+    fun updateItem(videoItemStatus: DownloadManager.Status) {
+        findVisibleViewHolder(videoItemStatus.videoId)?.updateStatus(videoItemStatus.status)
     }
 
     private fun findVisibleViewHolder(videoId: String): MyViewHolder? {
@@ -59,7 +60,7 @@ class VideoItemsListAdapter(private val callback: Callback) :
     inner class MyViewHolder(val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(videoItem: VideoItem) {
             binding.videoItem = videoItem
-            updateStatus(callback.getItemStatus(videoItem))
+            updateStatus(callback.getItemStatus(videoItem).status)
             expandItem(this, expandedItem == videoItem, animate = false)
 
             binding.cardContainer.setOnClickListener {
@@ -80,12 +81,12 @@ class VideoItemsListAdapter(private val callback: Callback) :
             }
         }
 
-        fun updateStatus(videoItemStatus: VideoItemStatus) {
+        fun updateStatus(videoItemStatus: DownloadManager.State) {
             binding.btnDownload.state = when (videoItemStatus) {
-                is VideoItemStatus.Download -> DownloadButton.State.Download
-                is VideoItemStatus.Downloaded -> DownloadButton.State.Downloaded(videoItemStatus.size)
-                is VideoItemStatus.Downloading -> DownloadButton.State.Downloading(videoItemStatus.currentSize, videoItemStatus.size)
-                is VideoItemStatus.Failed -> DownloadButton.State.Failed
+                is DownloadManager.State.Download -> DownloadButton.State.Download
+                is DownloadManager.State.Downloaded -> DownloadButton.State.Downloaded(videoItemStatus.size)
+                is DownloadManager.State.Downloading -> DownloadButton.State.Downloading(videoItemStatus.currentSize, videoItemStatus.size)
+                is DownloadManager.State.Failed -> DownloadButton.State.Failed
                 else -> throw IllegalStateException("Unhandled status: $videoItemStatus")
             }
         }

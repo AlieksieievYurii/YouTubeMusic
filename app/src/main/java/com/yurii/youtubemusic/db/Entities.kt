@@ -2,7 +2,10 @@ package com.yurii.youtubemusic.db
 
 import androidx.room.*
 import com.yurii.youtubemusic.models.MediaItem
+import com.yurii.youtubemusic.models.VideoItem
 import java.io.File
+import java.math.BigInteger
+import java.util.UUID
 
 @Entity(tableName = "media_items")
 data class MediaItemEntity(
@@ -12,7 +15,8 @@ data class MediaItemEntity(
     @ColumnInfo("duration") val durationInMillis: Long,
     val thumbnail: File,
     val mediaFile: File,
-    val position: Int
+    val position: Int,
+    val downloadingJobId: UUID?
 )
 
 
@@ -50,12 +54,13 @@ data class MediaItemWithPlaylists(
     val playlists: List<PlaylistEntity>
 )
 
-fun MediaItem.toEntity(position: Int): MediaItemEntity = MediaItemEntity(
+fun MediaItem.toEntity(position: Int, downloadingJobId: UUID?): MediaItemEntity = MediaItemEntity(
     mediaItemId = id,
     title = title,
     author = author,
     durationInMillis = durationInMillis,
     thumbnail = thumbnail,
     mediaFile = mediaFile,
-    position = position
+    position = position,
+    downloadingJobId = downloadingJobId
 )

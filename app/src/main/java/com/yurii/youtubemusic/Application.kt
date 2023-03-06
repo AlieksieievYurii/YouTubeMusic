@@ -23,6 +23,9 @@ class Application : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject
+    lateinit var workManager: WorkManager
+
 
     override fun onCreate() {
         super.onCreate()
