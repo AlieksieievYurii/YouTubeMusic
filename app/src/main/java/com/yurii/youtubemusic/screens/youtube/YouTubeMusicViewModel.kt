@@ -84,8 +84,9 @@ class YouTubeMusicViewModel @Inject constructor(
     }
 
     fun cancelDownloading(item: VideoItem) {
-//        downloaderServiceConnection.cancelDownloading(item)
-//        sendVideoItemStatus(VideoItemStatus.Download(item))
+        viewModelScope.launch {
+            downloadManager.cancel(item)
+        }
     }
 
     fun delete(videoItem: VideoItem) {

@@ -31,7 +31,7 @@ class Application : Application(), Configuration.Provider {
         super.onCreate()
         createMediaPlayerNotificationChannel()
         createMusicsDownloadingNotificationChannel()
-        validateMediaItems()
+        //validateMediaItems()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())

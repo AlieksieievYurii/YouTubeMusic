@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.data.db
 
-import android.util.Log
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -37,7 +36,7 @@ class MediaRepositoryTest {
     @Test
     fun test_deleteItem_itemDeletedAndPositionsUpdated() = runBlocking {
         val n = 10
-        val mediaItems = createMediaItems(n).onEach { mediaItem -> mediaRepository.addMediaItem(mediaItem) }
+        val mediaItems = createMediaItems(n).onEach { mediaItem -> mediaRepository.addDownloadingMediaItem(mediaItem) }
 
         val testedTargetMediaItem = mediaItems[3]
         mediaRepository.delete(testedTargetMediaItem)

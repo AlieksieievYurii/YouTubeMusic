@@ -28,13 +28,9 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
         mediaItemDao.deleteAndCorrectPositions(item.id)
     }
 
-    suspend fun addMediaItem(mediaItem: MediaItem, downloadingJobId: UUID) = lock.withLock {
+    suspend fun addDownloadingMediaItem(mediaItem: MediaItem, downloadingJobId: UUID) = lock.withLock {
         val incrementedPosition = mediaItemDao.getAvailablePosition() ?: 0
         mediaItemDao.insert(mediaItem.toEntity(incrementedPosition, downloadingJobId))
-    }
-
-    suspend fun addDownloadingMediaItem(mediaItem: MediaItem, downloadingJobId: UUID) {
-        mediaItemDao.insert(mediaItem.toEntity(UNSPECIFIED_POSITION, downloadingJobId))
     }
 
     suspend fun changePosition(mediaItem: MediaItem, from: Int, to: Int) = lock.withLock {
@@ -42,14 +38,10 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
     }
 
     suspend fun setMediaItemAsDownloaded(itemId: String) {
-        mediaItemDao.setMediaItemAsDownloaded(itemId, mediaItemDao.getAvailablePosition() ?: 0)
+        mediaItemDao.setMediaItemAsDownloaded(itemId)
     }
 
     suspend fun updateDownloadingJobId(item: Item, jobId: UUID) {
         mediaItemDao.updateDownloadingJobId(item.id, jobId)
-    }
-
-    companion object {
-        private const val UNSPECIFIED_POSITION = -1
     }
 }

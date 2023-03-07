@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.services.downloader2
 
-import android.util.Log
 import androidx.work.*
 import com.yurii.youtubemusic.di.MainScope
 import com.yurii.youtubemusic.models.MediaItemPlaylist
@@ -8,11 +7,13 @@ import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.models.toMediaItem
 import com.yurii.youtubemusic.services.media.MediaStorage
 import com.yurii.youtubemusic.source.MediaCreator
+import com.yurii.youtubemusic.source.MediaLibraryDomain
 import com.yurii.youtubemusic.source.MediaRepository
 import com.yurii.youtubemusic.utilities.asFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -24,7 +25,8 @@ class DownloadManagerImpl @Inject constructor(
     private val mediaCreator: MediaCreator,
     private val mediaRepository: MediaRepository,
     @MainScope private val coroutineScope: CoroutineScope,
-    private val mediaStorage: MediaStorage
+    private val mediaStorage: MediaStorage,
+    private val mediaLibraryDomain: MediaLibraryDomain
 ) : DownloadManager {
     private val cache = ConcurrentHashMap<String, Pair<DownloadManager.Status, UUID?>>()
 
@@ -47,6 +49,8 @@ class DownloadManagerImpl @Inject constructor(
 
                         if (downloadingJob.state == WorkInfo.State.SUCCEEDED)
                             mediaCreator.setMediaItemAsDownloaded(cacheItem.key)
+                        else if (downloadingJob.state == WorkInfo.State.CANCELLED)
+                            mediaRepository.getMediaItem(cacheItem.key)?.let { mediaRepository.delete(it) }
 
                         statusesFlow.emit(status)
                     }
@@ -81,8 +85,8 @@ class DownloadManagerImpl @Inject constructor(
             if (it.downloadingJobId != null) {
                 val workInfo: WorkInfo? = workManager.getWorkInfoById(it.downloadingJobId).await()
                 if (workInfo == null) {
-                    Log.i("MyApp", "Work is not found for ${it.downloadingJobId}")
-                    mediaRepository.delete(it.toMediaItem())
+                    Timber.e("Work is not found for ${it.downloadingJobId}")
+                    mediaLibraryDomain.deleteMediaItem(it.toMediaItem())
                 }
             }
         }
@@ -95,7 +99,9 @@ class DownloadManagerImpl @Inject constructor(
     }
 
     override suspend fun cancel(videoItem: VideoItem) {
-        TODO("Not yet implemented")
+        statusesFlow.emit(DownloadManager.Status(videoItem.id, DownloadManager.State.Download))
+        mediaLibraryDomain.deleteMediaItem(videoItem)
+        workManager.cancelUniqueWork(videoItem.id)
     }
 
     override fun getStatus(videoItem: VideoItem): DownloadManager.Status {
@@ -120,7 +126,7 @@ class DownloadManagerImpl @Inject constructor(
                     downloadingJobWorkInfo.outputData.getString(MusicDownloadWorker.ERROR_MESSAGE)
                 )
                 WorkInfo.State.BLOCKED -> TODO()
-                WorkInfo.State.CANCELLED -> TODO()
+                WorkInfo.State.CANCELLED -> DownloadManager.State.Download
             }
         )
     }
@@ -135,7 +141,9 @@ class DownloadManagerImpl @Inject constructor(
             it.setInputData(data)
             it.addTag(TAG_DOWNLOADING)
         }.build()
+
         workManager.enqueueUniqueWork(videoItem.id, ExistingWorkPolicy.REPLACE, request)
+
         return request.id
     }
 

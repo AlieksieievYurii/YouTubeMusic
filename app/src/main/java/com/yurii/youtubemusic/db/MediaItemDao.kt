@@ -24,13 +24,8 @@ interface MediaItemDao {
     @Query("SELECT * FROM media_items")
     fun getMediaItemsEntities(): Flow<List<MediaItemEntity>>
 
-    @Query(
-        """
-        UPDATE media_items SET downloadingJobId = NULL, position = :position 
-        WHERE mediaItemId = :mediaItemId AND downloadingJobId IS NOT NULL
-    """
-    )
-    fun setMediaItemAsDownloaded(mediaItemId: String, position: Int)
+    @Query("UPDATE media_items SET downloadingJobId = NULL WHERE mediaItemId = :mediaItemId")
+    suspend fun setMediaItemAsDownloaded(mediaItemId: String)
 
     @Query("SELECT MAX(position) + 1 from media_items")
     suspend fun getAvailablePosition(): Int?
