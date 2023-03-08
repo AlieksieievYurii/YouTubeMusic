@@ -22,6 +22,8 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
     val mediaItemEntities =  mediaItemDao.getMediaItemsEntities()
     suspend fun getMediaItem(mediaItemId: String): MediaItem? = mediaItemDao.getMediaItem(mediaItemId)?.toMediaItem()
 
+    suspend fun getDownloadingMediaItemEntity(item: Item): MediaItemEntity? = mediaItemDao.getDownloadingMediaItem(item.id)
+
     fun getOrderedMediaItems(): Flow<List<MediaItem>> = mediaItemDao.getAllSortedMediaItems().map { it.toMediaItems() }
 
     suspend fun delete(item: Item) = withContext(Dispatchers.IO) {

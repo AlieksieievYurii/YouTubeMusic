@@ -33,6 +33,11 @@ class MediaStorage @Inject constructor(@ApplicationContext context: Context) {
         getThumbnail(item).delete()
     }
 
+    fun deleteMediaFiles(itemId: String) {
+        getMediaFile(itemId).delete()
+        getThumbnail(itemId).delete()
+    }
+
     fun setMockAsDownloaded(videoItem: VideoItem) {
         val downloadingMockFile = getDownloadingMockFile(videoItem)
 

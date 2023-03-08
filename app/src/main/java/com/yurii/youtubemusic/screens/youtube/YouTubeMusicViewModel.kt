@@ -8,9 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
-import com.yurii.youtubemusic.services.downloader.ServiceConnection
 import com.yurii.youtubemusic.services.downloader2.DownloadManager
-import com.yurii.youtubemusic.services.media.MediaStorage
 import com.yurii.youtubemusic.source.GoogleAccount
 import com.yurii.youtubemusic.source.MediaLibraryDomain
 import com.yurii.youtubemusic.source.PlaylistRepository
@@ -19,22 +17,20 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import javax.inject.Inject
 
 @HiltViewModel
 class YouTubeMusicViewModel @Inject constructor(
     private val downloadManager: DownloadManager,
-    private val downloaderServiceConnection: ServiceConnection,
     private val youTubePreferences: YouTubePreferences,
     private val playlistRepository: PlaylistRepository,
     val youTubeAPI: YouTubeAPI,
     private val googleAccount: GoogleAccount,
     private val mediaLibraryDomain: MediaLibraryDomain,
-    private val mediaStorage: MediaStorage
+
 ) : ViewModel() {
     sealed class Event {
-        data class ShowFailedVideoItem(val videoItem: VideoItem, val error: Exception?) : Event()
+        data class ShowFailedVideoItem(val videoItem: VideoItem, val error: String) : Event()
         data class OpenPlaylistSelector(val videoItem: VideoItem, val playlists: List<MediaItemPlaylist>) : Event()
     }
 
@@ -79,8 +75,9 @@ class YouTubeMusicViewModel @Inject constructor(
     }
 
     fun tryToDownloadAgain(videoItem: VideoItem) {
-//        downloaderServiceConnection.retryToDownload(videoItem)
-//        sendVideoItemStatus(VideoItemStatus.Downloading(videoItem, 0, 0))
+        viewModelScope.launch {
+            downloadManager.retry(videoItem)
+        }
     }
 
     fun cancelDownloading(item: VideoItem) {
@@ -96,7 +93,11 @@ class YouTubeMusicViewModel @Inject constructor(
     }
 
     fun showFailedItemDetails(videoItem: VideoItem) {
-        sendEvent(Event.ShowFailedVideoItem(videoItem, downloaderServiceConnection.getError(videoItem)))
+        viewModelScope.launch {
+            (downloadManager.getStatus(videoItem).status as? DownloadManager.State.Failed)?.let {
+                sendEvent(Event.ShowFailedVideoItem(videoItem, it.errorMessage ?: "No error message"))
+            }
+        }
     }
 
     fun getItemStatus(videoItem: VideoItem) = downloadManager.getStatus(videoItem)

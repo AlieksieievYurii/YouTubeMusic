@@ -12,6 +12,9 @@ interface MediaItemDao {
     @Query("SELECT * FROM media_items WHERE mediaItemId = :mediaItemId")
     suspend fun getMediaItem(mediaItemId: String): MediaItemEntity?
 
+    @Query("SELECT * FROM media_items WHERE mediaItemId = :mediaItemId AND downloadingJobId IS NOT NULL")
+    suspend fun getDownloadingMediaItem(mediaItemId: String): MediaItemEntity?
+
     @Transaction
     suspend fun deleteAndCorrectPositions(mediaItemId: String) {
         mDecreasePositionFrom(mediaItemId)

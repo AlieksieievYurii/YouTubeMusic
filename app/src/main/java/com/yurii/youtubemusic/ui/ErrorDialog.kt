@@ -18,7 +18,7 @@ class ErrorDialog private constructor() : DialogFragment() {
     private lateinit var videoItem: VideoItem
     private var onTryAgain: CallTryAgain? = null
     private var onCancel: CallCancel? = null
-    private var error: Exception? = null
+    private var errorMessage: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_error, container, false).also {
@@ -34,7 +34,7 @@ class ErrorDialog private constructor() : DialogFragment() {
 
     private fun setErrorMessage(view: View) {
         view.findViewById<TextView>(R.id.tv_error_message).apply {
-            text = this@ErrorDialog.error?.message
+            text = this@ErrorDialog.errorMessage
         }
     }
     private fun setOnClickListeners(view: View) {
@@ -57,10 +57,10 @@ class ErrorDialog private constructor() : DialogFragment() {
     }
 
     companion object {
-        fun create(videoItem: VideoItem, error: Exception?): ErrorDialog {
+        fun create(videoItem: VideoItem, errorMessage: String): ErrorDialog {
             return ErrorDialog().apply {
                 this.videoItem = videoItem
-                this.error = error
+                this.errorMessage = errorMessage
             }
         }
     }

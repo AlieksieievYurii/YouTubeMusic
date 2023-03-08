@@ -1,7 +1,6 @@
 package com.yurii.youtubemusic.screens.youtube
 
 
-import android.util.Log
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
@@ -69,10 +68,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             launch { viewModel.videoItems.collectLatest { listAdapter.submitData(it) } }
             launch { startHandlingListLoadState() }
             launch { startHandlingEvents() }
-            launch { viewModel.videoItemStatus.collectLatest {
-            Log.i("MyApp", "STATUS: $it")
-                listAdapter.updateItem(it)
-            } }
+            launch { viewModel.videoItemStatus.collectLatest { listAdapter.updateItem(it) } }
         }
 
         binding.apply {
@@ -105,7 +101,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         }
     }
 
-    private fun showFailedVideoItem(videoItem: VideoItem, error: Exception?) {
+    private fun showFailedVideoItem(videoItem: VideoItem, error: String) {
         ErrorDialog.create(videoItem, error).addListeners(
             onTryAgain = { viewModel.tryToDownloadAgain(videoItem) },
             onCancel = { viewModel.cancelDownloading(videoItem) })

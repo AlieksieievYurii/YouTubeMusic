@@ -28,7 +28,9 @@ class DownloadManagerImpl @Inject constructor(
     private val mediaStorage: MediaStorage,
     private val mediaLibraryDomain: MediaLibraryDomain
 ) : DownloadManager {
-    private val cache = ConcurrentHashMap<String, Pair<DownloadManager.Status, UUID?>>()
+    private data class CacheItem(val status: DownloadManager.Status, val downloadingJobId: UUID?)
+
+    private val cache = ConcurrentHashMap<String, CacheItem>()
 
     private val statusesFlow = MutableSharedFlow<DownloadManager.Status>()
 
@@ -41,11 +43,11 @@ class DownloadManagerImpl @Inject constructor(
     private suspend fun observeWorkManagerStatuses() {
         workManager.getWorkInfosByTagLiveData(TAG_DOWNLOADING).asFlow().collect { downloadingJobs ->
             downloadingJobs.forEach { downloadingJob ->
-                val cacheItem = cache.entries.find { it.value.second == downloadingJob.id }
+                val cacheItem = cache.entries.find { it.value.downloadingJobId == downloadingJob.id }
                 if (cacheItem != null) {
                     val status = getStatus(downloadingJob, cacheItem.key)
-                    if (status != cacheItem.value.first) {
-                        cache[cacheItem.key] = status to downloadingJob.id
+                    if (status != cacheItem.value.status) {
+                        cache[cacheItem.key] = CacheItem(status, downloadingJob.id)
 
                         if (downloadingJob.state == WorkInfo.State.SUCCEEDED)
                             mediaCreator.setMediaItemAsDownloaded(cacheItem.key)
@@ -64,11 +66,11 @@ class DownloadManagerImpl @Inject constructor(
             mediaItems.forEach {
                 if (it.downloadingJobId != null) {
                     val status = DownloadManager.Status(it.mediaItemId, DownloadManager.State.Downloading(0, 0))
-                    cache.putIfAbsent(it.mediaItemId, status to it.downloadingJobId)
+                    cache.putIfAbsent(it.mediaItemId, CacheItem(status, it.downloadingJobId))
                 } else {
                     val fileSize = mediaStorage.getMediaFile(it.mediaItemId).length()
                     val status = DownloadManager.Status(it.mediaItemId, DownloadManager.State.Downloaded(fileSize))
-                    cache.putIfAbsent(it.mediaItemId, status to null)
+                    cache.putIfAbsent(it.mediaItemId, CacheItem(status, null))
                 }
             }
             cache.keys.forEach { mediaItemId ->
@@ -93,32 +95,36 @@ class DownloadManagerImpl @Inject constructor(
     }
 
     override suspend fun enqueue(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
-        statusesFlow.emit(DownloadManager.Status(videoItem.id, DownloadManager.State.Downloading(0, 0)))
-        val possibleMediaItem = mediaRepository.getDownloadingMediaItemEntity(videoItem)
-        if (possibleMediaItem == null) {
+        setDownloadingStatus(videoItem.id)
+        val alreadyExists = mediaRepository.getDownloadingMediaItemEntity(videoItem) != null
+        if (!alreadyExists) {
             val downloadingJobId = enqueueDownloadingJob(videoItem)
             mediaCreator.registerDownloadingMediaItem(videoItem, playlists, downloadingJobId)
+            setDownloadingStatus(videoItem.id, downloadingJobId)
         }
     }
 
     override suspend fun retry(videoItem: VideoItem) {
-        statusesFlow.emit(DownloadManager.Status(videoItem.id, DownloadManager.State.Downloading(0, 0)))
+        setDownloadingStatus(videoItem.id)
         if (mediaRepository.getDownloadingMediaItemEntity(videoItem) != null) {
             val downloadingJobId = enqueueDownloadingJob(videoItem)
             mediaRepository.updateDownloadingJobId(videoItem, downloadingJobId)
-        }else
+            setDownloadingStatus(videoItem.id, downloadingJobId)
+        } else
             throw IllegalStateException("Can not retry to download failed media item")
     }
 
     override suspend fun cancel(videoItem: VideoItem) {
         statusesFlow.emit(DownloadManager.Status(videoItem.id, DownloadManager.State.Download))
-        mediaLibraryDomain.deleteMediaItem(videoItem)
-        workManager.cancelUniqueWork(videoItem.id)
+        cache[videoItem.id]?.downloadingJobId?.let {
+            workManager.cancelWorkById(it)
+            mediaLibraryDomain.deleteMediaItem(videoItem)
+        }
     }
 
     override fun getStatus(videoItem: VideoItem): DownloadManager.Status {
         val cacheItem = cache.entries.find { it.key == videoItem.id }
-        return cacheItem?.value?.first ?: DownloadManager.Status(videoItem.id, DownloadManager.State.Download)
+        return cacheItem?.value?.status ?: DownloadManager.Status(videoItem.id, DownloadManager.State.Download)
     }
 
     override fun observeStatus(): Flow<DownloadManager.Status> = statusesFlow.asSharedFlow()
@@ -137,7 +143,7 @@ class DownloadManagerImpl @Inject constructor(
                 WorkInfo.State.FAILED -> DownloadManager.State.Failed(
                     downloadingJobWorkInfo.outputData.getString(MusicDownloadWorker.ERROR_MESSAGE)
                 )
-                WorkInfo.State.BLOCKED -> TODO()
+                WorkInfo.State.BLOCKED -> TODO("Unhandled")
                 WorkInfo.State.CANCELLED -> DownloadManager.State.Download
             }
         )
@@ -157,6 +163,17 @@ class DownloadManagerImpl @Inject constructor(
         workManager.enqueue(request)
 
         return request.id
+    }
+
+    private suspend fun setDownloadingStatus(itemId: String, downloadingJobId: UUID? = null) {
+        val status = DownloadManager.Status(itemId, DownloadManager.State.Downloading(0, 0))
+        setStatus(CacheItem(status, downloadingJobId), emit = true)
+    }
+
+    private suspend fun setStatus(cacheItem: CacheItem, emit: Boolean = false) {
+        cache[cacheItem.status.videoId] = cacheItem
+        if (emit)
+            statusesFlow.emit(cacheItem.status)
     }
 
     companion object {
