@@ -19,21 +19,15 @@ class MediaCreator @Inject constructor(
 
     private val lock = Mutex()
 
-    suspend fun createMediaItem(videoItem: VideoItem, playlists: List<MediaItemPlaylist>, downloadingJobId: UUID) = lock.withLock {
-        if (mediaRepository.getMediaItem(videoItem.id) == null) {
-            val createdMediaItem = registerMediaItem(videoItem, downloadingJobId)
-            playlistRepository.assignMediaItemToPlaylists(createdMediaItem, playlists)
+    suspend fun registerDownloadingMediaItem(videoItem: VideoItem, playlists: List<MediaItemPlaylist>, downloadingJobId: UUID) =
+        lock.withLock {
+            if (mediaRepository.getMediaItem(videoItem.id) == null) {
+                val createdMediaItem = registerMediaItem(videoItem, downloadingJobId)
+                playlistRepository.assignMediaItemToPlaylists(createdMediaItem, playlists)
+            } else {
+                mediaRepository.updateDownloadingJobId(videoItem, downloadingJobId)
+            }
         }
-    }
-
-    suspend fun registerDownloadingMediaItem(videoItem: VideoItem, playlists: List<MediaItemPlaylist>, downloadingJobId: UUID) {
-        if (mediaRepository.getMediaItem(videoItem.id) == null) {
-            val createdMediaItem = registerMediaItem(videoItem, downloadingJobId)
-            playlistRepository.assignMediaItemToPlaylists(createdMediaItem, playlists)
-        } else {
-            mediaRepository.updateDownloadingJobId(videoItem, downloadingJobId)
-        }
-    }
 
     suspend fun setMediaItemAsDownloaded(itemId: String) = withContext(Dispatchers.IO) {
         mediaRepository.setMediaItemAsDownloaded(itemId)
