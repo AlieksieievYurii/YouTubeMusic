@@ -94,8 +94,20 @@ class DownloadManagerImpl @Inject constructor(
 
     override suspend fun enqueue(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
         statusesFlow.emit(DownloadManager.Status(videoItem.id, DownloadManager.State.Downloading(0, 0)))
-        val downloadingJobId = enqueueDownloadingJob(videoItem)
-        mediaCreator.registerDownloadingMediaItem(videoItem, playlists, downloadingJobId)
+        val possibleMediaItem = mediaRepository.getDownloadingMediaItemEntity(videoItem)
+        if (possibleMediaItem == null) {
+            val downloadingJobId = enqueueDownloadingJob(videoItem)
+            mediaCreator.registerDownloadingMediaItem(videoItem, playlists, downloadingJobId)
+        }
+    }
+
+    override suspend fun retry(videoItem: VideoItem) {
+        statusesFlow.emit(DownloadManager.Status(videoItem.id, DownloadManager.State.Downloading(0, 0)))
+        if (mediaRepository.getDownloadingMediaItemEntity(videoItem) != null) {
+            val downloadingJobId = enqueueDownloadingJob(videoItem)
+            mediaRepository.updateDownloadingJobId(videoItem, downloadingJobId)
+        }else
+            throw IllegalStateException("Can not retry to download failed media item")
     }
 
     override suspend fun cancel(videoItem: VideoItem) {
@@ -142,7 +154,7 @@ class DownloadManagerImpl @Inject constructor(
             it.addTag(TAG_DOWNLOADING)
         }.build()
 
-        workManager.enqueueUniqueWork(videoItem.id, ExistingWorkPolicy.REPLACE, request)
+        workManager.enqueue(request)
 
         return request.id
     }

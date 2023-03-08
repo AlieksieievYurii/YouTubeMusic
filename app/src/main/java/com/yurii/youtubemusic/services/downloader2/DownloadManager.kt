@@ -15,6 +15,8 @@ interface DownloadManager {
     data class Status(val videoId: String, val status: State)
 
     suspend fun enqueue(videoItem: VideoItem, playlists: List<MediaItemPlaylist>)
+
+    suspend fun retry(videoItem: VideoItem)
     suspend fun cancel(videoItem: VideoItem)
     fun getStatus(videoItem: VideoItem): Status
     fun observeStatus(): Flow<Status>
