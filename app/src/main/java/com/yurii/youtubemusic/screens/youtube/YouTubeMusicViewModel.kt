@@ -8,7 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
-import com.yurii.youtubemusic.services.downloader2.DownloadManager
+import com.yurii.youtubemusic.services.downloader.DownloadManager
 import com.yurii.youtubemusic.source.GoogleAccount
 import com.yurii.youtubemusic.source.MediaLibraryDomain
 import com.yurii.youtubemusic.source.PlaylistRepository

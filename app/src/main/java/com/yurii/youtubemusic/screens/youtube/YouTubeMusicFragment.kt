@@ -12,7 +12,7 @@ import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.VideoItem
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
-import com.yurii.youtubemusic.services.downloader2.DownloadManager
+import com.yurii.youtubemusic.services.downloader.DownloadManager
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog

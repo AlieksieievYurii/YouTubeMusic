@@ -35,7 +35,7 @@ class MediaCreator @Inject constructor(
 
     private suspend fun registerMediaItem(videoItem: VideoItem, downloadingJobId: UUID): MediaItem {
         val mediaFile = mediaStorage.getMediaFile(videoItem)
-        val thumbnailFile = mediaStorage.getThumbnail(videoItem)
+        val thumbnailFile = mediaStorage.getThumbnail(videoItem.id)
 
         val mediaItem = MediaItem(
             id = videoItem.id,

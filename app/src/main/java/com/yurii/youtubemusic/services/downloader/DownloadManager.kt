@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.services.downloader2
+package com.yurii.youtubemusic.services.downloader
 
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.VideoItem

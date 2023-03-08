@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.services.downloader2
+package com.yurii.youtubemusic.services.downloader
 
 import androidx.work.*
 import com.yurii.youtubemusic.di.MainScope

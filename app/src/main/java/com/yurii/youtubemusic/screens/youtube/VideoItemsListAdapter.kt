@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.databinding.ItemVideoBinding
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.downloader2.DownloadManager
+import com.yurii.youtubemusic.services.downloader.DownloadManager
 import com.yurii.youtubemusic.ui.DownloadButton
 import com.yurii.youtubemusic.ui.getValueAnimator
 
@@ -87,7 +87,6 @@ class VideoItemsListAdapter(private val callback: Callback) :
                 is DownloadManager.State.Downloaded -> DownloadButton.State.Downloaded(videoItemStatus.size)
                 is DownloadManager.State.Downloading -> DownloadButton.State.Downloading(videoItemStatus.currentSize, videoItemStatus.size)
                 is DownloadManager.State.Failed -> DownloadButton.State.Failed
-                else -> throw IllegalStateException("Unhandled status: $videoItemStatus")
             }
         }
 
