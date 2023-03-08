@@ -14,8 +14,10 @@ import com.yurii.youtubemusic.services.media.MediaStorage
 import com.yurii.youtubemusic.utilities.parentMkdir
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -34,11 +36,14 @@ class MusicDownloadWorker @AssistedInject constructor(
         val videoId = inputData.getString(ARG_VIDEO_ID) ?: throw IllegalStateException("Worker requires <string> ARG_VIDEO_ID argument")
         val thumbnailUrl = inputData.getString(ARG_VIDEO_THUMBNAIL_URL)
             ?: throw IllegalStateException("Worker requires <string> ARG_VIDEO_THUMBNAIL_URL argument")
+       Timber.i("Start downloading music from YouTube video ID: $videoId")
 
         return try {
             val mediaFileSize = download(videoId, thumbnailUrl)
             Result.success(workDataOf(MEDIA_SIZE to mediaFileSize))
         } catch (error: Exception) {
+            Timber.e(error)
+            mediaStorage.getDownloadingMockFile(videoId).delete()
             Result.failure(workDataOf(ERROR_MESSAGE to error.message))
         }
     }
@@ -100,6 +105,8 @@ class MusicDownloadWorker @AssistedInject constructor(
         BufferedInputStream(url.openStream()).use { bis ->
             BufferedOutputStream(FileOutputStream(outputFile)).use { bos ->
                 while (bis.read(buffer, 0, 4096).also { count = it } != -1) {
+                    if (isStopped)
+                        throw CancellationException()
 
                     bos.write(buffer, 0, count)
                     total += count.toDouble()
@@ -108,7 +115,7 @@ class MusicDownloadWorker @AssistedInject constructor(
                     if (newProgress > progress) {
                         progress = newProgress
 
-                        setProgress(
+                        setProgressAsync(
                             workDataOf(
                                 PROGRESS to progress,
                                 PROGRESS_DOWNLOADED_SIZE to total.toLong(),
