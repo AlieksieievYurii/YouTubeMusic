@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/item_log_out"
         android:title="@string/label_log_out" />
+    <item
+        android:id="@+id/item_open_download_manager"
+        app:showAsAction="always"
+        android:icon="@drawable/baseline_download_24"
+        android:title="@string/label_download_manager" />
 </menu>

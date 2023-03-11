@@ -10,6 +10,7 @@ import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
 import com.yurii.youtubemusic.models.MediaItemPlaylist
+import com.yurii.youtubemusic.screens.manager.DownloadManagerActivity
 import com.yurii.youtubemusic.utilities.TabFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -27,6 +28,7 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
         when (id) {
             R.id.item_add_edit_categories -> openCategoriesEditor()
             R.id.item_open_equalizer -> openEqualizerActivity()
+            R.id.item_open_download_manager -> openDownloadManager()
         }
     }
 
@@ -51,6 +53,10 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
 
     private fun openCategoriesEditor() {
         startActivity(Intent(requireContext(), PlaylistEditorActivity::class.java))
+    }
+
+    private fun openDownloadManager() {
+        startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))
     }
 
     private fun initCategoriesLayout(categories: List<MediaItemPlaylist>) {

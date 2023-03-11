@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.screens.youtube
 
 
+import android.content.Intent
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
@@ -10,6 +11,7 @@ import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.screens.manager.DownloadManagerActivity
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
 import com.yurii.youtubemusic.services.downloader.DownloadManager
@@ -51,6 +53,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     override fun onClickOption(id: Int) {
         when (id) {
             R.id.item_log_out -> viewModel.signOut()
+            R.id.item_open_download_manager -> openDownloadManager()
         }
     }
 
@@ -144,6 +147,10 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         requireActivity().supportFragmentManager,
         viewModel.youTubeAPI, currentPlaylist, viewModel::setPlaylist
     )
+
+    private fun openDownloadManager() {
+        startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))
+    }
 
     companion object {
         fun createInstance() = YouTubeMusicFragment()
