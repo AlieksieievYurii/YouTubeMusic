@@ -42,6 +42,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".screens.manager.DownloadManagerActivity"
+            android:screenOrientation="portrait" />
+
         <service
             android:name=".services.media.MediaService"
             android:exported="false">
