@@ -43,9 +43,6 @@
         </activity>
 
         <service
-            android:name=".services.downloader.MusicDownloaderService"
-            android:exported="false" />
-        <service
             android:name=".services.media.MediaService"
             android:exported="false">
             <intent-filter>
