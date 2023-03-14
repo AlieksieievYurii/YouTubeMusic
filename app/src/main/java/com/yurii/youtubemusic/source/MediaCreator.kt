@@ -47,7 +47,7 @@ class MediaCreator @Inject constructor(
             description = ""
         )
 
-        mediaRepository.addDownloadingMediaItem(mediaItem, downloadingJobId)
+        mediaRepository.addDownloadingMediaItem(mediaItem, downloadingJobId, videoItem.normalThumbnail)
 
         return mediaItem
     }

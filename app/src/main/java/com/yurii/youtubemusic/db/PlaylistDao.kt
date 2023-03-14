@@ -58,7 +58,8 @@ interface PlaylistDao {
             media_items.duration, 
             media_items.thumbnail, 
             media_items.mediaFile,
-            media_item_playlist_assignment.position 
+            media_item_playlist_assignment.position,
+            media_items.thumbnailUrl
         FROM media_item_playlist_assignment 
         INNER JOIN media_items 
         ON media_items.mediaItemId = media_item_playlist_assignment.mediaItemId

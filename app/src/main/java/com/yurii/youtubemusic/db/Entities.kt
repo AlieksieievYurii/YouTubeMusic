@@ -16,6 +16,7 @@ data class MediaItemEntity(
     val thumbnail: File,
     val mediaFile: File,
     val position: Int,
+    val thumbnailUrl: String,
     val downloadingJobId: UUID?
 )
 
@@ -52,15 +53,4 @@ data class MediaItemWithPlaylists(
         associateBy = Junction(MediaItemPlayListAssignment::class)
     )
     val playlists: List<PlaylistEntity>
-)
-
-fun MediaItem.toEntity(position: Int, downloadingJobId: UUID?): MediaItemEntity = MediaItemEntity(
-    mediaItemId = id,
-    title = title,
-    author = author,
-    durationInMillis = durationInMillis,
-    thumbnail = thumbnail,
-    mediaFile = mediaFile,
-    position = position,
-    downloadingJobId = downloadingJobId
 )

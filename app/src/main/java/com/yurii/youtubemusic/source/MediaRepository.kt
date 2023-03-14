@@ -19,7 +19,7 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
 
     private val lock = Mutex()
 
-    val mediaItemEntities =  mediaItemDao.getMediaItemsEntities()
+    val mediaItemEntities = mediaItemDao.getMediaItemsEntities()
     suspend fun getMediaItem(mediaItemId: String): MediaItem? = mediaItemDao.getMediaItem(mediaItemId)?.toMediaItem()
 
     suspend fun getDownloadingMediaItemEntity(item: Item): MediaItemEntity? = mediaItemDao.getDownloadingMediaItem(item.id)
@@ -30,9 +30,21 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
         mediaItemDao.deleteAndCorrectPositions(item.id)
     }
 
-    suspend fun addDownloadingMediaItem(mediaItem: MediaItem, downloadingJobId: UUID) = lock.withLock {
+    suspend fun addDownloadingMediaItem(mediaItem: MediaItem, downloadingJobId: UUID, thumbnailUrl: String) = lock.withLock {
         val incrementedPosition = mediaItemDao.getAvailablePosition() ?: 0
-        mediaItemDao.insert(mediaItem.toEntity(incrementedPosition, downloadingJobId))
+        mediaItemDao.insert(
+            MediaItemEntity(
+                mediaItemId = mediaItem.id,
+                title = mediaItem.title,
+                author = mediaItem.author,
+                durationInMillis = mediaItem.durationInMillis,
+                thumbnail = mediaItem.thumbnail,
+                mediaFile = mediaItem.mediaFile,
+                position = incrementedPosition,
+                downloadingJobId = downloadingJobId,
+                thumbnailUrl = thumbnailUrl
+            )
+        )
     }
 
     suspend fun changePosition(mediaItem: MediaItem, from: Int, to: Int) = lock.withLock {
