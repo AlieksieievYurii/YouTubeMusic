@@ -36,14 +36,14 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
             oldItem == newItem
     }
 
-    fun submitPlaylistBinds(list: List<PlaylistSyncBind>) {
+    fun submitPlaylistBinds(list: List<PlaylistSyncBind>) = synchronized(this) {
         setDataSources(cashedPlaylistBinds.apply {
             clear()
             cashedPlaylistBinds.addAll(list.map { AdapterData.PlaylistBind(it) })
         }, cashedDownloadingJobs)
     }
 
-    fun submitDownloadingJobs(list: List<DownloadingVideoItemJob>) {
+    fun submitDownloadingJobs(list: List<DownloadingVideoItemJob>) = synchronized(this) {
         setDataSources(cashedPlaylistBinds, cashedDownloadingJobs.apply {
             clear()
             addAll(list.map { AdapterData.Job(it) })
