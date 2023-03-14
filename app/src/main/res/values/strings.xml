@@ -72,4 +72,6 @@
     <string name="label_create_playlist">Create playlist</string>
     <string name="label_rename_playlist">Rename playlist</string>
     <string name="label_download_manager">Download Manager</string>
+    <string name="label_playlist_sync_binds">Playlist sync binds</string>
+    <string name="label_downloading">Downloading</string>
 </resources>
