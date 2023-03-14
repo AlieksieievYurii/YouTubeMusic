@@ -10,7 +10,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.yurii.youtubemusic.screens.player.PlayerControlPanelFragment
 import com.yurii.youtubemusic.R
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener {
     private val viewModel: MainActivityViewModel by viewModels()
     private val activityMainBinding: ActivityMainBinding by viewBinding()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSupportActionBar(activityMainBinding.toolbar)
-        activityMainBinding.bottomNavigationView.setOnNavigationItemSelectedListener(this)
+        activityMainBinding.bottomNavigationView.setOnItemSelectedListener(this)
 
         fragmentHelper.showSavedMusicFragment(animated = false)
 
