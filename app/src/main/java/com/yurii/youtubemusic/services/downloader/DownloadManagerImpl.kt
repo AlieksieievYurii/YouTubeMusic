@@ -94,6 +94,14 @@ class DownloadManagerImpl @Inject constructor(
         }
     }
 
+    override fun getDownloadingJobs(): Flow<List<DownloadingJob>> {
+        return mediaRepository.mediaItemEntities.map { mediaItems ->
+            mediaItems.filter { it.downloadingJobId != null }.map {
+                DownloadingJob(it.toMediaItem(), it.thumbnailUrl, it.downloadingJobId!!)
+            }
+        }
+    }
+
     override suspend fun enqueue(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
         setDownloadingStatus(videoItem.id)
         val alreadyExists = mediaRepository.getDownloadingMediaItemEntity(videoItem) != null

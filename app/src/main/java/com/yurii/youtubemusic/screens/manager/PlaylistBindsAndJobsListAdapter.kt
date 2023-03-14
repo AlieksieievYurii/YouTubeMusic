@@ -14,7 +14,7 @@ import com.yurii.youtubemusic.databinding.ItemPlaylistSyncBindBinding
 
 sealed class AdapterData {
     data class PlaylistBind(val data: PlaylistSyncBind) : AdapterData()
-    data class Job(val data: DownloadingJob) : AdapterData()
+    data class Job(val data: DownloadingVideoItemJob) : AdapterData()
     data class Headline(val titleId: Int, val onAction: () -> Unit) : AdapterData()
 }
 
@@ -43,7 +43,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         }, cashedDownloadingJobs)
     }
 
-    fun submitDownloadingJobs(list: List<DownloadingJob>) {
+    fun submitDownloadingJobs(list: List<DownloadingVideoItemJob>) {
         setDataSources(cashedPlaylistBinds, cashedDownloadingJobs.apply {
             clear()
             addAll(list.map { AdapterData.Job(it) })
@@ -103,7 +103,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     }
 
     private class JobViewHolder(private val binding: ItemJobBinding) : ViewHolder(binding.root) {
-        fun bind(downloadingJob: DownloadingJob) {
+        fun bind(downloadingJob: DownloadingVideoItemJob) {
             binding.apply {
                 thumbnail.load(downloadingJob.thumbnail)
                 videoItemName.text = downloadingJob.videoItemName

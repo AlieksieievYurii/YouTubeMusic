@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityDownloadManagerBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class DownloadManagerActivity : AppCompatActivity() {
@@ -38,6 +40,12 @@ class DownloadManagerActivity : AppCompatActivity() {
             adapter = listAdapter
             setHasFixedSize(false)
             layoutManager = LinearLayoutManager(this@DownloadManagerActivity)
+        }
+
+        lifecycleScope.launch {
+            viewModel.downloadingJobs.collect {
+                listAdapter.submitDownloadingJobs(it)
+            }
         }
     }
 
