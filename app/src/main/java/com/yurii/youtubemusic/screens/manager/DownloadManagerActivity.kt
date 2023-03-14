@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityDownloadManagerBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -12,6 +13,18 @@ import dagger.hilt.android.AndroidEntryPoint
 class DownloadManagerActivity : AppCompatActivity() {
     private val viewModel: DownloadManagerViewModel by viewModels()
     private val binding: ActivityDownloadManagerBinding by viewBinding()
+    private val listAdapter by lazy {
+        PlaylistBindsAndJobsListAdapter(object : PlaylistBindsAndJobsListAdapter.Callback {
+            override fun onAddSyncPlaylistBind() {
+
+            }
+
+            override fun cancelAllDownloading() {
+                TODO("Not yet implemented")
+            }
+
+        })
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +34,11 @@ class DownloadManagerActivity : AppCompatActivity() {
             title = getString(R.string.label_download_manager)
         }
 
+        binding.playlistsBinds.apply {
+            adapter = listAdapter
+            setHasFixedSize(false)
+            layoutManager = LinearLayoutManager(this@DownloadManagerActivity)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
