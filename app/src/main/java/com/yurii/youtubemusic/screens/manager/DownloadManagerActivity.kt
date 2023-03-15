@@ -47,6 +47,12 @@ class DownloadManagerActivity : AppCompatActivity() {
                 listAdapter.submitDownloadingJobs(it)
             }
         }
+
+        lifecycleScope.launch {
+            viewModel.downloadingStatus.collect {
+                listAdapter.updateDownloadingJobStatus(it)
+            }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

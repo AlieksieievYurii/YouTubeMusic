@@ -2,14 +2,18 @@ package com.yurii.youtubemusic.screens.manager
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import coil.load
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemHeadlineBinding
 import com.yurii.youtubemusic.databinding.ItemJobBinding
 import com.yurii.youtubemusic.databinding.ItemPlaylistSyncBindBinding
+import com.yurii.youtubemusic.services.downloader.DownloadManager
 
 
 sealed class AdapterData {
@@ -27,6 +31,8 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
 
     private val cashedPlaylistBinds = mutableListOf<AdapterData.PlaylistBind>()
     private val cashedDownloadingJobs = mutableListOf<AdapterData.Job>()
+
+    private lateinit var recyclerView: RecyclerView
 
     private object Comparator : DiffUtil.ItemCallback<AdapterData>() {
         override fun areItemsTheSame(oldItem: AdapterData, newItem: AdapterData) =
@@ -48,6 +54,15 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
             clear()
             addAll(list.map { AdapterData.Job(it) })
         })
+    }
+
+    fun updateDownloadingJobStatus(status: DownloadManager.Status) {
+        findVisibleJobViewHolder(status.videoId)?.updateState(status.state)
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -96,6 +111,18 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         submitList(result)
     }
 
+    private fun findVisibleJobViewHolder(videoId: String): JobViewHolder? {
+        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+        (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
+            if (it != -1 && getItem(it) is AdapterData.Job) {
+                if ((getItem(it) as AdapterData.Job).data.videoItemId == videoId) {
+                    return recyclerView.findViewHolderForLayoutPosition(it) as JobViewHolder
+                }
+            }
+        }
+        return null
+    }
+
     private class PlaylistBindViewHolder(private val view: ItemPlaylistSyncBindBinding) : ViewHolder(view.root) {
         fun bind(playlistBind: PlaylistSyncBind) {
             view.playlistName.text = playlistBind.playlistName
@@ -108,6 +135,29 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
                 thumbnail.load(downloadingJob.thumbnail)
                 videoItemName.text = downloadingJob.videoItemName
                 videoItemId.text = downloadingJob.videoItemId
+            }
+        }
+
+        fun updateState(state: DownloadManager.State) {
+            when (state) {
+                DownloadManager.State.Download -> {
+                    //Nothing because at that moment item will disappear from the list
+                }
+                is DownloadManager.State.Downloaded -> {
+                    //Nothing because at that moment item will disappear from the list
+                }
+                is DownloadManager.State.Downloading -> binding.apply {
+                    progress.isVisible = true
+                    progress.progress = state.progress
+                    sizeProgress.isVisible = true
+                    sizeProgress.text = root.resources.getString(R.string.label_size_progress, state.currentSizeInMb, state.sizeInMb)
+                    action.setImageResource(R.drawable.ic_baseline_cancel_36)
+                }
+                is DownloadManager.State.Failed -> binding.apply {
+                    progress.isVisible = false
+                    sizeProgress.isVisible = false
+                    action.setImageResource(R.drawable.ic_baseline_error_36)
+                }
             }
         }
     }

@@ -14,4 +14,6 @@ class DownloadManagerViewModel @Inject constructor(private val downloadManager: 
     val downloadingJobs = downloadManager.getDownloadingJobs().map { downloadingJobs ->
         downloadingJobs.map { DownloadingVideoItemJob(it.mediaItem.title, it.mediaItem.id, it.thumbnailUrl) }
     }
+
+    val downloadingStatus = downloadManager.observeStatus()
 }
