@@ -94,7 +94,7 @@ class YouTubeMusicViewModel @Inject constructor(
 
     fun showFailedItemDetails(videoItem: VideoItem) {
         viewModelScope.launch {
-            (downloadManager.getStatus(videoItem).status as? DownloadManager.State.Failed)?.let {
+            (downloadManager.getStatus(videoItem).state as? DownloadManager.State.Failed)?.let {
                 sendEvent(Event.ShowFailedVideoItem(videoItem, it.errorMessage ?: "No error message"))
             }
         }

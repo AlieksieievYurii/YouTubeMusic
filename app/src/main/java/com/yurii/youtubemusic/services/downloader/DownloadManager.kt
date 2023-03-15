@@ -12,11 +12,15 @@ interface DownloadManager {
     sealed class State {
         object Download : State()
         data class Downloaded(val size: Long) : State()
-        data class Downloading( val currentSize: Long, val size: Long) : State()
+        data class Downloading(val progress: Int, val currentSize: Long, val size: Long) : State() {
+            val currentSizeInMb: Float = currentSize / 1000_000F
+            val sizeInMb: Float = size / 1000_000F
+        }
+
         data class Failed(val errorMessage: String?) : State()
     }
 
-    data class Status(val videoId: String, val status: State)
+    data class Status(val videoId: String, val state: State)
 
     fun getDownloadingJobs(): Flow<List<DownloadingJob>>
 

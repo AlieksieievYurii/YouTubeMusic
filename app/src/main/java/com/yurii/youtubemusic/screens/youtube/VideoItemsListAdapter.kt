@@ -31,7 +31,7 @@ class VideoItemsListAdapter(private val callback: Callback) :
     private lateinit var recyclerView: RecyclerView
 
     fun updateItem(videoItemStatus: DownloadManager.Status) {
-        findVisibleViewHolder(videoItemStatus.videoId)?.updateStatus(videoItemStatus.status)
+        findVisibleViewHolder(videoItemStatus.videoId)?.updateStatus(videoItemStatus.state)
     }
 
     private fun findVisibleViewHolder(videoId: String): MyViewHolder? {
@@ -60,7 +60,7 @@ class VideoItemsListAdapter(private val callback: Callback) :
     inner class MyViewHolder(val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(videoItem: VideoItem) {
             binding.videoItem = videoItem
-            updateStatus(callback.getItemStatus(videoItem).status)
+            updateStatus(callback.getItemStatus(videoItem).state)
             expandItem(this, expandedItem == videoItem, animate = false)
 
             binding.cardContainer.setOnClickListener {

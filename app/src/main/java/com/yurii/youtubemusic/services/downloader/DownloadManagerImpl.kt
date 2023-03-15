@@ -65,7 +65,7 @@ class DownloadManagerImpl @Inject constructor(
         mediaRepository.mediaItemEntities.collect { mediaItems ->
             mediaItems.forEach {
                 if (it.downloadingJobId != null) {
-                    val status = DownloadManager.Status(it.mediaItemId, DownloadManager.State.Downloading(0, 0))
+                    val status = DownloadManager.Status(it.mediaItemId, DownloadManager.State.Downloading(0, 0, 0))
                     cache.putIfAbsent(it.mediaItemId, CacheItem(status, it.downloadingJobId))
                 } else {
                     val fileSize = mediaStorage.getMediaFile(it.mediaItemId).length()
@@ -140,8 +140,9 @@ class DownloadManagerImpl @Inject constructor(
     private fun getStatus(downloadingJobWorkInfo: WorkInfo, mediaItemId: String): DownloadManager.Status {
         return DownloadManager.Status(
             mediaItemId, when (downloadingJobWorkInfo.state) {
-                WorkInfo.State.ENQUEUED -> DownloadManager.State.Downloading(0, 0)
+                WorkInfo.State.ENQUEUED -> DownloadManager.State.Downloading(0, 0, 0)
                 WorkInfo.State.RUNNING -> DownloadManager.State.Downloading(
+                    progress = downloadingJobWorkInfo.progress.getInt(MusicDownloadWorker.PROGRESS, 0),
                     currentSize = downloadingJobWorkInfo.progress.getLong(MusicDownloadWorker.PROGRESS_DOWNLOADED_SIZE, 0),
                     size = downloadingJobWorkInfo.progress.getLong(MusicDownloadWorker.PROGRESS_TOTAL_SIZE, 0)
                 )
@@ -174,7 +175,7 @@ class DownloadManagerImpl @Inject constructor(
     }
 
     private suspend fun setDownloadingStatus(itemId: String, downloadingJobId: UUID? = null) {
-        val status = DownloadManager.Status(itemId, DownloadManager.State.Downloading(0, 0))
+        val status = DownloadManager.Status(itemId, DownloadManager.State.Downloading(0, 0, 0))
         setStatus(CacheItem(status, downloadingJobId), emit = true)
     }
 
