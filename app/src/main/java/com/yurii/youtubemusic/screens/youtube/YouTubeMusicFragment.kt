@@ -104,8 +104,8 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         }
     }
 
-    private fun showFailedVideoItem(videoItem: VideoItem, error: String) {
-        ErrorDialog.create(videoItem, error).addListeners(
+    private fun showFailedVideoItem(videoItem: VideoItem, error: String?) {
+        ErrorDialog.create(error ?: getString(R.string.label_no_error_message)).addListeners(
             onTryAgain = { viewModel.tryToDownloadAgain(videoItem) },
             onCancel = { viewModel.cancelDownloading(videoItem) })
             .show(requireActivity().supportFragmentManager, "ErrorDialog")

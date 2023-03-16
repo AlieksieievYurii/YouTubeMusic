@@ -30,7 +30,7 @@ class YouTubeMusicViewModel @Inject constructor(
 
 ) : ViewModel() {
     sealed class Event {
-        data class ShowFailedVideoItem(val videoItem: VideoItem, val error: String) : Event()
+        data class ShowFailedVideoItem(val videoItem: VideoItem, val error: String?) : Event()
         data class OpenPlaylistSelector(val videoItem: VideoItem, val playlists: List<MediaItemPlaylist>) : Event()
     }
 
@@ -95,7 +95,7 @@ class YouTubeMusicViewModel @Inject constructor(
     fun showFailedItemDetails(videoItem: VideoItem) {
         viewModelScope.launch {
             (downloadManager.getDownloadingJobState(videoItem.id) as? DownloadManager.State.Failed)?.let {
-                sendEvent(Event.ShowFailedVideoItem(videoItem, it.errorMessage ?: "No error message"))
+                sendEvent(Event.ShowFailedVideoItem(videoItem, it.errorMessage))
             }
         }
     }
