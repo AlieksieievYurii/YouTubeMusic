@@ -26,6 +26,10 @@ class DownloadManagerActivity : AppCompatActivity() {
                 TODO("Not yet implemented")
             }
 
+            override fun cancelDownloading(itemId: String) {
+                viewModel.cancelDownloading(itemId)
+            }
+
             override fun getDownloadingJobState(id: String): DownloadManager.State {
                 return viewModel.getDownloadingJobStatus(id)
             }

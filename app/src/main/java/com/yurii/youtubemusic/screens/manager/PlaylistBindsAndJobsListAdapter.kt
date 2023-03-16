@@ -27,6 +27,8 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     interface Callback {
         fun onAddSyncPlaylistBind()
         fun cancelAllDownloading()
+
+        fun cancelDownloading(itemId: String)
         fun getDownloadingJobState(id: String): DownloadManager.State
     }
 
@@ -58,7 +60,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     }
 
     fun updateDownloadingJobStatus(status: DownloadManager.Status) {
-        findVisibleJobViewHolder(status.videoId)?.updateState(status.state)
+        findVisibleJobViewHolder(status.videoId)?.updateState(status.videoId, status.state)
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -138,10 +140,10 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
                 videoItemId.text = downloadingJob.videoItemId
             }
 
-            updateState(callback.getDownloadingJobState(downloadingJob.videoItemId))
+            updateState(downloadingJob.videoItemId, callback.getDownloadingJobState(downloadingJob.videoItemId))
         }
 
-        fun updateState(state: DownloadManager.State) {
+        fun updateState(itemId: String, state: DownloadManager.State) {
             when (state) {
                 DownloadManager.State.Download -> {
                     //Nothing because at that moment item will disappear from the list
@@ -155,6 +157,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
                     sizeProgress.isVisible = true
                     sizeProgress.text = root.resources.getString(R.string.label_size_progress, state.currentSizeInMb, state.sizeInMb)
                     action.setImageResource(R.drawable.ic_baseline_cancel_36)
+                    action.setOnClickListener { callback.cancelDownloading(itemId) }
                 }
                 is DownloadManager.State.Failed -> binding.apply {
                     progress.isVisible = false
