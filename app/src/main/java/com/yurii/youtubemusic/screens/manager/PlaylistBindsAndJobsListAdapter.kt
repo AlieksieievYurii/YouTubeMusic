@@ -27,6 +27,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     interface Callback {
         fun onAddSyncPlaylistBind()
         fun cancelAllDownloading()
+        fun getDownloadingJobState(id: String): DownloadManager.State
     }
 
     private val cashedPlaylistBinds = mutableListOf<AdapterData.PlaylistBind>()
@@ -129,13 +130,15 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         }
     }
 
-    private class JobViewHolder(private val binding: ItemJobBinding) : ViewHolder(binding.root) {
+    private inner class JobViewHolder(private val binding: ItemJobBinding) : ViewHolder(binding.root) {
         fun bind(downloadingJob: DownloadingVideoItemJob) {
             binding.apply {
                 thumbnail.load(downloadingJob.thumbnail)
                 videoItemName.text = downloadingJob.videoItemName
                 videoItemId.text = downloadingJob.videoItemId
             }
+
+            updateState(callback.getDownloadingJobState(downloadingJob.videoItemId))
         }
 
         fun updateState(state: DownloadManager.State) {

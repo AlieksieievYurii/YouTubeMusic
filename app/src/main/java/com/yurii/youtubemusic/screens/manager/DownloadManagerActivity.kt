@@ -8,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityDownloadManagerBinding
+import com.yurii.youtubemusic.services.downloader.DownloadManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -25,6 +26,9 @@ class DownloadManagerActivity : AppCompatActivity() {
                 TODO("Not yet implemented")
             }
 
+            override fun getDownloadingJobState(id: String): DownloadManager.State {
+                return viewModel.getDownloadingJobStatus(id)
+            }
         })
     }
 

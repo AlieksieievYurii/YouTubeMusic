@@ -16,4 +16,6 @@ class DownloadManagerViewModel @Inject constructor(private val downloadManager: 
     }
 
     val downloadingStatus = downloadManager.observeStatus()
+
+    fun getDownloadingJobStatus(videoId: String) = downloadManager.getDownloadingJobState(videoId)
 }
