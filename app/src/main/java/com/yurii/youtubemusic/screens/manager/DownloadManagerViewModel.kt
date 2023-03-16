@@ -6,6 +6,7 @@ import com.yurii.youtubemusic.services.downloader.DownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,6 +39,14 @@ class DownloadManagerViewModel @Inject constructor(private val downloadManager: 
     fun retryDownloading(videoId: String) {
         viewModelScope.launch {
             downloadManager.retry(videoId)
+        }
+    }
+
+    fun cancelAllDownloadingJobs() {
+        viewModelScope.launch {
+            downloadManager.getDownloadingJobs().first().forEach {
+                downloadManager.cancel(it.mediaItem.id)
+            }
         }
     }
 

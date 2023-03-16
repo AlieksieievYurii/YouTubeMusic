@@ -19,7 +19,7 @@ import com.yurii.youtubemusic.services.downloader.DownloadManager
 sealed class AdapterData {
     data class PlaylistBind(val data: PlaylistSyncBind) : AdapterData()
     data class Job(val data: DownloadingVideoItemJob) : AdapterData()
-    data class Headline(val titleId: Int, val onAction: () -> Unit) : AdapterData()
+    data class Headline(val titleId: Int, val actionTextId: Int, val onAction: () -> Unit) : AdapterData()
 }
 
 
@@ -104,12 +104,12 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     private fun setDataSources(playlistBinds: List<AdapterData.PlaylistBind>, downloadingJobs: List<AdapterData.Job>) {
         val result = mutableListOf<AdapterData>()
         if (playlistBinds.isNotEmpty()) {
-            result.add(AdapterData.Headline(R.string.label_playlist_sync_binds, callback::onAddSyncPlaylistBind))
+            result.add(AdapterData.Headline(R.string.label_playlist_sync_binds, R.string.label_add, callback::onAddSyncPlaylistBind))
             result.addAll(playlistBinds)
         }
 
         if (downloadingJobs.isNotEmpty()) {
-            result.add(AdapterData.Headline(R.string.label_downloading, callback::cancelAllDownloading))
+            result.add(AdapterData.Headline(R.string.label_downloading, R.string.label_cancel_all, callback::cancelAllDownloading))
             result.addAll(downloadingJobs)
         }
 
@@ -172,9 +172,11 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     }
 
     private class HeadlineViewHolder(private val binding: ItemHeadlineBinding) : ViewHolder(binding.root) {
+        private val resources = binding.root.resources
         fun bind(headline: AdapterData.Headline) {
-            binding.title.text = binding.root.resources.getText(headline.titleId)
+            binding.title.text = resources.getText(headline.titleId)
             binding.action.setOnClickListener { headline.onAction() }
+            binding.action.text = resources.getText(headline.actionTextId)
         }
     }
 

@@ -23,6 +23,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:insetTop="0dp"
+            android:textSize="12sp"
+            android:textStyle="italic"
             android:insetBottom="0dp"
             android:minHeight="0dp"
             tools:text="Add" />

@@ -75,4 +75,5 @@
     <string name="label_playlist_sync_binds">Playlist sync binds</string>
     <string name="label_downloading">Downloading</string>
     <string name="label_no_error_message">No error message</string>
+    <string name="label_cancel_all">Cancel all</string>
 </resources>

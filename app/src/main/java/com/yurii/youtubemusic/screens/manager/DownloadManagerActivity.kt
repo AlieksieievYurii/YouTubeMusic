@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityDownloadManagerBinding
@@ -24,7 +26,7 @@ class DownloadManagerActivity : AppCompatActivity() {
             }
 
             override fun cancelAllDownloading() {
-                TODO("Not yet implemented")
+                viewModel.cancelAllDownloadingJobs()
             }
 
             override fun openFailedJobError(itemId: String) {
@@ -56,21 +58,15 @@ class DownloadManagerActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.downloadingJobs.collect {
-                listAdapter.submitDownloadingJobs(it)
-            }
-        }
-
-        lifecycleScope.launch {
-            viewModel.downloadingStatus.collect {
-                listAdapter.updateDownloadingJobStatus(it)
-            }
-        }
-
-        lifecycleScope.launch {
-            viewModel.events.collect {
-                when (it) {
-                    is DownloadManagerViewModel.Event.OpenFailedJobError -> openErrorDialog(it.videoId, it.error)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { viewModel.downloadingJobs.collect { listAdapter.submitDownloadingJobs(it) } }
+                launch { viewModel.downloadingStatus.collect { listAdapter.updateDownloadingJobStatus(it) } }
+                launch {
+                    viewModel.events.collect {
+                        when (it) {
+                            is DownloadManagerViewModel.Event.OpenFailedJobError -> openErrorDialog(it.videoId, it.error)
+                        }
+                    }
                 }
             }
         }
