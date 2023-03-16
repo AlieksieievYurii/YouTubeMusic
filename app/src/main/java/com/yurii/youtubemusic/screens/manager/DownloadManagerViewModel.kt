@@ -35,6 +35,12 @@ class DownloadManagerViewModel @Inject constructor(private val downloadManager: 
         }
     }
 
+    fun retryDownloading(videoId: String) {
+        viewModelScope.launch {
+            downloadManager.retry(videoId)
+        }
+    }
+
     fun openFailedJobError(itemId: String) {
         viewModelScope.launch {
             (downloadManager.getDownloadingJobState(itemId) as? DownloadManager.State.Failed)?.let {

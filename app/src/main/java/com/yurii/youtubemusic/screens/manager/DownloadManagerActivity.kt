@@ -83,7 +83,7 @@ class DownloadManagerActivity : AppCompatActivity() {
 
     private fun openErrorDialog(videoId: String, errorMessage: String?) {
         ErrorDialog.create(errorMessage ?: getString(R.string.label_no_error_message)).addListeners(
-            onTryAgain = { },
+            onTryAgain = { viewModel.retryDownloading(videoId) },
             onCancel = { viewModel.cancelDownloading(videoId) })
             .show(supportFragmentManager, "ErrorDialog")
     }
