@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.navigation.NavigationBarView
@@ -42,17 +44,25 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
 
         fragmentHelper.showSavedMusicFragment(animated = false)
 
-        lifecycleScope.launchWhenCreated {
-            launch { observeEvents() }
-            launch { observeYouTubeAuthenticationState() }
-            launch {
-                viewModel.numberOfDownloadingJobs.collect {
-                    downloadManagerBudge.number = it
-                }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { observeEvents() }
+                launch { observeYouTubeAuthenticationState() }
+                launch { observeNumberOfDownloadingJobs() }
             }
         }
 
         supportFragmentManager.beginTransaction().replace(R.id.player_view_holder, PlayerControlPanelFragment()).commit()
+    }
+
+    private suspend fun observeNumberOfDownloadingJobs() {
+        viewModel.numberOfDownloadingJobs.collect {
+            if (it != 0) {
+                downloadManagerBudge.isVisible = true
+                downloadManagerBudge.number = it
+            } else
+                downloadManagerBudge.isVisible = false
+        }
     }
 
     private suspend fun observeYouTubeAuthenticationState() {
