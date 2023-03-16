@@ -28,6 +28,8 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         fun onAddSyncPlaylistBind()
         fun cancelAllDownloading()
 
+        fun openFailedJobError(itemId: String)
+
         fun cancelDownloading(itemId: String)
         fun getDownloadingJobState(id: String): DownloadManager.State
     }
@@ -163,6 +165,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
                     progress.isVisible = false
                     sizeProgress.isVisible = false
                     action.setImageResource(R.drawable.ic_baseline_error_36)
+                    action.setOnClickListener { callback.openFailedJobError(itemId) }
                 }
             }
         }

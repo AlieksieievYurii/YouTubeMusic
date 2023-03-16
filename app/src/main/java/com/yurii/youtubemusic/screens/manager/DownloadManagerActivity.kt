@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityDownloadManagerBinding
 import com.yurii.youtubemusic.services.downloader.DownloadManager
+import com.yurii.youtubemusic.ui.ErrorDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -24,6 +25,10 @@ class DownloadManagerActivity : AppCompatActivity() {
 
             override fun cancelAllDownloading() {
                 TODO("Not yet implemented")
+            }
+
+            override fun openFailedJobError(itemId: String) {
+                viewModel.openFailedJobError(itemId)
             }
 
             override fun cancelDownloading(itemId: String) {
@@ -61,10 +66,25 @@ class DownloadManagerActivity : AppCompatActivity() {
                 listAdapter.updateDownloadingJobStatus(it)
             }
         }
+
+        lifecycleScope.launch {
+            viewModel.events.collect {
+                when (it) {
+                    is DownloadManagerViewModel.Event.OpenFailedJobError -> openErrorDialog(it.videoId, it.error)
+                }
+            }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return true
+    }
+
+    private fun openErrorDialog(videoId: String, errorMessage: String?) {
+        ErrorDialog.create(errorMessage ?: getString(R.string.label_no_error_message)).addListeners(
+            onTryAgain = { },
+            onCancel = { viewModel.cancelDownloading(videoId) })
+            .show(supportFragmentManager, "ErrorDialog")
     }
 }
