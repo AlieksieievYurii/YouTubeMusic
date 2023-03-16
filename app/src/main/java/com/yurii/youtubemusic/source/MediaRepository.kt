@@ -7,6 +7,7 @@ import com.yurii.youtubemusic.models.toMediaItem
 import com.yurii.youtubemusic.models.toMediaItems
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -20,9 +21,12 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
     private val lock = Mutex()
 
     val mediaItemEntities = mediaItemDao.getMediaItemsEntities()
+
+    val downloadingMediaItemEntities = mediaItemEntities.map { mediaItems -> mediaItems.filter { it.downloadingJobId != null } }
+
     suspend fun getMediaItem(mediaItemId: String): MediaItem? = mediaItemDao.getMediaItem(mediaItemId)?.toMediaItem()
 
-    suspend fun getDownloadingMediaItemEntity(item: Item): MediaItemEntity? = mediaItemDao.getDownloadingMediaItem(item.id)
+    suspend fun getDownloadingMediaItemEntity(itemId: String): MediaItemEntity? = mediaItemDao.getDownloadingMediaItem(itemId)
 
     fun getOrderedMediaItems(): Flow<List<MediaItem>> = mediaItemDao.getAllSortedMediaItems().map { it.toMediaItems() }
 

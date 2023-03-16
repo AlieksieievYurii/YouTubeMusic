@@ -95,16 +95,14 @@ class DownloadManagerImpl @Inject constructor(
     }
 
     override fun getDownloadingJobs(): Flow<List<DownloadingJob>> {
-        return mediaRepository.mediaItemEntities.map { mediaItems ->
-            mediaItems.filter { it.downloadingJobId != null }.map {
-                DownloadingJob(it.toMediaItem(), it.thumbnailUrl, it.downloadingJobId!!)
-            }
+        return mediaRepository.downloadingMediaItemEntities.map { downloadingMediaItems ->
+            downloadingMediaItems.map { DownloadingJob(it.toMediaItem(), it.thumbnailUrl, it.downloadingJobId!!) }
         }
     }
 
     override suspend fun enqueue(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
         setDownloadingStatus(videoItem.id)
-        val alreadyExists = mediaRepository.getDownloadingMediaItemEntity(videoItem) != null
+        val alreadyExists = mediaRepository.getDownloadingMediaItemEntity(videoItem.id) != null
         if (!alreadyExists) {
             val downloadingJobId = enqueueDownloadingJob(videoItem)
             mediaCreator.registerDownloadingMediaItem(videoItem, playlists, downloadingJobId)
@@ -112,27 +110,28 @@ class DownloadManagerImpl @Inject constructor(
         }
     }
 
-    override suspend fun retry(videoItem: VideoItem) {
-        setDownloadingStatus(videoItem.id)
-        if (mediaRepository.getDownloadingMediaItemEntity(videoItem) != null) {
-            val downloadingJobId = enqueueDownloadingJob(videoItem)
-            mediaRepository.updateDownloadingJobId(videoItem, downloadingJobId)
-            setDownloadingStatus(videoItem.id, downloadingJobId)
+    override suspend fun retry(videoId: String) {
+        setDownloadingStatus(videoId)
+        val downloadingItem = mediaRepository.getDownloadingMediaItemEntity(videoId)
+        if (downloadingItem != null) {
+            val downloadingJobId = enqueueDownloadingJob(downloadingItem.mediaItemId, downloadingItem.thumbnailUrl)
+            mediaRepository.updateDownloadingJobId(downloadingItem.toMediaItem(), downloadingJobId)
+            setDownloadingStatus(videoId, downloadingJobId)
         } else
             throw IllegalStateException("Can not retry to download failed media item")
     }
 
-    override suspend fun cancel(videoItem: VideoItem) {
-        statusesFlow.emit(DownloadManager.Status(videoItem.id, DownloadManager.State.Download))
-        cache[videoItem.id]?.downloadingJobId?.let {
+    override suspend fun cancel(videoId: String) {
+        statusesFlow.emit(DownloadManager.Status(videoId, DownloadManager.State.Download))
+        cache[videoId]?.downloadingJobId?.let {
             workManager.cancelWorkById(it)
-            mediaLibraryDomain.deleteMediaItem(videoItem)
+            mediaLibraryDomain.deleteMediaItem(mediaRepository.getMediaItem(videoId)!!)
         }
     }
 
-    override fun getStatus(videoItem: VideoItem): DownloadManager.Status {
-        val cacheItem = cache.entries.find { it.key == videoItem.id }
-        return cacheItem?.value?.status ?: DownloadManager.Status(videoItem.id, DownloadManager.State.Download)
+    override fun getDownloadingJobState(videoId: String): DownloadManager.State {
+        val cacheItem = cache.entries.find { it.key == videoId }
+        return cacheItem?.value?.status?.state ?: DownloadManager.State.Download
     }
 
     override fun observeStatus(): Flow<DownloadManager.Status> = statusesFlow.asSharedFlow()
@@ -158,10 +157,12 @@ class DownloadManagerImpl @Inject constructor(
         )
     }
 
-    private fun enqueueDownloadingJob(videoItem: VideoItem): UUID {
+    private fun enqueueDownloadingJob(videoItem: VideoItem): UUID = enqueueDownloadingJob(videoItem.id, videoItem.normalThumbnail)
+
+    private fun enqueueDownloadingJob(videoId: String, thumbnailUrl: String): UUID {
         val data = workDataOf(
-            MusicDownloadWorker.ARG_VIDEO_ID to videoItem.id,
-            MusicDownloadWorker.ARG_VIDEO_THUMBNAIL_URL to videoItem.normalThumbnail
+            MusicDownloadWorker.ARG_VIDEO_ID to videoId,
+            MusicDownloadWorker.ARG_VIDEO_THUMBNAIL_URL to thumbnailUrl
         )
 
         val request = OneTimeWorkRequestBuilder<MusicDownloadWorker>().also {

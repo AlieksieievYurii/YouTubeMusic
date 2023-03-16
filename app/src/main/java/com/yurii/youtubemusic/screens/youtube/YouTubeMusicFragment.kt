@@ -40,7 +40,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
 
     private val listAdapter: VideoItemsListAdapter by lazy {
         VideoItemsListAdapter(object : VideoItemsListAdapter.Callback {
-            override fun getItemStatus(videoItem: VideoItem): DownloadManager.Status = viewModel.getItemStatus(videoItem)
+            override fun getDownloadingJobState(videoItem: VideoItem): DownloadManager.State = viewModel.getItemStatus(videoItem)
             override fun onDownload(videoItem: VideoItem) = viewModel.download(videoItem)
             override fun onDownloadAndAssignedCategories(videoItem: VideoItem) = viewModel.openCategorySelectorFor(videoItem)
             override fun onCancelDownloading(videoItem: VideoItem) = viewModel.cancelDownloading(videoItem)

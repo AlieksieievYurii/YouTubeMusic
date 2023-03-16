@@ -76,13 +76,13 @@ class YouTubeMusicViewModel @Inject constructor(
 
     fun tryToDownloadAgain(videoItem: VideoItem) {
         viewModelScope.launch {
-            downloadManager.retry(videoItem)
+            downloadManager.retry(videoItem.id)
         }
     }
 
     fun cancelDownloading(item: VideoItem) {
         viewModelScope.launch {
-            downloadManager.cancel(item)
+            downloadManager.cancel(item.id)
         }
     }
 
@@ -94,13 +94,13 @@ class YouTubeMusicViewModel @Inject constructor(
 
     fun showFailedItemDetails(videoItem: VideoItem) {
         viewModelScope.launch {
-            (downloadManager.getStatus(videoItem).state as? DownloadManager.State.Failed)?.let {
+            (downloadManager.getDownloadingJobState(videoItem.id) as? DownloadManager.State.Failed)?.let {
                 sendEvent(Event.ShowFailedVideoItem(videoItem, it.errorMessage ?: "No error message"))
             }
         }
     }
 
-    fun getItemStatus(videoItem: VideoItem) = downloadManager.getStatus(videoItem)
+    fun getItemStatus(videoItem: VideoItem) = downloadManager.getDownloadingJobState(videoItem.id)
 
     private fun sendEvent(event: Event) = viewModelScope.launch {
         _event.emit(event)

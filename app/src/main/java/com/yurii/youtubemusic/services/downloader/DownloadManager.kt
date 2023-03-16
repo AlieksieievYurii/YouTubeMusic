@@ -26,8 +26,8 @@ interface DownloadManager {
 
     suspend fun enqueue(videoItem: VideoItem, playlists: List<MediaItemPlaylist>)
 
-    suspend fun retry(videoItem: VideoItem)
-    suspend fun cancel(videoItem: VideoItem)
-    fun getStatus(videoItem: VideoItem): Status
+    suspend fun retry(videoId: String)
+    suspend fun cancel(videoId: String)
+    fun getDownloadingJobState(videoId: String): State
     fun observeStatus(): Flow<Status>
 }

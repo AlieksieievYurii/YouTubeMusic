@@ -19,7 +19,7 @@ import com.yurii.youtubemusic.ui.getValueAnimator
 class VideoItemsListAdapter(private val callback: Callback) :
     PagingDataAdapter<VideoItem, VideoItemsListAdapter.MyViewHolder>(Comparator) {
     interface Callback {
-        fun getItemStatus(videoItem: VideoItem): DownloadManager.Status
+        fun getDownloadingJobState(videoItem: VideoItem): DownloadManager.State
         fun onDownload(videoItem: VideoItem)
         fun onDownloadAndAssignedCategories(videoItem: VideoItem)
         fun onCancelDownloading(videoItem: VideoItem)
@@ -60,7 +60,7 @@ class VideoItemsListAdapter(private val callback: Callback) :
     inner class MyViewHolder(val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(videoItem: VideoItem) {
             binding.videoItem = videoItem
-            updateStatus(callback.getItemStatus(videoItem).state)
+            updateStatus(callback.getDownloadingJobState(videoItem))
             expandItem(this, expandedItem == videoItem, animate = false)
 
             binding.cardContainer.setOnClickListener {
