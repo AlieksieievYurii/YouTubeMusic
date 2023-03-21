@@ -1,10 +1,7 @@
 package com.yurii.youtubemusic.db
 
 import androidx.room.*
-import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.models.VideoItem
 import java.io.File
-import java.math.BigInteger
 import java.util.UUID
 
 @Entity(tableName = "media_items")
@@ -51,6 +48,28 @@ data class MediaItemWithPlaylists(
         parentColumn = "mediaItemId",
         entityColumn = "playlistId",
         associateBy = Junction(MediaItemPlayListAssignment::class)
+    )
+    val playlists: List<PlaylistEntity>
+)
+
+@Entity(tableName = "you_tube_playlist_synchronization")
+data class YouTubePlaylistSyncEntity(
+    @PrimaryKey val youTubePlaylistId: String,
+    val youTubePlaylistName: String
+)
+
+@Entity(tableName = "you_tube_playlist_synchronization_ref_to_media_playlist", primaryKeys = ["youTubePlaylistId", "playlistId"])
+data class YouTubePlaylistSyncCrossRefToMediaPlaylist(
+    val youTubePlaylistId: String,
+    val playlistId: Long
+)
+
+data class YouTubePlaylistWithBoundMediaPlaylists(
+    @Embedded val youTubePlaylistSync: YouTubePlaylistSyncEntity,
+    @Relation(
+        parentColumn = "youTubePlaylistId",
+        entityColumn = "playlistId",
+        associateBy = Junction(YouTubePlaylistSyncCrossRefToMediaPlaylist::class)
     )
     val playlists: List<PlaylistEntity>
 )

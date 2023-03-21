@@ -7,11 +7,21 @@ import androidx.room.TypeConverters
 import java.io.File
 import java.util.UUID
 
-@Database(entities = [MediaItemEntity::class, PlaylistEntity::class, MediaItemPlayListAssignment::class], version = 2)
+@Database(
+    entities = [MediaItemEntity::class,
+        PlaylistEntity::class,
+        MediaItemPlayListAssignment::class,
+        YouTubePlaylistSyncEntity::class,
+        YouTubePlaylistSyncCrossRefToMediaPlaylist::class], version = 2
+)
 @TypeConverters(FileConverter::class, UUIDConverter::class)
 abstract class DataBase : RoomDatabase() {
+
     abstract fun mediaItemDao(): MediaItemDao
+
     abstract fun playlistDao(): PlaylistDao
+
+    abstract fun playlistSyncBindDao(): YouTubePlaylistSynchronizationDao
 }
 
 class FileConverter {
