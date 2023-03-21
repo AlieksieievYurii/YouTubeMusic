@@ -17,11 +17,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import java.io.File
 import java.lang.IllegalStateException
 
@@ -120,7 +120,7 @@ inline fun <reified T : java.io.Serializable> Bundle.serializable(key: String): 
 
 fun Service.stopForegroundCompat(removeNotification: Boolean) {
     if (SDK_INT >= Build.VERSION_CODES.N)
-        stopForeground(if(removeNotification) Service.STOP_FOREGROUND_REMOVE else Service.STOP_FOREGROUND_DETACH)
+        stopForeground(if (removeNotification) Service.STOP_FOREGROUND_REMOVE else Service.STOP_FOREGROUND_DETACH)
     else
         @Suppress("DEPRECATION") stopForeground(removeNotification)
 }
@@ -132,3 +132,7 @@ fun <T> LiveData<T>.asFlow(): Flow<T> = callbackFlow {
         removeObserver(observer)
     }
 }.flowOn(Dispatchers.Main.immediate)
+
+fun <T, R> Flow<List<T>>.mapItems(transform: (T) -> R): Flow<List<R>> {
+    return map { it.map(transform) }
+}
