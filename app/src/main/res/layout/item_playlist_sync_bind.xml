@@ -18,10 +18,11 @@
             <TextView
                 android:id="@+id/playlist_name"
                 style="@style/TextAppearance.AppCompat.Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:ellipsize="end"
+                android:gravity="center_vertical"
                 android:lines="1"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
@@ -29,15 +30,16 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="item" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/playlists_assignment"
-                style="@style/Widget.MaterialComponents.ChipGroup"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/app_playlists"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:animateLayoutChanges="true">
+                android:padding="8dp"
+                android:textAlignment="textEnd"
+                android:textStyle="italic"
+                tools:text="Playlists" />
 
-            </com.google.android.material.chip.ChipGroup>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </layout>

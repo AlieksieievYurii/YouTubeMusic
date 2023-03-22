@@ -13,11 +13,12 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemHeadlineBinding
 import com.yurii.youtubemusic.databinding.ItemJobBinding
 import com.yurii.youtubemusic.databinding.ItemPlaylistSyncBindBinding
+import com.yurii.youtubemusic.models.YouTubePlaylistSync
 import com.yurii.youtubemusic.services.downloader.DownloadManager
 
 
 sealed class AdapterData {
-    data class PlaylistBind(val data: PlaylistSyncBind) : AdapterData()
+    data class PlaylistBind(val data: YouTubePlaylistSync) : AdapterData()
     data class Job(val data: DownloadingVideoItemJob) : AdapterData()
     data class Headline(val titleId: Int, val actionTextId: Int, val onAction: () -> Unit) : AdapterData()
 }
@@ -47,7 +48,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
             oldItem == newItem
     }
 
-    fun submitPlaylistBinds(list: List<PlaylistSyncBind>) = synchronized(this) {
+    fun submitPlaylistBinds(list: List<YouTubePlaylistSync>) = synchronized(this) {
         setDataSources(cashedPlaylistBinds.apply {
             clear()
             cashedPlaylistBinds.addAll(list.map { AdapterData.PlaylistBind(it) })
@@ -128,9 +129,11 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         return null
     }
 
-    private class PlaylistBindViewHolder(private val view: ItemPlaylistSyncBindBinding) : ViewHolder(view.root) {
-        fun bind(playlistBind: PlaylistSyncBind) {
-            view.playlistName.text = playlistBind.playlistName
+    private class PlaylistBindViewHolder(private val binding: ItemPlaylistSyncBindBinding) : ViewHolder(binding.root) {
+        fun bind(playlistBind: YouTubePlaylistSync) {
+            binding.playlistName.text = playlistBind.youTubePlaylistName
+            binding.appPlaylists.text = playlistBind.mediaItemPlaylists.joinToString(",") { it.name }
+
         }
     }
 
