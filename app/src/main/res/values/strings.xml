@@ -76,4 +76,10 @@
     <string name="label_downloading">Downloading</string>
     <string name="label_no_error_message">No error message</string>
     <string name="label_cancel_all">Cancel all</string>
+    <string name="label_youtube_playlists_synchronization">YouTube Playlists synchronization</string>
+    <string name="label_next">Next</string>
+    <string name="label_back">Back</string>
+    <string name="hint_select_you_tube_playlist">Select YouTube playlist from which you want to download music automatically</string>
+    <string name="hint_select_app_playlists">Now select the application playlists to which downloaded media items should be assigned. Note that by default all are assigned to All playlist</string>
+    <string name="hint_all_playlists_synchronized">You\'ve synchronized all your playlists</string>
 </resources>

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.paging.Pager
@@ -36,9 +37,7 @@ class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
     @Inject
     lateinit var youTubePlaylistSyncRepository: YouTubePlaylistSyncRepository
 
-    private val playlistsAdapter = PlaylistsAdapter {
-        moveToAppPlaylistsSelection()
-    }.apply {
+    private val playlistsAdapter = PlaylistsAdapter { moveToAppPlaylistsSelection() }.apply {
         val loader = LoaderViewHolder()
         withLoadStateHeaderAndFooter(loader, loader)
     }
@@ -48,46 +47,51 @@ class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.dialog_add_youtube_playlist_sync, null, false)
-        binding.youTubePlaylists.apply {
-            adapter = playlistsAdapter
-            layoutManager = LinearLayoutManager(context)
-        }
-
-        binding.cancel.setOnClickListener { dismiss() }
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lifecycleScope.launchWhenCreated {
-            launch {
-                Pager(
-                    config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-                    pagingSourceFactory = { ExcludingAlreadySyncPlaylistPagingSource(youTubeAPI, youTubePlaylistSyncRepository) }).flow.collectLatest {
-                    playlistsAdapter.submitData(it)
-                }
-            }
-            launch {
-                playlistsAdapter.loadStateFlow.collectLatest {
-                    binding.youTubePlaylists.isVisible = it.refresh is LoadState.NotLoading
-                    binding.progressBar.isVisible = it.refresh is LoadState.Loading
-                    binding.hintListIsEmpty.isVisible = it.refresh is LoadState.Error
-
-                    if (it.refresh is LoadState.Error) {
-                        binding.hintListIsEmpty.text = when (val error = (it.refresh as LoadState.Error).error) {
-                            is MissingItems -> getString(R.string.hint_missing_items)
-                            is EmptyListException -> getString(R.string.label_no_playlist)
-                            else -> getString(R.string.label_error, error.message ?: "None")
-                        }
-                    }
-                }
-            }
-
-            launch { initAppPlaylists() }
+            launch { observeYouTubePlaylists() }
+            launch { observeYouTubePlaylistsState() }
+            launch { observeAppPlaylists() }
         }
+        binding.apply {
+            youTubePlaylists.adapter = playlistsAdapter
+            youTubePlaylists.layoutManager = LinearLayoutManager(context)
+            back.setOnClickListener { moveToYouTubePlaylistSelection() }
+            cancel.setOnClickListener { dismiss() }
+        }
+    }
 
-        binding.back.setOnClickListener { moveToYouTubePlaylistSelection() }
+    private suspend fun observeYouTubePlaylists() {
+        Pager(
+            config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+            pagingSourceFactory = {
+                ExcludingAlreadySyncPlaylistPagingSource(
+                    youTubeAPI,
+                    youTubePlaylistSyncRepository
+                )
+            }).flow.collectLatest {
+            playlistsAdapter.submitData(it)
+        }
+    }
+
+    private suspend fun observeYouTubePlaylistsState() {
+        playlistsAdapter.loadStateFlow.collectLatest {
+            binding.youTubePlaylists.isVisible = it.refresh is LoadState.NotLoading
+            binding.progressBar.isVisible = it.refresh is LoadState.Loading
+            binding.hintListIsEmpty.isVisible = it.refresh is LoadState.Error
+
+            if (it.refresh is LoadState.Error) {
+                binding.hintListIsEmpty.text = when (val error = (it.refresh as LoadState.Error).error) {
+                    is AllYouTubePlaylistsSynchronized -> getString(R.string.hint_all_playlists_synchronized)
+                    is EmptyListException -> getString(R.string.label_no_playlist)
+                    else -> getString(R.string.label_error, error.message ?: "None")
+                }
+            }
+        }
     }
 
     private fun moveToYouTubePlaylistSelection() {
@@ -99,22 +103,37 @@ class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
             nextOrAdd.setOnClickListener { moveToAppPlaylistsSelection() }
             youTubePlaylists.adapter = playlistsAdapter
             youTubePlaylists.isVisible = true
+            if (playlistsAdapter.itemCount == 0) {
+                youTubePlaylists.isVisible = false
+                hintListIsEmpty.isVisible = true
+                hintListIsEmpty.text = getString(R.string.label_no_playlist)
+            } else {
+                youTubePlaylists.isVisible = true
+                hintListIsEmpty.isVisible = false
+            }
         }
     }
 
     private fun moveToAppPlaylistsSelection() {
         binding.apply {
+            val context = root.context
             stepView.go(1, true)
             youTubePlaylists.adapter = mediaItemPlaylistMultiChoiceAdapter
             binding.nextOrAdd.isEnabled = true
             back.visibility = View.VISIBLE
-            hint.text = binding.root.context.getString(R.string.hint_select_app_playlists)
-            nextOrAdd.text = binding.root.context.getString(R.string.label_add)
+            hint.text = context.getString(R.string.hint_select_app_playlists)
+            nextOrAdd.text = context.getString(R.string.label_add)
             nextOrAdd.setOnClickListener { performAddingYouTubePlaylistSync() }
+
+            if (mediaItemPlaylistMultiChoiceAdapter.itemCount == 0) {
+                youTubePlaylists.isVisible = false
+                hintListIsEmpty.isVisible = true
+                hintListIsEmpty.text = context.getString(R.string.label_no_playlist)
+            }
         }
     }
 
-    private suspend fun initAppPlaylists() {
+    private suspend fun observeAppPlaylists() {
         playlistRepository.getPlaylists().collect {
             mediaItemPlaylistMultiChoiceAdapter.submitList(it)
         }
@@ -127,6 +146,13 @@ class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
                 playlistsAdapter.selectedPlaylist!!,
                 mediaItemPlaylistMultiChoiceAdapter.getSelectedItems()
             )
+            dismiss()
+        }
+    }
+
+    companion object {
+        fun show(fragmentManager: FragmentManager) {
+            AddYouTubePlaylistSynchronizationDialog().show(fragmentManager, "AddYouTubePlaylistSynchronization")
         }
     }
 }

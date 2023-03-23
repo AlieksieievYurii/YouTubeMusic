@@ -35,6 +35,9 @@ class AppModule {
     fun providePlaylistDao(dataBase: DataBase) = dataBase.playlistDao()
 
     @Provides
+    fun provideYouTubePlaylistSynchronizationDao(dataBase: DataBase) = dataBase.playlistSyncBindDao()
+
+    @Provides
     @Singleton
     fun providesWorkManager(@ApplicationContext context: Context) = WorkManager.getInstance(context)
 
