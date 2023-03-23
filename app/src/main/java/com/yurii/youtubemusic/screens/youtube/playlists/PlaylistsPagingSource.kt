@@ -6,7 +6,7 @@ import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
 import com.yurii.youtubemusic.utilities.EmptyListException
 import java.lang.Exception
 
-class PlaylistsPagingSource(private val youTubeAPI: YouTubeAPI) : PagingSource<String, Playlist>() {
+open class PlaylistsPagingSource(private val youTubeAPI: YouTubeAPI) : PagingSource<String, Playlist>() {
     override fun getRefreshKey(state: PagingState<String, Playlist>): String? = null
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Playlist> {
