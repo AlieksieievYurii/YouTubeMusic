@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.screens.manager
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -29,6 +30,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         fun onAddSyncPlaylistBind()
         fun cancelAllDownloading()
 
+        fun onClickPlaylistSync(view: View, playlistSync: YouTubePlaylistSync)
         fun openFailedJobError(itemId: String)
 
         fun cancelDownloading(itemId: String)
@@ -129,11 +131,11 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         return null
     }
 
-    private class PlaylistBindViewHolder(private val binding: ItemPlaylistSyncBindBinding) : ViewHolder(binding.root) {
+    private inner class PlaylistBindViewHolder(private val binding: ItemPlaylistSyncBindBinding) : ViewHolder(binding.root) {
         fun bind(playlistBind: YouTubePlaylistSync) {
             binding.playlistName.text = playlistBind.youTubePlaylistName
             binding.appPlaylists.text = playlistBind.mediaItemPlaylists.joinToString(",") { it.name }
-
+            binding.content.setOnClickListener { callback.onClickPlaylistSync(binding.root, playlistBind) }
         }
     }
 

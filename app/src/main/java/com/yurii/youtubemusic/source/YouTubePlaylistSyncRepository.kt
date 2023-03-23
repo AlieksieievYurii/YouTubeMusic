@@ -26,4 +26,8 @@ class YouTubePlaylistSyncRepository @Inject constructor(private val youTubePlayl
             YouTubePlaylistSyncCrossRefToMediaPlaylist(youTubePlaylist.id, it.id)
         }.toTypedArray())
     }
+
+    suspend fun removeYouTubePlaylistSynchronization(youTubePlaylistId: String) {
+        youTubePlaylistSyncDao.deleteYouTubePlaylistSyncAndItsRelations(youTubePlaylistId)
+    }
 }

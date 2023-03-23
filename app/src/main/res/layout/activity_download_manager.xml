@@ -20,6 +20,29 @@
             tools:layout_editor_absoluteX="16dp"
             tools:layout_editor_absoluteY="16dp" />
 
+        <LinearLayout
+            android:id="@+id/layout_no_playlists_synchronization"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+
+            <TextView
+                style="@style/DescriptionText"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="No playlist synchronization"
+                android:visibility="visible"
+                app:drawableTopCompat="@drawable/ic_empty_play_lists" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/add_playlist_synchronization"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_add" />
+        </LinearLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/playlists_binds"
             android:layout_width="match_parent"

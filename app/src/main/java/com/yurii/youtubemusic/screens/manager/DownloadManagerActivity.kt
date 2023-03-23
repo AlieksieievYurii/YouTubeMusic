@@ -1,15 +1,19 @@
 package com.yurii.youtubemusic.screens.manager
 
 import android.os.Bundle
+import android.view.View
 import android.viewbinding.library.activity.viewBinding
+import android.widget.PopupMenu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityDownloadManagerBinding
+import com.yurii.youtubemusic.models.YouTubePlaylistSync
 import com.yurii.youtubemusic.services.downloader.DownloadManager
 import com.yurii.youtubemusic.ui.ErrorDialog
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,11 +26,24 @@ class DownloadManagerActivity : AppCompatActivity() {
     private val listAdapter by lazy {
         PlaylistBindsAndJobsListAdapter(object : PlaylistBindsAndJobsListAdapter.Callback {
             override fun onAddSyncPlaylistBind() {
-
+                AddYouTubePlaylistSynchronizationDialog.show(supportFragmentManager)
             }
 
             override fun cancelAllDownloading() {
                 viewModel.cancelAllDownloadingJobs()
+            }
+
+            override fun onClickPlaylistSync(view: View, playlistSync: YouTubePlaylistSync) {
+                PopupMenu(this@DownloadManagerActivity, view).apply {
+                    menuInflater.inflate(R.menu.playlist_synchronization_item_menu, menu)
+                    setOnMenuItemClickListener {
+                        if (it.itemId == R.id.item_delete_media_item) {
+                            viewModel.deletePlaylistSynchronization(playlistSync.youTubePlaylistId)
+                            true
+                        } else
+                            false
+                    }
+                }.show()
             }
 
             override fun openFailedJobError(itemId: String) {
@@ -57,24 +74,35 @@ class DownloadManagerActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@DownloadManagerActivity)
         }
 
+        binding.addPlaylistSynchronization.setOnClickListener { AddYouTubePlaylistSynchronizationDialog.show(supportFragmentManager) }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { viewModel.downloadingJobs.collect { listAdapter.submitDownloadingJobs(it) } }
                 launch { viewModel.downloadingStatus.collect { listAdapter.updateDownloadingJobStatus(it) } }
+                launch { observeEvents() }
                 launch {
-                    viewModel.events.collect {
-                        when (it) {
-                            is DownloadManagerViewModel.Event.OpenFailedJobError -> openErrorDialog(it.videoId, it.error)
-                        }
+                    viewModel.youTubePlaylistSyncs.collect {
+                        binding.layoutNoPlaylistsSynchronization.isVisible = it.isEmpty()
+                        listAdapter.submitPlaylistBinds(it)
                     }
                 }
             }
         }
+
     }
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return true
+    }
+
+    private suspend fun observeEvents() {
+        viewModel.events.collect {
+            when (it) {
+                is DownloadManagerViewModel.Event.OpenFailedJobError -> openErrorDialog(it.videoId, it.error)
+            }
+        }
     }
 
     private fun openErrorDialog(videoId: String, errorMessage: String?) {
