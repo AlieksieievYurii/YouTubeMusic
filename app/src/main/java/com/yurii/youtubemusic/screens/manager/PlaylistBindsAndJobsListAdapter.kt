@@ -3,7 +3,6 @@ package com.yurii.youtubemusic.screens.manager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -163,16 +162,16 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
                     //Nothing because at that moment item will disappear from the list
                 }
                 is DownloadManager.State.Downloading -> binding.apply {
-                    progress.isVisible = true
+                    progress.visibility = View.VISIBLE
                     progress.progress = state.progress
-                    sizeProgress.isVisible = true
+                    sizeProgress.visibility = View.VISIBLE
                     sizeProgress.text = root.resources.getString(R.string.label_size_progress, state.currentSizeInMb, state.sizeInMb)
                     action.setImageResource(R.drawable.ic_baseline_cancel_36)
                     action.setOnClickListener { callback.cancelDownloading(itemId) }
                 }
                 is DownloadManager.State.Failed -> binding.apply {
-                    progress.isVisible = false
-                    sizeProgress.isVisible = false
+                    progress.visibility = View.INVISIBLE
+                    sizeProgress.visibility = View.INVISIBLE
                     action.setImageResource(R.drawable.ic_baseline_error_36)
                     action.setOnClickListener { callback.openFailedJobError(itemId) }
                 }
