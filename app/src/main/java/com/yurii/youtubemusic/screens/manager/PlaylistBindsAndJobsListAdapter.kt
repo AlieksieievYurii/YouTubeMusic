@@ -17,7 +17,6 @@ import com.yurii.youtubemusic.databinding.ItemPlaylistSyncBindBinding
 import com.yurii.youtubemusic.models.YouTubePlaylistSync
 import com.yurii.youtubemusic.services.downloader.DownloadManager
 
-
 sealed class AdapterData {
     data class PlaylistBind(val data: YouTubePlaylistSync) : AdapterData()
     data class Job(val data: DownloadingVideoItemJob) : AdapterData()
@@ -122,10 +121,15 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     private fun findVisibleJobViewHolder(videoId: String): JobViewHolder? {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
         (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
-            if (it != -1 && getItem(it) is AdapterData.Job) {
-                if ((getItem(it) as AdapterData.Job).data.videoItemId == videoId) {
-                    return recyclerView.findViewHolderForLayoutPosition(it) as JobViewHolder
+            if (it != -1) {
+                val item = try {
+                    getItem(it) as? AdapterData.Job
+                } catch (_: IndexOutOfBoundsException) {
+                    null
                 }
+
+                if (item != null && item.data.videoItemId == videoId)
+                   return recyclerView.findViewHolderForLayoutPosition(it) as JobViewHolder
             }
         }
         return null
