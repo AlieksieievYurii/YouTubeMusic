@@ -7,7 +7,6 @@ import com.yurii.youtubemusic.models.toMediaItem
 import com.yurii.youtubemusic.models.toMediaItems
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -27,6 +26,13 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
     suspend fun getMediaItem(mediaItemId: String): MediaItem? = mediaItemDao.getMediaItem(mediaItemId)?.toMediaItem()
 
     suspend fun getDownloadingMediaItemEntity(itemId: String): MediaItemEntity? = mediaItemDao.getDownloadingMediaItem(itemId)
+
+    /**
+     * Checks if the item with given id exists independently if it is downloading or already downloaded
+     */
+    suspend fun exists(itemId: String): Boolean {
+        return getMediaItem(itemId) != null
+    }
 
     fun getOrderedMediaItems(): Flow<List<MediaItem>> = mediaItemDao.getAllSortedMediaItems().map { it.toMediaItems() }
 

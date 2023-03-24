@@ -3,6 +3,7 @@ package com.yurii.youtubemusic.screens.manager
 import android.os.Bundle
 import android.view.View
 import android.viewbinding.library.activity.viewBinding
+import android.widget.CompoundButton
 import android.widget.PopupMenu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -60,6 +61,10 @@ class DownloadManagerActivity : AppCompatActivity() {
         })
     }
 
+    private val onEnablePlaylistSync = CompoundButton.OnCheckedChangeListener { _, enabled ->
+            viewModel.enableAutomationYouTubeSynchronization(enabled)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -81,12 +86,8 @@ class DownloadManagerActivity : AppCompatActivity() {
                 launch { viewModel.downloadingJobs.collect { listAdapter.submitDownloadingJobs(it) } }
                 launch { viewModel.downloadingStatus.collect { listAdapter.updateDownloadingJobStatus(it) } }
                 launch { observeEvents() }
-                launch {
-                    viewModel.youTubePlaylistSyncs.collect {
-                        binding.layoutNoPlaylistsSynchronization.isVisible = it.isEmpty()
-                        listAdapter.submitPlaylistBinds(it)
-                    }
-                }
+                launch { observeYouTubePlaylistsSyncs() }
+                launch { observeAutoSyncState() }
             }
         }
 
@@ -102,6 +103,24 @@ class DownloadManagerActivity : AppCompatActivity() {
             when (it) {
                 is DownloadManagerViewModel.Event.OpenFailedJobError -> openErrorDialog(it.videoId, it.error)
             }
+        }
+    }
+
+    private suspend fun observeYouTubePlaylistsSyncs() {
+        viewModel.youTubePlaylistSyncs.collect {
+            binding.layoutNoPlaylistsSynchronization.isVisible = it.isEmpty()
+            listAdapter.submitPlaylistBinds(it)
+        }
+    }
+
+    private suspend fun observeAutoSyncState() {
+        viewModel.synchronizerState.collect {
+            if (it != null)
+                binding.enableAutoSync.apply {
+                    setOnCheckedChangeListener(null)
+                    isChecked = it
+                    setOnCheckedChangeListener(onEnablePlaylistSync)
+                }
         }
     }
 

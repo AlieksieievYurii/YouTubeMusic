@@ -3,12 +3,10 @@ package com.yurii.youtubemusic.screens.manager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yurii.youtubemusic.services.downloader.DownloadManager
+import com.yurii.youtubemusic.source.SyncManager
 import com.yurii.youtubemusic.source.YouTubePlaylistSyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,11 +15,15 @@ data class DownloadingVideoItemJob(val videoItemName: String, val videoItemId: S
 @HiltViewModel
 class DownloadManagerViewModel @Inject constructor(
     private val downloadManager: DownloadManager,
-    private val youTubePlaylistSyncRepository: YouTubePlaylistSyncRepository
+    private val youTubePlaylistSyncRepository: YouTubePlaylistSyncRepository,
+    private val syncManager: SyncManager
 ) : ViewModel() {
     sealed class Event {
         data class OpenFailedJobError(val videoId: String, val error: String?) : Event()
     }
+
+    private val _synchronizerState = MutableStateFlow<Boolean?>(null)
+    val synchronizerState = _synchronizerState.asStateFlow()
 
     private val _events = MutableSharedFlow<Event>()
     val events = _events.asSharedFlow()
@@ -33,6 +35,19 @@ class DownloadManagerViewModel @Inject constructor(
     val youTubePlaylistSyncs = youTubePlaylistSyncRepository.youTubePlaylistSyncs
 
     val downloadingStatus = downloadManager.observeStatus()
+
+    init {
+        viewModelScope.launch {
+            _synchronizerState.value = syncManager.isOn()
+        }
+    }
+
+    fun enableAutomationYouTubeSynchronization(enabled: Boolean) {
+        if (enabled)
+            syncManager.turnOn()
+        else
+            syncManager.turnOff()
+    }
 
     fun getDownloadingJobStatus(videoId: String) = downloadManager.getDownloadingJobState(videoId)
     fun cancelDownloading(itemId: String) {

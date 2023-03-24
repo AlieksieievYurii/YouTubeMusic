@@ -34,6 +34,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:textSize="14sp"
+                android:lines="1"
+                android:ellipsize="end"
                 app:layout_constraintEnd_toStartOf="@+id/action"
                 app:layout_constraintStart_toEndOf="@+id/thumbnail"
                 app:layout_constraintTop_toTopOf="parent"
