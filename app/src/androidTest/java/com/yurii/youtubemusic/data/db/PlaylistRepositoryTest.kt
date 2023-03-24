@@ -1,6 +1,5 @@
 package com.yurii.youtubemusic.data.db
 
-import android.util.Log
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -12,7 +11,6 @@ import com.yurii.youtubemusic.models.toMediaItem
 import com.yurii.youtubemusic.models.toMediaItems
 import com.yurii.youtubemusic.source.PlaylistRepository
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test

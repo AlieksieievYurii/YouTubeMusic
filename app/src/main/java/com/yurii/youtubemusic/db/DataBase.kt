@@ -34,7 +34,7 @@ class FileConverter {
 
 class UUIDConverter {
     @TypeConverter
-    fun UUIDtoString(uuid: UUID): String = uuid.toString()
+    fun uUIDtoString(uuid: UUID?): String? = uuid?.toString()
 
     @TypeConverter
     fun idStringToUUID(uuid: String?): UUID? = if (uuid != null) UUID.fromString(uuid) else null
