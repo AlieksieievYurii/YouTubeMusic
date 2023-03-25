@@ -13,11 +13,13 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Singleton
 
 
+@Singleton
 class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao) {
 
-    private val lock = Mutex()
+    private val  lock = Mutex()
 
     val mediaItemEntities = mediaItemDao.getMediaItemsEntities()
 
@@ -40,8 +42,7 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
         mediaItemDao.deleteAndCorrectPositions(item.id)
     }
 
-    suspend fun addDownloadingMediaItem(mediaItem: MediaItem, downloadingJobId: UUID, thumbnailUrl: String) = lock.withLock {
-        val incrementedPosition = mediaItemDao.getAvailablePosition() ?: 0
+    suspend fun addDownloadingMediaItem(mediaItem: MediaItem, downloadingJobId: UUID, thumbnailUrl: String) {
         mediaItemDao.insert(
             MediaItemEntity(
                 mediaItemId = mediaItem.id,
@@ -50,7 +51,7 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
                 durationInMillis = mediaItem.durationInMillis,
                 thumbnail = mediaItem.thumbnail,
                 mediaFile = mediaItem.mediaFile,
-                position = incrementedPosition,
+                position = UNSPECIFIED_POSITION,
                 downloadingJobId = downloadingJobId,
                 thumbnailUrl = thumbnailUrl
             )
@@ -61,11 +62,16 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
         mediaItemDao.updatePosition(mediaItem.id, from, to)
     }
 
-    suspend fun setMediaItemAsDownloaded(itemId: String) {
-        mediaItemDao.setMediaItemAsDownloaded(itemId)
+    suspend fun setMediaItemAsDownloaded(itemId: String)  = lock.withLock {
+        val incrementedPosition = mediaItemDao.getAvailablePosition() ?: 0
+        mediaItemDao.setMediaItemAsDownloaded(itemId, incrementedPosition)
     }
 
     suspend fun updateDownloadingJobId(item: Item, jobId: UUID) {
         mediaItemDao.updateDownloadingJobId(item.id, jobId)
+    }
+
+    companion object {
+        private const val UNSPECIFIED_POSITION = -1
     }
 }

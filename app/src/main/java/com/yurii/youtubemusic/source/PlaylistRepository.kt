@@ -22,19 +22,37 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
             val alreadyAssignedPlaylists = playlistDao.getAssignedPlaylists(mediaItem.id).toMediaItemPlaylists().toSet()
             val playlistsToAssign = newPlaylists subtract alreadyAssignedPlaylists
             val playlistsToRemove = alreadyAssignedPlaylists subtract newPlaylists.toSet()
-            playlistsToAssign.forEach { playlistDao.setPlaylist(mediaItem.id, it.id) }
+            playlistsToAssign.forEach {
+                val availablePosition = playlistDao.getAvailablePosition(it.id) ?: 0
+                playlistDao.assignMediaItemToPlaylist(mediaItem.id, it.id, availablePosition)
+            }
             playlistsToRemove.forEach { playlistDao.detachPlaylist(mediaItem.id, it.id) }
         }
     }
 
-    suspend fun getAssignedPlaylistsFor(mediaItem: MediaItem) = withContext(Dispatchers.IO) {
-        playlistDao.getAssignedPlaylists(mediaItem.id).toMediaItemPlaylists()
+    suspend fun assignDownloadingMediaItemToPlaylists(mediaItem: MediaItem, playlists: List<MediaItemPlaylist>) = lock.withLock {
+        withContext(Dispatchers.IO) {
+            playlists.forEach {
+                playlistDao.assignMediaItemToPlaylist(mediaItem.id, it.id, UNSPECIFIED_POSITION)
+            }
+        }
+    }
+
+    suspend fun getAssignedPlaylistsFor(itemId: String) = withContext(Dispatchers.IO) {
+        playlistDao.getAssignedPlaylists(itemId).toMediaItemPlaylists()
     }
 
     fun getPlaylists(): Flow<List<MediaItemPlaylist>> = playlistDao.getPlaylists().map { it.toMediaItemPlaylists() }
 
     suspend fun renamePlaylist(mediaItemPlaylist: MediaItemPlaylist, newName: String) = withContext(Dispatchers.IO) {
         playlistDao.update(mediaItemPlaylist.copy(name = newName).toPlaylistEntity())
+    }
+
+    suspend fun setMediaItemAsDownloaded(itemId: String) = lock.withLock {
+        getAssignedPlaylistsFor(itemId).forEach {
+            val availablePosition = playlistDao.getAvailablePosition(it.id) ?: 0
+            playlistDao.setPosition(itemId, it.id, availablePosition)
+        }
     }
 
     suspend fun removePlaylist(mediaItemPlaylist: MediaItemPlaylist) = lock.withLock {
@@ -60,5 +78,9 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
         withContext(Dispatchers.IO) {
             playlistDao.removeMediaItemFromPlaylists(item.id)
         }
+    }
+
+    companion object {
+        private const val UNSPECIFIED_POSITION = -1
     }
 }

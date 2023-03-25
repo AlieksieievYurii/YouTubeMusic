@@ -36,7 +36,6 @@ class DownloadManagerImpl @Inject constructor(
     private val statusesFlow = MutableSharedFlow<DownloadManager.Status>()
 
     init {
-        Log.i("MyApp", "WorkManager init")
         coroutineScope.launch { synchronize() }
         coroutineScope.launch { bindSynchronizationOfCacheWithMediaItems() }
         coroutineScope.launch { observeWorkManagerStatuses() }
@@ -127,7 +126,9 @@ class DownloadManagerImpl @Inject constructor(
         statusesFlow.emit(DownloadManager.Status(videoId, DownloadManager.State.Download))
         cache[videoId]?.downloadingJobId?.let {
             workManager.cancelWorkById(it)
-            mediaLibraryDomain.deleteMediaItem(mediaRepository.getMediaItem(videoId)!!)
+            val item = mediaRepository.getMediaItem(videoId)
+            if (item != null)
+                mediaLibraryDomain.deleteMediaItem(item)
         }
     }
 

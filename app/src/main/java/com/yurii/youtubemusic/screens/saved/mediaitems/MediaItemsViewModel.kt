@@ -64,7 +64,7 @@ class MediaItemsViewModel @AssistedInject constructor(
         }
     }
 
-    suspend fun getAssignedPlaylists(mediaItem: MediaItem) = playlistRepository.getAssignedPlaylistsFor(mediaItem)
+    suspend fun getAssignedPlaylists(mediaItem: MediaItem) = playlistRepository.getAssignedPlaylistsFor(mediaItem.id)
 
     suspend fun getPlaylists() = playlistRepository.getPlaylists().first()
 

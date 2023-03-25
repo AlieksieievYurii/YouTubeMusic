@@ -27,14 +27,15 @@ interface MediaItemDao {
     @Query("SELECT * FROM media_items")
     fun getMediaItemsEntities(): Flow<List<MediaItemEntity>>
 
-    @Query("UPDATE media_items SET downloadingJobId = NULL WHERE mediaItemId = :mediaItemId")
-    suspend fun setMediaItemAsDownloaded(mediaItemId: String)
+    @Query("UPDATE media_items SET downloadingJobId = NULL, position = :position  WHERE mediaItemId = :mediaItemId")
+    suspend fun setMediaItemAsDownloaded(mediaItemId: String, position: Int)
 
     @Query("SELECT MAX(position) + 1 from media_items")
     suspend fun getAvailablePosition(): Int?
 
     @Query("UPDATE media_items SET downloadingJobId = :jobId WHERE mediaItemId = :mediaItemId")
     suspend fun updateDownloadingJobId(mediaItemId: String, jobId: UUID)
+
     @Transaction
     suspend fun updatePosition(mediaItemId: String, from: Int, to: Int) {
         if (from > to)

@@ -20,12 +20,11 @@ interface PlaylistDao {
     @Insert
     fun insertMediaItemPlaylist(vararg mediaItemPlayListAssignment: MediaItemPlayListAssignment)
 
-    @Transaction
-    fun setPlaylist(mediaItemId: String, playlistId: Long) {
+    fun assignMediaItemToPlaylist(mediaItemId: String, playlistId: Long, position: Int) {
         val mediaItemPlaylist = MediaItemPlayListAssignment(
             mediaItemId,
             playlistId,
-            getAvailablePosition(playlistId) ?: 0
+            position
         )
 
         insertMediaItemPlaylist(mediaItemPlaylist)
@@ -86,7 +85,7 @@ interface PlaylistDao {
         else
             mDecreasePositionInRange(playlistId, from, to)
 
-        mSetPosition(mediaItemId, playlistId, to)
+        setPosition(mediaItemId, playlistId, to)
     }
 
     @Query("DELETE FROM media_item_playlist_assignment WHERE playlistId = :playlistId")
@@ -98,7 +97,7 @@ interface PlaylistDao {
         WHERE mediaItemId = :mediaItemId AND playlistId = :playlistId
          """
     )
-    suspend fun mSetPosition(mediaItemId: String, playlistId: Long, position: Int)
+    suspend fun setPosition(mediaItemId: String, playlistId: Long, position: Int)
 
     @Query(
         """

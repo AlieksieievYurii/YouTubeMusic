@@ -10,7 +10,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class MediaCreator @Inject constructor(
     private val mediaRepository: MediaRepository,
     private val playlistRepository: PlaylistRepository,
@@ -23,7 +25,7 @@ class MediaCreator @Inject constructor(
         lock.withLock {
             if (mediaRepository.getMediaItem(videoItem.id) == null) {
                 val createdMediaItem = registerMediaItem(videoItem, downloadingJobId)
-                playlistRepository.assignMediaItemToPlaylists(createdMediaItem, playlists)
+                playlistRepository.assignDownloadingMediaItemToPlaylists(createdMediaItem, playlists)
             } else {
                 mediaRepository.updateDownloadingJobId(videoItem, downloadingJobId)
             }
@@ -31,6 +33,7 @@ class MediaCreator @Inject constructor(
 
     suspend fun setMediaItemAsDownloaded(itemId: String) = withContext(Dispatchers.IO) {
         mediaRepository.setMediaItemAsDownloaded(itemId)
+        playlistRepository.setMediaItemAsDownloaded(itemId)
     }
 
     private suspend fun registerMediaItem(videoItem: VideoItem, downloadingJobId: UUID): MediaItem {
