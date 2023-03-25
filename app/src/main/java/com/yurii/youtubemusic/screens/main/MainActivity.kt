@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
@@ -29,13 +30,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
     private val viewModel: MainActivityViewModel by viewModels()
     private val activityMainBinding: ActivityMainBinding by viewBinding()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
-
-    @delegate:SuppressLint("UnsafeOptInUsageError")
-    private val downloadManagerBudge by lazy {
-        BadgeDrawable.create(this).also {
-            BadgeUtils.attachBadgeDrawable(it, toolbar, R.id.item_open_download_manager)
-        }
-    }
+    private val downloadManagerBudge by lazy { BadgeDrawable.create(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,6 +91,12 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             true
         }
         else -> false
+    }
+
+    @SuppressLint("UnsafeOptInUsageError")
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        BadgeUtils.attachBadgeDrawable(downloadManagerBudge, activityMainBinding.toolbar, R.id.item_open_download_manager)
+        return super.onCreateOptionsMenu(menu)
     }
 
     override fun onNewIntent(intent: Intent) {
