@@ -136,7 +136,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
 
     private inner class PlaylistBindViewHolder(private val binding: ItemPlaylistSyncBindBinding) : ViewHolder(binding.root) {
         fun bind(playlistBind: YouTubePlaylistSync) {
-            binding.playlistName.text = playlistBind.youTubePlaylistName
+            binding.data = playlistBind
             binding.appPlaylists.text = playlistBind.mediaItemPlaylists.joinToString(",") { it.name }
             binding.content.setOnClickListener { callback.onClickPlaylistSync(binding.root, playlistBind) }
         }

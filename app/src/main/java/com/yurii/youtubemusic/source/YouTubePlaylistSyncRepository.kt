@@ -16,12 +16,13 @@ class YouTubePlaylistSyncRepository @Inject constructor(private val youTubePlayl
         YouTubePlaylistSync(
             it.youTubePlaylistSync.youTubePlaylistId,
             it.youTubePlaylistSync.youTubePlaylistName,
+            it.youTubePlaylistSync.thumbnailUrl,
             it.playlists.toMediaItemPlaylists()
         )
     }
 
     suspend fun addYouTubePlaylistSynchronization(youTubePlaylist: Playlist, playlistBinds: List<MediaItemPlaylist>) {
-        youTubePlaylistSyncDao.insert(YouTubePlaylistSyncEntity(youTubePlaylist.id, youTubePlaylist.name))
+        youTubePlaylistSyncDao.insert(YouTubePlaylistSyncEntity(youTubePlaylist.id, youTubePlaylist.name, youTubePlaylist.thumbnail))
         youTubePlaylistSyncDao.insertMediaItemPlaylistBinds(*playlistBinds.map {
             YouTubePlaylistSyncCrossRefToMediaPlaylist(youTubePlaylist.id, it.id)
         }.toTypedArray())

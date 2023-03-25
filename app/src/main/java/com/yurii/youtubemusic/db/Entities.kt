@@ -55,7 +55,8 @@ data class MediaItemWithPlaylists(
 @Entity(tableName = "you_tube_playlist_synchronization")
 data class YouTubePlaylistSyncEntity(
     @PrimaryKey val youTubePlaylistId: String,
-    val youTubePlaylistName: String
+    val youTubePlaylistName: String,
+    val thumbnailUrl: String
 )
 
 @Entity(tableName = "you_tube_playlist_synchronization_ref_to_media_playlist", primaryKeys = ["youTubePlaylistId", "playlistId"])

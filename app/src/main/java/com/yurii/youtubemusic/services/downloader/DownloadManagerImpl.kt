@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic.services.downloader
 
+import android.util.Log
 import androidx.work.*
 import com.yurii.youtubemusic.di.MainScope
 import com.yurii.youtubemusic.models.MediaItemPlaylist
@@ -35,6 +36,7 @@ class DownloadManagerImpl @Inject constructor(
     private val statusesFlow = MutableSharedFlow<DownloadManager.Status>()
 
     init {
+        Log.i("MyApp", "WorkManager init")
         coroutineScope.launch { synchronize() }
         coroutineScope.launch { bindSynchronizationOfCacheWithMediaItems() }
         coroutineScope.launch { observeWorkManagerStatuses() }
