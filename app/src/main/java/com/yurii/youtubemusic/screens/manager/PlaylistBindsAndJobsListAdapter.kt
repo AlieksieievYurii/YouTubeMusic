@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import coil.load
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemHeadlineBinding
 import com.yurii.youtubemusic.databinding.ItemJobBinding
@@ -128,7 +127,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
                 }
 
                 if (item != null && item.data.videoItemId == videoId)
-                   return recyclerView.findViewHolderForLayoutPosition(it) as JobViewHolder
+                    return recyclerView.findViewHolderForLayoutPosition(it) as JobViewHolder
             }
         }
         return null
@@ -144,12 +143,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
 
     private inner class JobViewHolder(private val binding: ItemJobBinding) : ViewHolder(binding.root) {
         fun bind(downloadingJob: DownloadingVideoItemJob) {
-            binding.apply {
-                thumbnail.load(downloadingJob.thumbnail)
-                videoItemName.text = downloadingJob.videoItemName
-                videoItemId.text = downloadingJob.videoItemId
-            }
-
+            binding.data = downloadingJob
             updateState(downloadingJob.videoItemId, callback.getDownloadingJobState(downloadingJob.videoItemId))
         }
 

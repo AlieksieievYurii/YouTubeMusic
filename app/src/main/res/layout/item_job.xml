@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="data"
+            type="com.yurii.youtubemusic.screens.manager.DownloadingVideoItemJob" />
+    </data>
+
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,8 +25,9 @@
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/thumbnail"
-                android:layout_width="90dp"
-                android:layout_height="wrap_content"
+                imageUrl="@{data.thumbnail}"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
                 android:layout_marginStart="8dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/content_description_thumbnail_video"
@@ -36,6 +44,7 @@
                 android:layout_marginStart="8dp"
                 android:ellipsize="end"
                 android:lines="1"
+                android:text="@{data.videoItemName}"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toStartOf="@+id/action"
                 app:layout_constraintStart_toEndOf="@+id/thumbnail"
@@ -46,6 +55,7 @@
                 android:id="@+id/video_item_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@{data.videoItemId}"
                 android:textSize="12sp"
                 app:layout_constraintStart_toStartOf="@+id/video_item_name"
                 app:layout_constraintTop_toBottomOf="@+id/video_item_name"
