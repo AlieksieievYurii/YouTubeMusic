@@ -2,7 +2,10 @@ package com.yurii.youtubemusic.screens.manager
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yurii.youtubemusic.models.MediaItemPlaylist
+import com.yurii.youtubemusic.models.YouTubePlaylistSync
 import com.yurii.youtubemusic.services.downloader.DownloadManager
+import com.yurii.youtubemusic.source.PlaylistRepository
 import com.yurii.youtubemusic.source.SyncManager
 import com.yurii.youtubemusic.source.YouTubePlaylistSyncRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,10 +19,16 @@ data class DownloadingVideoItemJob(val videoItemName: String, val videoItemId: S
 class DownloadManagerViewModel @Inject constructor(
     private val downloadManager: DownloadManager,
     private val youTubePlaylistSyncRepository: YouTubePlaylistSyncRepository,
+    private val playlistRepository: PlaylistRepository,
     private val syncManager: SyncManager
 ) : ViewModel() {
     sealed class Event {
         data class OpenFailedJobError(val videoId: String, val error: String?) : Event()
+        data class OpenPlaylistsEditor(
+            val youTubePlaylistId: String,
+            val alreadySelectedPlaylists: List<MediaItemPlaylist>,
+            val allPlaylists: List<MediaItemPlaylist>
+        ) : Event()
     }
 
     private val _synchronizerState = MutableStateFlow<Boolean?>(null)
@@ -47,6 +56,24 @@ class DownloadManagerViewModel @Inject constructor(
             syncManager.turnOn()
         else
             syncManager.turnOff()
+    }
+
+    fun editAssignedPlaylists(youTubePlaylistSync: YouTubePlaylistSync) {
+        viewModelScope.launch {
+            _events.emit(
+                Event.OpenPlaylistsEditor(
+                    youTubePlaylistSync.youTubePlaylistId,
+                    youTubePlaylistSync.mediaItemPlaylists,
+                    playlistRepository.getPlaylists().first()
+                )
+            )
+        }
+    }
+
+    fun reassignPlaylistsForSync(youTubePlaylistId: String, playlists: List<MediaItemPlaylist>) {
+        viewModelScope.launch {
+            youTubePlaylistSyncRepository.reassignPlaylists(youTubePlaylistId, playlists)
+        }
     }
 
     fun getDownloadingJobStatus(videoId: String) = downloadManager.getDownloadingJobState(videoId)

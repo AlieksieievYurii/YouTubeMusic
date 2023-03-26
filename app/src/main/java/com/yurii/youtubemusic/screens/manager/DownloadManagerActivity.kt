@@ -17,6 +17,7 @@ import com.yurii.youtubemusic.databinding.ActivityDownloadManagerBinding
 import com.yurii.youtubemusic.models.YouTubePlaylistSync
 import com.yurii.youtubemusic.services.downloader.DownloadManager
 import com.yurii.youtubemusic.ui.ErrorDialog
+import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -38,11 +39,17 @@ class DownloadManagerActivity : AppCompatActivity() {
                 PopupMenu(this@DownloadManagerActivity, view).apply {
                     menuInflater.inflate(R.menu.playlist_synchronization_item_menu, menu)
                     setOnMenuItemClickListener {
-                        if (it.itemId == R.id.item_delete_media_item) {
-                            viewModel.deletePlaylistSynchronization(playlistSync.youTubePlaylistId)
-                            true
-                        } else
-                            false
+                        when (it.itemId) {
+                            R.id.item_delete_playlist_sync -> {
+                                viewModel.deletePlaylistSynchronization(playlistSync.youTubePlaylistId)
+                                true
+                            }
+                            R.id.item_edit_assigned_playlists -> {
+                                viewModel.editAssignedPlaylists(playlistSync)
+                                true
+                            }
+                            else -> false
+                        }
                     }
                 }.show()
             }
@@ -62,7 +69,7 @@ class DownloadManagerActivity : AppCompatActivity() {
     }
 
     private val onEnablePlaylistSync = CompoundButton.OnCheckedChangeListener { _, enabled ->
-            viewModel.enableAutomationYouTubeSynchronization(enabled)
+        viewModel.enableAutomationYouTubeSynchronization(enabled)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,6 +109,10 @@ class DownloadManagerActivity : AppCompatActivity() {
         viewModel.events.collect {
             when (it) {
                 is DownloadManagerViewModel.Event.OpenFailedJobError -> openErrorDialog(it.videoId, it.error)
+                is DownloadManagerViewModel.Event.OpenPlaylistsEditor ->
+                    SelectPlaylistsDialog(this, it.allPlaylists, it.alreadySelectedPlaylists) { newPlaylists ->
+                        viewModel.reassignPlaylistsForSync(it.youTubePlaylistId, newPlaylists)
+                    }.show()
             }
         }
     }

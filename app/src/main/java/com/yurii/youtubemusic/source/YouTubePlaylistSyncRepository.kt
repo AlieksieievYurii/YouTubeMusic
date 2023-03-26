@@ -8,6 +8,8 @@ import com.yurii.youtubemusic.models.YouTubePlaylistSync
 import com.yurii.youtubemusic.models.toMediaItemPlaylists
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.utilities.mapItems
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class YouTubePlaylistSyncRepository @Inject constructor(private val youTubePlaylistSyncDao: YouTubePlaylistSynchronizationDao) {
@@ -23,12 +25,21 @@ class YouTubePlaylistSyncRepository @Inject constructor(private val youTubePlayl
 
     suspend fun addYouTubePlaylistSynchronization(youTubePlaylist: Playlist, playlistBinds: List<MediaItemPlaylist>) {
         youTubePlaylistSyncDao.insert(YouTubePlaylistSyncEntity(youTubePlaylist.id, youTubePlaylist.name, youTubePlaylist.thumbnail))
-        youTubePlaylistSyncDao.insertMediaItemPlaylistBinds(*playlistBinds.map {
-            YouTubePlaylistSyncCrossRefToMediaPlaylist(youTubePlaylist.id, it.id)
-        }.toTypedArray())
+        assignAppPlaylists(youTubePlaylist.id, playlistBinds)
+    }
+
+    suspend fun reassignPlaylists(youTubePlaylistId: String, playlists: List<MediaItemPlaylist>) = withContext(Dispatchers.IO) {
+        youTubePlaylistSyncDao.deleteAppPlaylistsAssignments(youTubePlaylistId)
+        assignAppPlaylists(youTubePlaylistId, playlists)
     }
 
     suspend fun removeYouTubePlaylistSynchronization(youTubePlaylistId: String) {
         youTubePlaylistSyncDao.deleteYouTubePlaylistSyncAndItsRelations(youTubePlaylistId)
+    }
+
+    private suspend fun assignAppPlaylists(youTubePlaylistId: String, playlists: List<MediaItemPlaylist>) {
+        youTubePlaylistSyncDao.insertMediaItemPlaylistBinds(*playlists.map {
+            YouTubePlaylistSyncCrossRefToMediaPlaylist(youTubePlaylistId, it.id)
+        }.toTypedArray())
     }
 }
