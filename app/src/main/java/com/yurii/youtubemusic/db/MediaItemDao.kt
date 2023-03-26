@@ -17,7 +17,8 @@ interface MediaItemDao {
 
     @Transaction
     suspend fun deleteAndCorrectPositions(mediaItemId: String) {
-        mDecreasePositionFrom(mediaItemId)
+        if (getMediaItem(mediaItemId)?.position != UNSPECIFIED_POSITION)
+            mDecreasePositionFrom(mediaItemId)
         mDeleteById(mediaItemId)
     }
 
@@ -65,4 +66,8 @@ interface MediaItemDao {
         """
     )
     suspend fun mDecreasePositionFrom(mediaItemId: String)
+
+    companion object {
+        const val UNSPECIFIED_POSITION = -1
+    }
 }

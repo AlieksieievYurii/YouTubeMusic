@@ -51,7 +51,7 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
                 durationInMillis = mediaItem.durationInMillis,
                 thumbnail = mediaItem.thumbnail,
                 mediaFile = mediaItem.mediaFile,
-                position = UNSPECIFIED_POSITION,
+                position = MediaItemDao.UNSPECIFIED_POSITION,
                 downloadingJobId = downloadingJobId,
                 thumbnailUrl = thumbnailUrl
             )
@@ -69,9 +69,5 @@ class MediaRepository @Inject constructor(private val mediaItemDao: MediaItemDao
 
     suspend fun updateDownloadingJobId(item: Item, jobId: UUID) {
         mediaItemDao.updateDownloadingJobId(item.id, jobId)
-    }
-
-    companion object {
-        private const val UNSPECIFIED_POSITION = -1
     }
 }

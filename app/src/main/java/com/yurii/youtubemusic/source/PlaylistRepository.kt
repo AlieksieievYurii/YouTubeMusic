@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic.source
 
+import com.yurii.youtubemusic.db.MediaItemPlayListAssignment
 import com.yurii.youtubemusic.db.PlaylistDao
 import com.yurii.youtubemusic.db.PlaylistEntity
 import com.yurii.youtubemusic.models.*
@@ -24,7 +25,7 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
             val playlistsToRemove = alreadyAssignedPlaylists subtract newPlaylists.toSet()
             playlistsToAssign.forEach {
                 val availablePosition = playlistDao.getAvailablePosition(it.id) ?: 0
-                playlistDao.assignMediaItemToPlaylist(mediaItem.id, it.id, availablePosition)
+                playlistDao.insertMediaItemPlaylist(MediaItemPlayListAssignment(mediaItem.id, it.id, availablePosition))
             }
             playlistsToRemove.forEach { playlistDao.detachPlaylist(mediaItem.id, it.id) }
         }
@@ -33,7 +34,7 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
     suspend fun assignDownloadingMediaItemToPlaylists(mediaItem: MediaItem, playlists: List<MediaItemPlaylist>) = lock.withLock {
         withContext(Dispatchers.IO) {
             playlists.forEach {
-                playlistDao.assignMediaItemToPlaylist(mediaItem.id, it.id, UNSPECIFIED_POSITION)
+                playlistDao.insertMediaItemPlaylist(MediaItemPlayListAssignment(mediaItem.id, it.id, PlaylistDao.UNSPECIFIED_POSITION))
             }
         }
     }
@@ -78,9 +79,5 @@ class PlaylistRepository @Inject constructor(private val playlistDao: PlaylistDa
         withContext(Dispatchers.IO) {
             playlistDao.removeMediaItemFromPlaylists(item.id)
         }
-    }
-
-    companion object {
-        private const val UNSPECIFIED_POSITION = -1
     }
 }
