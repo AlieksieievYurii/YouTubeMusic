@@ -55,7 +55,7 @@
                 android:id="@+id/video_item_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{data.videoItemId}"
+                android:text="@{@string/label_id(data.videoItemId)}"
                 android:textSize="12sp"
                 app:layout_constraintStart_toStartOf="@+id/video_item_name"
                 app:layout_constraintTop_toBottomOf="@+id/video_item_name"

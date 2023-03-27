@@ -82,4 +82,5 @@
     <string name="hint_select_you_tube_playlist">Select YouTube playlist from which you want to download music automatically</string>
     <string name="hint_select_app_playlists">Now select the application playlists to which downloaded media items should be assigned. Note that by default all are assigned to All playlist</string>
     <string name="hint_all_playlists_synchronized">You\'ve synchronized all your playlists</string>
+    <string name="label_id">ID: %s</string>
 </resources>

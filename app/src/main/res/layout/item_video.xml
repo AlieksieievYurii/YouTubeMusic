@@ -55,13 +55,13 @@
                     android:layout_marginEnd="@dimen/mediumMargin"
                     android:layout_marginBottom="@dimen/mediumMargin"
                     android:background="@drawable/rectangle"
+                    android:forceDarkAllowed="false"
                     android:text="@{UtilsKt.parseDurationToHumanView(videoItem.durationInMillis)}"
                     android:textColor="@android:color/white"
                     android:textSize="12sp"
-                    android:forceDarkAllowed="false"
                     android:textStyle="bold"
-                    tools:text="0:30"
-                    tools:targetApi="q" />
+                    tools:targetApi="q"
+                    tools:text="0:30" />
 
                 <TextView
                     android:id="@+id/title"
@@ -140,7 +140,7 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="@dimen/mediumPadding"
                 android:paddingEnd="@dimen/mediumPadding"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <ImageView
                     android:id="@+id/iv_thumb_up"
@@ -157,13 +157,27 @@
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/iv_thumb_up"
                     android:layout_alignParentTop="true"
-                    android:textAlignment="gravity"
-                    android:gravity="center_vertical"
                     android:layout_marginStart="5dp"
                     android:layout_toEndOf="@+id/iv_thumb_up"
+                    android:gravity="center_vertical"
                     android:text="@{UtilsKt.bigIntegerToShortCutSuffix(videoItem.likeCount)}"
+                    android:textAlignment="gravity"
                     android:textSize="12sp"
                     tools:text="212K" />
+
+                <TextView
+                    android:id="@+id/video_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="2dp"
+                    android:layout_toEndOf="@id/tv_count_likes"
+                    android:text="@{@string/label_id(videoItem.id)}"
+                    android:textAlignment="viewEnd"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    tools:text="ID: 12f34tf" />
 
                 <TextView
                     android:id="@+id/tv_description"
