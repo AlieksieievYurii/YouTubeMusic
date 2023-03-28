@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.yurii.youtubemusic.ShareContentModalSheet
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.yurii.youtubemusic.models.MediaItem
@@ -105,6 +106,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
             when (it.itemId) {
                 R.id.item_delete_media_item -> confirmRemovingMediaItem(mediaItem)
                 R.id.item_edit_categories -> openCategoriesEditor(mediaItem)
+                R.id.item_share -> openSharingSheet(mediaItem)
                 else -> return@setOnMenuItemClickListener false
             }
             true
@@ -112,6 +114,9 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
         popupMenu.show()
     }
 
+    private fun openSharingSheet(mediaItem: MediaItem) {
+        ShareContentModalSheet.show(mediaItem, requireActivity().supportFragmentManager)
+    }
     private fun openCategoriesEditor(mediaItem: MediaItem) {
         lifecycleScope.launch {
             SelectPlaylistsDialog(

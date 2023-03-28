@@ -83,4 +83,7 @@
     <string name="hint_select_app_playlists">Now select the application playlists to which downloaded media items should be assigned. Note that by default all are assigned to All playlist</string>
     <string name="hint_all_playlists_synchronized">You\'ve synchronized all your playlists</string>
     <string name="label_id">ID: %s</string>
+    <string name="label_share">Share</string>
+    <string name="label_share_video_url">Share video URL</string>
+    <string name="label_share_media_file">Share media file</string>
 </resources>
