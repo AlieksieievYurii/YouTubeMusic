@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.*
 import dagger.hilt.android.HiltAndroidApp
@@ -28,7 +29,7 @@ class Application : Application(), Configuration.Provider {
     }
 
     override fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder().setWorkerFactory(workerFactory).build()
+        return Configuration.Builder().setMinimumLoggingLevel(Log.DEBUG).setWorkerFactory(workerFactory).build()
     }
 
     private fun createMediaPlayerNotificationChannel() {
