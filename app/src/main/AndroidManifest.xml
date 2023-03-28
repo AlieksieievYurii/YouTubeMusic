@@ -31,9 +31,9 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.main.MainActivity"
+            android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:exported="true"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,9 +42,10 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".services.downloader.MusicDownloaderService"
-            android:exported="false" />
+        <activity
+            android:name=".screens.manager.DownloadManagerActivity"
+            android:screenOrientation="portrait" />
+
         <service
             android:name=".services.media.MediaService"
             android:exported="false">
@@ -53,11 +54,23 @@
             </intent-filter>
         </service>
 
-        <receiver android:name="androidx.media.session.MediaButtonReceiver" android:exported="false">
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
-    </application>
 
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+    </application>
 </manifest>

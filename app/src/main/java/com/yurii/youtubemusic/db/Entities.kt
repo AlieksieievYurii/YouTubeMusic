@@ -1,8 +1,8 @@
 package com.yurii.youtubemusic.db
 
 import androidx.room.*
-import com.yurii.youtubemusic.models.MediaItem
 import java.io.File
+import java.util.UUID
 
 @Entity(tableName = "media_items")
 data class MediaItemEntity(
@@ -12,7 +12,9 @@ data class MediaItemEntity(
     @ColumnInfo("duration") val durationInMillis: Long,
     val thumbnail: File,
     val mediaFile: File,
-    val position: Int
+    val position: Int,
+    val thumbnailUrl: String,
+    val downloadingJobId: UUID?
 )
 
 
@@ -50,12 +52,25 @@ data class MediaItemWithPlaylists(
     val playlists: List<PlaylistEntity>
 )
 
-fun MediaItem.toEntity(position: Int): MediaItemEntity = MediaItemEntity(
-    mediaItemId = id,
-    title = title,
-    author = author,
-    durationInMillis = durationInMillis,
-    thumbnail = thumbnail,
-    mediaFile = mediaFile,
-    position = position
+@Entity(tableName = "you_tube_playlist_synchronization")
+data class YouTubePlaylistSyncEntity(
+    @PrimaryKey val youTubePlaylistId: String,
+    val youTubePlaylistName: String,
+    val thumbnailUrl: String
+)
+
+@Entity(tableName = "you_tube_playlist_synchronization_ref_to_media_playlist", primaryKeys = ["youTubePlaylistId", "playlistId"])
+data class YouTubePlaylistSyncCrossRefToMediaPlaylist(
+    val youTubePlaylistId: String,
+    val playlistId: Long
+)
+
+data class YouTubePlaylistWithBoundMediaPlaylists(
+    @Embedded val youTubePlaylistSync: YouTubePlaylistSyncEntity,
+    @Relation(
+        parentColumn = "youTubePlaylistId",
+        entityColumn = "playlistId",
+        associateBy = Junction(YouTubePlaylistSyncCrossRefToMediaPlaylist::class)
+    )
+    val playlists: List<PlaylistEntity>
 )

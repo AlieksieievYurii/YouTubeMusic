@@ -28,5 +28,7 @@ fun createMediaItemEntity(id: Int, prefix: String = "") = MediaItemEntity(
     durationInMillis = id.toLong(),
     thumbnail = File("/thumbnails/$prefix$id.jpg"),
     mediaFile = File("/media-files/$prefix$id.mp3"),
-    position = id
+    position = id,
+    downloadingJobId = null,
+    thumbnailUrl = "https://$id.jpeg"
 )

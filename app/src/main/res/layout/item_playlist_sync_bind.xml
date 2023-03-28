@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="data"
+            type="com.yurii.youtubemusic.models.YouTubePlaylistSync" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardElevation="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/playlist_thumbnail"
+                imageUrl="@{data.thumbnailUrl}"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginStart="8dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/content_description_thumbnail_video"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/roundedImageView"
+                tools:src="@drawable/ic_loading_image_error" />
+
+            <TextView
+                android:id="@+id/playlist_name"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:lines="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@{data.youTubePlaylistName}"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toStartOf="@+id/app_playlists"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toEndOf="@+id/playlist_thumbnail"
+                app:layout_constraintTop_toTopOf="@+id/playlist_thumbnail"
+                tools:text="item" />
+
+            <TextView
+                android:id="@+id/playlist_id"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="32dp"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:lines="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@{data.youTubePlaylistId}"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@+id/playlist_thumbnail"
+                app:layout_constraintEnd_toStartOf="@+id/app_playlists"
+                app:layout_constraintStart_toEndOf="@+id/playlist_thumbnail"
+                app:layout_constraintTop_toBottomOf="@+id/playlist_name"
+                tools:text="Playlist issssssssssssssssssssssssssssssssssssd" />
+
+            <TextView
+                android:id="@+id/app_playlists"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:textAlignment="textEnd"
+                android:textStyle="italic"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toEndOf="@+id/playlist_name"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Playlists" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+</layout>

@@ -9,8 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemPlaylistBinding
 
-class PlaylistsAdapter(private val selectedPlaylist: Playlist?, private val onSelectedPlaylist: (Playlist) -> Unit) :
+class PlaylistsAdapter(private val onSelectedPlaylist: (Playlist) -> Unit) :
     PagingDataAdapter<Playlist, PlaylistsAdapter.PlaylistViewHolder>(Comparator) {
+
+    var selectedPlaylist: Playlist? = null
 
     private object Comparator : DiffUtil.ItemCallback<Playlist>() {
         override fun areItemsTheSame(oldItem: Playlist, newItem: Playlist) =
@@ -36,7 +38,10 @@ class PlaylistsAdapter(private val selectedPlaylist: Playlist?, private val onSe
             binding.apply {
                 this.playlist = playlist
                 root.setBackgroundColor(backgroundColor)
-                root.setOnClickListener { onSelectedPlaylist.invoke(playlist) }
+                root.setOnClickListener {
+                    selectedPlaylist = playlist
+                    onSelectedPlaylist.invoke(playlist)
+                }
             }
         }
     }

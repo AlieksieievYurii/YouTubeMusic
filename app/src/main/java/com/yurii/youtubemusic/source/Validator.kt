@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.max
 
 @Singleton
 class Validator @Inject constructor(private val mediaLibraryDomain: MediaLibraryDomain, private val mediaStorage: MediaStorage) {
@@ -36,7 +35,7 @@ class Validator @Inject constructor(private val mediaLibraryDomain: MediaLibrary
         if (!mediaStorage.getMediaFile(mediaItem).exists())
             return Error.MediaFileMissing(mediaItem)
 
-        if (!mediaStorage.getThumbnail(mediaItem).exists())
+        if (!mediaStorage.getThumbnail(mediaItem.id).exists())
             return Error.ThumbnailFileMissing(mediaItem)
 
         return null

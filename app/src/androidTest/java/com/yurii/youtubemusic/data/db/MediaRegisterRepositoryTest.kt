@@ -25,6 +25,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import java.io.File
 import java.math.BigInteger
+import java.util.*
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -45,7 +46,7 @@ class MediaRegisterRepositoryTest {
         val context = mockk<Context> {
             every { filesDir } returns temporaryFolder.root
         }
-        mediaRepository = MediaRepository(database.mediaItemDao(), mockk())
+        mediaRepository = MediaRepository(database.mediaItemDao())
         mediaManagerDomain = MediaCreator(
             mediaRepository, PlaylistRepository(database.playlistDao()), MediaStorage(context)
         )
@@ -55,7 +56,7 @@ class MediaRegisterRepositoryTest {
     @Test
     fun test_registerMediaItem_mediaItemCreated() = runBlocking {
         val videoItem = createVideoItem(1).first()
-        mediaManagerDomain.createMediaItem(videoItem, emptyList())
+        createMediaItem(videoItem)
 
         val mediaItemEntity = database.mediaItemDao().getAllSortedMediaItems().first().first()
         assertThat(mediaItemEntity.mediaItemId).isEqualTo(videoItem.id)
@@ -65,7 +66,7 @@ class MediaRegisterRepositoryTest {
     @Test
     fun test_registerMultipleMediaItems_mediaItemsCreated() = runBlocking {
         val videoItems = createVideoItem(100)
-        videoItems.forEach { mediaManagerDomain.createMediaItem(it, emptyList()) }
+        videoItems.forEach { createMediaItem(it) }
 
         val mediaItemEntities = database.mediaItemDao().getAllSortedMediaItems().first()
 
@@ -77,7 +78,7 @@ class MediaRegisterRepositoryTest {
     @Test
     fun test_registerMultipleMediaItemsAsynchronously_mediaItemsCreated() = runBlocking {
         val videoItems = createVideoItem(100)
-        videoItems.map { async { mediaManagerDomain.createMediaItem(it, emptyList()) } }.awaitAll()
+        videoItems.map { async { createMediaItem(it) } }.awaitAll()
 
         val mediaItemEntities = database.mediaItemDao().getAllSortedMediaItems().first()
         assertThat(mediaItemEntities.last().mediaItemId).isEqualTo(videoItems.last().id)
@@ -104,6 +105,11 @@ class MediaRegisterRepositoryTest {
             thumbnail = "http://thumbnail-$id.json",
             normalThumbnail = "http://thumbnail-normal-$id.json"
         )
+    }
+
+    private suspend fun createMediaItem(videoItem: VideoItem) {
+        mediaManagerDomain.registerDownloadingMediaItem(videoItem, emptyList(), UUID(1L, 1L))
+        mediaRepository.setMediaItemAsDownloaded(videoItem.id)
     }
 
     companion object {

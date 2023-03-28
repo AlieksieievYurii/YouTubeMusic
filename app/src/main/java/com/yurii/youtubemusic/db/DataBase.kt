@@ -5,12 +5,23 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import java.io.File
+import java.util.UUID
 
-@Database(entities = [MediaItemEntity::class, PlaylistEntity::class, MediaItemPlayListAssignment::class], version = 1)
-@TypeConverters(FileConverter::class)
+@Database(
+    entities = [MediaItemEntity::class,
+        PlaylistEntity::class,
+        MediaItemPlayListAssignment::class,
+        YouTubePlaylistSyncEntity::class,
+        YouTubePlaylistSyncCrossRefToMediaPlaylist::class], version = 2
+)
+@TypeConverters(FileConverter::class, UUIDConverter::class)
 abstract class DataBase : RoomDatabase() {
+
     abstract fun mediaItemDao(): MediaItemDao
+
     abstract fun playlistDao(): PlaylistDao
+
+    abstract fun playlistSyncBindDao(): YouTubePlaylistSynchronizationDao
 }
 
 class FileConverter {
@@ -19,4 +30,12 @@ class FileConverter {
 
     @TypeConverter
     fun pathToFile(path: String) = File(path)
+}
+
+class UUIDConverter {
+    @TypeConverter
+    fun uUIDtoString(uuid: UUID?): String? = uuid?.toString()
+
+    @TypeConverter
+    fun idStringToUUID(uuid: String?): UUID? = if (uuid != null) UUID.fromString(uuid) else null
 }

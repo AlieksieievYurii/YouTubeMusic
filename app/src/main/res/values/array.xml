@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="dialog_youtube_playlist_synchronization">
+        <item>YouTube Playlists</item>
+        <item>App Playlists</item>
+    </string-array>
+
+</resources>

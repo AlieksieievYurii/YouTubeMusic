@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.screens.youtube
 
 
+import android.content.Intent
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
@@ -10,8 +11,10 @@ import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.VideoItem
+import com.yurii.youtubemusic.screens.manager.DownloadManagerActivity
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
+import com.yurii.youtubemusic.services.downloader.DownloadManager
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
@@ -37,7 +40,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
 
     private val listAdapter: VideoItemsListAdapter by lazy {
         VideoItemsListAdapter(object : VideoItemsListAdapter.Callback {
-            override fun getItemStatus(videoItem: VideoItem): VideoItemStatus = viewModel.getItemStatus(videoItem)
+            override fun getDownloadingJobState(videoItem: VideoItem): DownloadManager.State = viewModel.getItemStatus(videoItem)
             override fun onDownload(videoItem: VideoItem) = viewModel.download(videoItem)
             override fun onDownloadAndAssignedCategories(videoItem: VideoItem) = viewModel.openCategorySelectorFor(videoItem)
             override fun onCancelDownloading(videoItem: VideoItem) = viewModel.cancelDownloading(videoItem)
@@ -50,6 +53,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
     override fun onClickOption(id: Int) {
         when (id) {
             R.id.item_log_out -> viewModel.signOut()
+            R.id.item_open_download_manager -> openDownloadManager()
         }
     }
 
@@ -100,8 +104,8 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         }
     }
 
-    private fun showFailedVideoItem(videoItem: VideoItem, error: Exception?) {
-        ErrorDialog.create(videoItem, error).addListeners(
+    private fun showFailedVideoItem(videoItem: VideoItem, error: String?) {
+        ErrorDialog.create(error ?: getString(R.string.label_no_error_message)).addListeners(
             onTryAgain = { viewModel.tryToDownloadAgain(videoItem) },
             onCancel = { viewModel.cancelDownloading(videoItem) })
             .show(requireActivity().supportFragmentManager, "ErrorDialog")
@@ -143,6 +147,10 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         requireActivity().supportFragmentManager,
         viewModel.youTubeAPI, currentPlaylist, viewModel::setPlaylist
     )
+
+    private fun openDownloadManager() {
+        startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))
+    }
 
     companion object {
         fun createInstance() = YouTubeMusicFragment()

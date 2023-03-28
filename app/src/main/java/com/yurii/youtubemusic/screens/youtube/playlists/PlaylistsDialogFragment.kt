@@ -37,10 +37,12 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        playlistsAdapter = PlaylistsAdapter(currentPlayList) { selectedPlaylist ->
+        playlistsAdapter = PlaylistsAdapter { selectedPlaylist ->
             onSelectedPlaylist.invoke(selectedPlaylist)
             dismiss()
         }
+
+        playlistsAdapter.selectedPlaylist = currentPlayList
 
         binding.rvPlayLists.apply {
             adapter = playlistsAdapter.apply {
