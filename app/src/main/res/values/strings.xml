@@ -84,4 +84,5 @@
     <string name="hint_all_playlists_synchronized">You\'ve synchronized all your playlists</string>
     <string name="label_id">ID: %s</string>
     <string name="label_share">Share</string>
+    <string name="label_share_video">Share video URL</string>
 </resources>
