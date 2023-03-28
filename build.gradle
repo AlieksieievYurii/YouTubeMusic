@@ -33,6 +33,7 @@ buildscript {
         androidx_hilt_work_version = "1.0.0"
         androidx_hilt_compiler_version = "1.0.0"
         stepview_version = "1.5.1"
+        qr_gen_version = "3.0.1"
 
         // Testing
         leakcanary_android_version = "2.4"
