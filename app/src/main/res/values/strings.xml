@@ -86,4 +86,5 @@
     <string name="label_share">Share</string>
     <string name="label_share_video_url">Share video URL</string>
     <string name="label_share_media_file">Share media file</string>
+    <string name="label_youtube_playlists">YouTube Playlists</string>
 </resources>

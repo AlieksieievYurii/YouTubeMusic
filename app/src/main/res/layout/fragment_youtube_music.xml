@@ -89,6 +89,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_empty_playlist"
+                    android:textAlignment="center"
                     isVisible="@{viewState instanceof ViewState.EmptyList}"
                     app:drawableTopCompat="@drawable/ic_empty_playlist"
                     tools:visibility="gone" />
@@ -140,12 +141,15 @@
                         android:id="@+id/error"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:drawableTopCompat="@drawable/ic_first_selection_illustration" />
+                        android:layout_margin="8dp"
+                        android:textAlignment="center"
+                        app:drawableTopCompat="@drawable/ic_a_broken_robot_pana" />
 
                     <Button
                         android:id="@+id/btn_try_again"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
                         android:text="@string/label_try_again" />
                 </LinearLayout>
             </LinearLayout>

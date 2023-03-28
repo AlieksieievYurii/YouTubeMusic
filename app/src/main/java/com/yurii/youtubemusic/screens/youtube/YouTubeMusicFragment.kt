@@ -75,7 +75,10 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         }
 
         binding.apply {
-            btnTryAgain.setOnClickListener { listAdapter.retry() }
+            btnTryAgain.setOnClickListener {
+                binding.refresh.isEnabled = true
+                listAdapter.retry()
+            }
             btnSelectPlayList.setOnClickListener { openDialogToSelectPlaylist(viewModel.currentPlaylistId.value) }
             btnSelectPlayListFirst.setOnClickListener { openDialogToSelectPlaylist(null) }
             refresh.setOnRefreshListener { listAdapter.refresh() }
@@ -132,6 +135,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             }
             is LoadState.Error -> {
                 binding.refresh.isRefreshing = false
+                binding.refresh.isEnabled = false
                 val loadStateError = it.refresh as LoadState.Error
                 if (loadStateError.error is EmptyListException)
                     binding.viewState = ViewState.EmptyList

@@ -3,15 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/label_youtube_playlists" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_play_lists"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_gravity="center"
             android:scrollbars="vertical"
             android:visibility="gone" />
 
@@ -19,7 +27,7 @@
             android:id="@+id/progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_gravity="center"
             android:layout_margin="100dp"
             tools:visibility="gone" />
 
@@ -28,7 +36,7 @@
             style="@style/DescriptionText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_gravity="center"
             android:text="@string/label_not_found_play_lists"
             android:visibility="gone"
             app:drawableTopCompat="@drawable/ic_empty_play_lists" />
@@ -37,7 +45,7 @@
             android:id="@+id/layout_error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_gravity="center"
             android:orientation="vertical"
             android:visibility="gone">
 
@@ -58,5 +66,5 @@
             <!-- //TODO Replace error illustration -->
         </LinearLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
 </layout>
