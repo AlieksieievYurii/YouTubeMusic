@@ -19,9 +19,6 @@
             name="playingCategory"
             type="String" />
 
-        <variable
-            name="isPlayingNow"
-            type="Boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -121,8 +118,7 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@{isPlayingNow ? @drawable/ic_circle_pause_72 : @drawable/ic_circle_play_72}"
-            android:tint="?attr/colorAccent"
+            app:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
@@ -130,7 +126,7 @@
             app:layout_constraintTop_toBottomOf="@+id/seek_bar"
             app:layout_constraintVertical_bias="0.7"
             tools:ignore="ContentDescription"
-            tools:src="@drawable/ic_circle_play_72" />
+            tools:src="@drawable/anim_from_pause_to_play_48dp" />
 
         <ImageButton
             android:id="@+id/move_to_next"
@@ -141,7 +137,7 @@
             android:layout_toEndOf="@id/action_button"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_skip_next_48dp"
-            android:tint="?attr/colorAccent"
+            app:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="@+id/action_button"
             app:layout_constraintStart_toEndOf="@+id/action_button"
             app:layout_constraintTop_toTopOf="@+id/action_button"
@@ -156,7 +152,7 @@
             android:layout_toEndOf="@id/action_button"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_skip_previous_48dp"
-            android:tint="?attr/colorAccent"
+            app:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="@+id/action_button"
             app:layout_constraintEnd_toStartOf="@+id/action_button"
             app:layout_constraintTop_toTopOf="@+id/action_button"
@@ -168,7 +164,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="?attr/colorAccent"
+            app:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/move_to_previous"
             app:layout_constraintStart_toStartOf="parent"
@@ -183,7 +179,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="?attr/colorAccent"
+            app:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="@+id/open_audio_effects"
             app:layout_constraintStart_toEndOf="@+id/open_audio_effects"
             app:layout_constraintTop_toTopOf="@+id/open_audio_effects"
@@ -196,7 +192,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="?attr/colorAccent"
+            app:tint="?attr/colorAccent"
             app:layout_constraintBottom_toBottomOf="@+id/loop_mode"
             app:layout_constraintStart_toEndOf="@+id/loop_mode"
             app:layout_constraintTop_toTopOf="@+id/loop_mode"

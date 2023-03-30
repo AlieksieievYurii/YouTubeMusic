@@ -30,7 +30,7 @@
 
             <FrameLayout
                 android:id="@+id/thumbnail_layout"
-                android:layout_width="80dp"
+                android:layout_width="85dp"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true">
 

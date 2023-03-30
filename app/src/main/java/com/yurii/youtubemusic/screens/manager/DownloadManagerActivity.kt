@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class DownloadManagerActivity : AppCompatActivity() {
-    private val viewModel: DownloadManagerViewModel by viewModels()
+    internal val viewModel: DownloadManagerViewModel by viewModels()
     private val binding: ActivityDownloadManagerBinding by viewBinding()
     private val listAdapter by lazy {
         PlaylistBindsAndJobsListAdapter(object : PlaylistBindsAndJobsListAdapter.Callback {

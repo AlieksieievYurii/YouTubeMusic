@@ -2,6 +2,7 @@ package com.yurii.youtubemusic.utilities
 
 import android.app.Service
 import android.content.res.ColorStateList
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -135,4 +136,13 @@ fun <T> LiveData<T>.asFlow(): Flow<T> = callbackFlow {
 
 fun <T, R> Flow<List<T>>.mapItems(transform: (T) -> R): Flow<List<R>> {
     return map { it.map(transform) }
+}
+
+fun ImageView.setUniqueAnimatedDrawable(animatedVectorDrawableResId: Int) {
+    if (tag != animatedVectorDrawableResId) {
+        setImageResource(animatedVectorDrawableResId)
+        (drawable as? AnimatedVectorDrawable)?.start()
+            ?: throw IllegalStateException("Given drawable ID is not animated vector")
+        tag = animatedVectorDrawableResId
+    }
 }

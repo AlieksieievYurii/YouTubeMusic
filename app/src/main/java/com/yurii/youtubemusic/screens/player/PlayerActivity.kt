@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.screens.player
 
 import android.content.Intent
+import android.graphics.drawable.AnimatedVectorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.viewbinding.library.activity.viewBinding
@@ -15,6 +16,7 @@ import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.utilities.setTint
+import com.yurii.youtubemusic.utilities.setUniqueAnimatedDrawable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -82,7 +84,10 @@ class PlayerActivity : AppCompatActivity() {
             is PlaybackState.Playing -> binding.apply {
                 thumbnail.load(it.mediaItem.thumbnail)
                 mediaItem = it.mediaItem
-                isPlayingNow = !it.isPaused
+                if (it.isPaused)
+                    actionButton.setUniqueAnimatedDrawable(R.drawable.anim_from_play_to_pause_48dp)
+                else
+                    actionButton.setUniqueAnimatedDrawable(R.drawable.anim_from_pause_to_play_48dp)
             }
         }
     }

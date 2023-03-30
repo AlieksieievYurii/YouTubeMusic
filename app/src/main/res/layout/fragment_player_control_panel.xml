@@ -19,9 +19,6 @@
             name="playingPlaylist"
             type="com.yurii.youtubemusic.models.MediaItemPlaylist" />
 
-        <variable
-            name="isPlayingNow"
-            type="Boolean" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -119,7 +116,6 @@
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@{isPlayingNow ? @drawable/ic_pause_48px : @drawable/ic_play_48dp}"
                 tools:ignore="ContentDescription"
                 tools:src="@drawable/ic_play_48dp" />
 
