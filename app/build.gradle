@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
-    id 'kotlin-android-extensions'
+    id 'kotlin-parcelize'
     id 'com.google.dagger.hilt.android'
 }
 
@@ -32,13 +32,8 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    buildFeatures {
-        viewBinding true
-    }
-
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = '1.8'
     }
 
     testOptions {
@@ -54,7 +49,7 @@ android {
 
 dependencies {
     implementation "androidx.media:media:$media_api_version"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     implementation "androidx.recyclerview:recyclerview:$recycler_view_version"
     implementation "androidx.core:core-ktx:$core_ktx_version"
@@ -63,7 +58,7 @@ dependencies {
     implementation "org.threeten:threetenbp:$threetenbp_version"
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
     implementation "com.github.sealedtx:java-youtube-downloader:$java_youtube_downloader_version"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.21"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "com.google.code.gson:gson:$gson_version"
     implementation "de.hdodenhof:circleimageview:$circleimageview_version"
@@ -71,7 +66,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx_version"
     implementation "com.jakewharton.timber:timber:$timber_version"
     implementation "com.google.android.gms:play-services-auth:$play_services_auth"
-    implementation "com.otaliastudios:nestedscrollcoordinatorlayout:$nestedscrollcoordinatorlayout_version"
     implementation "com.github.yogacp:android-viewbinding:$view_biding_delegate_version"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$swiperefreshlayout_version"
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"

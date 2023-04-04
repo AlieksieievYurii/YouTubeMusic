@@ -1,7 +1,7 @@
 package com.yurii.youtubemusic.models
 
 import com.google.api.services.youtube.model.Video
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.threeten.bp.Duration
 import java.math.BigInteger
 

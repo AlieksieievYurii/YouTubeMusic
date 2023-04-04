@@ -4,7 +4,8 @@ import android.os.Parcelable
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import com.yurii.youtubemusic.db.PlaylistEntity
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
+
 
 @Parcelize
 data class MediaItemPlaylist(val id: Long, val name: String) : Parcelable {

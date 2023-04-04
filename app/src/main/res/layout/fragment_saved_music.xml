@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.otaliastudios.nestedscrollcoordinatorlayout.NestedScrollCoordinatorLayout
+    <com.yurii.youtubemusic.ui.NestedScrollCoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
@@ -33,5 +33,5 @@
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
-    </com.otaliastudios.nestedscrollcoordinatorlayout.NestedScrollCoordinatorLayout>
+    </com.yurii.youtubemusic.ui.NestedScrollCoordinatorLayout>
 </layout>
