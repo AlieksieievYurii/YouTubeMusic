@@ -7,7 +7,8 @@ import android.support.v4.media.MediaMetadataCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.yurii.youtubemusic.db.MediaItemEntity
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
+
 import java.io.File
 
 /**

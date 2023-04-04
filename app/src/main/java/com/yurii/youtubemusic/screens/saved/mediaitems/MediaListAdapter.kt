@@ -14,6 +14,7 @@ import com.yurii.youtubemusic.databinding.ItemMusicBinding
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.utilities.getVisibleItems
+import com.yurii.youtubemusic.utilities.setUniqueAnimatedDrawable
 import java.util.*
 
 class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, MediaListAdapter.MusicViewHolder>(Comparator) {
@@ -113,10 +114,13 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
 
         fun setPlayingState(isPlaying: Boolean) {
             itemMusicBinding.apply {
-                val itemIcon = ContextCompat.getDrawable(root.context, if (isPlaying) R.drawable.ic_pause_24px else R.drawable.ic_play_24dp)
                 container.setCardBackgroundColor(ContextCompat.getColor(root.context, R.color.lightGray))
                 thumbnailState.isVisible = true
-                thumbnailState.setImageDrawable(itemIcon)
+                if (isPlaying)
+                    thumbnailState.setUniqueAnimatedDrawable(R.drawable.anim_from_pause_to_play_48dp)
+                else
+                    thumbnailState.setUniqueAnimatedDrawable(R.drawable.anim_from_play_to_pause_48dp)
+
                 if (playlist != null) {
                     hintPlayingCategory.text = root.context.getString(R.string.label_playing_from, playlist?.name)
                     hintPlayingCategory.isVisible = true

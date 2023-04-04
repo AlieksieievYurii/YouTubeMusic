@@ -21,6 +21,7 @@ import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.ui.startValueAnimation
+import com.yurii.youtubemusic.utilities.setUniqueAnimatedDrawable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -71,7 +72,10 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
         binding.apply {
             this.mediaItem = mediaItem
             thumbnail.load(mediaItem.thumbnail)
-            isPlayingNow = isPlaying
+            if (isPlaying)
+                actionButton.setUniqueAnimatedDrawable(R.drawable.anim_from_pause_to_play_48dp)
+            else
+                actionButton.setUniqueAnimatedDrawable(R.drawable.anim_from_play_to_pause_48dp)
             playingPlaylist = playlist
             if (!container.isVisible)
                 showMusicPlayerPanel()
