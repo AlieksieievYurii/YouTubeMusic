@@ -6,7 +6,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
-import com.yurii.youtubemusic.db.MediaItemEntity
+import com.youtubemusic.core.database.models.MediaItemEntity
 import kotlinx.parcelize.Parcelize
 
 import java.io.File

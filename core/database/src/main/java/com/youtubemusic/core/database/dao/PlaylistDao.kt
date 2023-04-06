@@ -1,6 +1,9 @@
-package com.yurii.youtubemusic.db
+package com.youtubemusic.core.database.dao
 
 import androidx.room.*
+import com.youtubemusic.core.database.models.MediaItemEntity
+import com.youtubemusic.core.database.models.MediaItemPlayListAssignment
+import com.youtubemusic.core.database.models.PlaylistEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

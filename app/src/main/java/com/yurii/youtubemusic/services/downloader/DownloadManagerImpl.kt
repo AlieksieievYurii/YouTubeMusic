@@ -86,7 +86,7 @@ class DownloadManagerImpl @Inject constructor(
     private suspend fun synchronize() {
         mediaRepository.mediaItemEntities.first().forEach {
             if (it.downloadingJobId != null) {
-                val workInfo: WorkInfo? = workManager.getWorkInfoById(it.downloadingJobId).await()
+                val workInfo: WorkInfo? = workManager.getWorkInfoById(it.downloadingJobId!!).await()
                 if (workInfo == null) {
                     Timber.e("Work is not found for ${it.downloadingJobId}")
                     mediaLibraryDomain.deleteMediaItem(it.toMediaItem())

@@ -1,6 +1,12 @@
-package com.yurii.youtubemusic.db
+package com.youtubemusic.core.database.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Transaction
+import com.youtubemusic.core.database.models.YouTubePlaylistSyncToAppPlaylistCrossRef
+import com.youtubemusic.core.database.models.YouTubePlaylistSyncEntity
+import com.youtubemusic.core.database.models.YouTubePlaylistWithBoundMediaPlaylists
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -10,7 +16,7 @@ interface YouTubePlaylistSynchronizationDao {
     suspend fun insert(vararg youTubePlaylistSync: YouTubePlaylistSyncEntity)
 
     @Insert
-    suspend fun insertMediaItemPlaylistBinds(vararg p: YouTubePlaylistSyncCrossRefToMediaPlaylist)
+    suspend fun insertMediaItemPlaylistBinds(vararg p: YouTubePlaylistSyncToAppPlaylistCrossRef)
 
     @Transaction
     suspend fun deleteYouTubePlaylistSyncAndItsRelations(youTubePlaylistId: String) {

@@ -1,8 +1,8 @@
 package com.yurii.youtubemusic.source
 
-import com.yurii.youtubemusic.db.MediaItemPlayListAssignment
-import com.yurii.youtubemusic.db.PlaylistDao
-import com.yurii.youtubemusic.db.PlaylistEntity
+import com.youtubemusic.core.database.dao.PlaylistDao
+import com.youtubemusic.core.database.models.MediaItemPlayListAssignment
+import com.youtubemusic.core.database.models.PlaylistEntity
 import com.yurii.youtubemusic.models.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

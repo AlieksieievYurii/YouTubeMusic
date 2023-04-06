@@ -1,6 +1,7 @@
-package com.yurii.youtubemusic.db
+package com.youtubemusic.core.database.dao
 
 import androidx.room.*
+import com.youtubemusic.core.database.models.MediaItemEntity
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 

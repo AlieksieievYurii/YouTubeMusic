@@ -1,6 +1,7 @@
 package com.yurii.youtubemusic.source
 
-import com.yurii.youtubemusic.db.*
+import com.youtubemusic.core.database.dao.MediaItemDao
+import com.youtubemusic.core.database.models.MediaItemEntity
 import com.yurii.youtubemusic.models.Item
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.toMediaItem

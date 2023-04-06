@@ -3,7 +3,7 @@ package com.yurii.youtubemusic.models
 import android.os.Parcelable
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
-import com.yurii.youtubemusic.db.PlaylistEntity
+import com.youtubemusic.core.database.models.PlaylistEntity
 import kotlinx.parcelize.Parcelize
 
 

@@ -1,9 +1,9 @@
 package com.yurii.youtubemusic.source
 
 import com.youtubemusic.core.common.mapItems
-import com.yurii.youtubemusic.db.YouTubePlaylistSyncEntity
-import com.yurii.youtubemusic.db.YouTubePlaylistSynchronizationDao
-import com.yurii.youtubemusic.db.YouTubePlaylistSyncCrossRefToMediaPlaylist
+import com.youtubemusic.core.database.dao.YouTubePlaylistSynchronizationDao
+import com.youtubemusic.core.database.models.YouTubePlaylistSyncEntity
+import com.youtubemusic.core.database.models.YouTubePlaylistSyncToAppPlaylistCrossRef
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.YouTubePlaylistSync
 import com.yurii.youtubemusic.models.toMediaItemPlaylists
@@ -39,7 +39,7 @@ class YouTubePlaylistSyncRepository @Inject constructor(private val youTubePlayl
 
     private suspend fun assignAppPlaylists(youTubePlaylistId: String, playlists: List<MediaItemPlaylist>) {
         youTubePlaylistSyncDao.insertMediaItemPlaylistBinds(*playlists.map {
-            YouTubePlaylistSyncCrossRefToMediaPlaylist(youTubePlaylistId, it.id)
+            YouTubePlaylistSyncToAppPlaylistCrossRef(youTubePlaylistId, it.id)
         }.toTypedArray())
     }
 }
