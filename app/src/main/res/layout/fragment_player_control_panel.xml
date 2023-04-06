@@ -5,7 +5,7 @@
 
     <data>
 
-        <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
+        <import type="com.youtubemusic.core.common.FormatingUtilsKt" />
 
         <variable
             name="mediaItem"
@@ -96,7 +96,7 @@
                         android:id="@+id/time_progress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{@string/label_duration_progress(UtilsKt.parseDurationToHumanView(currentTimePosition), UtilsKt.parseDurationToHumanView(mediaItem.durationInMillis))}"
+                        android:text="@{@string/label_duration_progress(FormatingUtilsKt.parseDurationToHumanView(currentTimePosition), FormatingUtilsKt.parseDurationToHumanView(mediaItem.durationInMillis))}"
                         android:textColor="#C6C6C6"
                         android:textSize="12sp"
                         tools:text="1:04 / 5:34" />

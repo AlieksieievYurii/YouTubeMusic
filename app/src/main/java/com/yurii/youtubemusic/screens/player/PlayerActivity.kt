@@ -11,12 +11,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import coil.load
+import com.youtubemusic.core.common.setTint
+import com.youtubemusic.core.common.setUniqueAnimatedDrawable
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.utilities.setTint
-import com.yurii.youtubemusic.utilities.setUniqueAnimatedDrawable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

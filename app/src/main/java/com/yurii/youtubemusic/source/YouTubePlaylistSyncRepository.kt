@@ -1,5 +1,6 @@
 package com.yurii.youtubemusic.source
 
+import com.youtubemusic.core.common.mapItems
 import com.yurii.youtubemusic.db.YouTubePlaylistSyncEntity
 import com.yurii.youtubemusic.db.YouTubePlaylistSynchronizationDao
 import com.yurii.youtubemusic.db.YouTubePlaylistSyncCrossRefToMediaPlaylist
@@ -7,7 +8,6 @@ import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.YouTubePlaylistSync
 import com.yurii.youtubemusic.models.toMediaItemPlaylists
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
-import com.yurii.youtubemusic.utilities.mapItems
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

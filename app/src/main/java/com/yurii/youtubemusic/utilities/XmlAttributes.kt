@@ -7,6 +7,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import coil.load
 import coil.transform.RoundedCornersTransformation
+import com.youtubemusic.core.common.setAnimatedText
 import com.yurii.youtubemusic.R
 import java.io.File
 

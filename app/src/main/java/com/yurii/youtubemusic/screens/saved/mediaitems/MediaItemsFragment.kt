@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.youtubemusic.core.common.requireParcelable
 import com.yurii.youtubemusic.ShareContentModalSheet
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
@@ -21,7 +22,6 @@ import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.services.media.PlaybackState
 import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
-import com.yurii.youtubemusic.utilities.requireParcelable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

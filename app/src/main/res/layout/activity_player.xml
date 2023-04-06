@@ -5,7 +5,7 @@
 
     <data>
 
-        <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
+        <import type="com.youtubemusic.core.common.FormatingUtilsKt" />
 
         <variable
             name="mediaItem"
@@ -93,7 +93,7 @@
             android:layout_below="@id/seek_bar"
             android:layout_alignParentStart="true"
             android:layout_marginEnd="16dp"
-            android:text="@{UtilsKt.parseDurationToHumanView(mediaItem.durationInMillis)}"
+            android:text="@{FormatingUtilsKt.parseDurationToHumanView(mediaItem.durationInMillis)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/seek_bar"
             tools:text="0:00" />
@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/seek_bar"
             android:layout_alignParentEnd="true"
-            android:text="@{UtilsKt.parseDurationToHumanView(currentTimePosition)}"
+            android:text="@{FormatingUtilsKt.parseDurationToHumanView(currentTimePosition)}"
             app:layout_constraintEnd_toStartOf="@+id/textView"
             app:layout_constraintHorizontal_bias="0.049"
             app:layout_constraintStart_toStartOf="parent"

@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.ui
+package com.youtubemusic.core.common
 
 import android.animation.TimeInterpolator
 import android.animation.ValueAnimator

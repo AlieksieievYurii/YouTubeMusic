@@ -9,12 +9,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.youtubemusic.core.common.getVisibleItems
+import com.youtubemusic.core.common.setUniqueAnimatedDrawable
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ItemMusicBinding
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.MediaItemPlaylist
-import com.yurii.youtubemusic.utilities.getVisibleItems
-import com.yurii.youtubemusic.utilities.setUniqueAnimatedDrawable
 import java.util.*
 
 class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, MediaListAdapter.MusicViewHolder>(Comparator) {

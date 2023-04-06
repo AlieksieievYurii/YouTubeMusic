@@ -2,6 +2,7 @@ package com.yurii.youtubemusic.services.downloader
 
 import android.util.Log
 import androidx.work.*
+import com.youtubemusic.core.common.asFlow
 import com.yurii.youtubemusic.di.MainScope
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.models.VideoItem
@@ -10,7 +11,6 @@ import com.yurii.youtubemusic.services.media.MediaStorage
 import com.yurii.youtubemusic.source.MediaCreator
 import com.yurii.youtubemusic.source.MediaLibraryDomain
 import com.yurii.youtubemusic.source.MediaRepository
-import com.yurii.youtubemusic.utilities.asFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

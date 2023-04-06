@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.core.content.res.ResourcesCompat
+import com.youtubemusic.core.common.toPx
 import com.yurii.youtubemusic.R
 import java.lang.IllegalStateException
 import kotlin.collections.ArrayList

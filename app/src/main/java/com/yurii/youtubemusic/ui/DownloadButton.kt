@@ -15,6 +15,7 @@ import android.view.animation.LinearInterpolator
 import androidx.annotation.IntRange
 import androidx.core.graphics.toRectF
 import androidx.core.view.GestureDetectorCompat
+import com.youtubemusic.core.common.toPx
 import com.yurii.youtubemusic.R
 import kotlin.math.min
 

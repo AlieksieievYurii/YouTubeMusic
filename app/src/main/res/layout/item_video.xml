@@ -6,7 +6,7 @@
 
     <data>
 
-        <import type="com.yurii.youtubemusic.utilities.UtilsKt" />
+        <import type="com.youtubemusic.core.common.FormatingUtilsKt" />
 
         <import type="android.view.View" />
 
@@ -56,7 +56,7 @@
                     android:layout_marginBottom="@dimen/mediumMargin"
                     android:background="@drawable/rectangle"
                     android:forceDarkAllowed="false"
-                    android:text="@{UtilsKt.parseDurationToHumanView(videoItem.durationInMillis)}"
+                    android:text="@{FormatingUtilsKt.parseDurationToHumanView(videoItem.durationInMillis)}"
                     android:textColor="@android:color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
@@ -99,7 +99,7 @@
                     android:layout_below="@id/channel_title"
                     android:layout_marginStart="@dimen/defMargin"
                     android:layout_toEndOf="@id/thumbnail"
-                    android:text="@{@string/label_views_count(UtilsKt.bigIntegerToShortCutSuffix(videoItem.viewCount))}"
+                    android:text="@{@string/label_views_count(FormatingUtilsKt.bigIntegerToShortCutSuffix(videoItem.viewCount))}"
                     android:textSize="12sp"
                     tools:text="135K views" />
 
@@ -160,7 +160,7 @@
                     android:layout_marginStart="5dp"
                     android:layout_toEndOf="@+id/iv_thumb_up"
                     android:gravity="center_vertical"
-                    android:text="@{UtilsKt.bigIntegerToShortCutSuffix(videoItem.likeCount)}"
+                    android:text="@{FormatingUtilsKt.bigIntegerToShortCutSuffix(videoItem.likeCount)}"
                     android:textAlignment="gravity"
                     android:textSize="12sp"
                     tools:text="212K" />

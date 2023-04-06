@@ -13,12 +13,12 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.text.TextUtils
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
+import com.youtubemusic.core.common.parcelable
+import com.youtubemusic.core.common.stopForegroundCompat
 import com.yurii.youtubemusic.models.*
 import com.yurii.youtubemusic.screens.main.MainActivity
 import com.yurii.youtubemusic.source.MediaLibraryDomain
 import com.yurii.youtubemusic.source.PlaylistRepository
-import com.yurii.youtubemusic.utilities.parcelable
-import com.yurii.youtubemusic.utilities.stopForegroundCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

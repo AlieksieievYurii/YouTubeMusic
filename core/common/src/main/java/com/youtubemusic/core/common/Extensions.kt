@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.utilities
+package com.youtubemusic.core.common
 
 import android.app.Service
 import android.content.res.ColorStateList

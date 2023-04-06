@@ -15,13 +15,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import coil.load
+import com.youtubemusic.core.common.setUniqueAnimatedDrawable
+import com.youtubemusic.core.common.startValueAnimation
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
 import com.yurii.youtubemusic.models.MediaItem
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.ui.startValueAnimation
-import com.yurii.youtubemusic.utilities.setUniqueAnimatedDrawable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
