@@ -3,11 +3,12 @@ package com.yurii.youtubemusic.screens.saved.mediaitems
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.yurii.youtubemusic.models.*
-import com.yurii.youtubemusic.services.media.MediaServiceConnection
-import com.yurii.youtubemusic.services.media.PlaybackState
-import com.yurii.youtubemusic.source.MediaLibraryDomain
-import com.yurii.youtubemusic.source.PlaylistRepository
+import com.youtubemusic.core.data.repository.PlaylistRepository
+import com.youtubemusic.core.player.MediaServiceConnection
+import com.youtubemusic.core.player.PlaybackState
+import com.youtubemusic.core.data.repository.MediaLibraryDomain
+import com.youtubemusic.core.model.MediaItem
+import com.youtubemusic.core.model.MediaItemPlaylist
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 
 class MediaItemsViewModel @AssistedInject constructor(
     @Assisted private val playlist: MediaItemPlaylist,
-    private val mediaServiceConnection: MediaServiceConnection,
+    private val mediaServiceConnection: com.youtubemusic.core.player.MediaServiceConnection,
     private val playlistRepository: PlaylistRepository,
     private val mediaLibraryDomain: MediaLibraryDomain
 ) : ViewModel() {
@@ -47,8 +48,8 @@ class MediaItemsViewModel @AssistedInject constructor(
 
     fun onClickMediaItem(mediaItem: MediaItem) {
         when (val playbackState = playbackState.value) {
-            PlaybackState.None -> mediaServiceConnection.play(mediaItem, playlist)
-            is PlaybackState.Playing -> if (playbackState.mediaItem == mediaItem) {
+            com.youtubemusic.core.player.PlaybackState.None -> mediaServiceConnection.play(mediaItem, playlist)
+            is com.youtubemusic.core.player.PlaybackState.Playing -> if (playbackState.mediaItem == mediaItem) {
                 if (playbackState.isPaused)
                     mediaServiceConnection.resume()
                 else

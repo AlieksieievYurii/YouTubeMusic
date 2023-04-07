@@ -2,12 +2,11 @@ package com.yurii.youtubemusic.screens.manager
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yurii.youtubemusic.models.MediaItemPlaylist
-import com.yurii.youtubemusic.models.YouTubePlaylistSync
-import com.yurii.youtubemusic.services.downloader.DownloadManager
-import com.yurii.youtubemusic.source.PlaylistRepository
-import com.yurii.youtubemusic.source.SyncManager
-import com.yurii.youtubemusic.source.YouTubePlaylistSyncRepository
+import com.youtubemusic.core.data.repository.PlaylistRepository
+import com.youtubemusic.core.downloader.youtube.SyncManager
+import com.youtubemusic.core.data.repository.YouTubePlaylistSyncRepository
+import com.youtubemusic.core.downloader.youtube.DownloadManager
+import com.youtubemusic.core.model.MediaItemPlaylist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -58,7 +57,7 @@ class DownloadManagerViewModel @Inject constructor(
             syncManager.turnOff()
     }
 
-    fun editAssignedPlaylists(youTubePlaylistSync: YouTubePlaylistSync) {
+    fun editAssignedPlaylists(youTubePlaylistSync: com.youtubemusic.core.model.YouTubePlaylistSync) {
         viewModelScope.launch {
             _events.emit(
                 Event.OpenPlaylistsEditor(

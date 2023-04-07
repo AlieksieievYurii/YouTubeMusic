@@ -2,9 +2,8 @@ package com.yurii.youtubemusic.screens.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yurii.youtubemusic.services.downloader.DownloadManager
-import com.yurii.youtubemusic.services.media.MediaServiceConnection
-import com.yurii.youtubemusic.source.GoogleAccount
+import com.youtubemusic.core.data.repository.GoogleAccount
+import com.youtubemusic.core.downloader.youtube.DownloadManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -13,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val mediaServiceConnection: MediaServiceConnection,
+    private val mediaServiceConnection: com.youtubemusic.core.player.MediaServiceConnection,
     downloadManager: DownloadManager,
     googleAccount: GoogleAccount
 ) : ViewModel() {

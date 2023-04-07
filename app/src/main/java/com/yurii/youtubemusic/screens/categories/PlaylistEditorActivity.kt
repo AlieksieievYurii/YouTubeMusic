@@ -9,9 +9,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.chip.Chip
+import com.youtubemusic.core.model.MediaItemPlaylist
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityPlaylistEditorBinding
-import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.ui.AddEditPlaylistDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import dagger.hilt.android.AndroidEntryPoint

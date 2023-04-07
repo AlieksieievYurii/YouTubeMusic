@@ -8,8 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.yurii.youtubemusic.db.DataBase
 import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
-import com.yurii.youtubemusic.source.PlaylistRepository
-import com.yurii.youtubemusic.source.YouTubePlaylistSyncRepository
+import com.youtubemusic.core.data.repository.YouTubePlaylistSyncRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before

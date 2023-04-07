@@ -12,13 +12,12 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.DialogPlayListsBinding
 import com.yurii.youtubemusic.screens.youtube.LoaderViewHolder
-import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
-import com.yurii.youtubemusic.utilities.EmptyListException
+import com.youtubemusic.core.data.EmptyListException
+import com.youtubemusic.core.model.YouTubePlaylist
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -26,9 +25,9 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
     private lateinit var binding: DialogPlayListsBinding
     private lateinit var playlistsAdapter: PlaylistsAdapter
 
-    var currentPlayList: Playlist? = null
-    lateinit var onSelectedPlaylist: (Playlist) -> Unit
-    lateinit var youTubeAPI: YouTubeAPI
+    var currentPlayList: YouTubePlaylist? = null
+    lateinit var onSelectedPlaylist: (YouTubePlaylist) -> Unit
+    lateinit var youTubePlaylistsPager: Pager<String, YouTubePlaylist>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.dialog_play_lists, null, false)
@@ -59,9 +58,7 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
 
         lifecycleScope.launchWhenCreated {
             launch {
-                Pager(
-                    config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-                    pagingSourceFactory = { PlaylistsPagingSource(youTubeAPI) }).flow.collectLatest {
+                youTubePlaylistsPager.flow.collectLatest {
                     playlistsAdapter.submitData(it)
                 }
             }
@@ -118,11 +115,16 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
     }
 
     companion object {
-        fun show(fragmentManager: FragmentManager, youTubeAPI: YouTubeAPI, currentPlayList: Playlist?, onSelectedPlaylist: (Playlist) -> Unit) {
+        fun show(
+            fragmentManager: FragmentManager,
+            youTubePlaylistsPager: Pager<String, YouTubePlaylist>,
+            currentPlayList: YouTubePlaylist?,
+            onSelectedPlaylist: (YouTubePlaylist) -> Unit
+        ) {
             PlaylistsDialogFragment().apply {
                 this.currentPlayList = currentPlayList
                 this.onSelectedPlaylist = onSelectedPlaylist
-                this.youTubeAPI = youTubeAPI
+                this.youTubePlaylistsPager = youTubePlaylistsPager
             }.show(fragmentManager, "SelectionPlayListFragment")
         }
     }

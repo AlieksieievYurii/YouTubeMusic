@@ -4,7 +4,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_IDLE
 import androidx.recyclerview.widget.RecyclerView
-import com.yurii.youtubemusic.models.MediaItem
+import com.youtubemusic.core.model.MediaItem
 
 class MoveListItemHelper(private val callback: (item: MediaItem, from: Int, to: Int) -> Unit) :
     ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {

@@ -7,7 +7,7 @@ import android.widget.CheckedTextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.yurii.youtubemusic.models.MediaItemPlaylist
+import com.youtubemusic.core.model.MediaItemPlaylist
 
 class MediaItemPlaylistMultiChoiceAdapter :
     ListAdapter<MediaItemPlaylist, MediaItemPlaylistMultiChoiceAdapter.PlaylistViewHolder>(Comparator) {

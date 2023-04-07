@@ -5,11 +5,11 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import com.google.android.material.tabs.TabLayoutMediator
+import com.youtubemusic.core.model.MediaItemPlaylist
 import com.yurii.youtubemusic.screens.categories.PlaylistEditorActivity
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
-import com.yurii.youtubemusic.models.MediaItemPlaylist
 import com.yurii.youtubemusic.screens.manager.DownloadManagerActivity
 import com.yurii.youtubemusic.utilities.TabFragment
 import dagger.hilt.android.AndroidEntryPoint

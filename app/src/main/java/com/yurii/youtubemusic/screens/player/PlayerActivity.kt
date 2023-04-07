@@ -1,7 +1,6 @@
 package com.yurii.youtubemusic.screens.player
 
 import android.content.Intent
-import android.graphics.drawable.AnimatedVectorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.viewbinding.library.activity.viewBinding
@@ -16,7 +15,7 @@ import com.youtubemusic.core.common.setUniqueAnimatedDrawable
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
 import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
-import com.yurii.youtubemusic.services.media.PlaybackState
+import com.youtubemusic.core.player.PlaybackState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

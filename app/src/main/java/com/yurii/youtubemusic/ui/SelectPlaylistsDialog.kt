@@ -3,8 +3,8 @@ package com.yurii.youtubemusic.ui
 
 import android.content.Context
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.youtubemusic.core.model.MediaItemPlaylist
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.models.MediaItemPlaylist
 
 class SelectPlaylistsDialog constructor(
     private val context: Context,

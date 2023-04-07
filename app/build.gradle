@@ -50,6 +50,10 @@ android {
 dependencies {
     implementation project(":core:common")
     implementation project(":core:database")
+    implementation project(':core:data')
+    implementation project(':core:model')
+    implementation project(':core:downloader:youtube')
+    implementation project(':core:player')
 
     implementation "androidx.media:media:$media_api_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0"

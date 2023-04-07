@@ -2,8 +2,8 @@ package com.yurii.youtubemusic.screens.saved
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yurii.youtubemusic.models.MediaItemPlaylist
-import com.yurii.youtubemusic.services.media.MediaServiceConnection
+import com.youtubemusic.core.data.repository.PlaylistRepository
+import com.youtubemusic.core.model.MediaItemPlaylist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -12,7 +12,7 @@ import javax.inject.Inject
 @HiltViewModel
 class
 SavedMusicViewModel @Inject constructor(
-    private val mediaServiceConnection: MediaServiceConnection
+    private val playlistRepository: PlaylistRepository
 ) : ViewModel() {
     sealed class State {
         object Loading : State()
@@ -24,7 +24,7 @@ SavedMusicViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            mediaServiceConnection.allPlaylists.collectLatest { playlists ->
+            playlistRepository.getPlaylists().collectLatest { playlists ->
                 _musicCategories.value = State.Loaded(playlists.toMutableList().also {
                     it.add(0, MediaItemPlaylist.ALL)
                 })

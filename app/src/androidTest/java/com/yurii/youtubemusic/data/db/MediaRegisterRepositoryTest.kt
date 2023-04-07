@@ -8,10 +8,7 @@ import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import com.yurii.youtubemusic.db.DataBase
 import com.yurii.youtubemusic.models.VideoItem
-import com.yurii.youtubemusic.services.media.MediaStorage
-import com.yurii.youtubemusic.source.MediaCreator
-import com.yurii.youtubemusic.source.MediaRepository
-import com.yurii.youtubemusic.source.PlaylistRepository
+import com.youtubemusic.core.data.repository.MediaFileRepository
 import com.yurii.youtubemusic.utilities.*
 import io.mockk.every
 import io.mockk.mockk
@@ -48,7 +45,7 @@ class MediaRegisterRepositoryTest {
         }
         mediaRepository = MediaRepository(database.mediaItemDao())
         mediaManagerDomain = MediaCreator(
-            mediaRepository, PlaylistRepository(database.playlistDao()), MediaStorage(context)
+            mediaRepository, PlaylistRepository(database.playlistDao()), MediaFileRepository(context)
         )
 
     }

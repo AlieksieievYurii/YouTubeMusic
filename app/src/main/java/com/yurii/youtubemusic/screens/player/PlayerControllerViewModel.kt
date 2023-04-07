@@ -2,8 +2,8 @@ package com.yurii.youtubemusic.screens.player
 
 import androidx.annotation.IntRange
 import androidx.lifecycle.*
-import com.yurii.youtubemusic.services.media.MediaServiceConnection
-import com.yurii.youtubemusic.services.media.PlaybackState
+import com.youtubemusic.core.player.MediaServiceConnection
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -29,8 +29,8 @@ class PlayerControllerViewModel @Inject constructor (private val mediaServiceCon
         viewModelScope.launch {
             playbackState.collect {
                 when (it) {
-                    PlaybackState.None -> timerJob?.cancel()
-                    is PlaybackState.Playing -> {
+                    com.youtubemusic.core.player.PlaybackState.None -> timerJob?.cancel()
+                    is com.youtubemusic.core.player.PlaybackState.Playing -> {
                         _currentPosition.value = it.currentPosition
                         if (it.isPaused) timerJob?.cancel() else runTicker()
                     }
@@ -65,10 +65,10 @@ class PlayerControllerViewModel @Inject constructor (private val mediaServiceCon
 
     fun pauseOrPlay() {
         when (val it = playbackState.value) {
-            PlaybackState.None -> {
+            com.youtubemusic.core.player.PlaybackState.None -> {
                 // Ignore
             }
-            is PlaybackState.Playing -> if (it.isPaused) mediaServiceConnection.resume() else mediaServiceConnection.pause()
+            is com.youtubemusic.core.player.PlaybackState.Playing -> if (it.isPaused) mediaServiceConnection.resume() else mediaServiceConnection.pause()
         }
     }
 
@@ -79,13 +79,13 @@ class PlayerControllerViewModel @Inject constructor (private val mediaServiceCon
 
     fun seekTo(@IntRange(from = 0, to = 1000) value: Int) {
         timerJob?.cancel()
-        (playbackState.value as? PlaybackState.Playing)?.let {
+        (playbackState.value as? com.youtubemusic.core.player.PlaybackState.Playing)?.let {
             mediaServiceConnection.seekTo(value * it.mediaItem.durationInMillis / 1000)
         }
     }
 
     fun getCurrentMappedPosition(): Int =
-        (playbackState.value as? PlaybackState.Playing)?.let { (_currentPosition.value * 1000 / it.mediaItem.durationInMillis).toInt() } ?: 0
+        (playbackState.value as? com.youtubemusic.core.player.PlaybackState.Playing)?.let { (_currentPosition.value * 1000 / it.mediaItem.durationInMillis).toInt() } ?: 0
 
     fun stopPlaying() = mediaServiceConnection.stop()
 }

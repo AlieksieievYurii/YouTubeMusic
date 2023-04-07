@@ -6,13 +6,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.yurii.youtubemusic.models.*
-import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
-import com.yurii.youtubemusic.services.downloader.DownloadManager
-import com.yurii.youtubemusic.source.GoogleAccount
-import com.yurii.youtubemusic.source.MediaLibraryDomain
-import com.yurii.youtubemusic.source.PlaylistRepository
-import com.yurii.youtubemusic.source.YouTubePreferences
+import com.youtubemusic.core.data.repository.*
+import com.youtubemusic.core.downloader.youtube.DownloadManager
+import com.youtubemusic.core.model.MediaItemPlaylist
+import com.youtubemusic.core.model.VideoItem
+import com.youtubemusic.core.model.YouTubePlaylist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -24,10 +22,9 @@ class YouTubeMusicViewModel @Inject constructor(
     private val downloadManager: DownloadManager,
     private val youTubePreferences: YouTubePreferences,
     private val playlistRepository: PlaylistRepository,
-    val youTubeAPI: YouTubeAPI,
+    private val youTubeRepository: YouTubeRepository,
     private val googleAccount: GoogleAccount,
     private val mediaLibraryDomain: MediaLibraryDomain,
-
 ) : ViewModel() {
     sealed class Event {
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: String?) : Event()
@@ -37,8 +34,9 @@ class YouTubeMusicViewModel @Inject constructor(
     private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
     val videoItems: StateFlow<PagingData<VideoItem>> = _videoItems
 
-    private val _currentPlaylistId: MutableStateFlow<Playlist?> = MutableStateFlow(youTubePreferences.getCurrentYouTubePlaylist())
-    val currentPlaylistId: StateFlow<Playlist?> = _currentPlaylistId
+    private val _currentYouTubePlaylist: MutableStateFlow<YouTubePlaylist?> =
+        MutableStateFlow(youTubePreferences.getCurrentYouTubePlaylist())
+    val currentYouTubePlaylistId = _currentYouTubePlaylist.asStateFlow()
 
     val videoItemStatus: Flow<DownloadManager.Status> = downloadManager.observeStatus()
 
@@ -48,7 +46,7 @@ class YouTubeMusicViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     init {
-        _currentPlaylistId.value?.let { loadVideoItems(it) }
+        _currentYouTubePlaylist.value?.let { loadVideoItems(it) }
     }
 
     fun signOut() {
@@ -56,9 +54,9 @@ class YouTubeMusicViewModel @Inject constructor(
         youTubePreferences.setCurrentYouTubePlaylist(null)
     }
 
-    fun setPlaylist(playlist: Playlist) {
+    fun setPlaylist(playlist: YouTubePlaylist) {
         youTubePreferences.setCurrentYouTubePlaylist(playlist)
-        _currentPlaylistId.value = playlist
+        _currentYouTubePlaylist.value = playlist
         loadVideoItems(playlist)
     }
 
@@ -102,15 +100,22 @@ class YouTubeMusicViewModel @Inject constructor(
 
     fun getItemStatus(videoItem: VideoItem) = downloadManager.getDownloadingJobState(videoItem.id)
 
+    fun getYouTubePlaylistsPager(): Pager<String, YouTubePlaylist> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+            pagingSourceFactory = { youTubeRepository.getYouTubePlaylistsPagingSource() })
+
+    }
+
     private fun sendEvent(event: Event) = viewModelScope.launch {
         _event.emit(event)
     }
 
-    private fun loadVideoItems(playlist: Playlist) {
+    private fun loadVideoItems(playlist: YouTubePlaylist) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             Pager(config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-                pagingSourceFactory = { VideosPagingSource(youTubeAPI, playlist.id) }).flow.cachedIn(viewModelScope)
+                pagingSourceFactory = { youTubeRepository.getYouTubeVideosPagingSource(playlist) }).flow.cachedIn(viewModelScope)
                 .collectLatest {
                     _videoItems.emit(it)
                 }

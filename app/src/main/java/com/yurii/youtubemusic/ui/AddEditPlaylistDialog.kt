@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.youtubemusic.core.model.MediaItemPlaylist
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.models.MediaItemPlaylist
 
 class AddEditPlaylistDialog private constructor(
     private val context: Context,

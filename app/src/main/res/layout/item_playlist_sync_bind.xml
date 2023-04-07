@@ -7,7 +7,7 @@
 
         <variable
             name="data"
-            type="com.yurii.youtubemusic.models.YouTubePlaylistSync" />
+            type="com.youtubemusic.core.model.YouTubePlaylistSync" />
     </data>
 
     <androidx.cardview.widget.CardView

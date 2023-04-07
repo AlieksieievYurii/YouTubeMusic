@@ -9,7 +9,7 @@
 
         <variable
             name="mediaItem"
-            type="com.yurii.youtubemusic.models.MediaItem" />
+            type="com.youtubemusic.core.model.MediaItem" />
 
         <variable
             name="currentTimePosition"
@@ -17,7 +17,7 @@
 
         <variable
             name="playingPlaylist"
-            type="com.yurii.youtubemusic.models.MediaItemPlaylist" />
+            type="com.youtubemusic.core.model.MediaItemPlaylist" />
 
     </data>
 

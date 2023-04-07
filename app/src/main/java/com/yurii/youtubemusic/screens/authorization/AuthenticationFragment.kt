@@ -5,8 +5,8 @@ import android.widget.Toast
 import com.google.android.gms.common.api.ApiException
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentAuthenticationBinding
-import com.yurii.youtubemusic.source.DoesNotHaveRequiredScopes
-import com.yurii.youtubemusic.source.GoogleAccount
+import com.youtubemusic.core.data.repository.DoesNotHaveRequiredScopes
+import com.youtubemusic.core.data.repository.GoogleAccount
 import com.yurii.youtubemusic.utilities.TabFragment
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

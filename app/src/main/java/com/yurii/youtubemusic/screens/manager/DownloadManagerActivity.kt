@@ -12,10 +12,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityDownloadManagerBinding
-import com.yurii.youtubemusic.models.YouTubePlaylistSync
-import com.yurii.youtubemusic.services.downloader.DownloadManager
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,7 +34,7 @@ class DownloadManagerActivity : AppCompatActivity() {
                 viewModel.cancelAllDownloadingJobs()
             }
 
-            override fun onClickPlaylistSync(view: View, playlistSync: YouTubePlaylistSync) {
+            override fun onClickPlaylistSync(view: View, playlistSync: com.youtubemusic.core.model.YouTubePlaylistSync) {
                 PopupMenu(this@DownloadManagerActivity, view).apply {
                     menuInflater.inflate(R.menu.playlist_synchronization_item_menu, menu)
                     setOnMenuItemClickListener {

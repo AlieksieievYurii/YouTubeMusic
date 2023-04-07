@@ -13,14 +13,15 @@ import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.youtubemusic.core.data.AllYouTubePlaylistsSynchronized
+import com.youtubemusic.core.data.repository.PlaylistRepository
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.DialogAddYoutubePlaylistSyncBinding
 import com.yurii.youtubemusic.screens.youtube.LoaderViewHolder
-import com.yurii.youtubemusic.screens.youtube.YouTubeAPI
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsAdapter
-import com.yurii.youtubemusic.source.PlaylistRepository
-import com.yurii.youtubemusic.source.YouTubePlaylistSyncRepository
-import com.yurii.youtubemusic.utilities.EmptyListException
+import com.youtubemusic.core.data.repository.YouTubePlaylistSyncRepository
+import com.youtubemusic.core.data.EmptyListException
+import com.youtubemusic.core.data.repository.YouTubeRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -29,7 +30,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
     @Inject
-    lateinit var youTubeAPI: YouTubeAPI
+    lateinit var youTubeRepository: YouTubeRepository
 
     @Inject
     lateinit var playlistRepository: PlaylistRepository
@@ -68,12 +69,7 @@ class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
     private suspend fun observeYouTubePlaylists() {
         Pager(
             config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-            pagingSourceFactory = {
-                ExcludingAlreadySyncPlaylistPagingSource(
-                    youTubeAPI,
-                    youTubePlaylistSyncRepository
-                )
-            }).flow.collectLatest {
+            pagingSourceFactory = { youTubeRepository.getExcludingAlreadySyncPlaylistPagingSource() }).flow.collectLatest {
             playlistsAdapter.submitData(it)
         }
     }
@@ -142,9 +138,9 @@ class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
 
     private fun performAddingYouTubePlaylistSync() {
         lifecycleScope.launch {
+            val playlist = playlistsAdapter.selectedPlaylist!!
             youTubePlaylistSyncRepository.addYouTubePlaylistSynchronization(
-                playlistsAdapter.selectedPlaylist!!,
-                mediaItemPlaylistMultiChoiceAdapter.getSelectedItems()
+                playlist, mediaItemPlaylistMultiChoiceAdapter.getSelectedItems()
             )
             dismiss()
         }

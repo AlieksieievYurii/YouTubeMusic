@@ -7,7 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityEqualizerBinding
-import com.yurii.youtubemusic.models.EqualizerData
+import com.youtubemusic.core.model.EqualizerData
 import com.yurii.youtubemusic.ui.EqualizerView
 import dagger.hilt.android.AndroidEntryPoint
 

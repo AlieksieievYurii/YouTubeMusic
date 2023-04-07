@@ -1,8 +1,8 @@
 package com.yurii.youtubemusic.screens.equalizer
 
 import androidx.lifecycle.*
-import com.yurii.youtubemusic.models.TwisterData
-import com.yurii.youtubemusic.services.media.AudioEffectManager
+import com.youtubemusic.core.model.TwisterData
+import com.youtubemusic.core.player.AudioEffectManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

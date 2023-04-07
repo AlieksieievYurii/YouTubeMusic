@@ -6,15 +6,17 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.youtubemusic.core.data.EmptyListException
+import com.youtubemusic.core.downloader.youtube.DownloadManager
+import com.youtubemusic.core.model.MediaItemPlaylist
+import com.youtubemusic.core.model.VideoItem
+import com.youtubemusic.core.model.YouTubePlaylist
 import com.yurii.youtubemusic.databinding.FragmentYoutubeMusicBinding
 import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.models.MediaItemPlaylist
-import com.yurii.youtubemusic.models.VideoItem
+
 import com.yurii.youtubemusic.screens.manager.DownloadManagerActivity
-import com.yurii.youtubemusic.screens.youtube.playlists.Playlist
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
-import com.yurii.youtubemusic.services.downloader.DownloadManager
 import com.yurii.youtubemusic.ui.ErrorDialog
 import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
@@ -79,7 +81,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
                 binding.refresh.isEnabled = true
                 listAdapter.retry()
             }
-            btnSelectPlayList.setOnClickListener { openDialogToSelectPlaylist(viewModel.currentPlaylistId.value) }
+            btnSelectPlayList.setOnClickListener { openDialogToSelectPlaylist(viewModel.currentYouTubePlaylistId.value) }
             btnSelectPlayListFirst.setOnClickListener { openDialogToSelectPlaylist(null) }
             refresh.setOnRefreshListener { listAdapter.refresh() }
         }
@@ -114,7 +116,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             .show(requireActivity().supportFragmentManager, "ErrorDialog")
     }
 
-    private suspend fun startHandlingCurrentPlaylist() = viewModel.currentPlaylistId.collectLatest {
+    private suspend fun startHandlingCurrentPlaylist() = viewModel.currentYouTubePlaylistId.collectLatest {
         binding.apply {
             if (it != null) {
                 viewState = ViewState.Loading
@@ -130,7 +132,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             is LoadState.Loading -> if (!binding.refresh.isRefreshing) binding.viewState = ViewState.Loading
             is LoadState.NotLoading -> {
                 binding.refresh.isRefreshing = false
-                if (viewModel.currentPlaylistId.value != null)
+                if (viewModel.currentYouTubePlaylistId.value != null)
                     binding.viewState = ViewState.VideosLoaded
             }
             is LoadState.Error -> {
@@ -147,9 +149,9 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         }
     }
 
-    private fun openDialogToSelectPlaylist(currentPlaylist: Playlist?) = PlaylistsDialogFragment.show(
+    private fun openDialogToSelectPlaylist(currentPlaylist: YouTubePlaylist?) = PlaylistsDialogFragment.show(
         requireActivity().supportFragmentManager,
-        viewModel.youTubeAPI, currentPlaylist, viewModel::setPlaylist
+        viewModel.getYouTubePlaylistsPager(), currentPlaylist, viewModel::setPlaylist
     )
 
     private fun openDownloadManager() {

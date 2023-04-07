@@ -14,12 +14,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.requireParcelable
+import com.youtubemusic.core.model.MediaItem
+import com.youtubemusic.core.model.MediaItemPlaylist
 import com.yurii.youtubemusic.ShareContentModalSheet
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
-import com.yurii.youtubemusic.models.MediaItem
-import com.yurii.youtubemusic.models.MediaItemPlaylist
-import com.yurii.youtubemusic.services.media.PlaybackState
+import com.youtubemusic.core.player.PlaybackState
 import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import dagger.hilt.android.AndroidEntryPoint
@@ -71,7 +71,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
 
     private suspend fun startObservingPlayingItem() = viewModel.playbackState.collectLatest { playbackState ->
         when (playbackState) {
-            PlaybackState.None -> mediaListAdapter.resetState()
+           PlaybackState.None -> mediaListAdapter.resetState()
             is PlaybackState.Playing -> mediaListAdapter.setPlayingStateMediaItem(
                 playbackState.mediaItem,
                 isPlaying = !playbackState.isPaused,

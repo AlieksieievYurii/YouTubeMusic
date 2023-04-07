@@ -47,7 +47,7 @@
             android:screenOrientation="portrait" />
 
         <service
-            android:name=".services.media.MediaService"
+            android:name="com.youtubemusic.core.player.MediaService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />

@@ -16,7 +16,7 @@ import coil.load
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButton
 import com.youtubemusic.core.common.toPx
-import com.yurii.youtubemusic.models.MediaItem
+import com.youtubemusic.core.model.MediaItem
 import de.hdodenhof.circleimageview.CircleImageView
 import net.glxn.qrgen.android.QRCode
 import timber.log.Timber

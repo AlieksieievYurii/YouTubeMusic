@@ -10,7 +10,7 @@
 
         <variable
             name="musicItem"
-            type="com.yurii.youtubemusic.models.MediaItem" />
+            type="com.youtubemusic.core.model.MediaItem" />
     </data>
 
 
