@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.categories
+package com.youtubemusic.feature.playlist_editor
 
 import androidx.lifecycle.*
 import com.youtubemusic.core.data.repository.PlaylistRepository

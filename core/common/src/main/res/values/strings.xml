@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_rename_playlist">Rename playlist</string>
+    <string name="label_create_playlist">Create playlist</string>
+    <string name="label_category_name">Playlist Name</string>
+    <string name="label_ok">OK</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_playlist_name_cannot_be_empty">You must enter name</string>
+    <string name="label_no_playlist">You haven\'t created any playlist yet</string>
+    <string name="dialog_delete">Delete</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_confirm_deletion_playlist_title">Delete playlist</string>
+    <string name="dialog_confirm_deletion_playlist_message">Are you sure you want to delete this playlist?</string>
+</resources>

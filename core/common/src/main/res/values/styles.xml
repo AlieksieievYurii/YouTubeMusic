@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DescriptionText">
+        <item name="android:paddingStart">40dp</item>
+        <item name="android:paddingEnd">40dp</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:paddingTop">20dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="RedButton">
+        <item name="android:backgroundTint">?attr/colorError</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="PrimaryButton">
+        <item name="android:backgroundTint">?attr/colorAccent</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="CategoriesTabsStyle" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@android:color/white</item>
+        <item name="tabIndicatorHeight">2.5dp</item>
+        <item name="tabIconTint">@android:color/white</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+        <item name="tabTextColor">@android:color/white</item>
+    </style>
+
+    <style name="roundedImageView" parent="">
+        <item name="cornerSize">15%</item>
+    </style>
+
+    <style name="CustomBottomSheetDialog" parent="@style/ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheet</item>
+    </style>
+
+    <style name="CustomBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="shapeAppearanceOverlay">@style/CustomShapeAppearanceBottomSheetDialog</item>
+    </style>
+
+    <style name="CustomShapeAppearanceBottomSheetDialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+    </style>
+</resources>

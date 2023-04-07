@@ -14,7 +14,7 @@
             android:layout_height="300dp"
             android:layout_margin="10dp"
             app:connectorColor="?attr/colorAccent"
-            app:disableConnectorColor="@color/lightGray"
+            app:disableConnectorColor="@android:color/darker_gray"
             app:disableThumb="@drawable/disabled_seekbar_thumb"
             app:enabledEqualizer="false"
             app:layout_constraintEnd_toEndOf="parent"
@@ -34,12 +34,12 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="46dp"
             app:color="?attr/colorAccent"
-            app:disableColor="@color/lightGray"
+            app:disableColor="@android:color/darker_gray"
             app:enabled="false"
             app:layout_constraintEnd_toStartOf="@+id/virtualizer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/enable_bass_boost"
-            app:markerColor="@color/white" />
+            app:markerColor="@android:color/white" />
 
         <com.youtubemusic.feature.equalizer.ui.TwisterController
             android:id="@+id/virtualizer"
@@ -50,12 +50,12 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             app:color="?attr/colorAccent"
-            app:disableColor="@color/lightGray"
+            app:disableColor="@android:color/darker_gray"
             app:enabled="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/bass_boost"
             app:layout_constraintTop_toBottomOf="@+id/enable_virtualizer"
-            app:markerColor="@color/white" />
+            app:markerColor="@android:color/white" />
 
         <TextView
             android:id="@+id/textView3"

@@ -3,4 +3,7 @@
     <string name="label_audio_effects">Audio Effects</string>
     <string name="label_custom">Custom</string>
     <string name="label_presets">Presets</string>
+    <string name="bass_boost">Bass Boost</string>
+    <string name="virtualizer">Virtualizer</string>
+    <string name="label_equalizer">Equalizer</string>
 </resources>

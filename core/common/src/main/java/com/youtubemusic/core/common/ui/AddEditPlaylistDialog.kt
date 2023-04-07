@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.ui
+package com.youtubemusic.core.common.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,8 +6,7 @@ import android.view.LayoutInflater
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.youtubemusic.core.model.MediaItemPlaylist
-import com.yurii.youtubemusic.R
+import com.youtubemusic.core.common.R
 
 class AddEditPlaylistDialog private constructor(
     private val context: Context,
@@ -46,7 +45,7 @@ class AddEditPlaylistDialog private constructor(
         fun showToCreate(context: Context, callback: (String) -> Unit) =
             AddEditPlaylistDialog(context, null, callback).show()
 
-        fun showToEdit(context: Context, playlist: MediaItemPlaylist, callback: (String) -> Unit) =
-            AddEditPlaylistDialog(context, playlist.name, callback).show()
+        fun showToEdit(context: Context, playlistName: String, callback: (String) -> Unit) =
+            AddEditPlaylistDialog(context, playlistName, callback).show()
     }
 }

@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.categories
+package com.youtubemusic.feature.playlist_editor
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,11 +9,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.chip.Chip
+import com.youtubemusic.core.common.ui.AddEditPlaylistDialog
+import com.youtubemusic.core.common.ui.showDeletionDialog
 import com.youtubemusic.core.model.MediaItemPlaylist
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.ActivityPlaylistEditorBinding
-import com.yurii.youtubemusic.ui.AddEditPlaylistDialog
-import com.yurii.youtubemusic.ui.showDeletionDialog
+import com.youtubemusic.feature.playlist_editor.databinding.ActivityPlaylistEditorBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -72,7 +71,7 @@ class PlaylistEditorActivity : AppCompatActivity() {
             id = playlist.id.toInt()
             text = playlist.name
             setOnClickListener {
-                AddEditPlaylistDialog.showToEdit(this@PlaylistEditorActivity, playlist) { viewModel.renameCategory(playlist, it) }
+                AddEditPlaylistDialog.showToEdit(this@PlaylistEditorActivity, playlist.name) { viewModel.renameCategory(playlist, it) }
             }
             setOnCloseIconClickListener {
                 showDeletionDialog(
