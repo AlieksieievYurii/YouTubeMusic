@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.equalizer
+package com.youtubemusic.feature.equalizer
 
 import androidx.lifecycle.*
 import com.youtubemusic.core.model.TwisterData

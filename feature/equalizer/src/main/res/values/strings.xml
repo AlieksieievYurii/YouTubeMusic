@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_audio_effects">Audio Effects</string>
+    <string name="label_custom">Custom</string>
+    <string name="label_presets">Presets</string>
+</resources>

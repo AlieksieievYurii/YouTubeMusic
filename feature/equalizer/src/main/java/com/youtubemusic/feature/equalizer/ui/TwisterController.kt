@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.ui
+package com.youtubemusic.feature.equalizer.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,7 +8,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.yurii.youtubemusic.R
+import com.youtubemusic.feature.equalizer.R
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.hypot

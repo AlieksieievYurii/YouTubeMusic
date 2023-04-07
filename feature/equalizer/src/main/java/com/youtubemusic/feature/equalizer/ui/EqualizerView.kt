@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.ui
+package com.youtubemusic.feature.equalizer.ui
 
 import android.content.Context
 import android.graphics.*
@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.core.content.res.ResourcesCompat
 import com.youtubemusic.core.common.toPx
-import com.yurii.youtubemusic.R
+import com.youtubemusic.feature.equalizer.R
 import java.lang.IllegalStateException
 import kotlin.collections.ArrayList
 import kotlin.math.abs

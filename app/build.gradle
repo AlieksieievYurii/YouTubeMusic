@@ -54,6 +54,7 @@ dependencies {
     implementation project(':core:model')
     implementation project(':core:downloader:youtube')
     implementation project(':core:player')
+    implementation project(':feature:equalizer')
 
     implementation "androidx.media:media:$media_api_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0"

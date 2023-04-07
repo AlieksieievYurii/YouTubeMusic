@@ -20,7 +20,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
-            android:name=".screens.equalizer.EqualizerActivity"
+            android:name="com.youtubemusic.feature.equalizer.EqualizerActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".screens.player.PlayerActivity"

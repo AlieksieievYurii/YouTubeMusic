@@ -2,13 +2,13 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".screens.equalizer.EqualizerActivity">
+    tools:context="com.youtubemusic.feature.equalizer.EqualizerActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.yurii.youtubemusic.ui.EqualizerView
+        <com.youtubemusic.feature.equalizer.ui.EqualizerView
             android:id="@+id/equalizer"
             android:layout_width="match_parent"
             android:layout_height="300dp"
@@ -24,7 +24,7 @@
             app:progressDrawable="@drawable/seekbar_style"
             app:thumb="@drawable/seekbar_thumb" />
 
-        <com.yurii.youtubemusic.ui.TwisterController
+        <com.youtubemusic.feature.equalizer.ui.TwisterController
             android:id="@+id/bass_boost"
             android:layout_width="150dp"
             android:layout_height="150dp"
@@ -41,7 +41,7 @@
             app:layout_constraintTop_toBottomOf="@+id/enable_bass_boost"
             app:markerColor="@color/white" />
 
-        <com.yurii.youtubemusic.ui.TwisterController
+        <com.youtubemusic.feature.equalizer.ui.TwisterController
             android:id="@+id/virtualizer"
             android:layout_width="150dp"
             android:layout_height="150dp"

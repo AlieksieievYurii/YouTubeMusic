@@ -1,14 +1,13 @@
-package com.yurii.youtubemusic.screens.equalizer
+package com.youtubemusic.feature.equalizer
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.ActivityEqualizerBinding
 import com.youtubemusic.core.model.EqualizerData
-import com.yurii.youtubemusic.ui.EqualizerView
+import com.youtubemusic.feature.equalizer.databinding.ActivityEqualizerBinding
+import com.youtubemusic.feature.equalizer.ui.EqualizerView
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

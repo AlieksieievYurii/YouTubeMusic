@@ -14,7 +14,7 @@ import com.youtubemusic.core.common.setTint
 import com.youtubemusic.core.common.setUniqueAnimatedDrawable
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
-import com.yurii.youtubemusic.screens.equalizer.EqualizerActivity
+import com.youtubemusic.feature.equalizer.EqualizerActivity
 import com.youtubemusic.core.player.PlaybackState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
