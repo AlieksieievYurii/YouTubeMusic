@@ -7,7 +7,7 @@
 
         <variable
             name="data"
-            type="com.yurii.youtubemusic.screens.manager.DownloadingVideoItemJob" />
+            type="com.youtubemusic.feature.download_manager.DownloadingVideoItemJob" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -30,7 +30,6 @@
                 android:layout_height="50dp"
                 android:layout_marginStart="8dp"
                 android:adjustViewBounds="true"
-                android:contentDescription="@string/content_description_thumbnail_video"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:shapeAppearanceOverlay="@style/roundedImageView"

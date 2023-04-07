@@ -82,6 +82,7 @@ dependencies {
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     implementation "androidx.datastore:datastore-preferences:$data_store_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
+    implementation project(path: ':feature:download-manager')
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
     implementation "androidx.work:work-runtime-ktx:$work_version"
     implementation "androidx.hilt:hilt-work:$androidx_hilt_work_version"

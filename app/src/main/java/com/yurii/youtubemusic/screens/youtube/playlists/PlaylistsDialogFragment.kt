@@ -13,9 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.youtubemusic.core.common.PlaylistsAdapter
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.DialogPlayListsBinding
-import com.yurii.youtubemusic.screens.youtube.LoaderViewHolder
+import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.data.EmptyListException
 import com.youtubemusic.core.model.YouTubePlaylist
 import kotlinx.coroutines.flow.collectLatest

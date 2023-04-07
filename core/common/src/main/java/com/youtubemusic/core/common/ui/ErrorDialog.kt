@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.ui
+package com.youtubemusic.core.common.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
-import com.yurii.youtubemusic.R
+import com.youtubemusic.core.common.R
 
 typealias CallTryAgain = () -> Unit
 typealias CallCancel = () -> Unit

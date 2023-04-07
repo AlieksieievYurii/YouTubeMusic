@@ -30,11 +30,9 @@
                 android:layout_height="50dp"
                 android:layout_marginStart="8dp"
                 android:adjustViewBounds="true"
-                android:contentDescription="@string/content_description_thumbnail_video"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/roundedImageView"
-                tools:src="@drawable/ic_loading_image_error" />
+                app:shapeAppearanceOverlay="@style/roundedImageView" />
 
             <TextView
                 android:id="@+id/playlist_name"

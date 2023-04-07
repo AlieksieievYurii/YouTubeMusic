@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.manager
+package com.youtubemusic.feature.download_manager
 
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.YouTubePlaylistSync
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.ItemHeadlineBinding
-import com.yurii.youtubemusic.databinding.ItemJobBinding
-import com.yurii.youtubemusic.databinding.ItemPlaylistSyncBindBinding
+import com.youtubemusic.feature.download_manager.databinding.ItemHeadlineBinding
+import com.youtubemusic.feature.download_manager.databinding.ItemJobBinding
+import com.youtubemusic.feature.download_manager.databinding.ItemPlaylistSyncBindBinding
 
 sealed class AdapterData {
     data class PlaylistBind(val data: YouTubePlaylistSync) : AdapterData()
@@ -27,7 +26,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         fun onAddSyncPlaylistBind()
         fun cancelAllDownloading()
 
-        fun onClickPlaylistSync(view: View, playlistSync: com.youtubemusic.core.model.YouTubePlaylistSync)
+        fun onClickPlaylistSync(view: View, playlistSync: YouTubePlaylistSync)
         fun openFailedJobError(itemId: String)
 
         fun cancelDownloading(itemId: String)
@@ -47,7 +46,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
             oldItem == newItem
     }
 
-    fun submitPlaylistBinds(list: List<com.youtubemusic.core.model.YouTubePlaylistSync>) = synchronized(this) {
+    fun submitPlaylistBinds(list: List<YouTubePlaylistSync>) = synchronized(this) {
         setDataSources(cashedPlaylistBinds.apply {
             clear()
             cashedPlaylistBinds.addAll(list.map { AdapterData.PlaylistBind(it) })
@@ -134,7 +133,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     }
 
     private inner class PlaylistBindViewHolder(private val binding: ItemPlaylistSyncBindBinding) : ViewHolder(binding.root) {
-        fun bind(playlistBind: com.youtubemusic.core.model.YouTubePlaylistSync) {
+        fun bind(playlistBind: YouTubePlaylistSync) {
             binding.data = playlistBind
             binding.appPlaylists.text = playlistBind.mediaItemPlaylists.joinToString(",") { it.name }
             binding.content.setOnClickListener { callback.onClickPlaylistSync(binding.root, playlistBind) }

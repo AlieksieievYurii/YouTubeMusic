@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.manager
+package com.youtubemusic.feature.download_manager
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,15 +13,14 @@ import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.youtubemusic.core.common.PlaylistsAdapter
+import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.data.AllYouTubePlaylistsSynchronized
-import com.youtubemusic.core.data.repository.PlaylistRepository
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.DialogAddYoutubePlaylistSyncBinding
-import com.yurii.youtubemusic.screens.youtube.LoaderViewHolder
-import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsAdapter
-import com.youtubemusic.core.data.repository.YouTubePlaylistSyncRepository
 import com.youtubemusic.core.data.EmptyListException
+import com.youtubemusic.core.data.repository.PlaylistRepository
+import com.youtubemusic.core.data.repository.YouTubePlaylistSyncRepository
 import com.youtubemusic.core.data.repository.YouTubeRepository
+import com.youtubemusic.feature.download_manager.databinding.DialogAddYoutubePlaylistSyncBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

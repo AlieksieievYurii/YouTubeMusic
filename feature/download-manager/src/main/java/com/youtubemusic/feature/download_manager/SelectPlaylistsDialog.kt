@@ -1,10 +1,9 @@
-package com.yurii.youtubemusic.ui
+package com.youtubemusic.feature.download_manager
 
 
 import android.content.Context
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.youtubemusic.core.model.MediaItemPlaylist
-import com.yurii.youtubemusic.R
 
 class SelectPlaylistsDialog constructor(
     private val context: Context,

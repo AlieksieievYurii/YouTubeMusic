@@ -6,6 +6,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.youtubemusic.core.common.ui.ErrorDialog
+import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.data.EmptyListException
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
@@ -15,10 +17,9 @@ import com.yurii.youtubemusic.databinding.FragmentYoutubeMusicBinding
 import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.R
 
-import com.yurii.youtubemusic.screens.manager.DownloadManagerActivity
+import com.youtubemusic.feature.download_manager.DownloadManagerActivity
 import com.yurii.youtubemusic.screens.youtube.playlists.PlaylistsDialogFragment
-import com.yurii.youtubemusic.ui.ErrorDialog
-import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
+import com.youtubemusic.feature.download_manager.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest

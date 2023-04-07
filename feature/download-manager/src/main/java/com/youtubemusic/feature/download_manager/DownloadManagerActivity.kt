@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.manager
+package com.youtubemusic.feature.download_manager
 
 import android.os.Bundle
 import android.view.View
@@ -12,11 +12,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.youtubemusic.core.common.ui.ErrorDialog
 import com.youtubemusic.core.downloader.youtube.DownloadManager
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.ActivityDownloadManagerBinding
-import com.yurii.youtubemusic.ui.ErrorDialog
-import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
+import com.youtubemusic.feature.download_manager.databinding.ActivityDownloadManagerBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

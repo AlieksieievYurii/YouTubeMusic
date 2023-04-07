@@ -43,7 +43,7 @@
         </activity>
 
         <activity
-            android:name=".screens.manager.DownloadManagerActivity"
+            android:name="com.youtubemusic.feature.download_manager.DownloadManagerActivity"
             android:screenOrientation="portrait" />
 
         <service

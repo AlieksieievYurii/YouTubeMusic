@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.youtube
+package com.youtubemusic.core.common.ui
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.yurii.youtubemusic.R
+import com.youtubemusic.core.common.R
 
 class LoaderViewHolder : LoadStateAdapter<LoaderViewHolder.LoaderViewHolder>() {
     class LoaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {

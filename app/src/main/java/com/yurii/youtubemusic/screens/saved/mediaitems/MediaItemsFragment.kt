@@ -20,7 +20,7 @@ import com.yurii.youtubemusic.ShareContentModalSheet
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.youtubemusic.core.player.PlaybackState
-import com.yurii.youtubemusic.ui.SelectPlaylistsDialog
+import com.youtubemusic.feature.download_manager.SelectPlaylistsDialog
 import com.yurii.youtubemusic.ui.showDeletionDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -119,7 +119,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
     private fun openCategoriesEditor(mediaItem: MediaItem) {
         lifecycleScope.launch {
-            SelectPlaylistsDialog(
+            com.youtubemusic.feature.download_manager.SelectPlaylistsDialog(
                 requireContext(),
                 viewModel.getPlaylists(),
                 viewModel.getAssignedPlaylists(mediaItem)

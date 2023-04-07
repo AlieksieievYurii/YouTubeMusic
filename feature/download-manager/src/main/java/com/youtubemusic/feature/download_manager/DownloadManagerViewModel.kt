@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.manager
+package com.youtubemusic.feature.download_manager
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
