@@ -30,7 +30,7 @@
             android:name="com.youtubemusic.feature.playlist_editor.PlaylistEditorActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".screens.main.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"

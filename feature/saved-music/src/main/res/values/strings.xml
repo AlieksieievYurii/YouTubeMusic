@@ -8,4 +8,5 @@
     <string name="label_share_video_url">Share video URL</string>
     <string name="label_playing_from">Playing from \‘%s\’</string>
     <string name="label_share_media_file">Share media file</string>
+    <string name="label_add_edit_playlists">Playlists</string>
 </resources>
