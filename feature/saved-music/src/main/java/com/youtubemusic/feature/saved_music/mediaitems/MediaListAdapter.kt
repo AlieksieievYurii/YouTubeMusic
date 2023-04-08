@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.saved.mediaitems
+package com.youtubemusic.feature.saved_music.mediaitems
 
 import android.view.LayoutInflater
 import android.view.View
@@ -13,8 +13,8 @@ import com.youtubemusic.core.common.getVisibleItems
 import com.youtubemusic.core.common.setUniqueAnimatedDrawable
 import com.youtubemusic.core.model.MediaItem
 import com.youtubemusic.core.model.MediaItemPlaylist
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.ItemMusicBinding
+import com.youtubemusic.feature.saved_music.R
+import com.youtubemusic.feature.saved_music.databinding.ItemMusicBinding
 import java.util.*
 
 class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, MediaListAdapter.MusicViewHolder>(Comparator) {
@@ -79,11 +79,11 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
     }
 
 
-    private fun findVisibleViewHolder(mediaItem: MediaItem): MediaListAdapter.MusicViewHolder? {
+    private fun findVisibleViewHolder(mediaItem: MediaItem): MusicViewHolder? {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
         (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
             if (it != -1 && getItem(it)?.id == mediaItem.id) {
-                return recyclerView.findViewHolderForLayoutPosition(it) as MediaListAdapter.MusicViewHolder
+                return recyclerView.findViewHolderForLayoutPosition(it) as MusicViewHolder
             }
         }
         return null
@@ -114,7 +114,7 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
 
         fun setPlayingState(isPlaying: Boolean) {
             itemMusicBinding.apply {
-                container.setCardBackgroundColor(ContextCompat.getColor(root.context, R.color.lightGray))
+                container.setCardBackgroundColor(ContextCompat.getColor(root.context, android.R.color.darker_gray))
                 thumbnailState.isVisible = true
                 if (isPlaying)
                     thumbnailState.setUniqueAnimatedDrawable(com.youtubemusic.core.common.R.drawable.anim_from_pause_to_play_48dp)
@@ -132,7 +132,7 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
         fun setNonPlayingState() {
             itemMusicBinding.apply {
                 hintPlayingCategory.isVisible = false
-                container.setCardBackgroundColor(ContextCompat.getColor(itemMusicBinding.container.context, R.color.white))
+                container.setCardBackgroundColor(ContextCompat.getColor(itemMusicBinding.container.context,  android.R.color.white))
                 thumbnailState.isVisible = false
             }
         }

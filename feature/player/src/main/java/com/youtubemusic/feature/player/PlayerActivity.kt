@@ -1,10 +1,7 @@
 package com.youtubemusic.feature.player
 
-import android.content.Context
 import android.content.Intent
-import android.content.res.TypedArray
 import android.os.Bundle
-import android.util.TypedValue
 import android.viewbinding.library.activity.viewBinding
 import android.widget.SeekBar
 import androidx.activity.viewModels
@@ -14,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import coil.load
+import com.youtubemusic.core.common.getAttrColor
 import com.youtubemusic.core.common.setTint
 import com.youtubemusic.core.common.setUniqueAnimatedDrawable
 import com.youtubemusic.core.player.PlaybackState
@@ -104,12 +102,4 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
     }
-}
-
-fun Context.getAttrColor(attr: Int): Int {
-    val typedValue = TypedValue()
-    val a: TypedArray = obtainStyledAttributes(typedValue.data, intArrayOf(attr))
-    val color = a.getColor(0, 0)
-    a.recycle()
-    return color
 }

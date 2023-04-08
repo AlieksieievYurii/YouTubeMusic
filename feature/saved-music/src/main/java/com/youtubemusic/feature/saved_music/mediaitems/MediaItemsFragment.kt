@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.saved.mediaitems
+package com.youtubemusic.feature.saved_music.mediaitems
 
 import android.os.Bundle
 import android.view.View
@@ -14,14 +14,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.requireParcelable
+import com.youtubemusic.core.common.ui.showDeletionDialog
 import com.youtubemusic.core.model.MediaItem
 import com.youtubemusic.core.model.MediaItemPlaylist
-import com.yurii.youtubemusic.ShareContentModalSheet
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.FragmentMediaItemsBinding
 import com.youtubemusic.core.player.PlaybackState
-import com.youtubemusic.feature.download_manager.SelectPlaylistsDialog
-import com.yurii.youtubemusic.ui.showDeletionDialog
+import com.youtubemusic.feature.saved_music.R
+import com.youtubemusic.feature.saved_music.ShareContentModalSheet
+import com.youtubemusic.feature.saved_music.databinding.FragmentMediaItemsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

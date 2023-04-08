@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.saved
+package com.youtubemusic.feature.saved_music
 
 import android.content.Intent
 import android.view.View
@@ -8,9 +8,9 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.feature.equalizer.EqualizerActivity
 import com.youtubemusic.feature.playlist_editor.PlaylistEditorActivity
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
 import com.youtubemusic.core.common.TabFragment
+import com.youtubemusic.feature.download_manager.DownloadManagerActivity
+import com.youtubemusic.feature.saved_music.databinding.FragmentSavedMusicBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 
@@ -55,7 +55,7 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
     }
 
     private fun openDownloadManager() {
-        startActivity(Intent(requireContext(), com.youtubemusic.feature.download_manager.DownloadManagerActivity::class.java))
+        startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))
     }
 
     private fun initCategoriesLayout(categories: List<MediaItemPlaylist>) {

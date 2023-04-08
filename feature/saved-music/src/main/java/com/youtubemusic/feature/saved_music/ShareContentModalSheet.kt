@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic
+package com.youtubemusic.feature.saved_music
 
 import android.content.Intent
 import android.net.Uri
@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentManager
 import coil.load
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButton
+import com.youtubemusic.core.common.getAttrColor
 import com.youtubemusic.core.common.toPx
 import com.youtubemusic.core.model.MediaItem
 import de.hdodenhof.circleimageview.CircleImageView
@@ -29,7 +30,7 @@ class ShareContentModalSheet : BottomSheetDialogFragment() {
 
         val quCode = QRCode.from(buildUrl())
             .withSize(view.toPx(250), view.toPx(250))
-            .withColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary), 0)
+            .withColor(ContextCompat.getColor(requireContext(), requireContext().getAttrColor(android.R.attr.colorPrimary)), 0)
             .bitmap()
 
         view.findViewById<ImageView>(R.id.qr_code).setImageBitmap(quCode)
@@ -74,7 +75,7 @@ class ShareContentModalSheet : BottomSheetDialogFragment() {
         startActivity(shareIntent)
     }
 
-    private fun buildUrl(): String = "${YOUTUBE_WATCH_URL}${mediaItem.id}"
+    private fun buildUrl(): String = "$YOUTUBE_WATCH_URL${mediaItem.id}"
 
     companion object {
         private const val TAG = "ShareContentModalSheet"

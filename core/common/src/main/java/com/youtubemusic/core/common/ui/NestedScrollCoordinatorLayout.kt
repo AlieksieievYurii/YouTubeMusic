@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.ui
+package com.youtubemusic.core.common.ui
 
 import android.content.Context
 import android.util.AttributeSet

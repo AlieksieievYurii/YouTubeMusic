@@ -1,12 +1,15 @@
 package com.youtubemusic.core.common
 
 import android.app.Service
+import android.content.Context
 import android.content.res.ColorStateList
+import android.content.res.TypedArray
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.TypedValue
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.ImageView
@@ -145,4 +148,12 @@ fun ImageView.setUniqueAnimatedDrawable(animatedVectorDrawableResId: Int) {
             ?: throw IllegalStateException("Given drawable ID is not animated vector")
         tag = animatedVectorDrawableResId
     }
+}
+
+fun Context.getAttrColor(attr: Int): Int {
+    val typedValue = TypedValue()
+    val a: TypedArray = obtainStyledAttributes(typedValue.data, intArrayOf(attr))
+    val color = a.getColor(0, 0)
+    a.recycle()
+    return color
 }

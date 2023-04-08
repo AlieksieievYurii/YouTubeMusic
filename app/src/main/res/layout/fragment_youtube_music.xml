@@ -13,7 +13,7 @@
         <import type="com.yurii.youtubemusic.screens.youtube.YouTubeMusicFragment.ViewState" />
     </data>
 
-    <com.yurii.youtubemusic.ui.NestedScrollCoordinatorLayout
+    <com.youtubemusic.core.common.ui.NestedScrollCoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
@@ -154,5 +154,5 @@
                 </LinearLayout>
             </LinearLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    </com.yurii.youtubemusic.ui.NestedScrollCoordinatorLayout>
+    </com.youtubemusic.core.common.ui.NestedScrollCoordinatorLayout>
 </layout>

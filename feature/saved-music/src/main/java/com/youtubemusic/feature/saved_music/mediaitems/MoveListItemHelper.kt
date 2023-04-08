@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.saved.mediaitems
+package com.youtubemusic.feature.saved_music.mediaitems
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_DRAG

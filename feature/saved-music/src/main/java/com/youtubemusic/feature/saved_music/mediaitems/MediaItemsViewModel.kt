@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.saved.mediaitems
+package com.youtubemusic.feature.saved_music.mediaitems
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 
 class MediaItemsViewModel @AssistedInject constructor(
     @Assisted private val playlist: MediaItemPlaylist,
-    private val mediaServiceConnection: com.youtubemusic.core.player.MediaServiceConnection,
+    private val mediaServiceConnection: MediaServiceConnection,
     private val playlistRepository: PlaylistRepository,
     private val mediaLibraryDomain: MediaLibraryDomain
 ) : ViewModel() {
@@ -48,8 +48,8 @@ class MediaItemsViewModel @AssistedInject constructor(
 
     fun onClickMediaItem(mediaItem: MediaItem) {
         when (val playbackState = playbackState.value) {
-            com.youtubemusic.core.player.PlaybackState.None -> mediaServiceConnection.play(mediaItem, playlist)
-            is com.youtubemusic.core.player.PlaybackState.Playing -> if (playbackState.mediaItem == mediaItem) {
+            PlaybackState.None -> mediaServiceConnection.play(mediaItem, playlist)
+            is PlaybackState.Playing -> if (playbackState.mediaItem == mediaItem) {
                 if (playbackState.isPaused)
                     mediaServiceConnection.resume()
                 else

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_description_more_options">More options for music item</string>
+    <string name="label_no_media_items">The playlist doesn\'t contain any downloaded music yet</string>
+    <string name="label_fragment_title_saved_music">Saved Music</string>
+    <string name="dialog_confirm_deletion_music_title">Delete music</string>
+    <string name="dialog_confirm_deletion_music_message">Are you sure want to delete this music?</string>
+    <string name="label_share_video_url">Share video URL</string>
+    <string name="label_playing_from">Playing from \‘%s\’</string>
+    <string name="label_share_media_file">Share media file</string>
+</resources>

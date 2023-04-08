@@ -2,9 +2,9 @@ package com.yurii.youtubemusic.utilities
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.youtubemusic.feature.saved_music.SavedMusicFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.screens.authorization.AuthenticationFragment
-import com.yurii.youtubemusic.screens.saved.SavedMusicFragment
 import com.yurii.youtubemusic.screens.youtube.YouTubeMusicFragment
 
 
@@ -76,7 +76,7 @@ class FragmentHelper(private val fragmentManager: FragmentManager) {
     }
 
     private fun createSavedMusicFragment(): Fragment{
-        val savedMusicFragment = SavedMusicFragment.createInstance()
+        val savedMusicFragment = com.youtubemusic.feature.saved_music.SavedMusicFragment.createInstance()
 
         fragmentManager.beginTransaction().run {
             add(R.id.frameLayout, savedMusicFragment, TAG_SAVED_MUSIC_FRAGMENT)

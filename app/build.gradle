@@ -84,6 +84,7 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:$data_store_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
     implementation project(path: ':feature:download-manager')
+    implementation project(path: ':feature:saved-music')
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
     implementation "androidx.work:work-runtime-ktx:$work_version"
     implementation "androidx.hilt:hilt-work:$androidx_hilt_work_version"

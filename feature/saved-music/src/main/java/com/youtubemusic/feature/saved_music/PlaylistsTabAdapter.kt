@@ -1,9 +1,9 @@
-package com.yurii.youtubemusic.screens.saved
+package com.youtubemusic.feature.saved_music
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.youtubemusic.core.model.MediaItemPlaylist
-import com.yurii.youtubemusic.screens.saved.mediaitems.MediaItemsFragment
+import com.youtubemusic.feature.saved_music.mediaitems.MediaItemsFragment
 
 class PlaylistsTabAdapter(fragment: Fragment, private val categories: List<MediaItemPlaylist>) : FragmentStateAdapter(fragment) {
     override fun getItemCount(): Int = categories.size

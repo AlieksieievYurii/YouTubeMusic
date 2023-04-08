@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.saved
+package com.youtubemusic.feature.saved_music
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
