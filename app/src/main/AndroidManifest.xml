@@ -23,7 +23,7 @@
             android:name="com.youtubemusic.feature.equalizer.EqualizerActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".screens.player.PlayerActivity"
+            android:name="com.youtubemusic.feature.player.PlayerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

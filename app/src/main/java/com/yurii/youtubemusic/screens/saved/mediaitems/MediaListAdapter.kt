@@ -117,9 +117,9 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
                 container.setCardBackgroundColor(ContextCompat.getColor(root.context, R.color.lightGray))
                 thumbnailState.isVisible = true
                 if (isPlaying)
-                    thumbnailState.setUniqueAnimatedDrawable(R.drawable.anim_from_pause_to_play_48dp)
+                    thumbnailState.setUniqueAnimatedDrawable(com.youtubemusic.core.common.R.drawable.anim_from_pause_to_play_48dp)
                 else
-                    thumbnailState.setUniqueAnimatedDrawable(R.drawable.anim_from_play_to_pause_48dp)
+                    thumbnailState.setUniqueAnimatedDrawable(com.youtubemusic.core.common.R.drawable.anim_from_play_to_pause_48dp)
 
                 if (playlist != null) {
                     hintPlayingCategory.text = root.context.getString(R.string.label_playing_from, playlist?.name)

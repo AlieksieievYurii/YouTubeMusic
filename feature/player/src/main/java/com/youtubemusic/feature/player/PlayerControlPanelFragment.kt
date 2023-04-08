@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.player
+package com.youtubemusic.feature.player
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -20,8 +20,7 @@ import com.youtubemusic.core.common.startValueAnimation
 import com.youtubemusic.core.model.MediaItem
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.player.PlaybackState
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.FragmentPlayerControlPanelBinding
+import com.youtubemusic.feature.player.databinding.FragmentPlayerControlPanelBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -73,9 +72,9 @@ class PlayerControlPanelFragment : Fragment(R.layout.fragment_player_control_pan
             this.mediaItem = mediaItem
             thumbnail.load(mediaItem.thumbnail)
             if (isPlaying)
-                actionButton.setUniqueAnimatedDrawable(R.drawable.anim_from_pause_to_play_48dp)
+                actionButton.setUniqueAnimatedDrawable(com.youtubemusic.core.common.R.drawable.anim_from_pause_to_play_48dp)
             else
-                actionButton.setUniqueAnimatedDrawable(R.drawable.anim_from_play_to_pause_48dp)
+                actionButton.setUniqueAnimatedDrawable(com.youtubemusic.core.common.R.drawable.anim_from_play_to_pause_48dp)
             playingPlaylist = playlist
             if (!container.isVisible)
                 showMusicPlayerPanel()

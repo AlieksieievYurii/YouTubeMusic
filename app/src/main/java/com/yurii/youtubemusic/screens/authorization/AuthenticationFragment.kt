@@ -7,7 +7,7 @@ import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentAuthenticationBinding
 import com.youtubemusic.core.data.repository.DoesNotHaveRequiredScopes
 import com.youtubemusic.core.data.repository.GoogleAccount
-import com.yurii.youtubemusic.utilities.TabFragment
+import com.youtubemusic.core.common.TabFragment
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

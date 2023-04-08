@@ -1,24 +1,28 @@
-package com.yurii.youtubemusic.screens.player
+package com.youtubemusic.feature.player
 
+import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.content.res.TypedArray
 import android.os.Bundle
+import android.util.TypedValue
 import android.viewbinding.library.activity.viewBinding
 import android.widget.SeekBar
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import coil.load
 import com.youtubemusic.core.common.setTint
 import com.youtubemusic.core.common.setUniqueAnimatedDrawable
-import com.yurii.youtubemusic.R
-import com.yurii.youtubemusic.databinding.ActivityPlayerBinding
-import com.youtubemusic.feature.equalizer.EqualizerActivity
 import com.youtubemusic.core.player.PlaybackState
+import com.youtubemusic.feature.equalizer.EqualizerActivity
+import com.youtubemusic.feature.player.databinding.ActivityPlayerBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
 
 @AndroidEntryPoint
 class PlayerActivity : AppCompatActivity() {
@@ -62,11 +66,21 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private suspend fun observeLoopMode() = viewModel.isQueueLooped.collect { isLooped ->
-        binding.loopMode.setTint(if (isLooped) R.color.colorAccent else R.color.gray)
+        binding.loopMode.setTint(
+            if (isLooped) getAttrColor(android.R.attr.colorAccent) else ContextCompat.getColor(
+                this,
+                android.R.color.darker_gray
+            )
+        )
     }
 
     private suspend fun observeShuffleMode() = viewModel.isShuffled.collect { isShuffled ->
-        binding.shuffleMode.setTint(if (isShuffled) R.color.colorAccent else R.color.gray)
+        binding.shuffleMode.setTint(
+            if (isShuffled) getAttrColor(android.R.attr.colorAccent) else ContextCompat.getColor(
+                this,
+                android.R.color.darker_gray
+            )
+        )
     }
 
     private suspend fun observePlayingPosition() = viewModel.currentPosition.collectLatest {
@@ -84,10 +98,18 @@ class PlayerActivity : AppCompatActivity() {
                 thumbnail.load(it.mediaItem.thumbnail)
                 mediaItem = it.mediaItem
                 if (it.isPaused)
-                    actionButton.setUniqueAnimatedDrawable(R.drawable.anim_from_play_to_pause_48dp)
+                    actionButton.setUniqueAnimatedDrawable(com.youtubemusic.core.common.R.drawable.anim_from_play_to_pause_48dp)
                 else
-                    actionButton.setUniqueAnimatedDrawable(R.drawable.anim_from_pause_to_play_48dp)
+                    actionButton.setUniqueAnimatedDrawable(com.youtubemusic.core.common.R.drawable.anim_from_pause_to_play_48dp)
             }
         }
     }
+}
+
+fun Context.getAttrColor(attr: Int): Int {
+    val typedValue = TypedValue()
+    val a: TypedArray = obtainStyledAttributes(typedValue.data, intArrayOf(attr))
+    val color = a.getColor(0, 0)
+    a.recycle()
+    return color
 }

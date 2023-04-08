@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.utilities
+package com.youtubemusic.core.common
 
 import android.os.Bundle
 import android.view.*
@@ -9,7 +9,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import com.yurii.youtubemusic.R
 
 abstract class TabFragment<T : ViewDataBinding>(
     private val layoutId: Int,
@@ -49,14 +48,16 @@ abstract class TabFragment<T : ViewDataBinding>(
 
     private fun inflateOptionsMenuIfRequired(menu: Menu, inflater: MenuInflater) {
         optionMenuId?.run { inflater.inflate(this, menu) }
+
         toolbar.setOnMenuItemClickListener {
             this.onClickOption(it.itemId)
             true
         }
     }
 
+
     private fun initToolBar() {
-        toolbar = (activity as AppCompatActivity).findViewById(R.id.toolbar)
+        toolbar = (activity as ToolBarAccessor).getToolbar()
     }
 
     private fun changeTitle() {

@@ -6,6 +6,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.youtubemusic.core.common.TabFragment
 import com.youtubemusic.core.common.ui.ErrorDialog
 import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.data.EmptyListException
@@ -14,7 +15,6 @@ import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.model.YouTubePlaylist
 import com.yurii.youtubemusic.databinding.FragmentYoutubeMusicBinding
-import com.yurii.youtubemusic.utilities.*
 import com.yurii.youtubemusic.R
 
 import com.youtubemusic.feature.download_manager.DownloadManagerActivity

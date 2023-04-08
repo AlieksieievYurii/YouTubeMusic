@@ -10,8 +10,7 @@ import com.youtubemusic.feature.equalizer.EqualizerActivity
 import com.youtubemusic.feature.playlist_editor.PlaylistEditorActivity
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.FragmentSavedMusicBinding
-import com.youtubemusic.feature.download_manager.DownloadManagerActivity
-import com.yurii.youtubemusic.utilities.TabFragment
+import com.youtubemusic.core.common.TabFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 

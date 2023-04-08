@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -15,7 +16,8 @@ import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
-import com.yurii.youtubemusic.screens.player.PlayerControlPanelFragment
+import com.youtubemusic.core.common.ToolBarAccessor
+import com.youtubemusic.feature.player.PlayerControlPanelFragment
 import com.yurii.youtubemusic.R
 import com.yurii.youtubemusic.databinding.ActivityMainBinding
 import com.yurii.youtubemusic.utilities.*
@@ -25,7 +27,7 @@ import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener, ToolBarAccessor {
     private val viewModel: MainActivityViewModel by viewModels()
     private val activityMainBinding: ActivityMainBinding by viewBinding()
     private val fragmentHelper = FragmentHelper(supportFragmentManager)
@@ -46,7 +48,9 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             }
         }
 
-        supportFragmentManager.beginTransaction().replace(R.id.player_view_holder, PlayerControlPanelFragment()).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.player_view_holder,
+           PlayerControlPanelFragment()
+        ).commit()
     }
 
     private suspend fun observeNumberOfDownloadingJobs() {
@@ -121,6 +125,10 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         const val EXTRA_LAUNCH_FRAGMENT = "com.yurii.youtubemusic.mainactivity.extra.launch.fragment"
         const val EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC = "com.yurii.youtubemusic.mainactivity.extra.launch.savedmusic.fragment"
         const val EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC = "com.yurii.youtubemusic.mainactivity.extra.launch.youtubemusic.fragment"
+    }
+
+    override fun getToolbar(): Toolbar {
+        return activityMainBinding.toolbar
     }
 
 }

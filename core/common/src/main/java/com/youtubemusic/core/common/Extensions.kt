@@ -105,8 +105,8 @@ fun TextView.setAnimatedText(text: String) {
 /**
  * Alternative to ImageView.tint in xml
  */
-fun ImageView.setTint(@ColorRes colorRes: Int) {
-    ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(ContextCompat.getColor(context, colorRes)))
+fun ImageView.setTint(colorRes: Int) {
+    ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(colorRes))
 }
 
 inline fun <reified T : Parcelable> Bundle.parcelable(key: String): T? = when {

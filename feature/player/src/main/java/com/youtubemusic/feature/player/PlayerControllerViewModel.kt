@@ -1,4 +1,4 @@
-package com.yurii.youtubemusic.screens.player
+package com.youtubemusic.feature.player
 
 import androidx.annotation.IntRange
 import androidx.lifecycle.*
