@@ -1,35 +1,8 @@
-plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
-    id 'com.google.dagger.hilt.android'
-    id 'kotlin-kapt'
-}
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common.gradle"
 
 android {
     namespace 'com.youtubemusic.core.downloader.youtube'
-    compileSdk 33
-
-    defaultConfig {
-        minSdk 21
-        targetSdk 33
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
 }
 
 dependencies {
@@ -37,18 +10,8 @@ dependencies {
     implementation project(':core:model')
     implementation project(':core:common')
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
-    implementation "com.google.dagger:hilt-android:$hilt_version"
-    kapt "com.google.dagger:hilt-compiler:$hilt_version"
-    implementation "androidx.work:work-runtime-ktx:$work_version"
-    implementation "androidx.hilt:hilt-work:$androidx_hilt_work_version"
-    implementation "org.threeten:threetenbp:$threetenbp_version"
-    kapt "androidx.hilt:hilt-compiler:$androidx_hilt_compiler_version"
-    implementation "com.jakewharton.timber:timber:$timber_version"
-    implementation "com.github.sealedtx:java-youtube-downloader:$java_youtube_downloader_version"
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation worker.work
+    implementation worker.hilt_work
+    implementation utils.threetenbp
+    implementation utils.youtube_downloader
 }

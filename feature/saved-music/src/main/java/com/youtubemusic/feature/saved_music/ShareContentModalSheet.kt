@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentManager
 import coil.load
@@ -30,7 +29,7 @@ class ShareContentModalSheet : BottomSheetDialogFragment() {
 
         val quCode = QRCode.from(buildUrl())
             .withSize(view.toPx(250), view.toPx(250))
-            .withColor(ContextCompat.getColor(requireContext(), requireContext().getAttrColor(android.R.attr.colorPrimary)), 0)
+            .withColor(requireContext().getAttrColor(android.R.attr.colorPrimary), 0)
             .bitmap()
 
         view.findViewById<ImageView>(R.id.qr_code).setImageBitmap(quCode)

@@ -2,49 +2,108 @@
 
 buildscript {
     ext {
-        kotlin_version = "1.6.21"
-        lifecycle_version = "2.5.1"
-        media_api_version = "1.0.1"
-        appcompat_version = "1.1.0"
-        recycler_view_version = "1.1.0"
-        core_ktx_version = "1.2.0"
-        fragment_ktx_version = "1.5.5"
-        cardview_version = "1.0.0"
-        threetenbp_version = "1.4.2"
-        constraintlayout_version = "1.1.3"
-        java_youtube_downloader_version = "2.4.5"
-        lifecycle_runtime_ktx_version = "2.4.0"
-        gson_version = "2.8.6"
-        circleimageview_version = "3.1.0"
-        material_version = "1.6.0"
-        play_services_auth = "18.0.0"
-        google_api_client_android_version = "1.22.0"
-        google_api_services_youtube_version = "v3-rev183-1.22.0"
-        view_biding_delegate_version = "1.0.3"
-        swiperefreshlayout_version = "1.1.0"
-        paging_version = "3.1.1"
-        timber_version = "5.0.1"
-        coil_version = "2.2.2"
-        data_store_version = "1.0.0"
-        hilt_version = "2.44"
-        room_version = "2.5.0"
-        work_version = "2.8.0"
-        androidx_hilt_work_version = "1.0.0"
-        androidx_hilt_compiler_version = "1.0.0"
-        stepview_version = "1.5.1"
-        qr_gen_version = "3.0.1"
+        versions = [
+                hilt                    : "2.44",
+                room                    : "2.5.0",
+                core_ktx                : "1.7.0",
+                appcompat               : "1.6.1",
+                material                : "1.8.0",
+                junit                   : "4.13",
+                android_junit           : "1.1.5",
+                espresso                : "3.5.1",
+                timber                  : "5.0.1",
+                viewmodel               : "2.5.1",
+                fragment_ktx            : "1.5.5",
+                viewbinding             : "1.0.3",
+                worker                  : "2.8.0",
+                hilt_worker             : "1.0.0",
+                youtube_downloader      : "2.4.5",
+                threetenbp              : "1.4.2",
+                media                   : "1.0.1",
+                stepview                : "1.5.1",
+                paging                  : "3.1.1",
+                qgen                    : "3.0.1",
+                circle_image_view       : "3.1.0",
+                coil                    : "2.2.2",
+                swiperefreshlayout      : "1.1.0",
+                play_services_auth      : "18.0.0",
+                leakcanary              : "2.4",
+                mockk                   : "1.13.3",
+                versions_coroutines_test: "1.6.4",
+                truth                   : "1.0.1",
+                test_runner             : "1.5.2",
+                test_rules              : "1.5.0",
+                gson                    : "2.8.6",
+                datastore               : "1.0.0",
+                google_api_client_android: "1.22.0",
+                google_api_services_youtube: "v3-rev183-1.22.0"
 
-        // Testing
-        leakcanary_android_version = "2.4"
-        junit_version = "4.13"
-        kotlinx_coroutines_test_version = "1.6.4"
-        mockk_version = "1.13.3"
+        ]
 
-        // Instrumented Testing
-        androidx_runner_version = "1.5.2"
-        androidx_rules_version = "1.5.0"
-        androidx_junit_ext_version = "1.1.5"
-        truth_version = "1.0.1"
+        androidx = [
+                core              : "androidx.core:core-ktx:${versions.core_ktx}",
+                appcompat         : "androidx.appcompat:appcompat:${versions.appcompat}",
+                viewmodel         : "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.viewmodel}",
+                fragment_ktx      : "androidx.fragment:fragment-ktx:${versions.fragment_ktx}",
+                media             : "androidx.media:media:${versions.media}",
+                paging            : "androidx.paging:paging-runtime-ktx:${versions.paging}",
+                swiperefreshlayout: "androidx.swiperefreshlayout:swiperefreshlayout:${versions.swiperefreshlayout}",
+                datastore         : "androidx.datastore:datastore-preferences:${versions.datastore}"
+        ]
+
+        ui = [
+                material         : "com.google.android.material:material:${versions.material}",
+                stepview         : "com.github.shuhart:stepview:${versions.stepview}",
+                qgen             : "com.github.kenglxn.QRGen:android:${versions.qgen}",
+                circle_image_view: "de.hdodenhof:circleimageview:${versions.circle_image_view}",
+        ]
+
+        utils = [
+                viewbinding              : "com.github.yogacp:android-viewbinding:${versions.viewbinding}",
+                youtube_downloader       : "com.github.sealedtx:java-youtube-downloader:${versions.youtube_downloader}",
+                threetenbp               : "org.threeten:threetenbp:${versions.threetenbp}",
+                coil                     : "io.coil-kt:coil:${versions.coil}",
+                play_services_auth       : "com.google.android.gms:play-services-auth:${versions.play_services_auth}",
+                gson                     : "com.google.code.gson:gson:${versions.gson}",
+                google_api_client_android: "com.google.api-client:google-api-client-android:${versions.google_api_client_android}",
+                google_api_services_youtube: "com.google.apis:google-api-services-youtube:${versions.google_api_services_youtube}"
+        ]
+
+        room = [
+                runtime : "androidx.room:room-runtime:${versions.room}",
+                ktx     : "androidx.room:room-ktx:${versions.room}",
+                compiler: "androidx.room:room-compiler:${versions.room}"
+        ]
+
+        worker = [
+                work     : "androidx.work:work-runtime-ktx:${versions.worker}",
+                hilt_work: "androidx.hilt:hilt-work:${versions.hilt_worker}"
+        ]
+
+        dagger_hilt = [
+                android : "com.google.dagger:hilt-android:${versions.hilt}",
+                compiler: "com.google.dagger:hilt-compiler:${versions.hilt}"
+        ]
+
+        tests = [
+                junit          : "junit:junit:${versions.junit}",
+                mockk_android  : "io.mockk:mockk-android:${versions.mockk}",
+                mockk_agent    : "io.mockk:mockk-agent:${versions.mockk}",
+                coroutines_test: "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutines_test}",
+
+                android        : [
+                        junit      : "androidx.test.ext:junit:${versions.android_junit}",
+                        espresso   : "androidx.test.espresso:espresso-core:${versions.espresso}",
+                        truth      : "com.google.truth:truth:${versions.truth}",
+                        test_runner: "androidx.test:runner:${versions.test_runner}",
+                        test_rules : "androidx.test:rules:${versions.test_rules}"
+                ]
+        ]
+
+        tools = [
+                timber    : "com.jakewharton.timber:timber:${versions.timber}",
+                leakcanary: "com.squareup.leakcanary:leakcanary-android:${versions.leakcanary}"
+        ]
     }
 }
 

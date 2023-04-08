@@ -1,0 +1,14 @@
+apply from: "$rootProject.projectDir/common.gradle"
+
+android {
+    dataBinding {
+        enabled = true
+    }
+}
+
+dependencies {
+    implementation ui.material
+    implementation androidx.viewmodel
+    implementation androidx.fragment_ktx
+    implementation utils.viewbinding
+}
