@@ -13,7 +13,6 @@ import com.youtubemusic.core.common.getVisibleItems
 import com.youtubemusic.core.common.setUniqueAnimatedDrawable
 import com.youtubemusic.core.model.MediaItem
 import com.youtubemusic.core.model.MediaItemPlaylist
-import com.youtubemusic.feature.saved_music.R
 import com.youtubemusic.feature.saved_music.databinding.ItemMusicBinding
 import java.util.*
 
@@ -122,7 +121,8 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
                     thumbnailState.setUniqueAnimatedDrawable(com.youtubemusic.core.common.R.drawable.anim_from_play_to_pause_48dp)
 
                 if (playlist != null) {
-                    hintPlayingCategory.text = root.context.getString(R.string.label_playing_from, playlist?.name)
+                    hintPlayingCategory.text =
+                        root.context.getString(com.youtubemusic.core.common.R.string.label_playing_from, playlist?.name)
                     hintPlayingCategory.isVisible = true
                 } else
                     hintPlayingCategory.isVisible = false
@@ -132,7 +132,7 @@ class MediaListAdapter(private val callback: Callback) : ListAdapter<MediaItem, 
         fun setNonPlayingState() {
             itemMusicBinding.apply {
                 hintPlayingCategory.isVisible = false
-                container.setCardBackgroundColor(ContextCompat.getColor(itemMusicBinding.container.context,  android.R.color.white))
+                container.setCardBackgroundColor(ContextCompat.getColor(itemMusicBinding.container.context, android.R.color.white))
                 thumbnailState.isVisible = false
             }
         }

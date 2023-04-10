@@ -55,14 +55,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:drawableTopCompat="@drawable/ic_empty_play_lists"
-                tools:text="Error" />
+                tools:text="Error"
+                android:textIsSelectable="false" />
 
             <Button
                 android:id="@+id/refresh"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="@string/label_try_again" />
+                android:text="@string/label_retry" />
             <!-- //TODO Replace error illustration -->
         </LinearLayout>
 

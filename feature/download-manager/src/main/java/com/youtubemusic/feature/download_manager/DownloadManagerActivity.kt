@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.ui.ErrorDialog
+import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.feature.download_manager.databinding.ActivityDownloadManagerBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -133,7 +134,7 @@ class DownloadManagerActivity : AppCompatActivity() {
     }
 
     private fun openErrorDialog(videoId: String, errorMessage: String?) {
-        ErrorDialog.create(errorMessage ?: getString(R.string.label_no_error_message)).addListeners(
+        ErrorDialog.create(errorMessage ?: getString(com.youtubemusic.core.common.R.string.label_no_error_message)).addListeners(
             onTryAgain = { viewModel.retryDownloading(videoId) },
             onCancel = { viewModel.cancelDownloading(videoId) })
             .show(supportFragmentManager, "ErrorDialog")

@@ -26,20 +26,20 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp">
+            android:layout_margin="4dp">
 
             <FrameLayout
                 android:id="@+id/thumbnail_layout"
-                android:layout_width="85dp"
+                android:layout_width="84dp"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true">
 
                 <ImageView
                     android:id="@+id/thumbnail"
+                    imageSrc="@{musicItem.thumbnail}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
-                    imageSrc="@{musicItem.thumbnail}"
                     app:shapeAppearanceOverlay="@style/roundedImageView"
                     tools:ignore="ContentDescription"
                     tools:src="@tools:sample/backgrounds/scenic" />
@@ -94,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:textColor="#3F51B5"
+                    android:textColor="?attr/colorAccent"
                     android:textSize="10sp"
                     android:textStyle="italic"
                     android:visibility="gone"
@@ -130,6 +130,4 @@
 
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
-
-
 </layout>

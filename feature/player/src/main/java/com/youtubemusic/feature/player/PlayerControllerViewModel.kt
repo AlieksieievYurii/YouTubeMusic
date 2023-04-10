@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PlayerControllerViewModel @Inject constructor (private val mediaServiceConnection: MediaServiceConnection) : ViewModel() {
+internal class PlayerControllerViewModel @Inject constructor (private val mediaServiceConnection: MediaServiceConnection) : ViewModel() {
 
     private var timerJob: Job? = null
 

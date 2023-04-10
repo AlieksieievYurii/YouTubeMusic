@@ -72,7 +72,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/app_playlists"
                 app:layout_constraintStart_toEndOf="@+id/playlist_thumbnail"
                 app:layout_constraintTop_toBottomOf="@+id/playlist_name"
-                tools:text="Playlist issssssssssssssssssssssssssssssssssssd" />
+                tools:text="Playlist" />
 
             <TextView
                 android:id="@+id/app_playlists"
@@ -88,7 +88,8 @@
                 app:layout_constraintHorizontal_weight="1"
                 app:layout_constraintStart_toEndOf="@+id/playlist_name"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="Playlists" />
+                tools:text="Playlists"
+                android:textIsSelectable="false" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

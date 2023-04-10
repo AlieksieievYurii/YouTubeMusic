@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.youtubemusic.core.model.MediaItemPlaylist
 
-class MediaItemPlaylistMultiChoiceAdapter :
+internal class MediaItemPlaylistMultiChoiceAdapter :
     ListAdapter<MediaItemPlaylist, MediaItemPlaylistMultiChoiceAdapter.PlaylistViewHolder>(Comparator) {
     private val selectedItems = mutableMapOf<MediaItemPlaylist, Boolean>()
 

@@ -13,7 +13,7 @@ import java.lang.IllegalStateException
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
-class EqualizerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0, defStyleRes: Int = 0) :
+internal class EqualizerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0, defStyleRes: Int = 0) :
     ViewGroup(context, attrs, defStyle, defStyleRes), SeekBar.OnSeekBarChangeListener {
 
     interface OnChangeListener {

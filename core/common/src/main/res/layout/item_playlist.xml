@@ -32,7 +32,8 @@
                 android:layout_height="50dp"
                 android:layout_marginEnd="5dp"
                 app:imageUrl="@{playlist.thumbnailUrl}"
-                tools:src="@tools:sample/backgrounds/scenic" />
+                tools:src="@tools:sample/backgrounds/scenic"
+                android:contentDescription="@string/cont_desc_thumbnail" />
 
             <TextView
                 android:id="@+id/title"

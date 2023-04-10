@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.TabFragment
 import com.youtubemusic.core.common.ui.ErrorDialog
 import com.youtubemusic.core.common.ui.LoaderViewHolder
+import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
 import com.youtubemusic.core.common.ui.showDeletionDialog
 import com.youtubemusic.core.data.EmptyListException
 import com.youtubemusic.core.downloader.youtube.DownloadManager
@@ -37,7 +38,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         object Error : ViewState()
     }
 
-    private val viewModel: YouTubeMusicViewModel by viewModels()
+    internal val viewModel: YouTubeMusicViewModel by viewModels()
 
     private val listAdapter: VideoItemsListAdapter by lazy {
         VideoItemsListAdapter(object : VideoItemsListAdapter.Callback {
@@ -102,14 +103,14 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         }.show()
     }
 
-    private fun showConfirmationDialogToDeleteVideoItem(videoItem: VideoItem) {
+    internal fun showConfirmationDialogToDeleteVideoItem(videoItem: VideoItem) {
         showDeletionDialog(requireContext(), R.string.dialog_confirm_deletion_music_title, R.string.dialog_confirm_deletion_music_message) {
             viewModel.delete(videoItem)
         }
     }
 
     private fun showFailedVideoItem(videoItem: VideoItem, error: String?) {
-        ErrorDialog.create(error ?: getString(R.string.label_no_error_message)).addListeners(
+        ErrorDialog.create(error ?: getString(com.youtubemusic.core.common.R.string.label_no_error_message)).addListeners(
             onTryAgain = { viewModel.tryToDownloadAgain(videoItem) },
             onCancel = { viewModel.cancelDownloading(videoItem) })
             .show(requireActivity().supportFragmentManager, "ErrorDialog")

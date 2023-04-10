@@ -4,7 +4,7 @@ import androidx.room.TypeConverter
 import java.io.File
 import java.util.*
 
-class FileConverter {
+internal class FileConverter {
     @TypeConverter
     fun fileToPath(file: File): String = file.absolutePath
 
@@ -12,7 +12,7 @@ class FileConverter {
     fun pathToFile(path: String) = File(path)
 }
 
-class UUIDConverter {
+internal class UUIDConverter {
     @TypeConverter
     fun uUIDtoString(uuid: UUID?): String? = uuid?.toString()
 

@@ -17,7 +17,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="Auto sync"
+                android:text="@string/label_auto_sync"
                 tools:ignore="MissingConstraints"
                 tools:layout_editor_absoluteX="16dp"
                 tools:layout_editor_absoluteY="16dp" />
@@ -34,7 +34,7 @@
                     style="@style/DescriptionText"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="No playlist synchronization"
+                    android:text="@string/label_no_playlist_synchronization"
                     android:visibility="visible"
                     app:drawableTopCompat="@drawable/ic_empty_play_lists" />
 

@@ -77,7 +77,8 @@ buildscript {
 
         worker = [
                 work     : "androidx.work:work-runtime-ktx:${versions.worker}",
-                hilt_work: "androidx.hilt:hilt-work:${versions.hilt_worker}"
+                hilt_work: "androidx.hilt:hilt-work:${versions.hilt_worker}",
+                hilt_compiler: "androidx.hilt:hilt-compiler:${versions.hilt_worker}"
         ]
 
         dagger_hilt = [

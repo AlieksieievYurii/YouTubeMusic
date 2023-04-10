@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PlaylistEditorViewModel @Inject constructor(private val playlistRepository: PlaylistRepository) : ViewModel() {
+internal class PlaylistEditorViewModel @Inject constructor(private val playlistRepository: PlaylistRepository) : ViewModel() {
 
     val playlistsFlow = playlistRepository.getPlaylists()
 

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="label_playing_from">Playing from \‘%s\’</string>
-    <string name="label_duration_progress">%1s / %2s</string>
-</resources>

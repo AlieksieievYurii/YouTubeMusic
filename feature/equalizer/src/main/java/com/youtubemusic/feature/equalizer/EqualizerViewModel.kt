@@ -7,7 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class EqualizerViewModel @Inject constructor(val audioEffectManager: AudioEffectManager) : ViewModel() {
+internal class EqualizerViewModel @Inject constructor(val audioEffectManager: AudioEffectManager) : ViewModel() {
 
     fun getBassBoostData() = audioEffectManager.getBassBoostData()
 

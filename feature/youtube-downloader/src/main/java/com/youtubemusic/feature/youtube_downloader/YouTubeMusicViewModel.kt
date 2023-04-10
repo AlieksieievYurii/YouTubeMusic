@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class YouTubeMusicViewModel @Inject constructor(
+internal class YouTubeMusicViewModel @Inject constructor(
     private val downloadManager: DownloadManager,
     private val youTubePreferences: YouTubePreferences,
     private val playlistRepository: PlaylistRepository,

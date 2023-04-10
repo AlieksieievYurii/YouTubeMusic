@@ -14,8 +14,6 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.ColorRes
-import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -29,6 +27,7 @@ import kotlinx.coroutines.flow.map
 import java.io.File
 import java.lang.IllegalStateException
 
+@Suppress("UNCHECKED_CAST")
 fun <T : RecyclerView.ViewHolder> RecyclerView.getVisibleItems(): List<T> {
     val arrayList = ArrayList<T>()
     for (index: Int in 0 until childCount) {

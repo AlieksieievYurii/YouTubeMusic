@@ -80,10 +80,11 @@
                         android:ellipsize="end"
                         android:maxLength="30"
                         android:maxLines="1"
-                        android:textColor="#C6C6C6"
+                        android:textColor="@android:color/darker_gray"
                         android:textSize="12sp"
                         app:animatedText="@{@string/label_playing_from(playingPlaylist.name)}"
-                        tools:text="@tools:sample/lorem/random" />
+                        tools:text="@tools:sample/lorem/random"
+                        android:textIsSelectable="false" />
 
                     <View
                         android:layout_width="5dp"
@@ -97,7 +98,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@{@string/label_duration_progress(FormatingUtilsKt.parseDurationToHumanView(currentTimePosition), FormatingUtilsKt.parseDurationToHumanView(mediaItem.durationInMillis))}"
-                        android:textColor="#C6C6C6"
+                        android:textColor="@android:color/darker_gray"
                         android:textSize="12sp"
                         tools:text="1:04 / 5:34" />
                 </LinearLayout>

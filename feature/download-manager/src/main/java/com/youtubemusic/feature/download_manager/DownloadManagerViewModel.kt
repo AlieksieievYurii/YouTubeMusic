@@ -15,7 +15,7 @@ import javax.inject.Inject
 data class DownloadingVideoItemJob(val videoItemName: String, val videoItemId: String, val thumbnail: String)
 
 @HiltViewModel
-class DownloadManagerViewModel @Inject constructor(
+internal class DownloadManagerViewModel @Inject constructor(
     private val downloadManager: DownloadManager,
     private val youTubePlaylistSyncRepository: YouTubePlaylistSyncRepository,
     private val playlistRepository: PlaylistRepository,

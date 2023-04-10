@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PlayerActivity : AppCompatActivity() {
-    private val viewModel: PlayerControllerViewModel by viewModels()
+    internal val viewModel: PlayerControllerViewModel by viewModels()
     private val binding: ActivityPlayerBinding by viewBinding()
     private var isSeekBarChanging = false
     override fun onCreate(savedInstanceState: Bundle?) {
