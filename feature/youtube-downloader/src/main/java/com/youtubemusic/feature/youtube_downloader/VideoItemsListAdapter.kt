@@ -15,7 +15,7 @@ import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.feature.youtube_downloader.databinding.ItemVideoBinding
 
-class VideoItemsListAdapter(private val callback: Callback) :
+internal class VideoItemsListAdapter(private val callback: Callback) :
     PagingDataAdapter<VideoItem, VideoItemsListAdapter.MyViewHolder>(Comparator) {
     interface Callback {
         fun getDownloadingJobState(videoItem: VideoItem): DownloadManager.State
@@ -56,7 +56,7 @@ class VideoItemsListAdapter(private val callback: Callback) :
         this.recyclerView = recyclerView
     }
 
-    inner class MyViewHolder(val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class MyViewHolder(private val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(videoItem: VideoItem) {
             binding.videoItem = videoItem
             updateStatus(callback.getDownloadingJobState(videoItem))

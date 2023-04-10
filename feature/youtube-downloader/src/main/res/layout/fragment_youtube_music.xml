@@ -24,8 +24,8 @@
             android:id="@+id/layout_selection_playlist"
             isVisible="@{!(viewState instanceof ViewState.NoSelectedPlaylist)}"
             android:layout_width="match_parent"
-            android:background="?attr/colorPrimary"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -45,6 +45,7 @@
                     android:maxLines="1"
                     android:textAppearance="@style/TextAppearance.AppCompat.Title"
                     android:textColor="@android:color/white"
+                    android:textIsSelectable="false"
                     android:textSize="12sp"
                     tools:text="@tools:sample/lorem/random" />
 
@@ -55,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:minHeight="0dp"
-                    android:text="@string/select" />
+                    android:text="@string/label_select" />
             </LinearLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
@@ -75,10 +76,10 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/videos"
+                    isVisible="@{viewState instanceof ViewState.VideosLoaded}"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fitsSystemWindows="true"
-                    isVisible="@{viewState instanceof ViewState.VideosLoaded}"
                     tools:listitem="@layout/item_video"
                     tools:visibility="visible" />
 
@@ -86,20 +87,20 @@
                 <TextView
                     android:id="@+id/label_empty_playlist"
                     style="@style/DescriptionText"
+                    isVisible="@{viewState instanceof ViewState.EmptyList}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_empty_playlist"
                     android:textAlignment="center"
-                    isVisible="@{viewState instanceof ViewState.EmptyList}"
                     app:drawableTopCompat="@drawable/ic_empty_playlist"
                     tools:visibility="gone" />
 
 
                 <ProgressBar
                     android:id="@+id/loading"
+                    isVisible="@{viewState instanceof ViewState.Loading}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    isVisible="@{viewState instanceof ViewState.Loading}"
                     tools:visibility="gone" />
 
                 <LinearLayout
@@ -131,11 +132,11 @@
 
                 <LinearLayout
                     android:id="@+id/error_layout"
+                    isVisible="@{viewState instanceof ViewState.Error}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:orientation="vertical"
-                    isVisible="@{viewState instanceof ViewState.Error}">
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/error"
@@ -143,14 +144,15 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
                         android:textAlignment="center"
-                        app:drawableTopCompat="@drawable/ic_a_broken_robot_pana" />
+                        android:textIsSelectable="false"
+                        app:drawableTopCompat="@drawable/il_broken_robot" />
 
                     <Button
                         android:id="@+id/btn_try_again"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
-                        android:text="@string/label_try_again" />
+                        android:text="@string/label_retry" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

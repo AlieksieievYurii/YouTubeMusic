@@ -15,7 +15,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            tools:text="Test" />
+            tools:text="Test"
+            android:textIsSelectable="false" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/action"

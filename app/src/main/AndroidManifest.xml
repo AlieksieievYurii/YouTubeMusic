@@ -46,22 +46,6 @@
             android:name="com.youtubemusic.feature.download_manager.DownloadManagerActivity"
             android:screenOrientation="portrait" />
 
-        <service
-            android:name="com.youtubemusic.core.player.MediaService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
-            </intent-filter>
-        </service>
-
-        <receiver
-            android:name="androidx.media.session.MediaButtonReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
-
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

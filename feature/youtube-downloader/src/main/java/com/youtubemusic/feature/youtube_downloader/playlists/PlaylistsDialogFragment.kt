@@ -105,7 +105,7 @@ class PlaylistsDialogFragment private constructor() : DialogFragment() {
         progressBar.isVisible = false
         hintListIsEmpty.isVisible = false
         layoutError.isVisible = true
-        tvError.text = getString(R.string.label_error, errorMessage)
+        tvError.text = getString(com.youtubemusic.core.common.R.string.label_error, errorMessage)
     }
 
     private fun showEmptyListLayout() = binding.apply {

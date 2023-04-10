@@ -7,9 +7,9 @@ android {
 
 dependencies {
     implementation project(':core:common')
-    implementation project(':core:data')
+    api project(':core:data')
     implementation project(':core:model')
-    implementation project(':core:downloader:youtube')
+    api project(':core:downloader:youtube')
     implementation project(':feature:download-manager')
 
     implementation androidx.paging

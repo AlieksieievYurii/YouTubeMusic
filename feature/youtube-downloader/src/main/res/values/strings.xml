@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="label_youtube_playlists">YouTube Playlists</string>
-    <string name="label_try_again">Try again</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="label_sing_in">To download musics from your YouTube playlist, you need to sign in with Google</string>
-    <string name="select">Select</string>
+    <string name="label_select">Select</string>
     <string name="label_empty_playlist">This playlist does not have any videos. Please add first video to the playlist</string>
     <string name="label_first_playlist">Great job! Now you should select your first playlist to download musics from videos</string>
     <string name="select_playlist">Select playList</string>
@@ -13,10 +12,6 @@
     <string name="label_fragment_title_youtube_musics">YouTube Music</string>
     <string name="dialog_confirm_deletion_music_title">Delete music</string>
     <string name="dialog_confirm_deletion_music_message">Are you sure want to delete this music?</string>
-    <string name="label_playlists">Playlists</string>
-    <string name="label_ok">OK</string>
-    <string name="label_cancel">Cancel</string>
-    <string name="label_no_error_message">No error message</string>
     <string name="label_views_count">%s views</string>
-    <string name="label_error">Error: %s</string>
+    <string name="label_log_out">Logout</string>
 </resources>

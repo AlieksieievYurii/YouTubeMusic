@@ -82,8 +82,8 @@ class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
             if (it.refresh is LoadState.Error) {
                 binding.hintListIsEmpty.text = when (val error = (it.refresh as LoadState.Error).error) {
                     is AllYouTubePlaylistsSynchronized -> getString(R.string.hint_all_playlists_synchronized)
-                    is EmptyListException -> getString(R.string.label_no_playlist)
-                    else -> getString(R.string.label_error, error.message ?: "None")
+                    is EmptyListException -> getString(com.youtubemusic.core.common.R.string.label_no_app_playlist)
+                    else -> getString(com.youtubemusic.core.common.R.string.label_error, error.message ?: "None")
                 }
             }
         }
@@ -101,7 +101,7 @@ class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
             if (playlistsAdapter.itemCount == 0) {
                 youTubePlaylists.isVisible = false
                 hintListIsEmpty.isVisible = true
-                hintListIsEmpty.text = getString(R.string.label_no_playlist)
+                hintListIsEmpty.text = getString(com.youtubemusic.core.common.R.string.label_no_app_playlist)
             } else {
                 youTubePlaylists.isVisible = true
                 hintListIsEmpty.isVisible = false
@@ -117,13 +117,13 @@ class AddYouTubePlaylistSynchronizationDialog : DialogFragment() {
             binding.nextOrAdd.isEnabled = true
             back.visibility = View.VISIBLE
             hint.text = context.getString(R.string.hint_select_app_playlists)
-            nextOrAdd.text = context.getString(R.string.label_add)
+            nextOrAdd.text = context.getString(com.youtubemusic.core.common.R.string.label_add)
             nextOrAdd.setOnClickListener { performAddingYouTubePlaylistSync() }
 
             if (mediaItemPlaylistMultiChoiceAdapter.itemCount == 0) {
                 youTubePlaylists.isVisible = false
                 hintListIsEmpty.isVisible = true
-                hintListIsEmpty.text = context.getString(R.string.label_no_playlist)
+                hintListIsEmpty.text = context.getString(com.youtubemusic.core.common.R.string.label_no_app_playlist)
             }
         }
     }

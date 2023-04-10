@@ -10,8 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class
-SavedMusicViewModel @Inject constructor(
+internal class SavedMusicViewModel @Inject constructor(
     private val playlistRepository: PlaylistRepository
 ) : ViewModel() {
     sealed class State {

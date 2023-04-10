@@ -103,7 +103,13 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     private fun setDataSources(playlistBinds: List<AdapterData.PlaylistBind>, downloadingJobs: List<AdapterData.Job>) {
         val result = mutableListOf<AdapterData>()
         if (playlistBinds.isNotEmpty()) {
-            result.add(AdapterData.Headline(R.string.label_playlist_sync_binds, R.string.label_add, callback::onAddSyncPlaylistBind))
+            result.add(
+                AdapterData.Headline(
+                    R.string.label_playlist_sync_binds,
+                    com.youtubemusic.core.common.R.string.label_add,
+                    callback::onAddSyncPlaylistBind
+                )
+            )
             result.addAll(playlistBinds)
         }
 
@@ -158,7 +164,11 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
                     progress.visibility = View.VISIBLE
                     progress.progress = state.progress
                     sizeProgress.visibility = View.VISIBLE
-                    sizeProgress.text = root.resources.getString(R.string.label_size_progress, state.currentSizeInMb, state.sizeInMb)
+                    sizeProgress.text = root.resources.getString(
+                        com.youtubemusic.core.common.R.string.label_size_progress,
+                        state.currentSizeInMb,
+                        state.sizeInMb
+                    )
                     action.setImageResource(R.drawable.ic_baseline_cancel_36)
                     action.setOnClickListener { callback.cancelDownloading(itemId) }
                 }

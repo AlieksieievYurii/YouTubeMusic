@@ -32,8 +32,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="@string/label_no_playlist"
-            app:drawableTopCompat="@drawable/ic_empty_categories"
+            android:text="@string/label_no_app_playlist"
+            app:drawableTopCompat="@drawable/il_missing_items"
             tools:visibility="gone" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -54,8 +54,8 @@
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
-            app:itemIconTint="@color/nav_item_state"
-            app:itemTextColor="@color/nav_item_state"
+            app:itemIconTint="@drawable/nav_item_state"
+            app:itemTextColor="@drawable/nav_item_state"
             app:labelVisibilityMode="selected"
             app:layout_behavior="com.yurii.youtubemusic.utils.BottomNavigationBehavior"
             app:menu="@menu/navigation_menu" />

@@ -12,8 +12,8 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class EqualizerActivity : AppCompatActivity() {
-    private val viewModel: EqualizerViewModel by viewModels()
-    private val binding: ActivityEqualizerBinding by viewBinding()
+    internal val viewModel: EqualizerViewModel by viewModels()
+    internal val binding: ActivityEqualizerBinding by viewBinding()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

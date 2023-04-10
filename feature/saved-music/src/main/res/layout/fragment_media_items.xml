@@ -31,6 +31,6 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/label_no_media_items"
             android:visibility="visible"
-            app:drawableTopCompat="@drawable/ic_empty_playlist" />
+            app:drawableTopCompat="@drawable/il_missing_items" />
     </FrameLayout>
 </layout>

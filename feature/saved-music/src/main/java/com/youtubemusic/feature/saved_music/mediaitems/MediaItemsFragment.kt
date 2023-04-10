@@ -14,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.requireParcelable
+import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
 import com.youtubemusic.core.common.ui.showDeletionDialog
 import com.youtubemusic.core.model.MediaItem
 import com.youtubemusic.core.model.MediaItemPlaylist
@@ -32,7 +33,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
 
     @Inject
     lateinit var assistedFactory: MediaItemsViewModelAssistedFactory
-    private val viewModel: MediaItemsViewModel by viewModels { MediaItemsViewModel.Factory(assistedFactory, playlist) }
+    internal val viewModel: MediaItemsViewModel by viewModels { MediaItemsViewModel.Factory(assistedFactory, playlist) }
     private val binding: FragmentMediaItemsBinding by viewBinding()
 
     private val mediaListAdapter: MediaListAdapter by lazy {
@@ -98,7 +99,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
         }
     }
 
-    private fun expandMoreOptionsFor(viewItem: View, mediaItem: MediaItem) {
+    internal fun expandMoreOptionsFor(viewItem: View, mediaItem: MediaItem) {
         val popupMenu = PopupMenu(requireContext(), viewItem)
         popupMenu.menuInflater.inflate(R.menu.media_item_menu, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener {
@@ -118,7 +119,7 @@ class MediaItemsFragment : Fragment(R.layout.fragment_media_items) {
     }
     private fun openCategoriesEditor(mediaItem: MediaItem) {
         lifecycleScope.launch {
-            com.youtubemusic.feature.download_manager.SelectPlaylistsDialog(
+            SelectPlaylistsDialog(
                 requireContext(),
                 viewModel.getPlaylists(),
                 viewModel.getAssignedPlaylists(mediaItem)

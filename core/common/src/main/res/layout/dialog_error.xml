@@ -10,8 +10,8 @@
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_centerHorizontal="true"
-        android:contentDescription="@string/broken_robot"
-        android:src="@drawable/ic_a_broken_robot_pana" />
+        android:contentDescription="@string/cont_desc_img_broken_robot"
+        android:src="@drawable/il_broken_robot" />
 
     <TextView
         android:id="@+id/title"
@@ -32,10 +32,11 @@
         android:layout_below="@+id/title"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="50dp"
-        android:layout_marginEnd="50dp"
         android:layout_marginTop="5dp"
+        android:layout_marginEnd="50dp"
         android:maxHeight="100dp"
         android:textAlignment="center"
+        android:textIsSelectable="false"
         android:textSize="12sp"
         tools:text="Error message" />
 
@@ -51,22 +52,22 @@
             style="@style/RedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1"
-            android:layout_marginBottom="10dp"
             android:layout_marginStart="12dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="15dp"
-            android:text="@string/dialog_cancel" />
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1"
+            android:text="@string/label_cancel" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_try_again"
             style="@style/PrimaryButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="10dp"
-            android:layout_marginStart="@dimen/mediumMargin"
-            android:layout_marginBottom="10dp"
             android:layout_marginEnd="12dp"
+            android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:text="@string/label_retry" />
 

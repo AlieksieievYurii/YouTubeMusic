@@ -14,7 +14,7 @@ import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.sin
 
-class TwisterController(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
+internal class TwisterController(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
     companion object {
         private const val POSITION_COUNT = 10
         private const val STAR_ANGLE_DIAL_POINT = 160

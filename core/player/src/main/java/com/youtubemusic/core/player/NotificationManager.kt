@@ -70,7 +70,7 @@ class NotificationManager(private val context: Context, private val sessionToken
     }
 
     private fun getNotificationBuilder() = NotificationCompat.Builder(context, MEDIA_PLAYER_NOTIFICATION_CHANNEL).apply {
-        setSmallIcon(R.drawable.ic_first_selection_illustration)
+        setSmallIcon(R.drawable.ic_thumbnail_mock)
         setShowWhen(false)
         setStyle(
             androidx.media.app.NotificationCompat.MediaStyle()

@@ -8,7 +8,7 @@ fun showDeletionDialog(context: Context, titleId: Int, messageId: Int, callback:
     MaterialAlertDialogBuilder(context).apply {
         setTitle(titleId)
         setMessage(messageId)
-        setPositiveButton(R.string.dialog_delete) { _, _ -> callback.invoke() }
-        setNegativeButton(R.string.dialog_cancel, null)
+        setPositiveButton(R.string.label_delete) { _, _ -> callback.invoke() }
+        setNegativeButton(R.string.label_cancel, null)
     }.show()
 }

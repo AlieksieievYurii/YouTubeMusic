@@ -8,7 +8,7 @@ android {
 dependencies {
     implementation project(':core:common')
     implementation project(':core:model')
-    implementation project(':core:player')
+    api project(':core:player')
     implementation project(':feature:equalizer')
 
     implementation utils.coil

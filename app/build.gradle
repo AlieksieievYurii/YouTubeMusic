@@ -17,9 +17,6 @@ dependencies {
     implementation project(':feature:download-manager')
     implementation project(':feature:saved-music')
     implementation project(':feature:youtube-downloader')
-    implementation project(':core:downloader:youtube')
-    implementation project(':core:player')
-    implementation project(':core:data')
 
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     implementation worker.hilt_work
