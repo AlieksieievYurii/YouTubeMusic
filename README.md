@@ -31,7 +31,7 @@ The fragment is responsible for downloading music from YouTube. The app just fet
 **Downloading musics from YouTube is **not stable**, because Youtube often changes web structure of its pages.**
 
 ## Modularization
-![image](https://user-images.githubusercontent.com/39415360/230972590-911505f5-7b56-433a-9d46-22d540ac354a.png)
+![image](https://user-images.githubusercontent.com/39415360/230973497-66c2872c-d180-40b4-9118-536a6fab1648.png)
 
 ## Note:
 **WARNING**: Youtube API does not support a video download. In fact, it is prohibited - [Terms of Service - II. Prohibitions](https://developers.google.com/youtube/terms/api-services-terms-of-service). 
