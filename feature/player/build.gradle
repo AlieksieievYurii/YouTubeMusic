@@ -1,0 +1,16 @@
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common-feature.gradle"
+
+android {
+    namespace 'com.youtubemusic.feature.player'
+}
+
+dependencies {
+    implementation project(':core:common')
+    implementation project(':core:model')
+    api project(':core:player')
+    implementation project(':feature:equalizer')
+
+    implementation utils.coil
+    implementation ui.circle_image_view
+}

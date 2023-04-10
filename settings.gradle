@@ -14,5 +14,19 @@ dependencyResolutionManagement {
     }
 }
 
-include ':app'
 rootProject.name='YouTubeMusic'
+
+include ':app'
+include ':core:common'
+include ':core:database'
+include ':core:data'
+include ':core:model'
+include ':core:downloader:youtube'
+include ':core:player'
+
+include ':feature:equalizer'
+include ':feature:playlist-editor'
+include ':feature:download-manager'
+include ':feature:player'
+include ':feature:saved-music'
+include ':feature:youtube-downloader'

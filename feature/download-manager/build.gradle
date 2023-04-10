@@ -1,0 +1,15 @@
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common-feature.gradle"
+
+android {
+    namespace 'com.youtubemusic.feature.download_manager'
+}
+
+dependencies {
+    implementation project(':core:common')
+    implementation project(':core:data')
+    implementation project(':core:downloader:youtube')
+
+    implementation ui.stepview
+    implementation androidx.paging
+}

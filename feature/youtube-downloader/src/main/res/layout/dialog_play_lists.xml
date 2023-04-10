@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/label_youtube_playlists" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_play_lists"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:scrollbars="vertical"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="100dp"
+            tools:visibility="gone" />
+
+        <TextView
+            android:id="@+id/hint_list_is_empty"
+            style="@style/DescriptionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/label_not_found_play_lists"
+            android:visibility="gone"
+            app:drawableTopCompat="@drawable/ic_empty_play_lists" />
+
+        <LinearLayout
+            android:id="@+id/layout_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_error"
+                style="@style/DescriptionText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:drawableTopCompat="@drawable/ic_empty_play_lists"
+                tools:text="Error"
+                android:textIsSelectable="false" />
+
+            <Button
+                android:id="@+id/refresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/label_retry" />
+            <!-- //TODO Replace error illustration -->
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>

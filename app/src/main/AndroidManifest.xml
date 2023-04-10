@@ -20,17 +20,17 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
-            android:name=".screens.equalizer.EqualizerActivity"
+            android:name="com.youtubemusic.feature.equalizer.EqualizerActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".screens.player.PlayerActivity"
+            android:name="com.youtubemusic.feature.player.PlayerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".screens.categories.PlaylistEditorActivity"
+            android:name="com.youtubemusic.feature.playlist_editor.PlaylistEditorActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".screens.main.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
@@ -43,24 +43,8 @@
         </activity>
 
         <activity
-            android:name=".screens.manager.DownloadManagerActivity"
+            android:name="com.youtubemusic.feature.download_manager.DownloadManagerActivity"
             android:screenOrientation="portrait" />
-
-        <service
-            android:name=".services.media.MediaService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
-            </intent-filter>
-        </service>
-
-        <receiver
-            android:name="androidx.media.session.MediaButtonReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
 
         <provider
             android:name="androidx.startup.InitializationProvider"

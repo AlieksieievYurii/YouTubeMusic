@@ -1,0 +1,13 @@
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common.gradle"
+
+android {
+    namespace 'com.youtubemusic.core.player'
+}
+
+dependencies {
+    implementation project(':core:data')
+    implementation project(':core:common')
+
+    implementation androidx.media
+}

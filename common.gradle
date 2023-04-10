@@ -1,0 +1,59 @@
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.dagger.hilt.android'
+
+android {
+    compileSdk 33
+    compileSdkVersion 33
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    testOptions {
+        unitTests {
+            unitTests.returnDefaultValues = true
+        }
+    }
+
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
+}
+
+dependencies {
+    implementation androidx.core
+    implementation androidx.appcompat
+    implementation dagger_hilt.android
+    implementation tools.timber
+
+    kapt dagger_hilt.compiler
+
+    testImplementation tests.junit
+    testImplementation tests.mockk_android
+    testImplementation tests.mockk_agent
+    testImplementation tests.coroutines_test
+    androidTestImplementation tests.android.junit
+    androidTestImplementation tests.android.espresso
+    androidTestImplementation tests.mockk_android
+    androidTestImplementation tests.mockk_agent
+    androidTestImplementation tests.android.truth
+    androidTestImplementation tests.android.test_runner
+    androidTestImplementation tests.android.test_rules
+}

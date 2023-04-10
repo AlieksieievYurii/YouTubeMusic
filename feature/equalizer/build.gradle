@@ -1,0 +1,12 @@
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common-feature.gradle"
+
+android {
+    namespace 'com.youtubemusic.feature.equalizer'
+}
+
+dependencies {
+    implementation project(':core:common')
+    implementation project(':core:player')
+    implementation project(':core:model')
+}

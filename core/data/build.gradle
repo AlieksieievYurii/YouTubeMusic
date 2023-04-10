@@ -1,0 +1,25 @@
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common.gradle"
+
+android {
+    namespace 'com.youtubemusic.core.data'
+}
+
+dependencies {
+    api project(':core:model')
+    implementation project(':core:database')
+    implementation project(':core:common')
+
+    implementation utils.gson
+    implementation androidx.datastore
+    implementation utils.play_services_auth
+    implementation androidx.paging
+    implementation utils.threetenbp
+
+    implementation(utils.google_api_client_android) {
+        exclude group: 'org.apache.httpcomponents'
+    }
+    implementation(utils.google_api_services_youtube) {
+        exclude group: 'org.apache.httpcomponents'
+    }
+}

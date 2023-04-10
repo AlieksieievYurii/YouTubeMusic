@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.youtubemusic.core.common.FormatingUtilsKt" />
+
+        <variable
+            name="mediaItem"
+            type="com.youtubemusic.core.model.MediaItem" />
+
+        <variable
+            name="currentTimePosition"
+            type="Long" />
+
+        <variable
+            name="playingPlaylist"
+            type="com.youtubemusic.core.model.MediaItemPlaylist" />
+
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:elevation="10dp"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:visibility="gone"
+        app:cardBackgroundColor="?attr/colorPrimary"
+        app:cardCornerRadius="15dp"
+        app:cardUseCompatPadding="true"
+        tools:visibility="visible">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/thumbnail"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                app:civ_border_color="@android:color/white"
+                app:civ_border_width="1dp"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="8dp"
+                android:layout_toStartOf="@id/action_button"
+                android:layout_toEndOf="@id/thumbnail"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@android:color/white"
+                    app:animatedText="@{mediaItem.title}"
+                    tools:text="@tools:sample/lorem/random" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/hint_playing_category"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLength="30"
+                        android:maxLines="1"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp"
+                        app:animatedText="@{@string/label_playing_from(playingPlaylist.name)}"
+                        tools:text="@tools:sample/lorem/random"
+                        android:textIsSelectable="false" />
+
+                    <View
+                        android:layout_width="5dp"
+                        android:layout_height="5dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/circle" />
+
+                    <TextView
+                        android:id="@+id/time_progress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{@string/label_duration_progress(FormatingUtilsKt.parseDurationToHumanView(currentTimePosition), FormatingUtilsKt.parseDurationToHumanView(mediaItem.durationInMillis))}"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp"
+                        tools:text="1:04 / 5:34" />
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/action_button"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                tools:ignore="ContentDescription"
+                tools:src="@drawable/ic_play_48dp" />
+
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+</layout>

@@ -1,0 +1,13 @@
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common-feature.gradle"
+
+android {
+    namespace 'com.youtubemusic.core.common'
+}
+
+dependencies {
+    implementation project(':core:model')
+    implementation utils.threetenbp
+    implementation utils.coil
+    implementation androidx.paging
+}

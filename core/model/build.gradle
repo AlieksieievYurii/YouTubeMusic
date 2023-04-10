@@ -1,0 +1,7 @@
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common.gradle"
+apply plugin: 'kotlin-parcelize'
+
+android {
+    namespace 'com.youtubemusic.core.model'
+}

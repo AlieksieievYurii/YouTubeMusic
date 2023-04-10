@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.youtubemusic.core.common.FormatingUtilsKt" />
+
+        <import type="android.view.View" />
+
+        <variable
+            name="videoItem"
+            type="com.youtubemusic.core.model.VideoItem" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        card_view:cardCornerRadius="6dp"
+        card_view:cardUseCompatPadding="true">
+
+        <LinearLayout
+            android:id="@+id/card_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/main_part_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="6dp">
+
+                <ImageView
+                    android:id="@+id/thumbnail"
+                    android:layout_width="110dp"
+                    android:layout_height="80dp"
+                    android:contentDescription="@string/content_description_thumbnail_video"
+                    app:imageUrl="@{videoItem.thumbnail}"
+                    tools:src="@tools:sample/backgrounds/scenic" />
+
+                <TextView
+                    android:id="@+id/tv_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignEnd="@id/thumbnail"
+                    android:layout_alignBottom="@id/thumbnail"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/rectangle"
+                    android:forceDarkAllowed="false"
+                    android:text="@{FormatingUtilsKt.parseDurationToHumanView(videoItem.durationInMillis)}"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    tools:targetApi="q"
+                    tools:text="0:30" />
+
+                <TextView
+                    android:id="@+id/title"
+                    style="@style/TextAppearance.AppCompat.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_toStartOf="@id/options"
+                    android:layout_toEndOf="@id/thumbnail"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="@{videoItem.title}"
+                    android:textSize="12sp"
+                    tools:text="@tools:sample/lorem/random" />
+
+                <TextView
+                    android:id="@+id/channel_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/title"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_toStartOf="@id/options"
+                    android:layout_toEndOf="@id/thumbnail"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{videoItem.author}"
+                    android:textSize="12sp"
+                    tools:text="@tools:sample/lorem/random" />
+
+                <TextView
+                    android:id="@+id/tv_amount_views"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/channel_title"
+                    android:layout_marginStart="6dp"
+                    android:layout_toEndOf="@id/thumbnail"
+                    android:text="@{@string/label_views_count(FormatingUtilsKt.bigIntegerToShortCutSuffix(videoItem.viewCount))}"
+                    android:textSize="12sp"
+                    tools:text="135K views" />
+
+                <RelativeLayout
+                    android:id="@+id/options"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignBottom="@id/thumbnail"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true">
+
+                    <com.youtubemusic.feature.youtube_downloader.DownloadButton
+                        android:id="@+id/btn_download"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_centerInParent="true"
+                        android:layout_marginEnd="8dp"
+                        app:backgroundColor="?attr/colorAccent" />
+
+                    <TextView
+                        android:id="@+id/size_progress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/btn_download"
+                        android:layout_centerHorizontal="true"
+                        android:textColor="?attr/colorAccent"
+                        android:textSize="9sp"
+                        android:visibility="gone"
+                        tools:ignore="SmallSp"
+                        tools:text="10.2 / 50.2 M" />
+
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/expandable_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/iv_thumb_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/content_description_likes"
+                    android:src="@drawable/ic_thumb_up_black_24dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_count_likes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/iv_thumb_up"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toEndOf="@+id/iv_thumb_up"
+                    android:gravity="center_vertical"
+                    android:text="@{FormatingUtilsKt.bigIntegerToShortCutSuffix(videoItem.likeCount)}"
+                    android:textAlignment="gravity"
+                    android:textSize="12sp"
+                    tools:text="212K" />
+
+                <TextView
+                    android:id="@+id/video_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="2dp"
+                    android:layout_toEndOf="@id/tv_count_likes"
+                    android:text="@{@string/label_id(videoItem.id)}"
+                    android:textAlignment="viewEnd"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    tools:text="ID: 12f34tf" />
+
+                <TextView
+                    android:id="@+id/tv_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/iv_thumb_up"
+                    android:layout_marginTop="5dp"
+                    android:text="@{videoItem.description}"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:visibility="@{videoItem.description.empty ? View.GONE : View.VISIBLE}"
+                    tools:text="@tools:sample/lorem/random" />
+            </RelativeLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</layout>

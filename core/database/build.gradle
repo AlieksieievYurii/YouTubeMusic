@@ -1,0 +1,12 @@
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common.gradle"
+
+android {
+    namespace 'com.youtubemusic.core.database'
+}
+
+dependencies {
+    implementation room.runtime
+    implementation room.ktx
+    kapt room.compiler
+}

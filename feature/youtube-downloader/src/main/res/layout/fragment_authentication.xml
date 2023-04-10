@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white">
+
+        <TextView
+            android:id="@+id/tv_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_sing_in"
+            style="@style/DescriptionText"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="100dp"
+            android:layout_marginBottom="20dp"
+            app:drawableTopCompat="@drawable/ic_login_illustration" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sign_in_with_google"
+            android:textAllCaps="false"
+            android:backgroundTint="@android:color/white"
+            android:textColor="?attr/colorAccent"
+            android:drawableLeft="@drawable/ic_icons8_google"
+            android:layout_below="@id/tv_description"
+            android:layout_centerHorizontal="true"
+            tools:ignore="RtlHardcoded" />
+
+    </RelativeLayout>
+</layout>

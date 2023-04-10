@@ -1,0 +1,21 @@
+apply plugin: 'com.android.library'
+apply from: "$rootProject.projectDir/common-feature.gradle"
+
+android {
+    namespace 'com.youtubemusic.feature.saved_music'
+}
+
+dependencies {
+    implementation project(':feature:equalizer')
+    implementation project(':feature:player')
+    implementation project(':feature:playlist-editor')
+    implementation project(':feature:download-manager')
+
+    implementation project(':core:common')
+    implementation project(':core:data')
+    implementation project(':core:player')
+
+    implementation ui.qgen
+    implementation ui.circle_image_view
+    implementation utils.coil
+}
