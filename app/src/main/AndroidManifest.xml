@@ -21,13 +21,16 @@
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
             android:name="com.youtubemusic.feature.equalizer.EqualizerActivity"
+            android:exported="false"
             android:screenOrientation="portrait" />
         <activity
             android:name="com.youtubemusic.feature.player.PlayerActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name="com.youtubemusic.feature.playlist_editor.PlaylistEditorActivity"
+            android:exported="false"
             android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
@@ -44,6 +47,7 @@
 
         <activity
             android:name="com.youtubemusic.feature.download_manager.DownloadManagerActivity"
+            android:exported="false"
             android:screenOrientation="portrait" />
 
         <provider

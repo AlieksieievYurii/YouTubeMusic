@@ -1,6 +1,5 @@
 package com.youtubemusic.core.player
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.*
 import android.media.AudioAttributes
@@ -22,7 +21,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -96,12 +94,13 @@ class MediaService : MediaBrowserServiceCompat() {
     }
 
     private fun initMediaSession() {
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        else
+            PendingIntent.FLAG_UPDATE_CURRENT
+
         val sessionActivityPendingIntent = packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
-           // sessionIntent.putExtra(MainActivity.EXTRA_LAUNCH_FRAGMENT, MainActivity.EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC)
-            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            else
-                PendingIntent.FLAG_UPDATE_CURRENT
+            sessionIntent.putExtra(MAIN_ACTIVITY_EXTRA_LAUNCH_FRAGMENT, MAIN_ACTIVITY_EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC)
             PendingIntent.getActivity(this, 0, sessionIntent, flags)
         }
 
@@ -110,11 +109,9 @@ class MediaService : MediaBrowserServiceCompat() {
             setClass(applicationContext, MediaButtonReceiver::class.java)
         }
 
-        @SuppressLint("UnspecifiedImmutableFlag")
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, 0)
+        val pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, flags)
 
         mediaSession = MediaSessionCompat(baseContext, TAG, mediaButtonReceiver, null).apply {
-            setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
             setCallback(MediaSessionCallBacks())
             setMediaButtonReceiver(pendingIntent)
             setSessionActivity(sessionActivityPendingIntent)
@@ -168,7 +165,7 @@ class MediaService : MediaBrowserServiceCompat() {
 //        }
 //    }
 
-    private fun updateCurrentPlaybackState() = synchronized(this) {
+    internal fun updateCurrentPlaybackState() = synchronized(this) {
         val extras = Bundle().apply {
             if (currentState == PlaybackStateCompat.STATE_PLAYING || currentState == PlaybackStateCompat.STATE_PAUSED) {
                 putInt(PLAYBACK_STATE_SESSION_ID, getMediaPlayer().audioSessionId)
@@ -182,7 +179,7 @@ class MediaService : MediaBrowserServiceCompat() {
         mediaSession.setPlaybackState(currentPlaybackState)
     }
 
-    private fun sendMediaSessionError(errorEvent: String, error: Exception) =
+    internal fun sendMediaSessionError(errorEvent: String, error: Exception) =
         mediaSession.sendSessionEvent(errorEvent, Bundle().apply { putSerializable(EXTRA_EXCEPTION, error) })
 
     private fun getCurrentPlaybackStateBuilder(): PlaybackStateCompat.Builder {
@@ -239,7 +236,7 @@ class MediaService : MediaBrowserServiceCompat() {
 
 
     @Suppress("DEPRECATION")
-    private fun giveUpAudioFocus() {
+    internal fun giveUpAudioFocus() {
         if (currentAudioFocus == AudioFocus.Focused && audioManager.abandonAudioFocus(audioFocus) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             currentAudioFocus = AudioFocus.NoFocus
         }
@@ -247,7 +244,7 @@ class MediaService : MediaBrowserServiceCompat() {
 
 
     @Suppress("DEPRECATION")
-    private fun tryToGetAudioFocus() {
+    internal fun tryToGetAudioFocus() {
         if (currentAudioFocus == AudioFocus.NoFocus) {
             val result = audioManager.requestAudioFocus(audioFocus, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
             currentAudioFocus = if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) AudioFocus.Focused else AudioFocus.NoFocus
@@ -266,7 +263,7 @@ class MediaService : MediaBrowserServiceCompat() {
         }
     }
 
-    private fun handlePlayMusicQueue() {
+    internal fun handlePlayMusicQueue() {
         tryToGetAudioFocus()
         mediaSession.isActive = true
         try {
@@ -288,7 +285,7 @@ class MediaService : MediaBrowserServiceCompat() {
         }
     }
 
-    private fun playMediaPlayer() = synchronized(this) {
+    internal fun playMediaPlayer() = synchronized(this) {
         currentState = PlaybackStateCompat.STATE_PLAYING
         canPlayOnFocusGain = false
         getMediaPlayer().apply {
@@ -301,7 +298,7 @@ class MediaService : MediaBrowserServiceCompat() {
         updateCurrentPlaybackState()
     }
 
-    private fun pauseMediaPlayer() = synchronized(this) {
+    internal fun pauseMediaPlayer() = synchronized(this) {
         currentState = PlaybackStateCompat.STATE_PAUSED
         getMediaPlayer().pause()
         notificationManager.showPauseNotification()
@@ -309,7 +306,7 @@ class MediaService : MediaBrowserServiceCompat() {
         updateCurrentPlaybackState()
     }
 
-    private fun handleStopRequest() {
+    internal fun handleStopRequest() {
         currentState = PlaybackStateCompat.STATE_STOPPED
 
         getMediaPlayer().apply {
@@ -447,5 +444,11 @@ class MediaService : MediaBrowserServiceCompat() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         MediaButtonReceiver.handleIntent(mediaSession, intent)
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    companion object {
+        private const val MAIN_ACTIVITY_EXTRA_LAUNCH_FRAGMENT = "com.yurii.youtubemusic.mainactivity.extra.launch.fragment"
+        private const val MAIN_ACTIVITY_EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC =
+            "com.yurii.youtubemusic.mainactivity.extra.launch.savedmusic.fragment"
     }
 }
