@@ -25,8 +25,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name="com.youtubemusic.feature.player.PlayerActivity"
-            android:screenOrientation="portrait"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name="com.youtubemusic.feature.playlist_editor.PlaylistEditorActivity"
@@ -64,12 +64,15 @@
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}"
-            android:grantUriPermissions="true"
-            android:exported="false">
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="${firebaseCrashAnalyticsCollectionEnabled}" />
     </application>
 </manifest>

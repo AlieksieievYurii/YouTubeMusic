@@ -13,3 +13,6 @@
 /captures
 .externalNativeBuild
 .cxx
+buildSrc/build
+google-services.json
+*.apk

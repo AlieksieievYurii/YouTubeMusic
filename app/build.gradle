@@ -1,11 +1,31 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: FileEncryption
 apply from: "$rootProject.projectDir/common-feature.gradle"
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\aliek\\.android-keystore.jks')
+            storePassword '152399'
+            keyAlias 'youtubemusic'
+            keyPassword '152399'
+        }
+    }
     defaultConfig {
         applicationId "com.yurii.youtubemusic"
         versionCode 1
         versionName "1.0"
+    }
+    buildTypes {
+        debug {
+            manifestPlaceholders.firebaseCrashAnalyticsCollectionEnabled = false
+        }
+
+        release {
+            manifestPlaceholders.firebaseCrashAnalyticsCollectionEnabled = true
+        }
     }
 }
 
@@ -18,10 +38,16 @@ dependencies {
     implementation project(':feature:saved-music')
     implementation project(':feature:youtube-downloader')
 
+    implementation platform(tools.firebase_boom)
+    implementation tools.firebase_crush_analytics
+    implementation tools.firebase_analytics
+
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     implementation worker.hilt_work
     debugImplementation tools.leakcanary
 }
+
+preBuild.dependsOn decryptGoogleServicesFile
 
 kapt {
     correctErrorTypes true
