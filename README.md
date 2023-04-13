@@ -30,6 +30,11 @@ The fragment is responsible for downloading music from YouTube. The app just fet
 
 **Downloading musics from YouTube is **not stable**, because Youtube often changes web structure of its pages.**
 
+## Project Compilation
+The application uses Firebase that requires _google-services.json_. The project has a custom task that decrypts that file which is located in the project root
+and is named _google-services.json.encrypt_. Before bulding the project, you must setup environment variable `ANDROID_ENCRYPTION_KEY` pointing the key used during
+encryption. The decryption task is added to the build graph dependencies and is called before preBuild.
+
 ## Modularization
 ![image](https://user-images.githubusercontent.com/39415360/230973497-66c2872c-d180-40b4-9118-536a6fab1648.png)
 
