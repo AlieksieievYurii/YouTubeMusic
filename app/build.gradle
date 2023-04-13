@@ -5,10 +5,27 @@ apply plugin: FileEncryption
 apply from: "$rootProject.projectDir/common-feature.gradle"
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\aliek\\.android-keystore.jks')
+            storePassword '152399'
+            keyAlias 'youtubemusic'
+            keyPassword '152399'
+        }
+    }
     defaultConfig {
         applicationId "com.yurii.youtubemusic"
         versionCode 1
         versionName "1.0"
+    }
+    buildTypes {
+        debug {
+            manifestPlaceholders.firebaseCrashAnalyticsCollectionEnabled = false
+        }
+
+        release {
+            manifestPlaceholders.firebaseCrashAnalyticsCollectionEnabled = true
+        }
     }
 }
 
