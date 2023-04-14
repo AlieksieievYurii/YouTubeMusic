@@ -2,11 +2,18 @@ package com.youtubemusic.feature.youtube_downloader
 
 
 import android.content.Intent
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.viewbinding.library.fragment.viewBinding
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.youtubemusic.core.common.TabFragment
+import com.youtubemusic.core.common.ToolBarAccessor
 import com.youtubemusic.core.common.ui.ErrorDialog
 import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
@@ -16,7 +23,6 @@ import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.model.YouTubePlaylist
-
 import com.youtubemusic.feature.download_manager.DownloadManagerActivity
 import com.youtubemusic.feature.youtube_downloader.playlists.PlaylistsDialogFragment
 import com.youtubemusic.feature.youtube_downloader.databinding.FragmentYoutubeMusicBinding
@@ -25,11 +31,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
-    layoutId = R.layout.fragment_youtube_music,
-    titleStringId = R.string.label_fragment_title_youtube_musics,
-    optionMenuId = R.menu.youtube_music_fragment_menu
-) {
+class YouTubeMusicFragment : Fragment(R.layout.fragment_youtube_music) {
     sealed class ViewState {
         object NoSelectedPlaylist : ViewState()
         object VideosLoaded : ViewState()
@@ -37,7 +39,7 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         object EmptyList : ViewState()
         object Error : ViewState()
     }
-
+    private val binding: FragmentYoutubeMusicBinding by viewBinding()
     internal val viewModel: YouTubeMusicViewModel by viewModels()
 
     private val listAdapter: VideoItemsListAdapter by lazy {
@@ -52,14 +54,16 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
         })
     }
 
-    override fun onClickOption(id: Int) {
-        when (id) {
-            R.id.item_log_out -> viewModel.signOut()
-            R.id.item_open_download_manager -> openDownloadManager()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
+        (requireActivity() as ToolBarAccessor).getToolbar().setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.item_log_out -> viewModel.signOut()
+                R.id.item_open_download_manager -> openDownloadManager()
+            }
+            true
         }
-    }
-
-    override fun onInflatedView(viewDataBinding: FragmentYoutubeMusicBinding) {
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = listAdapter.apply {
@@ -85,6 +89,12 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
             btnSelectPlayListFirst.setOnClickListener { openDialogToSelectPlaylist(null) }
             refresh.setOnRefreshListener { listAdapter.refresh() }
         }
+
+    }
+    @Deprecated("Deprecated in Java")
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.youtube_music_fragment_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
     private suspend fun startHandlingEvents() = viewModel.event.collectLatest { event ->
@@ -156,9 +166,5 @@ class YouTubeMusicFragment : TabFragment<FragmentYoutubeMusicBinding>(
 
     private fun openDownloadManager() {
         startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))
-    }
-
-    companion object {
-        fun createInstance() = YouTubeMusicFragment()
     }
 }

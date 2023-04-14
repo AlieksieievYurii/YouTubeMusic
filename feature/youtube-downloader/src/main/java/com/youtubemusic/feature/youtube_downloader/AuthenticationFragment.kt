@@ -1,21 +1,21 @@
 package com.youtubemusic.feature.youtube_downloader
 
 import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.viewbinding.library.fragment.viewBinding
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.google.android.gms.common.api.ApiException
 import com.youtubemusic.core.data.repository.DoesNotHaveRequiredScopes
 import com.youtubemusic.core.data.repository.GoogleAccount
-import com.youtubemusic.core.common.TabFragment
 import com.youtubemusic.feature.youtube_downloader.databinding.FragmentAuthenticationBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AuthenticationFragment : TabFragment<FragmentAuthenticationBinding>(
-    layoutId = R.layout.fragment_authentication,
-    titleStringId = R.string.label_fragment_title_youtube_musics,
-    optionMenuId = null
-) {
+class AuthenticationFragment : Fragment(R.layout.fragment_authentication) {
+    private val binding: FragmentAuthenticationBinding by viewBinding()
 
     @Inject
     lateinit var googleAccount: GoogleAccount
@@ -27,7 +27,8 @@ class AuthenticationFragment : TabFragment<FragmentAuthenticationBinding>(
             handleDeclinedSignIn()
     }
 
-    override fun onInflatedView(viewDataBinding: FragmentAuthenticationBinding) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         binding.signInButton.setOnClickListener {
             binding.signInButton.isEnabled = false
             signInWithGoogleLauncher.launch(googleAccount.signInIntent)
@@ -48,9 +49,5 @@ class AuthenticationFragment : TabFragment<FragmentAuthenticationBinding>(
 
     private fun handleDeclinedSignIn() {
         binding.signInButton.isEnabled = true
-    }
-
-    companion object {
-        fun createInstance() = AuthenticationFragment()
     }
 }

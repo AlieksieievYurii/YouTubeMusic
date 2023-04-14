@@ -1,14 +1,17 @@
 package com.youtubemusic.feature.saved_music
 
 import android.content.Intent
-import android.view.View
+import android.os.Bundle
+import android.view.*
+import android.viewbinding.library.fragment.viewBinding
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import com.google.android.material.tabs.TabLayoutMediator
+import com.youtubemusic.core.common.ToolBarAccessor
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.feature.equalizer.EqualizerActivity
 import com.youtubemusic.feature.playlist_editor.PlaylistEditorActivity
-import com.youtubemusic.core.common.TabFragment
 import com.youtubemusic.feature.download_manager.DownloadManagerActivity
 import com.youtubemusic.feature.saved_music.databinding.FragmentSavedMusicBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -16,22 +19,24 @@ import kotlinx.coroutines.flow.collectLatest
 
 
 @AndroidEntryPoint
-class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
-    layoutId = R.layout.fragment_saved_music,
-    titleStringId = R.string.label_fragment_title_saved_music,
-    optionMenuId = R.menu.saved_musics_fragment_menu
-) {
+class SavedMusicFragment : Fragment(R.layout.fragment_saved_music) {
+    private val binding: FragmentSavedMusicBinding by viewBinding()
     private val viewModel: SavedMusicViewModel by viewModels()
 
-    override fun onClickOption(id: Int) {
-        when (id) {
-            R.id.item_add_edit_categories -> openCategoriesEditor()
-            R.id.item_open_equalizer -> openEqualizerActivity()
-            R.id.item_open_download_manager -> openDownloadManager()
-        }
-    }
 
-    override fun onInflatedView(viewDataBinding: FragmentSavedMusicBinding) {
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
+        (requireActivity() as ToolBarAccessor).getToolbar().setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.item_add_edit_categories -> openCategoriesEditor()
+                R.id.item_open_equalizer -> openEqualizerActivity()
+                R.id.item_open_download_manager -> openDownloadManager()
+            }
+            true
+        }
+
         lifecycleScope.launchWhenCreated {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.musicCategories.collectLatest {
@@ -44,6 +49,11 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
                 }
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.saved_musics_fragment_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
     private fun openEqualizerActivity() {
@@ -64,9 +74,5 @@ class SavedMusicFragment : TabFragment<FragmentSavedMusicBinding>(
             tab.text = categories[position].name
         }.attach()
         binding.categories.visibility = View.VISIBLE
-    }
-
-    companion object {
-        fun createInstance(): SavedMusicFragment = SavedMusicFragment()
     }
 }

@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/item_saved_music"
+            android:id="@id/fragment_saved_music"
             android:icon="@drawable/ic_library_music_white_24dp"
             android:title="@string/label_saved_musics" />
         <item
-            android:id="@+id/item_you_tube_music"
+            android:id="@id/fragment_you_tube_music"
             android:icon="@drawable/ic_you_tube_white_24dp"
             android:title="@string/label_youtube_musics" />
     </group>
