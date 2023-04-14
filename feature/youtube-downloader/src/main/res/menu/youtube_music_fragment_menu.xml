@@ -7,6 +7,6 @@
     <item
         android:id="@+id/item_open_download_manager"
         app:showAsAction="always"
-        android:icon="@drawable/baseline_download_24"
+        android:icon="@drawable/ic_baseline_download_24"
         android:title="@string/label_download_manager" />
 </menu>
