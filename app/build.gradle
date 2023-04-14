@@ -44,6 +44,10 @@ dependencies {
 
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     implementation worker.hilt_work
+
+    implementation androidx.navigation.fragment
+    implementation androidx.navigation.ui
+
     debugImplementation tools.leakcanary
 }
 
