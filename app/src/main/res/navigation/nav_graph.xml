@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_saved_music" />
 
     <fragment
-        android:id="@+id/fragment_you_tube_music"
+        android:id="@+id/fragment_youtube_music"
         android:name="com.youtubemusic.feature.youtube_downloader.YouTubeMusicFragment"
         android:label="YouTube Music"
         tools:layout="@layout/fragment_youtube_music" />

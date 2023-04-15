@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity(), ToolBarAccessor {
         activityMainBinding.bottomNavigationView.setupWithNavController(hostFragment.navController)
         activityMainBinding.toolbar.setupWithNavController(
             hostFragment.navController,
-            AppBarConfiguration(setOf(R.id.fragment_you_tube_music, R.id.fragment_saved_music))
+            AppBarConfiguration(setOf(R.id.fragment_youtube_music, R.id.fragment_saved_music))
         )
 
         lifecycleScope.launch {

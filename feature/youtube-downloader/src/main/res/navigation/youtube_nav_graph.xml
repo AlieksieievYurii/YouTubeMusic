@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/youtube_nav_graph"
+    app:startDestination="@id/fragment_playlist_videos">
+
+    <fragment
+        android:id="@+id/authenticationFragment"
+        android:name="com.youtubemusic.feature.youtube_downloader.AuthenticationFragment"
+        android:label="AuthenticationFragment"
+        tools:layout="@layout/fragment_authentication"/>
+    <fragment
+        android:id="@+id/fragment_playlist_videos"
+        android:name="com.youtubemusic.feature.youtube_downloader.PlaylistVideosFragment"
+        android:label="YouTube Music"
+        tools:layout="@layout/fragment_playlist_videos" >
+        <action
+            android:id="@+id/action_fragment_playlist_videos_to_authenticationFragment"
+            app:destination="@id/authenticationFragment" />
+    </fragment>
+</navigation>

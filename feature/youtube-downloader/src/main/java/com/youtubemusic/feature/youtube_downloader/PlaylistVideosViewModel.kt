@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class YouTubeMusicViewModel @Inject constructor(
+internal class PlaylistVideosViewModel @Inject constructor(
     private val downloadManager: DownloadManager,
     private val youTubePreferences: YouTubePreferences,
     private val playlistRepository: PlaylistRepository,
@@ -34,10 +34,6 @@ internal class YouTubeMusicViewModel @Inject constructor(
     private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
     val videoItems: StateFlow<PagingData<VideoItem>> = _videoItems
 
-    private val _currentYouTubePlaylist: MutableStateFlow<YouTubePlaylist?> =
-        MutableStateFlow(youTubePreferences.getCurrentYouTubePlaylist())
-    val currentYouTubePlaylistId = _currentYouTubePlaylist.asStateFlow()
-
     val videoItemStatus: Flow<DownloadManager.Status> = downloadManager.observeStatus()
 
     private val _event = MutableSharedFlow<Event>()
@@ -46,7 +42,9 @@ internal class YouTubeMusicViewModel @Inject constructor(
     private var searchJob: Job? = null
 
     init {
-        _currentYouTubePlaylist.value?.let { loadVideoItems(it) }
+        youTubePreferences.getCurrentYouTubePlaylist()?.let {
+            loadVideoItems(it)
+        }
     }
 
     fun signOut() {
@@ -54,9 +52,14 @@ internal class YouTubeMusicViewModel @Inject constructor(
         youTubePreferences.setCurrentYouTubePlaylist(null)
     }
 
+    fun playlist() = youTubePreferences.getCurrentYouTubePlaylist()
+
+    fun isLoggedOn(): Boolean {
+        return googleAccount.isAuthenticatedAndAuthorized.value
+    }
+
     fun setPlaylist(playlist: YouTubePlaylist) {
         youTubePreferences.setCurrentYouTubePlaylist(playlist)
-        _currentYouTubePlaylist.value = playlist
         loadVideoItems(playlist)
     }
 
