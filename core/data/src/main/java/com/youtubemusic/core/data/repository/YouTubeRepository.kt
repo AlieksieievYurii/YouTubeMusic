@@ -52,8 +52,12 @@ class YouTubeRepository @Inject constructor(
         return PlaylistsPagingSource(youTubeAPI)
     }
 
-    fun getYouTubeVideosPagingSource(playlist: YouTubePlaylist): YouTubeVideosPagingSource {
-        return YouTubeVideosPagingSource(youTubeAPI, playlist.id)
+    fun getYouTubeVideosPagingSource(query: String): YouTubeVideosPagingSource {
+        return YouTubeVideosPagingSource(youTubeAPI, query)
+    }
+
+    fun getYouTubePlaylistVideosPagingSource(playlist: YouTubePlaylist): YouTubePlaylistVideosPagingSource {
+        return YouTubePlaylistVideosPagingSource(youTubeAPI, playlist.id)
     }
 
     fun getExcludingAlreadySyncPlaylistPagingSource(): ExcludingAlreadySyncPlaylistPagingSource {
@@ -110,7 +114,31 @@ class ExcludingAlreadySyncPlaylistPagingSource(
     }
 }
 
-class YouTubeVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val playlistId: String) : PagingSource<String, VideoItem>() {
+class YouTubeVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val query: String) : PagingSource<String, VideoItem>() {
+    override fun getRefreshKey(state: PagingState<String, VideoItem>): String? = null
+
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, VideoItem> {
+        try {
+            val results = youTubeAPI.getVideos(query, pageToken = params.key)
+
+            if (results.items.isEmpty())
+                return LoadResult.Error(EmptyListException())
+
+            val videos = youTubeAPI.getVideosDetails(ids = results.items.map { it.id.videoId })
+
+            return LoadResult.Page(
+                data = videos.items.map { it.toVideoItem() },
+                prevKey = results.prevPageToken,
+                nextKey = results.nextPageToken
+            )
+
+        } catch (e: Exception) {
+            return LoadResult.Error(e)
+        }
+    }
+}
+
+class YouTubePlaylistVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val playlistId: String) : PagingSource<String, VideoItem>() {
     override fun getRefreshKey(state: PagingState<String, VideoItem>): String? = null
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, VideoItem> {

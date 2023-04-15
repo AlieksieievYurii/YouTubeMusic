@@ -5,6 +5,7 @@ import com.google.api.client.json.JsonFactory
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
+import com.google.api.services.youtube.model.SearchListResponse
 import com.google.api.services.youtube.model.VideoListResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,6 +39,16 @@ class YouTubeAPI @Inject constructor(
                 .execute()
         }
 
+    suspend fun getVideos(query: String, pageToken: String?): SearchListResponse = withContext(Dispatchers.IO) {
+        service.search()
+            .list("snippet")
+            .setOrder("viewCount")
+            .setMaxResults(10)
+            .setQ(query)
+            .setType("video")
+            .setPageToken(pageToken)
+            .execute()
+    }
 
     suspend fun getVideosDetails(ids: List<String>): VideoListResponse = withContext(Dispatchers.IO) {
         service.videos().list("snippet,statistics,contentDetails")
