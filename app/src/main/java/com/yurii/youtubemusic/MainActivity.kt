@@ -32,22 +32,19 @@ class MainActivity : AppCompatActivity(), ToolBarAccessor {
     private val viewModel: MainActivityViewModel by viewModels()
     private val activityMainBinding: ActivityMainBinding by viewBinding()
     private val downloadManagerBudge by lazy { BadgeDrawable.create(this) }
+    private val navController by lazy { (supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment).navController }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setSupportActionBar(activityMainBinding.toolbar)
-
-        val hostFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
-        activityMainBinding.bottomNavigationView.setupWithNavController(hostFragment.navController)
+        activityMainBinding.bottomNavigationView.setupWithNavController(navController)
         activityMainBinding.toolbar.setupWithNavController(
-            hostFragment.navController,
-            AppBarConfiguration(setOf(R.id.fragment_youtube_music, R.id.fragment_saved_music))
+            navController, AppBarConfiguration(setOf(R.id.fragment_youtube_music, R.id.fragment_saved_music))
         )
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { observeEvents() }
-                launch { observeYouTubeAuthenticationState() }
                 launch { observeNumberOfDownloadingJobs() }
             }
         }
@@ -56,6 +53,7 @@ class MainActivity : AppCompatActivity(), ToolBarAccessor {
             R.id.player_view_holder,
             PlayerControlPanelFragment()
         ).commit()
+
     }
 
     private suspend fun observeNumberOfDownloadingJobs() {
@@ -66,15 +64,6 @@ class MainActivity : AppCompatActivity(), ToolBarAccessor {
             } else
                 downloadManagerBudge.isVisible = false
         }
-    }
-
-    private suspend fun observeYouTubeAuthenticationState() {
-//        viewModel.isAuthenticatedAndAuthorized.collect { isAuthenticated ->
-//            if (fragmentHelper.isYouTubeMusicFragmentActive && !isAuthenticated)
-//                fragmentHelper.showAuthenticationFragment()
-//            else if (fragmentHelper.isAuthenticationFragmentActive && isAuthenticated)
-//                fragmentHelper.showYouTubeMusicFragment()
-//        }
     }
 
     private suspend fun observeEvents() {
@@ -95,19 +84,12 @@ class MainActivity : AppCompatActivity(), ToolBarAccessor {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent.getStringExtra(EXTRA_LAUNCH_FRAGMENT)?.let { fragmentExtra: String ->
-//            onNavigationItemSelected(
-//                activityMainBinding.bottomNavigationView.menu.findItem(
-//                    when (fragmentExtra) {
-//                        EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC -> R.id.fragment_saved_music.also {
-//                            activityMainBinding.bottomNavigationView.selectedItemId = it
-//                        }
-//                        EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC -> R.id.fragment_you_tube_music.also {
-//                            activityMainBinding.bottomNavigationView.selectedItemId = it
-//                        }
-//                        else -> throw IllegalStateException("Cannot open fragment with $fragmentExtra")
-//                    }
-//                )
-//            )
+            when (fragmentExtra) {
+                EXTRA_LAUNCH_FRAGMENT_SAVED_MUSIC -> navController.navigate(R.id.fragment_saved_music)
+                EXTRA_LAUNCH_FRAGMENT_YOUTUBE_MUSIC -> navController.navigate(R.id.fragment_youtube_music)
+                else -> throw IllegalStateException("Cannot open fragment with $fragmentExtra")
+            }
+
         }
     }
 
