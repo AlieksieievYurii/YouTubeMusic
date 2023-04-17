@@ -31,7 +31,6 @@ import java.lang.IllegalStateException
 class MainActivity : AppCompatActivity(), ToolBarAccessor {
     private val viewModel: MainActivityViewModel by viewModels()
     private val activityMainBinding: ActivityMainBinding by viewBinding()
-    private val downloadManagerBudge by lazy { BadgeDrawable.create(this) }
     private val navController by lazy { (supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment).navController }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +44,6 @@ class MainActivity : AppCompatActivity(), ToolBarAccessor {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { observeEvents() }
-                launch { observeNumberOfDownloadingJobs() }
             }
         }
 
@@ -56,15 +54,6 @@ class MainActivity : AppCompatActivity(), ToolBarAccessor {
 
     }
 
-    private suspend fun observeNumberOfDownloadingJobs() {
-        viewModel.numberOfDownloadingJobs.collect {
-            if (it != 0) {
-                downloadManagerBudge.isVisible = true
-                downloadManagerBudge.number = it
-            } else
-                downloadManagerBudge.isVisible = false
-        }
-    }
 
     private suspend fun observeEvents() {
         viewModel.event.collectLatest {
@@ -75,11 +64,6 @@ class MainActivity : AppCompatActivity(), ToolBarAccessor {
         }
     }
 
-    @SuppressLint("UnsafeOptInUsageError")
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        BadgeUtils.attachBadgeDrawable(downloadManagerBudge, activityMainBinding.toolbar, R.id.item_open_download_manager)
-        return super.onCreateOptionsMenu(menu)
-    }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
