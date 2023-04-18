@@ -23,9 +23,17 @@
         android:id="@+id/fragment_youtube_videos_search"
         android:name="com.youtubemusic.feature.youtube_downloader.search.YouTubeVideosSearchFragment"
         android:label="YouTube Videos Search"
-        tools:layout="@layout/fragment_youtube_videos_search" >
+        tools:layout="@layout/fragment_youtube_videos_search">
         <action
             android:id="@+id/action_fragment_youtube_videos_search_to_authenticationFragment"
             app:destination="@id/authenticationFragment" />
+        <action
+            android:id="@+id/action_fragment_youtube_videos_search_to_playlistsFragment"
+            app:destination="@id/playlistsFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/playlistsFragment"
+        android:name="com.youtubemusic.feature.youtube_downloader.playlists.PlaylistsFragment"
+        android:label="PlaylistsFragment"
+        tools:layout="@layout/fragment_playlists" />
 </navigation>
