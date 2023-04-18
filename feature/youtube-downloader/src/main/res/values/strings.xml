@@ -14,4 +14,5 @@
     <string name="dialog_confirm_deletion_music_message">Are you sure want to delete this music?</string>
     <string name="label_views_count">%s views</string>
     <string name="label_log_out">Logout</string>
+    <string name="label_search">Search</string>
 </resources>
