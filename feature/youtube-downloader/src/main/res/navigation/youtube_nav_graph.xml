@@ -14,11 +14,7 @@
         android:id="@+id/fragment_playlist_videos"
         android:name="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment"
         android:label="YouTube Music"
-        tools:layout="@layout/fragment_playlist_videos">
-        <action
-            android:id="@+id/action_fragment_playlist_videos_to_authenticationFragment"
-            app:destination="@id/authenticationFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_playlist_videos"/>
     <fragment
         android:id="@+id/fragment_youtube_videos_search"
         android:name="com.youtubemusic.feature.youtube_downloader.search.YouTubeVideosSearchFragment"
@@ -35,5 +31,9 @@
         android:id="@+id/playlistsFragment"
         android:name="com.youtubemusic.feature.youtube_downloader.playlists.PlaylistsFragment"
         android:label="PlaylistsFragment"
-        tools:layout="@layout/fragment_playlists" />
+        tools:layout="@layout/fragment_youtube_playlists" >
+        <action
+            android:id="@+id/action_playlistsFragment_to_fragment_playlist_videos"
+            app:destination="@id/fragment_playlist_videos" />
+    </fragment>
 </navigation>

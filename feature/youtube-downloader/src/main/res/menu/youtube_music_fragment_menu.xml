@@ -18,5 +18,10 @@
         android:title="@string/label_download_manager"
         app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
-    
+    <item
+        android:id="@+id/item_open_playlists"
+        android:icon="@drawable/baseline_video_library_24"
+        android:title="@string/label_youtube_playlists"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
 </menu>

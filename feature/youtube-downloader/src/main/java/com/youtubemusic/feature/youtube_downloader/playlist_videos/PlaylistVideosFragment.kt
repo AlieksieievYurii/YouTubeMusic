@@ -66,7 +66,6 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
             when(it.itemId) {
                 R.id.item_log_out -> {
                     viewModel.signOut()
-                    findNavController().navigate(R.id.action_fragment_playlist_videos_to_authenticationFragment)
                 }
                 R.id.item_open_download_manager -> openDownloadManager()
             }
@@ -98,10 +97,6 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
             btnSelectPlayListFirst.setOnClickListener { openDialogToSelectPlaylist(null) }
             refresh.setOnRefreshListener { listAdapter.refresh() }
         }
-
-        if (!viewModel.isLoggedOn())
-            findNavController().navigate(R.id.action_fragment_playlist_videos_to_authenticationFragment)
-
     }
 
     override fun onStart() {

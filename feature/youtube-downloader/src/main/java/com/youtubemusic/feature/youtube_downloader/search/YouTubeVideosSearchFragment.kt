@@ -121,6 +121,10 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
                     startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))
                     true
                 }
+                R.id.item_open_playlists -> {
+                    findNavController().navigate(R.id.action_fragment_youtube_videos_search_to_playlistsFragment)
+                    true
+                }
                 else -> false
             }
         }
