@@ -111,7 +111,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true">
 
-                    <com.youtubemusic.feature.youtube_downloader.DownloadButton
+                    <com.youtubemusic.feature.youtube_downloader.utils.DownloadButton
                         android:id="@+id/btn_download"
                         android:layout_width="50dp"
                         android:layout_height="50dp"

@@ -1,4 +1,4 @@
-package com.youtubemusic.feature.youtube_downloader
+package com.youtubemusic.feature.youtube_downloader.playlist_videos
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -118,7 +118,7 @@ internal class PlaylistVideosViewModel @Inject constructor(
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             Pager(config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-                pagingSourceFactory = { youTubeRepository.getYouTubeVideosPagingSource(playlist) }).flow.cachedIn(viewModelScope)
+                pagingSourceFactory = { youTubeRepository.getYouTubePlaylistVideosPagingSource(playlist) }).flow.cachedIn(viewModelScope)
                 .collectLatest {
                     _videoItems.emit(it)
                 }

@@ -8,9 +8,9 @@
 
         <variable
             name="viewState"
-            type="com.youtubemusic.feature.youtube_downloader.PlaylistVideosFragment.ViewState" />
+            type="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment.ViewState" />
 
-        <import type="com.youtubemusic.feature.youtube_downloader.PlaylistVideosFragment.ViewState" />
+        <import type="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment.ViewState" />
     </data>
 
     <com.youtubemusic.core.common.ui.NestedScrollCoordinatorLayout

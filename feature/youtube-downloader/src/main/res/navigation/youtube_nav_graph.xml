@@ -7,12 +7,12 @@
 
     <fragment
         android:id="@+id/authenticationFragment"
-        android:name="com.youtubemusic.feature.youtube_downloader.AuthenticationFragment"
+        android:name="com.youtubemusic.feature.youtube_downloader.auth.AuthenticationFragment"
         android:label="AuthenticationFragment"
         tools:layout="@layout/fragment_authentication" />
     <fragment
         android:id="@+id/fragment_playlist_videos"
-        android:name="com.youtubemusic.feature.youtube_downloader.PlaylistVideosFragment"
+        android:name="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment"
         android:label="YouTube Music"
         tools:layout="@layout/fragment_playlist_videos">
         <action

@@ -1,4 +1,4 @@
-package com.youtubemusic.feature.youtube_downloader
+package com.youtubemusic.feature.youtube_downloader.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,11 +7,11 @@ import android.view.View
 import android.viewbinding.library.fragment.viewBinding
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.common.api.ApiException
 import com.youtubemusic.core.data.repository.DoesNotHaveRequiredScopes
 import com.youtubemusic.core.data.repository.GoogleAccount
+import com.youtubemusic.feature.youtube_downloader.R
 import com.youtubemusic.feature.youtube_downloader.databinding.FragmentAuthenticationBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

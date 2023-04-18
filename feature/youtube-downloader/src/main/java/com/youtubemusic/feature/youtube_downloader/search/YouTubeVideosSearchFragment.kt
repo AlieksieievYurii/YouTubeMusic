@@ -8,7 +8,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.viewbinding.library.fragment.viewBinding
-import android.widget.EditText
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -26,7 +25,7 @@ import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.feature.download_manager.DownloadManagerActivity
 import com.youtubemusic.feature.youtube_downloader.R
-import com.youtubemusic.feature.youtube_downloader.VideoItemsListAdapter
+import com.youtubemusic.feature.youtube_downloader.utils.VideoItemsListAdapter
 import com.youtubemusic.feature.youtube_downloader.databinding.FragmentYoutubeVideosSearchBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest

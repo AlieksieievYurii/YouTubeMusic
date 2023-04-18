@@ -1,4 +1,4 @@
-package com.youtubemusic.feature.youtube_downloader
+package com.youtubemusic.feature.youtube_downloader.utils
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

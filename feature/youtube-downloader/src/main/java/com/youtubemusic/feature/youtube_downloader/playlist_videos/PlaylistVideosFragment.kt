@@ -1,4 +1,4 @@
-package com.youtubemusic.feature.youtube_downloader
+package com.youtubemusic.feature.youtube_downloader.playlist_videos
 
 import android.content.Intent
 import android.os.Bundle
@@ -24,6 +24,8 @@ import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.model.YouTubePlaylist
 import com.youtubemusic.feature.download_manager.DownloadManagerActivity
+import com.youtubemusic.feature.youtube_downloader.R
+import com.youtubemusic.feature.youtube_downloader.utils.VideoItemsListAdapter
 import com.youtubemusic.feature.youtube_downloader.databinding.FragmentPlaylistVideosBinding
 import com.youtubemusic.feature.youtube_downloader.playlists.PlaylistsDialogFragment
 import dagger.hilt.android.AndroidEntryPoint

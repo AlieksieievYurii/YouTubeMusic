@@ -1,4 +1,4 @@
-package com.youtubemusic.feature.youtube_downloader
+package com.youtubemusic.feature.youtube_downloader.utils
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
@@ -16,6 +16,7 @@ import androidx.annotation.IntRange
 import androidx.core.graphics.toRectF
 import androidx.core.view.GestureDetectorCompat
 import com.youtubemusic.core.common.toPx
+import com.youtubemusic.feature.youtube_downloader.R
 import kotlin.math.min
 
 
