@@ -13,7 +13,7 @@
     <fragment
         android:id="@+id/fragment_playlist_videos"
         android:name="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment"
-        android:label="YouTube Music"
+        android:label="YouTube"
         tools:layout="@layout/fragment_playlist_videos">
         <argument
             android:name="playlist_id"
@@ -22,7 +22,7 @@
     <fragment
         android:id="@+id/fragment_youtube_videos_search"
         android:name="com.youtubemusic.feature.youtube_downloader.search.YouTubeVideosSearchFragment"
-        android:label="YouTube Videos Search"
+        android:label="YouTube"
         tools:layout="@layout/fragment_youtube_videos_search">
         <action
             android:id="@+id/action_fragment_youtube_videos_search_to_authenticationFragment"
@@ -34,8 +34,8 @@
     <fragment
         android:id="@+id/playlistsFragment"
         android:name="com.youtubemusic.feature.youtube_downloader.playlists.PlaylistsFragment"
-        android:label="PlaylistsFragment"
-        tools:layout="@layout/fragment_youtube_playlists" >
+        android:label="@string/label_youtube_playlists"
+        tools:layout="@layout/fragment_youtube_playlists">
         <action
             android:id="@+id/action_playlistsFragment_to_fragment_playlist_videos"
             app:destination="@id/fragment_playlist_videos" />

@@ -110,7 +110,7 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
     @SuppressLint("UnsafeOptInUsageError")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.youtube_music_fragment_menu, menu)
+        inflater.inflate(R.menu.youtube_search_fragment_menu, menu)
         (requireActivity() as ToolBarAccessor).getToolbar().setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.item_log_out -> {

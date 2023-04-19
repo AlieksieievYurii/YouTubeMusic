@@ -2,7 +2,6 @@ package com.youtubemusic.feature.youtube_downloader.playlist_videos
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
@@ -91,7 +90,7 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
 
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.youtube_music_fragment_menu, menu)
+        inflater.inflate(R.menu.youtube_playlist_videos, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
