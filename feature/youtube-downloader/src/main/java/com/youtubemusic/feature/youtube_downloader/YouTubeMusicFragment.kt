@@ -19,7 +19,7 @@ class YouTubeMusicFragment : Fragment(R.layout.fragment_youtube_music) {
         val a = (childFragmentManager.findFragmentById(R.id.you_tube_music_navigation) as NavHostFragment).navController
         a.addOnDestinationChangedListener { controller, destination, arguments ->
 
-            if (destination.id != a.graph.startDestinationId) {
+            if (destination.id != a.graph.startDestinationId && destination.id != R.id.authenticationFragment) {
                 toolbar.apply {
                     title = destination.label
                     navigationIcon = DrawerArrowDrawable(context).also { it.progress = 1f }
@@ -36,7 +36,7 @@ class YouTubeMusicFragment : Fragment(R.layout.fragment_youtube_music) {
 
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true /* enabled by default */) {
             override fun handleOnBackPressed() {
-                if (a.currentDestination?.id != a.graph.startDestinationId)
+                if (a.currentDestination?.id != a.graph.startDestinationId && a.currentDestination?.id != R.id.authenticationFragment)
                     a.popBackStack()
                 else
                     findNavController().popBackStack()

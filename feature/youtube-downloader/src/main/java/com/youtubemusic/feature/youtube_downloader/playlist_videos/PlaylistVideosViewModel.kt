@@ -1,5 +1,7 @@
 package com.youtubemusic.feature.youtube_downloader.playlist_videos
 
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -10,7 +12,6 @@ import com.youtubemusic.core.data.repository.*
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
-import com.youtubemusic.core.model.YouTubePlaylist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -20,10 +21,10 @@ import javax.inject.Inject
 @HiltViewModel
 internal class PlaylistVideosViewModel @Inject constructor(
     private val downloadManager: DownloadManager,
-    private val youTubePreferences: YouTubePreferences,
     private val playlistRepository: PlaylistRepository,
     private val youTubeRepository: YouTubeRepository,
     private val googleAccount: GoogleAccount,
+    state: SavedStateHandle,
     private val mediaLibraryDomain: MediaLibraryDomain,
 ) : ViewModel() {
     sealed class Event {
@@ -41,26 +42,18 @@ internal class PlaylistVideosViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
+    private val youTubePlaylistId: String = state["playlist_id"] ?: throw IllegalStateException("playlist_id is required!")
+
     init {
-        youTubePreferences.getCurrentYouTubePlaylist()?.let {
-            loadVideoItems(it)
-        }
+        loadVideoItems()
     }
 
     fun signOut() {
         googleAccount.signOut()
-        youTubePreferences.setCurrentYouTubePlaylist(null)
     }
-
-    fun playlist() = youTubePreferences.getCurrentYouTubePlaylist()
 
     fun isLoggedOn(): Boolean {
         return googleAccount.isAuthenticatedAndAuthorized.value
-    }
-
-    fun setPlaylist(playlist: YouTubePlaylist) {
-        youTubePreferences.setCurrentYouTubePlaylist(playlist)
-        loadVideoItems(playlist)
     }
 
     fun download(item: VideoItem, playlists: List<MediaItemPlaylist> = emptyList()) {
@@ -103,23 +96,16 @@ internal class PlaylistVideosViewModel @Inject constructor(
 
     fun getItemStatus(videoItem: VideoItem) = downloadManager.getDownloadingJobState(videoItem.id)
 
-    fun getYouTubePlaylistsPager(): Pager<String, YouTubePlaylist> {
-        return Pager(
-            config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-            pagingSourceFactory = { youTubeRepository.getYouTubePlaylistsPagingSource() })
-
-    }
-
     private fun sendEvent(event: Event) = viewModelScope.launch {
         _event.emit(event)
     }
 
-    private fun loadVideoItems(playlist: YouTubePlaylist) {
+    private fun loadVideoItems() {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             Pager(config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-                pagingSourceFactory = { youTubeRepository.getYouTubePlaylistVideosPagingSource(playlist) }).flow.cachedIn(viewModelScope)
-                .collectLatest {
+                pagingSourceFactory = { youTubeRepository.getYouTubePlaylistVideosPagingSource(youTubePlaylistId) })
+                .flow.cachedIn(viewModelScope).collectLatest {
                     _videoItems.emit(it)
                 }
         }

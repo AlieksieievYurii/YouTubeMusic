@@ -28,7 +28,7 @@ class PlaylistsFragment : Fragment(R.layout.fragment_youtube_playlists) {
     private val viewModel: PlaylistsViewModel by viewModels()
     private val listAdapter by lazy {
         YouTubePlaylistsAdapter {
-            findNavController().navigate(R.id.action_playlistsFragment_to_fragment_playlist_videos)
+            findNavController().navigate(PlaylistsFragmentDirections.actionPlaylistsFragmentToFragmentPlaylistVideos(it.id))
         }
     }
 

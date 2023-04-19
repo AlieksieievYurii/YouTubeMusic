@@ -14,7 +14,11 @@
         android:id="@+id/fragment_playlist_videos"
         android:name="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment"
         android:label="YouTube Music"
-        tools:layout="@layout/fragment_playlist_videos"/>
+        tools:layout="@layout/fragment_playlist_videos">
+        <argument
+            android:name="playlist_id"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/fragment_youtube_videos_search"
         android:name="com.youtubemusic.feature.youtube_downloader.search.YouTubeVideosSearchFragment"

@@ -10,7 +10,6 @@ import android.viewbinding.library.fragment.viewBinding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.ToolBarAccessor
@@ -22,12 +21,10 @@ import com.youtubemusic.core.data.EmptyListException
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
-import com.youtubemusic.core.model.YouTubePlaylist
 import com.youtubemusic.feature.download_manager.DownloadManagerActivity
 import com.youtubemusic.feature.youtube_downloader.R
 import com.youtubemusic.feature.youtube_downloader.utils.VideoItemsListAdapter
 import com.youtubemusic.feature.youtube_downloader.databinding.FragmentPlaylistVideosBinding
-import com.youtubemusic.feature.youtube_downloader.playlists.PlaylistsDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -35,12 +32,12 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
     sealed class ViewState {
-        object NoSelectedPlaylist : ViewState()
         object VideosLoaded : ViewState()
         object Loading : ViewState()
         object EmptyList : ViewState()
         object Error : ViewState()
     }
+
     private val binding: FragmentPlaylistVideosBinding by viewBinding()
     internal val viewModel: PlaylistVideosViewModel by viewModels()
 
@@ -58,19 +55,16 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.i("MyApp", "PlaylistVideos created")
         setHasOptionsMenu(true)
 
-
         (requireActivity() as ToolBarAccessor).getToolbar().setOnMenuItemClickListener {
-            when(it.itemId) {
-                R.id.item_log_out -> {
-                    viewModel.signOut()
-                }
+            when (it.itemId) {
+                R.id.item_log_out -> viewModel.signOut()
                 R.id.item_open_download_manager -> openDownloadManager()
             }
             true
         }
+
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = listAdapter.apply {
@@ -91,44 +85,8 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
                 binding.refresh.isEnabled = true
                 listAdapter.retry()
             }
-            btnSelectPlayList.setOnClickListener {
-                openDialogToSelectPlaylist(viewModel.playlist())
-            }
-            btnSelectPlayListFirst.setOnClickListener { openDialogToSelectPlaylist(null) }
             refresh.setOnRefreshListener { listAdapter.refresh() }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        val a = viewModel.playlist()
-        if (a != null) {
-            binding.viewState = ViewState.Loading
-            binding.tvPlayListName.text = a.name
-        } else {
-            binding.viewState = ViewState.NoSelectedPlaylist
-        }
-        Log.i("MyApp", "PlaylistVideos started")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.i("MyApp", "PlaylistVideos resumed")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.i("MyApp", "PlaylistVideos paused")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.i("MyApp", "PlaylistVideos stoped")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.i("MyApp", "PlaylistVideos destroyed")
     }
 
     @Deprecated("Deprecated in Java")
@@ -169,11 +127,16 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
 
     private suspend fun startHandlingListLoadState() = listAdapter.loadStateFlow.collectLatest {
         when (it.refresh) {
-            is LoadState.Loading -> if (!binding.refresh.isRefreshing) binding.viewState = ViewState.Loading
+            is LoadState.Loading -> {
+                if (!binding.refresh.isRefreshing) {
+                    binding.viewState = ViewState.Loading
+                    binding.refresh.isEnabled = false
+                }
+            }
             is LoadState.NotLoading -> {
                 binding.refresh.isRefreshing = false
-                if (viewModel.playlist() != null)
-                    binding.viewState = ViewState.VideosLoaded
+                binding.refresh.isEnabled = true
+                binding.viewState = ViewState.VideosLoaded
             }
             is LoadState.Error -> {
                 binding.refresh.isRefreshing = false
@@ -183,16 +146,13 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
                     binding.viewState = ViewState.EmptyList
                 else {
                     binding.viewState = ViewState.Error
-                    binding.error.text = loadStateError.error.message ?: "None"
+                    binding.error.text =
+                        loadStateError.error.message ?: getString(com.youtubemusic.core.common.R.string.label_no_error_message)
                 }
             }
         }
     }
 
-    private fun openDialogToSelectPlaylist(currentPlaylist: YouTubePlaylist?) = PlaylistsDialogFragment.show(
-        requireActivity().supportFragmentManager,
-        viewModel.getYouTubePlaylistsPager(), currentPlaylist, viewModel::setPlaylist
-    )
 
     private fun openDownloadManager() {
         startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))
