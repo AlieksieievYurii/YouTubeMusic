@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.viewbinding.library.fragment.viewBinding
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -26,15 +27,16 @@ import com.youtubemusic.feature.youtube_downloader.utils.VideoItemsListAdapter
 import com.youtubemusic.feature.youtube_downloader.databinding.FragmentPlaylistVideosBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
     sealed class ViewState {
-        object VideosLoaded : ViewState()
         object Loading : ViewState()
-        object EmptyList : ViewState()
-        object Error : ViewState()
+        object Ready : ViewState()
+        data class Error(val error: String) : ViewState()
     }
 
     private val binding: FragmentPlaylistVideosBinding by viewBinding()
@@ -77,14 +79,18 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
             launch { startHandlingListLoadState() }
             launch { startHandlingEvents() }
             launch { viewModel.videoItemStatus.collectLatest { listAdapter.updateItem(it) } }
+            launch { handleViewState() }
         }
 
         binding.apply {
             btnTryAgain.setOnClickListener {
-                binding.refresh.isEnabled = true
+                viewModel.reloadPlaylistInformation()
                 listAdapter.retry()
             }
-            refresh.setOnRefreshListener { listAdapter.refresh() }
+            refresh.setOnRefreshListener {
+                listAdapter.refresh()
+                viewModel.reloadPlaylistInformation()
+            }
         }
     }
 
@@ -123,35 +129,42 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
             .show(requireActivity().supportFragmentManager, "ErrorDialog")
     }
 
+    private suspend fun handleViewState() {
+        viewModel.viewState.combine(listAdapter.loadStateFlow) { playlistInfoState, videosPagerState ->
+            val noErrorMessage = getString(com.youtubemusic.core.common.R.string.label_no_error_message)
+            binding.playlist = (playlistInfoState as? PlaylistVideosViewModel.State.Ready)?.youTubePlaylistDetails
+            when {
+                binding.refresh.isRefreshing -> ViewState.Ready
 
-    private suspend fun startHandlingListLoadState() = listAdapter.loadStateFlow.collectLatest {
-        when (it.refresh) {
-            is LoadState.Loading -> {
-                if (!binding.refresh.isRefreshing) {
-                    binding.viewState = ViewState.Loading
-                    binding.refresh.isEnabled = false
-                }
+                playlistInfoState is PlaylistVideosViewModel.State.Ready && (videosPagerState.refresh is LoadState.NotLoading
+                        || (videosPagerState.refresh as? LoadState.Error)?.error is EmptyListException) -> ViewState.Ready
+
+                playlistInfoState is PlaylistVideosViewModel.State.Error -> ViewState.Error(
+                    playlistInfoState.exception.message ?: noErrorMessage
+                )
+
+                videosPagerState.refresh is LoadState.Error -> ViewState.Error(
+                    (videosPagerState.refresh as LoadState.Error).error.message ?: noErrorMessage
+                )
+
+                else -> ViewState.Loading
             }
-            is LoadState.NotLoading -> {
-                binding.refresh.isRefreshing = false
-                binding.refresh.isEnabled = true
-                binding.viewState = ViewState.VideosLoaded
-            }
-            is LoadState.Error -> {
-                binding.refresh.isRefreshing = false
-                binding.refresh.isEnabled = false
-                val loadStateError = it.refresh as LoadState.Error
-                if (loadStateError.error is EmptyListException)
-                    binding.viewState = ViewState.EmptyList
-                else {
-                    binding.viewState = ViewState.Error
-                    binding.error.text =
-                        loadStateError.error.message ?: getString(com.youtubemusic.core.common.R.string.label_no_error_message)
-                }
-            }
+        }.distinctUntilChanged().collectLatest {
+            binding.viewState = it
         }
     }
 
+    private suspend fun startHandlingListLoadState() = listAdapter.loadStateFlow.collectLatest {
+        binding.labelEmptyPlaylist.isVisible = (it.refresh as? LoadState.Error)?.error is EmptyListException
+        when (it.refresh) {
+            is LoadState.Loading -> if (!binding.refresh.isRefreshing) binding.refresh.isEnabled = false
+            is LoadState.NotLoading -> {
+                binding.refresh.isRefreshing = false
+                binding.refresh.isEnabled = true
+            }
+            is LoadState.Error -> binding.refresh.isRefreshing = false
+        }
+    }
 
     private fun openDownloadManager() {
         startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))

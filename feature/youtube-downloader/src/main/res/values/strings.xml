@@ -15,4 +15,8 @@
     <string name="label_views_count">%s views</string>
     <string name="label_log_out">Logout</string>
     <string name="label_search">Search</string>
+    <string name="label_publick">public</string>
+    <string name="label_unlisted">unlisted</string>
+    <string name="label_private">private</string>
+    <string name="label_download_all">Download All</string>
 </resources>

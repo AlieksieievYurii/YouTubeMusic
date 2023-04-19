@@ -3,6 +3,7 @@ package com.youtubemusic.core.common
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import coil.load
@@ -11,7 +12,7 @@ import java.io.File
 
 
 @BindingAdapter("imageUrl")
-fun loadImage(view: ImageView, url: String) {
+fun loadImage(view: ImageView, url: String?) {
     view.load(url) {
         crossfade(true)
         transformations(RoundedCornersTransformation(10f, 10f, 10f, 10f))
@@ -38,4 +39,21 @@ fun animatedText(textView: TextView, text: String?) {
 @BindingAdapter("isVisible")
 fun isVisible(view: View, isVisible: Boolean) {
     view.isVisible = isVisible
+}
+
+@BindingAdapter("textResId")
+fun textResId(textView: TextView, stringResId: Int?) {
+    if (stringResId != null)
+        textView.setText(stringResId)
+}
+
+@BindingAdapter("startImageResId")
+fun startImageResId(textView: TextView, imageResId: Int?) {
+    if (imageResId != null)
+        textView.setCompoundDrawablesWithIntrinsicBounds(
+            ResourcesCompat.getDrawable(textView.resources, imageResId, null),
+            null,
+            null,
+            null
+        )
 }

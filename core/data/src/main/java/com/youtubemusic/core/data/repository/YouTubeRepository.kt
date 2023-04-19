@@ -6,11 +6,15 @@ import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.Video
 import com.youtubemusic.core.data.AllYouTubePlaylistsSynchronized
 import com.youtubemusic.core.data.EmptyListException
+import com.youtubemusic.core.data.toYouTubePlaylistDetails
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.model.YouTubePlaylist
+import com.youtubemusic.core.model.YouTubePlaylistDetails
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import org.threeten.bp.Duration
 import java.lang.Exception
+import java.math.BigInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,16 +52,20 @@ class YouTubeRepository @Inject constructor(
         return videoItems
     }
 
+    suspend fun getPlaylistDetails(playlistId: String): YouTubePlaylistDetails {
+        return youTubeAPI.getPlaylistDetails(playlistId).toYouTubePlaylistDetails()
+    }
+
     fun getYouTubePlaylistsPagingSource(): PlaylistsPagingSource {
         return PlaylistsPagingSource(youTubeAPI)
     }
 
-    fun getYouTubeVideosPagingSource(query: String): YouTubeVideosPagingSource {
-        return YouTubeVideosPagingSource(youTubeAPI, query)
+    fun getYouTubeVideosPagingSource(query: String): YouTubeVideosPagingSource2 {
+        return YouTubeVideosPagingSource2(youTubeAPI, query)
     }
 
-    fun getYouTubePlaylistVideosPagingSource(playlist: YouTubePlaylist): YouTubePlaylistVideosPagingSource {
-        return YouTubePlaylistVideosPagingSource(youTubeAPI, playlist.id)
+    fun getYouTubePlaylistVideosPagingSource(youTubePlaylistId: String): YouTubePlaylistVideosPagingSource {
+        return YouTubePlaylistVideosPagingSource(youTubeAPI, youTubePlaylistId)
     }
 
     fun getExcludingAlreadySyncPlaylistPagingSource(): ExcludingAlreadySyncPlaylistPagingSource {
@@ -138,7 +146,68 @@ class YouTubeVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val 
     }
 }
 
-class YouTubePlaylistVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val playlistId: String) : PagingSource<String, VideoItem>() {
+class YouTubeVideosPagingSource2(private val youTubeAPI: YouTubeAPI, private val query: String) : PagingSource<String, VideoItem>() {
+    override fun getRefreshKey(state: PagingState<String, VideoItem>): String? = null
+
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, VideoItem> {
+        try {
+//            val results = youTubeAPI.getVideos(query, pageToken = params.key)
+//
+//            if (results.items.isEmpty())
+//                return LoadResult.Error(EmptyListException())
+//
+//            val videos = youTubeAPI.getVideosDetails(ids = results.items.map { it.id.videoId })
+
+//            return LoadResult.Page(
+//                data = videos.items.map { it.toVideoItem() },
+//                prevKey = results.prevPageToken,
+//                nextKey = results.nextPageToken
+//            )
+            delay(3000)
+            if (query == "error")
+                return LoadResult.Error(Exception("ERROR"))
+
+            if (query.isEmpty())
+                return LoadResult.Page(
+                    data = (0..10).map {  VideoItem(
+                        "id-$it",
+                        "title-$it",
+                        "author-$it",
+                        10L,
+                        "description-$it",
+                        BigInteger.valueOf(1L),
+                        BigInteger.valueOf(1L),
+                        "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
+                        "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png"
+                    ) },
+                    prevKey = null,
+                    nextKey = null
+                )
+            else
+                return LoadResult.Page(
+                    data = (0..10).map {  VideoItem(
+                        "dddddddd$it",
+                        "ddddddd$it",
+                        "d3r2345$it",
+                        10L,
+                        "$it",
+                        BigInteger.valueOf(14L),
+                        BigInteger.valueOf(132L),
+                        "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
+                        "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png"
+                    ) },
+                    prevKey = null,
+                    nextKey = null
+                )
+
+        } catch (e: Exception) {
+            return LoadResult.Error(e)
+        }
+    }
+}
+
+class YouTubePlaylistVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val playlistId: String) :
+    PagingSource<String, VideoItem>() {
     override fun getRefreshKey(state: PagingState<String, VideoItem>): String? = null
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, VideoItem> {

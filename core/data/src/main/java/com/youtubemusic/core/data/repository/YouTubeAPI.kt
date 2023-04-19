@@ -3,6 +3,7 @@ package com.youtubemusic.core.data.repository
 import com.google.api.client.http.HttpTransport
 import com.google.api.client.json.JsonFactory
 import com.google.api.services.youtube.YouTube
+import com.google.api.services.youtube.model.PlaylistItem
 import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistListResponse
 import com.google.api.services.youtube.model.SearchListResponse
@@ -54,5 +55,9 @@ class YouTubeAPI @Inject constructor(
         service.videos().list("snippet,statistics,contentDetails")
             .setId(ids.joinToString(","))
             .execute()
+    }
+
+    suspend fun getPlaylistDetails(playlistId: String): PlaylistListResponse = withContext(Dispatchers.IO) {
+        service.playlists().list("contentDetails,snippet,status").setId(playlistId).execute()
     }
 }

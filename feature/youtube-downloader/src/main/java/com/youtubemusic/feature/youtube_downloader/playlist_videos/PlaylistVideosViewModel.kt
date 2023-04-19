@@ -1,6 +1,5 @@
 package com.youtubemusic.feature.youtube_downloader.playlist_videos
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +11,7 @@ import com.youtubemusic.core.data.repository.*
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
+import com.youtubemusic.core.model.YouTubePlaylistDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -27,6 +27,12 @@ internal class PlaylistVideosViewModel @Inject constructor(
     state: SavedStateHandle,
     private val mediaLibraryDomain: MediaLibraryDomain,
 ) : ViewModel() {
+    sealed class State {
+        object Loading : State()
+        data class Ready(val youTubePlaylistDetails: YouTubePlaylistDetails) : State()
+        data class Error(val exception: Exception) : State()
+    }
+
     sealed class Event {
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: String?) : Event()
         data class OpenPlaylistSelector(val videoItem: VideoItem, val playlists: List<MediaItemPlaylist>) : Event()
@@ -44,16 +50,20 @@ internal class PlaylistVideosViewModel @Inject constructor(
 
     private val youTubePlaylistId: String = state["playlist_id"] ?: throw IllegalStateException("playlist_id is required!")
 
+    private val _viewState = MutableStateFlow<State>(State.Loading)
+    val viewState = _viewState.asStateFlow()
+
     init {
         loadVideoItems()
+        loadPlaylistDetails()
+    }
+
+    fun reloadPlaylistInformation() {
+        loadPlaylistDetails()
     }
 
     fun signOut() {
         googleAccount.signOut()
-    }
-
-    fun isLoggedOn(): Boolean {
-        return googleAccount.isAuthenticatedAndAuthorized.value
     }
 
     fun download(item: VideoItem, playlists: List<MediaItemPlaylist> = emptyList()) {
@@ -98,6 +108,16 @@ internal class PlaylistVideosViewModel @Inject constructor(
 
     private fun sendEvent(event: Event) = viewModelScope.launch {
         _event.emit(event)
+    }
+
+    private fun loadPlaylistDetails() {
+        viewModelScope.launch {
+            _viewState.value = try {
+                State.Ready(youTubeRepository.getPlaylistDetails(youTubePlaylistId))
+            } catch (error: Exception) {
+                State.Error(error)
+            }
+        }
     }
 
     private fun loadVideoItems() {

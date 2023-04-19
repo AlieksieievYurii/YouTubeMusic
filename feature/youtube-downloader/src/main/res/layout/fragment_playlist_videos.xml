@@ -6,80 +6,181 @@
 
     <data>
 
+        <import type="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment.ViewState" />
+
+        <import type="com.youtubemusic.feature.youtube_downloader.utils.BindingUtilsKt" />
+
+        <variable
+            name="playlist"
+            type="com.youtubemusic.core.model.YouTubePlaylistDetails" />
+
         <variable
             name="viewState"
-            type="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment.ViewState" />
-
-        <import type="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment.ViewState" />
+            type="ViewState" />
     </data>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/refresh"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+        android:animateLayoutChanges="true"
+        android:gravity="center"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <ProgressBar
+            android:id="@+id/loading"
+            isVisible="@{viewState instanceof ViewState.Loading}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:visibility="gone" />
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/refresh"
+            isVisible="@{viewState instanceof ViewState.Ready}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/thumbnail"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="32dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginEnd="32dp"
+                        android:minWidth="100dp"
+                        android:minHeight="100dp"
+                        app:imageUrl="@{playlist.thumbnailUrl}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription"
+                        tools:src="@tools:sample/avatars" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_videos"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/button">
+
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/videos"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:fitsSystemWindows="true"
+                            tools:listitem="@layout/item_video"
+                            tools:visibility="visible" />
+
+                        <TextView
+                            android:id="@+id/label_empty_playlist"
+                            style="@style/DescriptionText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_empty_playlist"
+                            android:textAlignment="center"
+                            app:drawableTopCompat="@drawable/ic_empty_playlist"
+                            tools:visibility="gone" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/playlist_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:text="@{playlist.title}"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/thumbnail"
+                        tools:text="My Playlist" />
+
+                    <TextView
+                        android:id="@+id/author"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@{playlist.channelTitle}"
+                        app:layout_constraintStart_toStartOf="@+id/playlist_name"
+                        app:layout_constraintTop_toBottomOf="@+id/playlist_name"
+                        tools:text="Yurii Alieksieiev" />
+
+                    <TextView
+                        android:id="@+id/videos_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{@string/label_videos_count(playlist.videosNumber)}"
+                        android:textSize="12sp"
+                        app:layout_constraintStart_toStartOf="@+id/author"
+                        app:layout_constraintTop_toBottomOf="@+id/author"
+                        tools:text="30 videos" />
+
+                    <Button
+                        android:id="@+id/button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:text="@string/label_download_all"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/videos_count" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:textIsSelectable="false"
+                        android:textSize="12sp"
+                        tools:text="private"
+                        tools:drawableStartCompat="@drawable/ic_lock_12"
+                        app:startImageResId="@{BindingUtilsKt.getCorespondentIcon(playlist.privacyStatus)}"
+                        app:layout_constraintStart_toEndOf="@+id/videos_count"
+                        app:layout_constraintTop_toBottomOf="@+id/author"
+                        app:textResId="@{BindingUtilsKt.getStringRepresentation(playlist.privacyStatus)}" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.core.widget.NestedScrollView>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <LinearLayout
+            android:id="@+id/error_layout"
+            isVisible="@{viewState instanceof ViewState.Error}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical">
 
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/videos"
-                isVisible="@{viewState instanceof ViewState.VideosLoaded}"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fitsSystemWindows="true"
-                tools:listitem="@layout/item_video"
-                tools:visibility="visible" />
-
-
             <TextView
-                android:id="@+id/label_empty_playlist"
-                style="@style/DescriptionText"
-                isVisible="@{viewState instanceof ViewState.EmptyList}"
+                android:id="@+id/error"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/label_empty_playlist"
+                android:layout_margin="8dp"
+                android:text="@{(viewState instanceof ViewState.Error) ? ((ViewState.Error)viewState).error : @string/label_no_error_message}"
                 android:textAlignment="center"
-                app:drawableTopCompat="@drawable/ic_empty_playlist"
-                tools:visibility="gone" />
+                android:textIsSelectable="false"
+                app:drawableTopCompat="@drawable/il_broken_robot" />
 
-
-            <ProgressBar
-                android:id="@+id/loading"
-                isVisible="@{viewState instanceof ViewState.Loading}"
+            <Button
+                android:id="@+id/btn_try_again"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:visibility="gone" />
-
-
-            <LinearLayout
-                android:id="@+id/error_layout"
-                isVisible="@{viewState instanceof ViewState.Error}"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/error"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:textAlignment="center"
-                    android:textIsSelectable="false"
-                    app:drawableTopCompat="@drawable/il_broken_robot" />
-
-                <Button
-                    android:id="@+id/btn_try_again"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="@string/label_retry" />
-            </LinearLayout>
+                android:layout_margin="8dp"
+                android:text="@string/label_retry" />
         </LinearLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
+
 </layout>
