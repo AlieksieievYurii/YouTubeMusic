@@ -72,7 +72,7 @@
                         android:orientation="vertical"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/button">
+                        app:layout_constraintTop_toBottomOf="@+id/download_all">
 
 
                         <androidx.recyclerview.widget.RecyclerView
@@ -130,7 +130,7 @@
                         tools:text="30 videos" />
 
                     <Button
-                        android:id="@+id/button"
+                        android:id="@+id/download_all"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="16dp"
@@ -139,18 +139,18 @@
                         app:layout_constraintTop_toBottomOf="@+id/videos_count" />
 
                     <TextView
-                        android:id="@+id/textView4"
+                        android:id="@+id/privacy_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:textIsSelectable="false"
                         android:textSize="12sp"
-                        tools:text="private"
-                        tools:drawableStartCompat="@drawable/ic_lock_12"
-                        app:startImageResId="@{BindingUtilsKt.getCorespondentIcon(playlist.privacyStatus)}"
                         app:layout_constraintStart_toEndOf="@+id/videos_count"
                         app:layout_constraintTop_toBottomOf="@+id/author"
-                        app:textResId="@{BindingUtilsKt.getStringRepresentation(playlist.privacyStatus)}" />
+                        app:startImageResId="@{BindingUtilsKt.getCorespondentIcon(playlist.privacyStatus)}"
+                        app:textResId="@{BindingUtilsKt.getStringRepresentation(playlist.privacyStatus)}"
+                        tools:drawableStartCompat="@drawable/ic_lock_12"
+                        tools:text="private" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.core.widget.NestedScrollView>

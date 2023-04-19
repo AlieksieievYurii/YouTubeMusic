@@ -133,6 +133,8 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
         viewModel.viewState.combine(listAdapter.loadStateFlow) { playlistInfoState, videosPagerState ->
             val noErrorMessage = getString(com.youtubemusic.core.common.R.string.label_no_error_message)
             binding.playlist = (playlistInfoState as? PlaylistVideosViewModel.State.Ready)?.youTubePlaylistDetails
+            binding.downloadAll.isEnabled = (videosPagerState.refresh as? LoadState.Error)?.error !is EmptyListException
+
             when {
                 binding.refresh.isRefreshing -> ViewState.Ready
 
