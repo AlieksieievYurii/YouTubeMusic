@@ -1,6 +1,7 @@
 package com.youtubemusic.feature.youtube_downloader.playlist_videos
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -8,7 +9,10 @@ import com.youtubemusic.core.model.YouTubePlaylistDetails
 import com.youtubemusic.feature.youtube_downloader.R
 import com.youtubemusic.feature.youtube_downloader.databinding.HeaderPlaylistDetailsBinding
 
-class PlaylistDetailsHeaderAdapter : RecyclerView.Adapter<PlaylistDetailsHeaderAdapter.Content>() {
+class PlaylistDetailsHeaderAdapter(private val callback: Callback) : RecyclerView.Adapter<PlaylistDetailsHeaderAdapter.Content>() {
+    interface Callback {
+        fun onDownloadAll()
+    }
 
     var data: YouTubePlaylistDetails? = null
     set(value) {
@@ -16,6 +20,8 @@ class PlaylistDetailsHeaderAdapter : RecyclerView.Adapter<PlaylistDetailsHeaderA
             notifyItemChanged(0)
         field = value
     }
+
+    private val onDownloadAllClickListener = View.OnClickListener { callback.onDownloadAll() }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Content {
         val inflater = LayoutInflater.from(parent.context)
@@ -30,7 +36,11 @@ class PlaylistDetailsHeaderAdapter : RecyclerView.Adapter<PlaylistDetailsHeaderA
 
     inner class Content(private val binding: HeaderPlaylistDetailsBinding) : RecyclerView.ViewHolder(binding.root) {
         fun onBind(playlistDetails: YouTubePlaylistDetails) {
-            binding.playlist = playlistDetails
+            binding.apply {
+                playlist = playlistDetails
+                downloadAll.isEnabled = playlistDetails.videosNumber != 0L
+                downloadAll.setOnClickListener(onDownloadAllClickListener)
+            }
         }
     }
 

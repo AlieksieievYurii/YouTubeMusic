@@ -2,6 +2,7 @@ package com.youtubemusic.feature.youtube_downloader.playlist_videos
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
@@ -55,7 +56,13 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
         })
     }
 
-    private val headerAdapter: PlaylistDetailsHeaderAdapter by lazy { PlaylistDetailsHeaderAdapter() }
+    private val headerAdapter: PlaylistDetailsHeaderAdapter by lazy {
+        PlaylistDetailsHeaderAdapter(object : PlaylistDetailsHeaderAdapter.Callback {
+            override fun onDownloadAll() {
+                Log.i("MyApp", "CLICK")
+            }
+        })
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -135,21 +142,19 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
     private suspend fun handleViewState() {
         viewModel.viewState.combine(listAdapter.loadStateFlow) { playlistInfoState, videosPagerState ->
             val noErrorMessage = getString(com.youtubemusic.core.common.R.string.label_no_error_message)
-            (playlistInfoState as? PlaylistVideosViewModel.State.Ready)?.youTubePlaylistDetails?.let {
-                headerAdapter.data = it
-            }
 
+            val isPlaylistDetailsReady = playlistInfoState is PlaylistVideosViewModel.State.Ready
+            val isVideosLoaded = videosPagerState.refresh is LoadState.NotLoading
+            val isVideosLoadedButEmpty = (videosPagerState.refresh as? LoadState.Error)?.error is EmptyListException
+            if (isPlaylistDetailsReady)
+                headerAdapter.data = (playlistInfoState as PlaylistVideosViewModel.State.Ready).youTubePlaylistDetails
 
             when {
                 binding.refresh.isRefreshing -> ViewState.Ready
-
-                playlistInfoState is PlaylistVideosViewModel.State.Ready && (videosPagerState.refresh is LoadState.NotLoading
-                        || (videosPagerState.refresh as? LoadState.Error)?.error is EmptyListException) -> ViewState.Ready
-
+                isPlaylistDetailsReady && (isVideosLoaded || isVideosLoadedButEmpty) -> ViewState.Ready
                 playlistInfoState is PlaylistVideosViewModel.State.Error -> ViewState.Error(
                     playlistInfoState.exception.message ?: noErrorMessage
                 )
-
                 videosPagerState.refresh is LoadState.Error -> ViewState.Error(
                     (videosPagerState.refresh as LoadState.Error).error.message ?: noErrorMessage
                 )
@@ -162,15 +167,26 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
     }
 
     private suspend fun startHandlingListLoadState() = listAdapter.loadStateFlow.collectLatest {
-        binding.labelEmptyPlaylist.isVisible = (it.refresh as? LoadState.Error)?.error is EmptyListException
-        binding.videos.overScrollMode = if ((it.refresh as? LoadState.Error)?.error is EmptyListException) View.OVER_SCROLL_NEVER else View.OVER_SCROLL_ALWAYS
+        binding.apply {
+            if ((it.refresh as? LoadState.Error)?.error is EmptyListException) {
+                labelEmptyPlaylist.isVisible = true
+                videos.overScrollMode = View.OVER_SCROLL_NEVER
+            } else {
+                labelEmptyPlaylist.isVisible = false
+                videos.overScrollMode = View.OVER_SCROLL_ALWAYS
+            }
+        }
+
         when (it.refresh) {
             is LoadState.Loading -> if (!binding.refresh.isRefreshing) binding.refresh.isEnabled = false
             is LoadState.NotLoading -> {
                 binding.refresh.isRefreshing = false
                 binding.refresh.isEnabled = true
             }
-            is LoadState.Error -> binding.refresh.isRefreshing = false
+            is LoadState.Error -> {
+                binding.refresh.isRefreshing = false
+                binding.refresh.isEnabled = (it.refresh as LoadState.Error).error is EmptyListException
+            }
         }
     }
 
