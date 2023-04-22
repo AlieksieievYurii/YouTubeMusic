@@ -3,7 +3,6 @@ package com.youtubemusic.core.downloader.youtube
 import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
-import com.youtubemusic.core.data.repository.MediaRepository
 import com.youtubemusic.core.data.repository.YouTubePlaylistSyncRepository
 import com.youtubemusic.core.data.repository.YouTubeRepository
 import dagger.assisted.Assisted
@@ -18,10 +17,9 @@ import javax.inject.Singleton
 class YouTubePlaylistSynchronizationWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParameters: WorkerParameters,
-    private val downloadManager: DownloadManager,
     private val youTubeRepository: YouTubeRepository,
     private val youTubePlaylistSyncRepository: YouTubePlaylistSyncRepository,
-    private val mediaRepository: MediaRepository
+    private val downloadAllFromPlaylistUseCase: DownloadAllFromPlaylistUseCase
 ) : CoroutineWorker(appContext, workerParameters) {
     override suspend fun doWork(): Result {
         return try {
@@ -29,7 +27,7 @@ class YouTubePlaylistSynchronizationWorker @AssistedInject constructor(
 
             youTubePlaylistSyncRepository.youTubePlaylistSyncs.first().forEach {
                 if (it.youTubePlaylistId in youTubePlaylistsIds) {
-                    synchronizeMediaItems(it)
+                    downloadAllFromPlaylistUseCase.downloadAll(it.youTubePlaylistId, it.mediaItemPlaylists)
                 } else {
                     //TODO handle when youTube playlist is registered to sync but on the YouTube it is missing
                 }
@@ -41,12 +39,6 @@ class YouTubePlaylistSynchronizationWorker @AssistedInject constructor(
         }
     }
 
-    private suspend fun synchronizeMediaItems(youTubePlaylistSync: com.youtubemusic.core.model.YouTubePlaylistSync) {
-        youTubeRepository.getAllVideoItemsFromPlaylist(youTubePlaylistSync.youTubePlaylistId).forEach {
-            if (!mediaRepository.exists(it.id))
-                downloadManager.enqueue(it, youTubePlaylistSync.mediaItemPlaylists)
-        }
-    }
 }
 
 @Singleton

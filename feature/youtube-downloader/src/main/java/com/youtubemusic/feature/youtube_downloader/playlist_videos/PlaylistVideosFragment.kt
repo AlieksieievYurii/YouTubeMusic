@@ -2,7 +2,6 @@ package com.youtubemusic.feature.youtube_downloader.playlist_videos
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
@@ -58,9 +57,7 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
 
     private val headerAdapter: PlaylistDetailsHeaderAdapter by lazy {
         PlaylistDetailsHeaderAdapter(object : PlaylistDetailsHeaderAdapter.Callback {
-            override fun onDownloadAll() {
-                Log.i("MyApp", "CLICK")
-            }
+            override fun onDownloadAll() { viewModel.downloadAll() }
         })
     }
 

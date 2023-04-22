@@ -8,6 +8,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.youtubemusic.core.data.repository.*
+import com.youtubemusic.core.downloader.youtube.DownloadAllFromPlaylistUseCase
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
@@ -26,6 +27,7 @@ internal class PlaylistVideosViewModel @Inject constructor(
     private val googleAccount: GoogleAccount,
     state: SavedStateHandle,
     private val mediaLibraryDomain: MediaLibraryDomain,
+    private val downloadAllFromPlaylistUseCase: DownloadAllFromPlaylistUseCase
 ) : ViewModel() {
     sealed class State {
         object Loading : State()
@@ -64,6 +66,12 @@ internal class PlaylistVideosViewModel @Inject constructor(
 
     fun signOut() {
         googleAccount.signOut()
+    }
+
+    fun downloadAll() {
+        viewModelScope.launch {
+            downloadAllFromPlaylistUseCase.downloadAll(youTubePlaylistId, emptyList())
+        }
     }
 
     fun download(item: VideoItem, playlists: List<MediaItemPlaylist> = emptyList()) {
