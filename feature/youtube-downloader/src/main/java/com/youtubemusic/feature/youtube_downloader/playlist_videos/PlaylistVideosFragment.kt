@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.ToolBarAccessor
 import com.youtubemusic.core.common.ui.ErrorDialog
@@ -54,6 +55,8 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
         })
     }
 
+    private val headerAdapter: PlaylistDetailsHeaderAdapter by lazy { PlaylistDetailsHeaderAdapter() }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
@@ -68,10 +71,10 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
 
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = listAdapter.apply {
+            adapter = ConcatAdapter(headerAdapter, listAdapter.apply {
                 val loader = LoaderViewHolder()
                 withLoadStateHeaderAndFooter(loader, loader)
-            }
+            })
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -132,8 +135,10 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
     private suspend fun handleViewState() {
         viewModel.viewState.combine(listAdapter.loadStateFlow) { playlistInfoState, videosPagerState ->
             val noErrorMessage = getString(com.youtubemusic.core.common.R.string.label_no_error_message)
-            binding.playlist = (playlistInfoState as? PlaylistVideosViewModel.State.Ready)?.youTubePlaylistDetails
-            binding.downloadAll.isEnabled = (videosPagerState.refresh as? LoadState.Error)?.error !is EmptyListException
+            (playlistInfoState as? PlaylistVideosViewModel.State.Ready)?.youTubePlaylistDetails?.let {
+                headerAdapter.data = it
+            }
+
 
             when {
                 binding.refresh.isRefreshing -> ViewState.Ready
@@ -158,6 +163,7 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
 
     private suspend fun startHandlingListLoadState() = listAdapter.loadStateFlow.collectLatest {
         binding.labelEmptyPlaylist.isVisible = (it.refresh as? LoadState.Error)?.error is EmptyListException
+        binding.videos.overScrollMode = if ((it.refresh as? LoadState.Error)?.error is EmptyListException) View.OVER_SCROLL_NEVER else View.OVER_SCROLL_ALWAYS
         when (it.refresh) {
             is LoadState.Loading -> if (!binding.refresh.isRefreshing) binding.refresh.isEnabled = false
             is LoadState.NotLoading -> {

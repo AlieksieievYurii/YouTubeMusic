@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.youtubemusic.feature.youtube_downloader.utils.BindingUtilsKt" />
+
+        <variable
+            name="playlist"
+            type="com.youtubemusic.core.model.YouTubePlaylistDetails" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="32dp"
+            android:minWidth="100dp"
+            android:minHeight="100dp"
+            app:imageUrl="@{playlist.thumbnailUrl}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/playlist_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@{playlist.title}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/thumbnail"
+            tools:text="My Playlist" />
+
+        <TextView
+            android:id="@+id/author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@{playlist.channelTitle}"
+            app:layout_constraintStart_toStartOf="@+id/playlist_name"
+            app:layout_constraintTop_toBottomOf="@+id/playlist_name"
+            tools:text="Yurii Alieksieiev" />
+
+        <TextView
+            android:id="@+id/videos_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{@string/label_videos_count(playlist.videosNumber)}"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@+id/author"
+            app:layout_constraintTop_toBottomOf="@+id/author"
+            tools:text="30 videos" />
+
+        <Button
+            android:id="@+id/download_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/label_download_all"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/videos_count" />
+
+        <TextView
+            android:id="@+id/privacy_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textIsSelectable="false"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/videos_count"
+            app:layout_constraintTop_toBottomOf="@+id/author"
+            app:startImageResId="@{BindingUtilsKt.getCorespondentIcon(playlist.privacyStatus)}"
+            app:textResId="@{BindingUtilsKt.getStringRepresentation(playlist.privacyStatus)}"
+            tools:drawableStartCompat="@drawable/ic_lock_12"
+            tools:text="private" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
