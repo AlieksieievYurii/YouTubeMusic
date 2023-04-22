@@ -110,9 +110,11 @@ internal class VideoItemsListAdapter(private val callback: Callback) :
         private fun collapseExpandedItem() {
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
             (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
-                if (getItem(it) == expandedItem) {
-                    val expandedVisibleViewHolder = recyclerView.findViewHolderForLayoutPosition(it) as VideoItemViewHolder
-                    expandItem(expandedVisibleViewHolder, expand = false, animate = true)
+                if (it != -1) {
+                    val viewHolder = recyclerView.findViewHolderForLayoutPosition(it)
+                    if (viewHolder is VideoItemViewHolder && viewHolder.currentData == expandedItem) {
+                        expandItem(viewHolder, expand = false, animate = true)
+                    }
                 }
             }
         }
