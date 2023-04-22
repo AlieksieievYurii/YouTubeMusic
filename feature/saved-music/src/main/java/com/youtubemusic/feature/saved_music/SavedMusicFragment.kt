@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import com.google.android.material.tabs.TabLayoutMediator
 import com.youtubemusic.core.common.ToolBarAccessor
+import com.youtubemusic.core.common.attachNumberBadge
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.feature.equalizer.EqualizerActivity
 import com.youtubemusic.feature.playlist_editor.PlaylistEditorActivity
@@ -23,18 +24,19 @@ class SavedMusicFragment : Fragment(R.layout.fragment_saved_music) {
     private val binding: FragmentSavedMusicBinding by viewBinding()
     private val viewModel: SavedMusicViewModel by viewModels()
 
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
-        (requireActivity() as ToolBarAccessor).getToolbar().setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.item_add_edit_categories -> openCategoriesEditor()
-                R.id.item_open_equalizer -> openEqualizerActivity()
-                R.id.item_open_download_manager -> openDownloadManager()
+        (requireActivity() as ToolBarAccessor).getToolbar().apply {
+            attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.numberOfDownloadingJobs)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.item_add_edit_categories -> openCategoriesEditor()
+                    R.id.item_open_equalizer -> openEqualizerActivity()
+                    R.id.item_open_download_manager -> openDownloadManager()
+                }
+                true
             }
-            true
         }
 
         lifecycleScope.launchWhenCreated {

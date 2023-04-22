@@ -15,9 +15,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.badge.BadgeUtils
 import com.youtubemusic.core.common.ToolBarAccessor
+import com.youtubemusic.core.common.attachNumberBadge
 import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
 import com.youtubemusic.core.downloader.youtube.DownloadManager
@@ -41,7 +40,6 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
 
     private val binding: FragmentYoutubeVideosSearchBinding by viewBinding()
     internal val viewModel: YouTubeVideosSearchViewModel by viewModels()
-    private val downloadManagerBudge by lazy { BadgeDrawable.create(requireContext()) }
 
     private val listAdapter: VideoItemsListAdapter by lazy {
         VideoItemsListAdapter(object : VideoItemsListAdapter.Callback {
@@ -58,6 +56,8 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
+        (requireActivity() as ToolBarAccessor).getToolbar()
+            .attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.numberOfDownloadingJobs)
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = listAdapter.apply {
@@ -71,7 +71,6 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
 
         lifecycleScope.launchWhenStarted {
             launch { startHandlingListLoadState() }
-            launch { observeNumberOfDownloadingJobs() }
             launch { viewModel.videoItems.collectLatest { listAdapter.submitData(it) } }
         }
 
@@ -81,16 +80,6 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
                     findNavController().navigate(R.id.action_fragment_youtube_videos_search_to_authenticationFragment)
                 is YouTubeVideosSearchViewModel.Event.OpenPlaylistSelector -> showDialogToSelectPlaylists(it.videoItem, it.playlists)
             }
-        }
-    }
-
-    private suspend fun observeNumberOfDownloadingJobs() {
-        viewModel.numberOfDownloadingJobs.collect {
-            if (it != 0) {
-                downloadManagerBudge.isVisible = true
-                downloadManagerBudge.number = it
-            } else
-                downloadManagerBudge.isVisible = false
         }
     }
 
@@ -107,7 +96,6 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
 
 
     @Deprecated("Deprecated in Java")
-    @SuppressLint("UnsafeOptInUsageError")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.youtube_search_fragment_menu, menu)
@@ -153,11 +141,6 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
 
             })
         }
-        BadgeUtils.attachBadgeDrawable(
-            downloadManagerBudge,
-            (requireActivity() as ToolBarAccessor).getToolbar(),
-            R.id.item_open_download_manager
-        )
     }
 
     private suspend fun startHandlingListLoadState() = listAdapter.loadStateFlow.collectLatest {

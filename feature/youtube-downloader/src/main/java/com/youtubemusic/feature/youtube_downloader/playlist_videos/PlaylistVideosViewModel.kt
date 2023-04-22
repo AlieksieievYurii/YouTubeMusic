@@ -55,6 +55,8 @@ internal class PlaylistVideosViewModel @Inject constructor(
     private val _viewState = MutableStateFlow<State>(State.Loading)
     val viewState = _viewState.asStateFlow()
 
+    val downloadingJobsNumber = downloadManager.getDownloadingJobs().map { it.size }
+
     init {
         loadVideoItems()
         loadPlaylistDetails()

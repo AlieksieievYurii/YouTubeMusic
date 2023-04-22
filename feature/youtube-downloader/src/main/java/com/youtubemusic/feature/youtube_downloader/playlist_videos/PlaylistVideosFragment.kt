@@ -14,6 +14,7 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.ToolBarAccessor
+import com.youtubemusic.core.common.attachNumberBadge
 import com.youtubemusic.core.common.ui.ErrorDialog
 import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
@@ -57,7 +58,9 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
 
     private val headerAdapter: PlaylistDetailsHeaderAdapter by lazy {
         PlaylistDetailsHeaderAdapter(object : PlaylistDetailsHeaderAdapter.Callback {
-            override fun onDownloadAll() { viewModel.downloadAll() }
+            override fun onDownloadAll() {
+                viewModel.downloadAll()
+            }
         })
     }
 
@@ -65,13 +68,17 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
 
-        (requireActivity() as ToolBarAccessor).getToolbar().setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.item_log_out -> viewModel.signOut()
-                R.id.item_open_download_manager -> openDownloadManager()
+        (requireActivity() as ToolBarAccessor).getToolbar().apply {
+            attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.downloadingJobsNumber)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.item_log_out -> viewModel.signOut()
+                    R.id.item_open_download_manager -> openDownloadManager()
+                }
+                true
             }
-            true
         }
+
 
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
@@ -110,10 +117,7 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
     private suspend fun startHandlingEvents() = viewModel.event.collectLatest { event ->
         when (event) {
             is PlaylistVideosViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(event.videoItem, event.error)
-            is PlaylistVideosViewModel.Event.OpenPlaylistSelector -> showDialogToSelectPlaylists(
-                event.videoItem,
-                event.playlists
-            )
+            is PlaylistVideosViewModel.Event.OpenPlaylistSelector -> showDialogToSelectPlaylists(event.videoItem, event.playlists)
         }
     }
 
