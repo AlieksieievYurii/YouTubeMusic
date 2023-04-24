@@ -125,14 +125,9 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
         (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
             if (it != -1) {
-                val item = try {
-                    getItem(it) as? AdapterData.Job
-                } catch (_: IndexOutOfBoundsException) {
-                    null
-                }
-
-                if (item != null && item.data.videoItemId == videoId)
-                    return recyclerView.findViewHolderForLayoutPosition(it) as JobViewHolder
+                val viewHolder = recyclerView.findViewHolderForLayoutPosition(it) as? JobViewHolder
+                if (viewHolder?.data?.videoItemId == videoId)
+                    return viewHolder
             }
         }
         return null
@@ -147,7 +142,11 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     }
 
     private inner class JobViewHolder(private val binding: ItemJobBinding) : ViewHolder(binding.root) {
+        var data: DownloadingVideoItemJob? = null
+            private set
+
         fun bind(downloadingJob: DownloadingVideoItemJob) {
+            data = downloadingJob
             binding.data = downloadingJob
             updateState(downloadingJob.videoItemId, callback.getDownloadingJobState(downloadingJob.videoItemId))
         }

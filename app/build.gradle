@@ -48,7 +48,7 @@ dependencies {
     implementation androidx.navigation.fragment
     implementation androidx.navigation.ui
 
-    debugImplementation tools.leakcanary
+    //debugImplementation tools.leakcanary
 }
 
 preBuild.dependsOn decryptGoogleServicesFile
