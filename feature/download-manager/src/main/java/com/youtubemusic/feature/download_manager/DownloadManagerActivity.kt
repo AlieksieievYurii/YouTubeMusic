@@ -87,7 +87,8 @@ class DownloadManagerActivity : AppCompatActivity() {
         binding.playlistsBinds.apply {
             adapter = ConcatAdapter(headerAdapter, listAdapter)
             setHasFixedSize(false)
-            layoutManager = LinearLayoutManager(this@DownloadManagerActivity)
+            layoutManager = LinearLayoutManager(context)
+            addItemDecoration(PlaylistBindsAndJobsListAdapter.ItemSeparator(context))
         }
 
         lifecycleScope.launchWhenStarted {

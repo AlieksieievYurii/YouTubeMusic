@@ -1,5 +1,9 @@
 package com.youtubemusic.feature.download_manager
 
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -187,6 +191,46 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
             binding.title.text = resources.getText(headline.titleId)
             binding.action.setOnClickListener { headline.onAction() }
             binding.action.text = resources.getText(headline.actionTextId)
+        }
+    }
+
+    internal class ItemSeparator(private val context: Context) : RecyclerView.ItemDecoration() {
+        private val divider: Drawable by lazy {
+            val attrs = context.obtainStyledAttributes(arrayOf(android.R.attr.listDivider).toIntArray())
+            val d = attrs.getDrawable(0)
+            attrs.recycle()
+            d!!
+        }
+
+        override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+            val left = parent.paddingLeft
+            val right = parent.width - parent.paddingRight
+
+            (0 until parent.childCount).forEach {
+
+                val view = parent.getChildAt(it)
+                val view2 = parent.getChildAt(it + 1)
+                val viewHolder = parent.getChildViewHolder(view)
+                val nextViewHolder = if (view2 != null) parent.getChildViewHolder(view2) else null
+
+                if (
+                    (viewHolder is JobViewHolder && nextViewHolder != null) ||
+                    (viewHolder is PlaylistBindViewHolder && nextViewHolder !is HeadlineViewHolder)
+                ) {
+                    val rP = view.layoutParams as RecyclerView.LayoutParams
+                    val top = view.bottom + rP.bottomMargin
+                    val bottom = top + divider.intrinsicHeight
+
+                    divider.setBounds(left, top, right, bottom)
+                    divider.draw(c)
+                }
+            }
+
+        }
+
+        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+            super.getItemOffsets(outRect, view, parent, state)
+            outRect.set(0, 0, 0, divider.intrinsicHeight)
         }
     }
 
