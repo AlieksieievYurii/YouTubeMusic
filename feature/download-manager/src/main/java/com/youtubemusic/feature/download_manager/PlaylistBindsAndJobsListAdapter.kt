@@ -36,10 +36,6 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         fun cancelDownloading(itemId: String)
         fun getDownloadingJobState(id: String): DownloadManager.State
     }
-
-    private val cashedPlaylistBinds = mutableListOf<AdapterData.PlaylistBind>()
-    private val cashedDownloadingJobs = mutableListOf<AdapterData.Job>()
-
     private lateinit var recyclerView: RecyclerView
 
     private object Comparator : DiffUtil.ItemCallback<AdapterData>() {
@@ -50,19 +46,6 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
             oldItem == newItem
     }
 
-    fun submitPlaylistBinds(list: List<YouTubePlaylistSync>) = synchronized(this) {
-        setDataSources(cashedPlaylistBinds.apply {
-            clear()
-            cashedPlaylistBinds.addAll(list.map { AdapterData.PlaylistBind(it) })
-        }, cashedDownloadingJobs)
-    }
-
-    fun submitDownloadingJobs(list: List<DownloadingVideoItemJob>) = synchronized(this) {
-        setDataSources(cashedPlaylistBinds, cashedDownloadingJobs.apply {
-            clear()
-            addAll(list.map { AdapterData.Job(it) })
-        })
-    }
 
     fun updateDownloadingJobStatus(status: DownloadManager.Status) {
         findVisibleJobViewHolder(status.videoId)?.updateState(status.videoId, status.state)
@@ -104,7 +87,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         is AdapterData.Headline -> (holder as HeadlineViewHolder).bind(data)
     }
 
-    private fun setDataSources(playlistBinds: List<AdapterData.PlaylistBind>, downloadingJobs: List<AdapterData.Job>) {
+    fun setDataSources(playlistBinds: List<AdapterData.PlaylistBind>, downloadingJobs: List<AdapterData.Job>) {
         val result = mutableListOf<AdapterData>()
         if (playlistBinds.isNotEmpty()) {
             result.add(

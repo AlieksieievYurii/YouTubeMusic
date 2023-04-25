@@ -15,6 +15,7 @@ import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.feature.download_manager.databinding.ActivityDownloadManagerBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -92,13 +93,15 @@ class DownloadManagerActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launchWhenStarted {
-            launch { viewModel.downloadingJobs.collect { listAdapter.submitDownloadingJobs(it) } }
+            launch {
+                viewModel.downloadingJobs.combine(viewModel.youTubePlaylistSyncs) { jobs, playlistSyncs ->
+                    playlistSyncs.map { AdapterData.PlaylistBind(it) } to jobs.map { AdapterData.Job(it) }
+                }.collectLatest { listAdapter.setDataSources(it.first, it.second) }
+            }
             launch { viewModel.downloadingStatus.collectLatest { listAdapter.updateDownloadingJobStatus(it) } }
             launch { observeEvents() }
-            launch { observeYouTubePlaylistsSyncs() }
             launch { observeAutoSyncState() }
         }
-
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -115,13 +118,6 @@ class DownloadManagerActivity : AppCompatActivity() {
                         viewModel.reassignPlaylistsForSync(it.youTubePlaylistId, newPlaylists)
                     }.show()
             }
-        }
-    }
-
-    private suspend fun observeYouTubePlaylistsSyncs() {
-        viewModel.youTubePlaylistSyncs.collect {
-            headerAdapter.isNoPlaylistSynchronization = it.isEmpty()
-            listAdapter.submitPlaylistBinds(it)
         }
     }
 
