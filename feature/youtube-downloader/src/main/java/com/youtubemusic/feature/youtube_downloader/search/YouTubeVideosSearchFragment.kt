@@ -18,6 +18,7 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.ToolBarAccessor
 import com.youtubemusic.core.common.attachNumberBadge
+import com.youtubemusic.core.common.ui.ErrorDialog
 import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
 import com.youtubemusic.core.data.EmptyListException
@@ -52,7 +53,7 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
             override fun onDownloadAndAssignedCategories(videoItem: VideoItem) = viewModel.openCategorySelectorFor(videoItem)
             override fun onCancelDownloading(videoItem: VideoItem) = viewModel.cancelDownloading(videoItem)
             override fun onDelete(videoItem: VideoItem) = viewModel.delete(videoItem)
-            override fun onShowErrorDetail(videoItem: VideoItem) {}
+            override fun onShowErrorDetail(videoItem: VideoItem) = viewModel.showFailedItemDetails(videoItem)
 
         })
     }
@@ -79,6 +80,7 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
         lifecycleScope.launchWhenStarted {
             launch { startHandlingListLoadState() }
             launch { viewModel.videoItems.collectLatest { listAdapter.submitData(it) } }
+            launch { viewModel.downloadingJobsStatuses.collectLatest { listAdapter.updateItem(it) } }
         }
 
         viewModel.event.observe(viewLifecycleOwner) {
@@ -86,6 +88,7 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
                 YouTubeVideosSearchViewModel.Event.NavigateToLoginScreen ->
                     findNavController().navigate(R.id.action_fragment_youtube_videos_search_to_authenticationFragment)
                 is YouTubeVideosSearchViewModel.Event.OpenPlaylistSelector -> showDialogToSelectPlaylists(it.videoItem, it.playlists)
+                is YouTubeVideosSearchViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(it.videoItem, it.errorMessage)
             }
         }
     }
@@ -171,5 +174,12 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
                 }
             }
         }
+    }
+
+    private fun showFailedVideoItem(videoItem: VideoItem, error: String?) {
+        ErrorDialog.create(error ?: getString(com.youtubemusic.core.common.R.string.label_no_error_message)).addListeners(
+            onTryAgain = { viewModel.tryToDownloadAgain(videoItem) },
+            onCancel = { viewModel.cancelDownloading(videoItem) })
+            .show(requireActivity().supportFragmentManager, "ErrorDialog")
     }
 }

@@ -15,6 +15,7 @@ import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.data.SearchFilterData
+import com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -32,6 +33,7 @@ class YouTubeVideosSearchViewModel @Inject constructor(
     sealed class Event {
         object NavigateToLoginScreen : Event()
         data class OpenPlaylistSelector(val videoItem: VideoItem, val playlists: List<MediaItemPlaylist>) : Event()
+        data class ShowFailedVideoItem(val videoItem: VideoItem, val errorMessage: String?): Event()
     }
 
     private val _videoItems: MutableStateFlow<PagingData<VideoItem>> = MutableStateFlow(PagingData.empty())
@@ -41,6 +43,8 @@ class YouTubeVideosSearchViewModel @Inject constructor(
     val event = SingleLiveEvent<Event>()
 
     val numberOfDownloadingJobs = downloadManager.getDownloadingJobs().map { it.size }
+
+    val downloadingJobsStatuses = downloadManager.observeStatus()
 
     fun getItemStatus(videoItem: VideoItem) = downloadManager.getDownloadingJobState(videoItem.id)
 
@@ -61,6 +65,14 @@ class YouTubeVideosSearchViewModel @Inject constructor(
     fun tryToDownloadAgain(videoItem: VideoItem) {
         viewModelScope.launch {
             downloadManager.retry(videoItem.id)
+        }
+    }
+
+    fun showFailedItemDetails(videoItem: VideoItem) {
+        viewModelScope.launch {
+            (downloadManager.getDownloadingJobState(videoItem.id) as? DownloadManager.State.Failed)?.let {
+                event.value = Event.ShowFailedVideoItem(videoItem, it.errorMessage)
+            }
         }
     }
 
