@@ -37,6 +37,7 @@ class SearchFilterDialogWrapper(private val context: Context) {
             binding.duration.setSelection(it.duration.ordinal)
             binding.uploadDate.setSelection(it.uploadDate.ordinal)
             binding.featureSyndicated.isChecked = it.featureSyndicated
+            binding.featureEmbeddable.isChecked = it.featureEmbeddable
             binding.featureEpisode.isChecked = it.featureEpisode
             binding.featureMovie.isChecked = it.featureMovie
         }
@@ -53,7 +54,8 @@ class SearchFilterDialogWrapper(private val context: Context) {
                         uploadDate = getUploadDateEnum(),
                         featureSyndicated = binding.featureSyndicated.isChecked,
                         featureEpisode = binding.featureEpisode.isChecked,
-                        featureMovie = binding.featureMovie.isChecked
+                        featureMovie = binding.featureMovie.isChecked,
+                        featureEmbeddable = binding.featureEmbeddable.isChecked
                     )
                 )
             }.setNegativeButton(com.youtubemusic.core.common.R.string.label_cancel) { _, _ -> }

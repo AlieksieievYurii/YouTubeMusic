@@ -17,12 +17,14 @@ data class SearchFilterData(
     val duration: DurationEnum,
     val uploadDate: UploadDateEnum,
     val featureSyndicated: Boolean,
+    val featureEmbeddable: Boolean,
     val featureEpisode: Boolean,
     val featureMovie: Boolean
 ) {
     companion object {
         val DEFAULT = SearchFilterData(OrderEnum.RELEVANCE, DurationEnum.ANY, UploadDateEnum.ANYTIME,
             featureSyndicated = false,
+            featureEmbeddable = false,
             featureEpisode = false,
             featureMovie = false
         )

@@ -60,6 +60,7 @@ class YouTubeAPI @Inject constructor(
                 .setVideoDuration(searchFilter.duration.toQueryKey())
                 .setVideoSyndicated(if (searchFilter.featureSyndicated) "true" else "any")
                 .setVideoType(videoType)
+                .setVideoEmbeddable(if (searchFilter.featureEmbeddable) "true" else "any")
                 .setMaxResults(10)
                 .setQ(query)
                 .setType("video")
