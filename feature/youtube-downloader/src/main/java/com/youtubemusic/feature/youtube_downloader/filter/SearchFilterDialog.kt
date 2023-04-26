@@ -9,12 +9,10 @@ import com.youtubemusic.core.data.*
 import com.youtubemusic.feature.youtube_downloader.R
 import com.youtubemusic.feature.youtube_downloader.databinding.DialogSearchFilterBinding
 
-class SearchFilterDialogWrapper(private val context: Context) {
+class SearchFilterDialogWrapper(private val context: Context, private val callback:(SearchFilterData) -> Unit) {
     private val binding: DialogSearchFilterBinding by lazy {
         DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.dialog_search_filter, null, false)
     }
-
-    var callback: ((SearchFilterData) -> Unit)? = null
 
     fun show(currentSearchFilterData: SearchFilterData? = null) {
         ArrayAdapter.createFromResource(context, R.array.order_by, android.R.layout.simple_spinner_item).also {
@@ -47,7 +45,7 @@ class SearchFilterDialogWrapper(private val context: Context) {
             .setView(binding.root)
             .setPositiveButton(com.youtubemusic.core.common.R.string.label_apply) { _, _ ->
 
-                callback?.invoke(
+                callback.invoke(
                     SearchFilterData(
                         orderBy = getOrderByEnum(),
                         duration = getDurationEnum(),

@@ -10,9 +10,6 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always|collapseActionView" />
     <item
-        android:id="@+id/item_log_out"
-        android:title="@string/label_log_out" />
-    <item
         android:id="@+id/item_open_download_manager"
         android:icon="@drawable/ic_baseline_download_24"
         android:title="@string/label_download_manager"
@@ -26,6 +23,9 @@
         tools:ignore="AlwaysShowAction" />
     <item
         android:id="@+id/item_search_filter"
-        android:title="Search filter"
-        app:showAsAction="never"/>
+        android:title="@string/label_search_filter"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/item_log_out"
+        android:title="@string/label_log_out" />
 </menu>

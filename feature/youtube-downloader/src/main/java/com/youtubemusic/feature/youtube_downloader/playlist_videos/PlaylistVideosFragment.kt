@@ -4,11 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.viewbinding.library.fragment.viewBinding
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.ConcatAdapter
@@ -34,7 +37,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
+class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos), MenuProvider {
     sealed class ViewState {
         object Loading : ViewState()
         object Ready : ViewState()
@@ -66,19 +69,9 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenu(true)
-
-        (requireActivity() as ToolBarAccessor).getToolbar().apply {
+        requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
+        (requireActivity() as ToolBarAccessor).getToolbar().
             attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.downloadingJobsNumber)
-            setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.item_log_out -> viewModel.signOut()
-                    R.id.item_open_download_manager -> openDownloadManager()
-                }
-                true
-            }
-        }
-
 
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
@@ -108,10 +101,17 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos) {
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.youtube_playlist_videos, menu)
-        super.onCreateOptionsMenu(menu, inflater)
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.youtube_playlist_videos, menu)
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.item_log_out -> viewModel.signOut()
+            R.id.item_open_download_manager -> openDownloadManager()
+            else -> return false
+        }
+        return true
     }
 
     private suspend fun startHandlingEvents() = viewModel.event.collectLatest { event ->

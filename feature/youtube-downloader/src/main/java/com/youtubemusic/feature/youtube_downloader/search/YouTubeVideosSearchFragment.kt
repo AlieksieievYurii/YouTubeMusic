@@ -2,15 +2,16 @@ package com.youtubemusic.feature.youtube_downloader.search
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.viewbinding.library.fragment.viewBinding
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
@@ -33,7 +34,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_search) {
+class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_search), MenuProvider {
     sealed class ViewState {
         object Loading : ViewState()
         object Loaded : ViewState()
@@ -56,9 +57,12 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
         })
     }
 
+    private lateinit var searchViewItem: SearchView
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenu(true)
+        requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
+
         (requireActivity() as ToolBarAccessor).getToolbar()
             .attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.numberOfDownloadingJobs)
         binding.videos.apply {
@@ -86,53 +90,11 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.load()
-    }
-
-    private fun showDialogToSelectPlaylists(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
-        SelectPlaylistsDialog(requireContext(), playlists, emptyList()) { categories ->
-            viewModel.download(videoItem, categories)
-        }.show()
-    }
-
-
-    @Deprecated("Deprecated in Java")
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.youtube_search_fragment_menu, menu)
-        val searchViewItem = menu.findItem(R.id.item_search).actionView as SearchView
-        (requireActivity() as ToolBarAccessor).getToolbar().setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.item_log_out -> {
-                    viewModel.logOut()
-                    true
-                }
-                R.id.item_open_download_manager -> {
-                    startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))
-                    true
-                }
-                R.id.item_open_playlists -> {
-                    findNavController().navigate(R.id.action_fragment_youtube_videos_search_to_playlistsFragment)
-                    true
-                }
-                R.id.item_search_filter -> {
-                    SearchFilterDialogWrapper(requireContext()).apply {
-                        callback = {searchFilterData ->
-                            viewModel.searchFilter = searchFilterData
-                            viewModel.search(searchViewItem.query.toString())
-                        }
-                    }.show(viewModel.searchFilter)
-                    true
-                }
-                else -> false
-            }
-        }
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.youtube_search_fragment_menu, menu)
+        searchViewItem = menu.findItem(R.id.item_search).actionView as SearchView
         menu.findItem(R.id.item_search).setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(p0: MenuItem): Boolean {
-                return true
-            }
+            override fun onMenuItemActionExpand(p0: MenuItem) = true
 
             override fun onMenuItemActionCollapse(p0: MenuItem): Boolean {
                 viewModel.search("")
@@ -140,6 +102,7 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
             }
 
         })
+
         searchViewItem.apply {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
@@ -151,10 +114,35 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
                 override fun onQueryTextChange(newText: String?): Boolean {
                     return true
                 }
-
             })
         }
     }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.item_log_out -> viewModel.logOut()
+            R.id.item_open_download_manager -> startActivity(Intent(requireContext(), DownloadManagerActivity::class.java))
+            R.id.item_open_playlists -> findNavController().navigate(R.id.action_fragment_youtube_videos_search_to_playlistsFragment)
+            R.id.item_search_filter -> SearchFilterDialogWrapper(requireContext()) { searchFilterData ->
+                viewModel.searchFilter = searchFilterData
+                viewModel.search(searchViewItem.query.toString())
+            }.show(viewModel.searchFilter)
+            else -> return false
+        }
+        return true
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.load()
+    }
+
+    private fun showDialogToSelectPlaylists(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
+        SelectPlaylistsDialog(requireContext(), playlists, emptyList()) { categories ->
+            viewModel.download(videoItem, categories)
+        }.show()
+    }
+
 
     private suspend fun startHandlingListLoadState() = listAdapter.loadStateFlow.collectLatest {
         binding.apply {
