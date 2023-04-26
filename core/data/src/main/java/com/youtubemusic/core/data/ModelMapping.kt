@@ -7,6 +7,7 @@ import com.youtubemusic.core.database.models.MediaItemEntity
 import com.youtubemusic.core.database.models.PlaylistEntity
 import com.youtubemusic.core.model.*
 import org.threeten.bp.Duration
+import java.math.BigInteger
 import java.util.*
 
 fun MediaItemEntity.toMediaItem() = MediaItem(
@@ -72,8 +73,8 @@ fun Video.toVideoItem() = VideoItem(
     author = snippet.channelTitle,
     durationInMillis = Duration.parse(contentDetails.duration).toMillis(),
     description = snippet.description,
-    viewCount = statistics.viewCount,
-    likeCount = statistics.likeCount,
+    viewCount = statistics.viewCount ?: BigInteger.ZERO,
+    likeCount = statistics.likeCount ?: BigInteger.ZERO,
     thumbnail = snippet.thumbnails.default.url,
     normalThumbnail = snippet.thumbnails.medium.url,
     publishDate = Date(snippet.publishedAt.value)
