@@ -19,6 +19,7 @@ import com.youtubemusic.core.common.ToolBarAccessor
 import com.youtubemusic.core.common.attachNumberBadge
 import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
+import com.youtubemusic.core.data.EmptyListException
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
@@ -36,6 +37,7 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
     sealed class ViewState {
         object Loading : ViewState()
         object Loaded : ViewState()
+        object EmptyResult : ViewState()
         data class Error(val error: String) : ViewState()
     }
 
@@ -172,9 +174,12 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
                     refresh.isRefreshing = false
                     refresh.isEnabled = false
                     val loadStateError = it.refresh as LoadState.Error
-                    viewState = ViewState.Error(
-                        loadStateError.error.message ?: getString(com.youtubemusic.core.common.R.string.label_no_error_message)
-                    )
+                    viewState = if (loadStateError.error is EmptyListException)
+                        ViewState.EmptyResult
+                    else
+                        ViewState.Error(
+                            loadStateError.error.message ?: getString(com.youtubemusic.core.common.R.string.label_no_error_message)
+                        )
                 }
             }
         }
