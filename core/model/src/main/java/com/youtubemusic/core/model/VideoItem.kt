@@ -2,6 +2,7 @@ package com.youtubemusic.core.model
 
 import kotlinx.parcelize.Parcelize
 import java.math.BigInteger
+import java.util.Date
 
 /**
  * Data class representing video item containing all necessary information
@@ -16,5 +17,6 @@ data class VideoItem(
     val viewCount: BigInteger,
     val likeCount: BigInteger,
     val thumbnail: String,
-    val normalThumbnail: String
+    val normalThumbnail: String,
+    val publishDate: Date
 ) : Item(id, title, author, durationInMillis)

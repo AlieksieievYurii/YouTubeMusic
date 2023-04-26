@@ -1,5 +1,6 @@
 package com.youtubemusic.core.common
 
+import android.text.format.DateFormat
 import org.threeten.bp.Duration
 import java.math.BigInteger
 import java.util.*
@@ -44,5 +45,9 @@ fun longToShortCutSuffix(value: Long): String {
     val truncated: Long = value / (divideBy / 10)
     val hasDecimal: Boolean = truncated < 100 && truncated / 10.0 != (truncated / 10).toDouble()
     return if (hasDecimal) "${truncated / 10.0}$suffix" else "${truncated / 10}$suffix"
+}
+
+fun toHumanReadable(date: Date): String {
+    return DateFormat.format("yyyy-MM-dd hh:mm:ss a", date).toString()
 }
 
