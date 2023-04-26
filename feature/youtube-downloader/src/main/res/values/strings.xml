@@ -19,4 +19,13 @@
     <string name="label_unlisted">unlisted</string>
     <string name="label_private">private</string>
     <string name="label_download_all">Download All</string>
+    <string name="label_order_by">Order by</string>
+    <string name="label_duration">Duration</string>
+    <string name="label_upload_date">Upload\ndate</string>
+    <string name="label_features">Features</string>
+    <string name="label_syndicated">Syndicated</string>
+    <string name="label_embeddable">Embeddable</string>
+    <string name="label_episode">Episode</string>
+    <string name="label_movie">Movie</string>
+    <string name="label_search_filter">Search filter</string>
 </resources>

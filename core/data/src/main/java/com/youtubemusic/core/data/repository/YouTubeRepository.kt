@@ -2,19 +2,15 @@ package com.youtubemusic.core.data.repository
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.google.api.services.youtube.model.Playlist
-import com.google.api.services.youtube.model.Video
-import com.youtubemusic.core.data.AllYouTubePlaylistsSynchronized
-import com.youtubemusic.core.data.EmptyListException
-import com.youtubemusic.core.data.toYouTubePlaylistDetails
+import com.youtubemusic.core.data.*
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.model.YouTubePlaylist
 import com.youtubemusic.core.model.YouTubePlaylistDetails
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import org.threeten.bp.Duration
 import java.lang.Exception
 import java.math.BigInteger
+import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -60,8 +56,8 @@ class YouTubeRepository @Inject constructor(
         return PlaylistsPagingSource(youTubeAPI)
     }
 
-    fun getYouTubeVideosPagingSource(query: String): YouTubeVideosPagingSource2 {
-        return YouTubeVideosPagingSource2(youTubeAPI, query)
+    fun getYouTubeVideosPagingSource(query: String, searchFilter: SearchFilterData): YouTubeVideosPagingSource {
+        return YouTubeVideosPagingSource(youTubeAPI, query, searchFilter)
     }
 
     fun getYouTubePlaylistVideosPagingSource(youTubePlaylistId: String): YouTubePlaylistVideosPagingSource {
@@ -122,12 +118,15 @@ class ExcludingAlreadySyncPlaylistPagingSource(
     }
 }
 
-class YouTubeVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val query: String) : PagingSource<String, VideoItem>() {
+class YouTubeVideosPagingSource(
+    private val youTubeAPI: YouTubeAPI, private val query: String,
+    private val searchFilter: SearchFilterData
+) : PagingSource<String, VideoItem>() {
     override fun getRefreshKey(state: PagingState<String, VideoItem>): String? = null
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, VideoItem> {
         try {
-            val results = youTubeAPI.getVideos(query, pageToken = params.key)
+            val results = youTubeAPI.getVideos(query, searchFilter, pageToken = params.key)
 
             if (results.items.isEmpty())
                 return LoadResult.Error(EmptyListException())
@@ -146,7 +145,11 @@ class YouTubeVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val 
     }
 }
 
-class YouTubeVideosPagingSource2(private val youTubeAPI: YouTubeAPI, private val query: String) : PagingSource<String, VideoItem>() {
+class YouTubeVideosPagingSource2(
+    private val youTubeAPI: YouTubeAPI,
+    private val query: String,
+    private val searchFilter: SearchFilterData
+) : PagingSource<String, VideoItem>() {
     override fun getRefreshKey(state: PagingState<String, VideoItem>): String? = null
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, VideoItem> {
@@ -169,33 +172,39 @@ class YouTubeVideosPagingSource2(private val youTubeAPI: YouTubeAPI, private val
 
             if (query.isEmpty())
                 return LoadResult.Page(
-                    data = (0..10).map {  VideoItem(
-                        "id-$it",
-                        "title-$it",
-                        "author-$it",
-                        10L,
-                        "description-$it",
-                        BigInteger.valueOf(1L),
-                        BigInteger.valueOf(1L),
-                        "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
-                        "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png"
-                    ) },
+                    data = (0..10).map {
+                        VideoItem(
+                            "id-$it",
+                            "title-$it",
+                            "author-$it",
+                            10L,
+                            "description-$it",
+                            BigInteger.valueOf(1L),
+                            BigInteger.valueOf(1L),
+                            "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
+                            "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
+                            Calendar.getInstance().time
+                        )
+                    },
                     prevKey = null,
                     nextKey = null
                 )
             else
                 return LoadResult.Page(
-                    data = (0..10).map {  VideoItem(
-                        "dddddddd$it",
-                        "ddddddd$it",
-                        "d3r2345$it",
-                        10L,
-                        "$it",
-                        BigInteger.valueOf(14L),
-                        BigInteger.valueOf(132L),
-                        "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
-                        "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png"
-                    ) },
+                    data = (0..10).map {
+                        VideoItem(
+                            "dddddddd$it",
+                            "ddddddd$it",
+                            "d3r2345$it",
+                            10L,
+                            "$it",
+                            BigInteger.valueOf(14L),
+                            BigInteger.valueOf(132L),
+                            "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
+                            "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
+                            Calendar.getInstance().time
+                        )
+                    },
                     prevKey = null,
                     nextKey = null
                 )
@@ -231,21 +240,3 @@ class YouTubePlaylistVideosPagingSource(private val youTubeAPI: YouTubeAPI, priv
     }
 }
 
-fun Playlist.toYouTubePlaylist() = YouTubePlaylist(
-    this.id,
-    this.snippet.title,
-    this.snippet.thumbnails.default.url,
-    this.contentDetails.itemCount
-)
-
-fun Video.toVideoItem() = VideoItem(
-    id = id,
-    title = snippet.title,
-    author = snippet.channelTitle,
-    durationInMillis = Duration.parse(contentDetails.duration).toMillis(),
-    description = snippet.description,
-    viewCount = statistics.viewCount,
-    likeCount = statistics.likeCount,
-    thumbnail = snippet.thumbnails.default.url,
-    normalThumbnail = snippet.thumbnails.medium.url
-)

@@ -14,6 +14,7 @@ import com.youtubemusic.core.data.repository.YouTubeRepository
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
+import com.youtubemusic.core.data.SearchFilterData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -37,11 +38,13 @@ class YouTubeVideosSearchViewModel @Inject constructor(
     val videoItems: StateFlow<PagingData<VideoItem>> = _videoItems
     private var searchJob: Job? = null
 
-     val event = SingleLiveEvent<Event>()
+    val event = SingleLiveEvent<Event>()
 
     val numberOfDownloadingJobs = downloadManager.getDownloadingJobs().map { it.size }
 
     fun getItemStatus(videoItem: VideoItem) = downloadManager.getDownloadingJobState(videoItem.id)
+
+    var searchFilter: SearchFilterData = SearchFilterData.DEFAULT
 
     fun download(item: VideoItem, playlists: List<MediaItemPlaylist> = emptyList()) {
         viewModelScope.launch {
@@ -78,14 +81,14 @@ class YouTubeVideosSearchViewModel @Inject constructor(
         if (googleAccount.isAuthenticatedAndAuthorized.value)
             search("")
         else
-          event.value = Event.NavigateToLoginScreen
+            event.value = Event.NavigateToLoginScreen
     }
 
     fun search(query: String) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             Pager(config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-                pagingSourceFactory = { youTubeRepository.getYouTubeVideosPagingSource(query) }).flow.cachedIn(viewModelScope)
+                pagingSourceFactory = { youTubeRepository.getYouTubeVideosPagingSource(query, searchFilter) }).flow.cachedIn(viewModelScope)
                 .collectLatest {
                     _videoItems.emit(it)
                 }

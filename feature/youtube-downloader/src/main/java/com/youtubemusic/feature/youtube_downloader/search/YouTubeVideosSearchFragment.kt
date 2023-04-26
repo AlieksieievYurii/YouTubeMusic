@@ -1,8 +1,8 @@
 package com.youtubemusic.feature.youtube_downloader.search
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -24,6 +24,7 @@ import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.feature.download_manager.DownloadManagerActivity
 import com.youtubemusic.feature.youtube_downloader.R
+import com.youtubemusic.feature.youtube_downloader.filter.SearchFilterDialogWrapper
 import com.youtubemusic.feature.youtube_downloader.utils.VideoItemsListAdapter
 import com.youtubemusic.feature.youtube_downloader.databinding.FragmentYoutubeVideosSearchBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -99,6 +100,7 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.youtube_search_fragment_menu, menu)
+        val searchViewItem = menu.findItem(R.id.item_search).actionView as SearchView
         (requireActivity() as ToolBarAccessor).getToolbar().setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.item_log_out -> {
@@ -111,6 +113,15 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
                 }
                 R.id.item_open_playlists -> {
                     findNavController().navigate(R.id.action_fragment_youtube_videos_search_to_playlistsFragment)
+                    true
+                }
+                R.id.item_search_filter -> {
+                    SearchFilterDialogWrapper(requireContext()).apply {
+                        callback = {searchFilterData ->
+                            viewModel.searchFilter = searchFilterData
+                            viewModel.search(searchViewItem.query.toString())
+                        }
+                    }.show(viewModel.searchFilter)
                     true
                 }
                 else -> false
@@ -127,7 +138,7 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
             }
 
         })
-        (menu.findItem(R.id.item_search).actionView as SearchView).apply {
+        searchViewItem.apply {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String): Boolean {
                     viewModel.search(query)

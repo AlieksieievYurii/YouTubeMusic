@@ -24,4 +24,8 @@
         android:title="@string/label_youtube_playlists"
         app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
+    <item
+        android:id="@+id/item_search_filter"
+        android:title="Search filter"
+        app:showAsAction="never"/>
 </menu>

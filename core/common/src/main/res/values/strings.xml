@@ -8,6 +8,7 @@
     <string name="label_delete">Delete</string>
     <string name="label_retry">Retry</string>
     <string name="label_add">Add</string>
+    <string name="label_apply">Apply</string>
     <string name="label_error">Error: %s</string>
     <string name="label_id">ID: %s</string>
     <string name="label_no_error_message">No error message</string>

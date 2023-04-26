@@ -1,12 +1,13 @@
 package com.youtubemusic.core.data
 
+import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistListResponse
+import com.google.api.services.youtube.model.Video
 import com.youtubemusic.core.database.models.MediaItemEntity
 import com.youtubemusic.core.database.models.PlaylistEntity
-import com.youtubemusic.core.model.MediaItem
-import com.youtubemusic.core.model.MediaItemPlaylist
-import com.youtubemusic.core.model.YouTubePlaylistDetails
-import com.youtubemusic.core.model.YouTubePlaylistPrivacyStatus
+import com.youtubemusic.core.model.*
+import org.threeten.bp.Duration
+import java.util.*
 
 fun MediaItemEntity.toMediaItem() = MediaItem(
     id = mediaItemId,
@@ -42,3 +43,38 @@ fun PlaylistListResponse.toYouTubePlaylistDetails(): YouTubePlaylistDetails {
         }
     )
 }
+
+fun OrderEnum.toQueryKey() = when (this) {
+    OrderEnum.RELEVANCE -> "relevance"
+    OrderEnum.UPLOAD_DATE -> "date"
+    OrderEnum.BY_TITLE -> "title"
+    OrderEnum.VIEW_COUNT -> "viewCount"
+    OrderEnum.RATING -> "rating"
+}
+
+fun DurationEnum.toQueryKey() = when(this) {
+    DurationEnum.ANY -> "any"
+    DurationEnum.SHORT -> "short"
+    DurationEnum.MEDIUM -> "medium"
+    DurationEnum.LONG -> "long"
+}
+
+fun Playlist.toYouTubePlaylist() = YouTubePlaylist(
+    this.id,
+    this.snippet.title,
+    this.snippet.thumbnails.default.url,
+    this.contentDetails.itemCount
+)
+
+fun Video.toVideoItem() = VideoItem(
+    id = id,
+    title = snippet.title,
+    author = snippet.channelTitle,
+    durationInMillis = Duration.parse(contentDetails.duration).toMillis(),
+    description = snippet.description,
+    viewCount = statistics.viewCount,
+    likeCount = statistics.likeCount,
+    thumbnail = snippet.thumbnails.default.url,
+    normalThumbnail = snippet.thumbnails.medium.url,
+    publishDate = Date(snippet.publishedAt.value)
+)
