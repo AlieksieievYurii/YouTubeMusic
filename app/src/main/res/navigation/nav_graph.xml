@@ -8,12 +8,12 @@
     <fragment
         android:id="@+id/fragment_saved_music"
         android:name="com.youtubemusic.feature.saved_music.SavedMusicFragment"
-        android:label="Saved Music"
+        android:label="@string/label_saved_musics"
         tools:layout="@layout/fragment_saved_music" />
 
     <fragment
         android:id="@+id/fragment_youtube_music"
         android:name="com.youtubemusic.feature.youtube_downloader.YouTubeMusicFragment"
-        android:label="YouTube Music"
+        android:label="@string/label_youtube_musics"
         tools:layout="@layout/fragment_youtube_music" />
 </navigation>

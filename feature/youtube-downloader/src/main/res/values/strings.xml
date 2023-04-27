@@ -9,7 +9,6 @@
     <string name="select_playlist">Select playList</string>
     <string name="content_description_thumbnail_video">Thumbnail of video item</string>
     <string name="content_description_likes">Likes</string>
-    <string name="label_fragment_title_youtube_musics">YouTube Music</string>
     <string name="dialog_confirm_deletion_music_title">Delete music</string>
     <string name="dialog_confirm_deletion_music_message">Are you sure want to delete this music?</string>
     <string name="label_views_count">%s views</string>
