@@ -16,12 +16,16 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -29,6 +33,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
 import java.lang.IllegalStateException
+import java.lang.reflect.Field
 
 @Suppress("UNCHECKED_CAST")
 fun <T : RecyclerView.ViewHolder> RecyclerView.getVisibleItems(): List<T> {
@@ -181,4 +186,20 @@ fun Toolbar.attachNumberBadge(menuItemId: Int, lifecycleOwner: LifecycleOwner, t
             BadgeUtils.detachBadgeDrawable(downloadManagerBudge, this@attachNumberBadge, menuItemId)
         }
     })
+}
+
+@SuppressLint("DiscouragedPrivateApi")
+fun SearchView.setWhiteCursor() {
+    val searchTextView: SearchView.SearchAutoComplete = findViewById(androidx.appcompat.R.id.search_src_text)
+    if (SDK_INT >= Build.VERSION_CODES.Q) {
+        searchTextView.setTextCursorDrawable(R.drawable.cursor);
+    } else {
+        try {
+            val field: Field = TextView::class.java.getDeclaredField("mCursorDrawableRes")
+            field.isAccessible = true
+            field.set(searchTextView, R.drawable.cursor)
+        } catch (e: Exception) {
+            Firebase.crashlytics.recordException(e)
+        }
+    }
 }

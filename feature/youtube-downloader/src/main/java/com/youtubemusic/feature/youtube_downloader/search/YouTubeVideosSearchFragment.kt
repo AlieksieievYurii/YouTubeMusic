@@ -18,6 +18,7 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.ToolBarAccessor
 import com.youtubemusic.core.common.attachNumberBadge
+import com.youtubemusic.core.common.setWhiteCursor
 import com.youtubemusic.core.common.ui.ErrorDialog
 import com.youtubemusic.core.common.ui.LoaderViewHolder
 import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
@@ -27,9 +28,9 @@ import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.feature.download_manager.DownloadManagerActivity
 import com.youtubemusic.feature.youtube_downloader.R
+import com.youtubemusic.feature.youtube_downloader.databinding.FragmentYoutubeVideosSearchBinding
 import com.youtubemusic.feature.youtube_downloader.filter.SearchFilterDialogWrapper
 import com.youtubemusic.feature.youtube_downloader.utils.VideoItemsListAdapter
-import com.youtubemusic.feature.youtube_downloader.databinding.FragmentYoutubeVideosSearchBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -96,6 +97,8 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.youtube_search_fragment_menu, menu)
         searchViewItem = menu.findItem(R.id.item_search).actionView as SearchView
+        searchViewItem.setWhiteCursor()
+
         menu.findItem(R.id.item_search).setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(p0: MenuItem) = true
 
