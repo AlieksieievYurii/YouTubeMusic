@@ -2,6 +2,8 @@ package com.youtubemusic.core.data.repository
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.youtubemusic.core.data.*
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.model.YouTubePlaylist
@@ -85,6 +87,7 @@ open class PlaylistsPagingSource(private val youTubeAPI: YouTubeAPI) : PagingSou
                 prevKey = playlists.prevPageToken
             )
         } catch (error: Exception) {
+            Firebase.crashlytics.recordException(error)
             return LoadResult.Error(error)
         }
     }
@@ -139,8 +142,9 @@ class YouTubeVideosPagingSource(
                 nextKey = results.nextPageToken
             )
 
-        } catch (e: Exception) {
-            return LoadResult.Error(e)
+        } catch (error: Exception) {
+            Firebase.crashlytics.recordException(error)
+            return LoadResult.Error(error)
         }
     }
 }
@@ -234,8 +238,9 @@ class YouTubePlaylistVideosPagingSource(private val youTubeAPI: YouTubeAPI, priv
                 nextKey = results.nextPageToken
             )
 
-        } catch (e: Exception) {
-            return LoadResult.Error(e)
+        } catch (error: Exception) {
+            Firebase.crashlytics.recordException(error)
+            return LoadResult.Error(error)
         }
     }
 }

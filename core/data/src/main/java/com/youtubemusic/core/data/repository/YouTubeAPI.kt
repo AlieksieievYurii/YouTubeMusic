@@ -16,7 +16,6 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
-@Suppress("BlockingMethodInNonBlockingContext")
 class YouTubeAPI @Inject constructor(
     private val transport: HttpTransport,
     private val jsonFactory: JsonFactory,

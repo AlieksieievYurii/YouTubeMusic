@@ -44,6 +44,10 @@ dependencies {
     implementation dagger_hilt.android
     implementation tools.timber
 
+    implementation platform(tools.firebase_boom)
+    implementation tools.firebase_crush_analytics
+    implementation tools.firebase_analytics
+
     kapt dagger_hilt.compiler
 
     testImplementation tests.junit
