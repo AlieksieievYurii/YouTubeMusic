@@ -1,10 +1,8 @@
 package com.yurii.youtubemusic
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Menu
 import android.viewbinding.library.activity.viewBinding
 import androidx.activity.viewModels
 import androidx.appcompat.widget.Toolbar
@@ -14,8 +12,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.snackbar.Snackbar
 import com.youtubemusic.core.common.ToolBarAccessor
 import com.youtubemusic.feature.player.PlayerControlPanelFragment

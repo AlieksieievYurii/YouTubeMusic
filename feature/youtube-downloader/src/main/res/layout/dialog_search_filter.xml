@@ -3,124 +3,133 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <Spinner
-        android:id="@+id/order_by"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_order_by"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tv_order_by"
-        app:layout_constraintTop_toTopOf="@+id/tv_order_by" />
-
-    <Spinner
-        android:id="@+id/duration"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_duration"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/order_by"
-        app:layout_constraintTop_toTopOf="@+id/tv_duration"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <Spinner
-        android:id="@+id/upload_date"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_upload_date"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/duration"
-        app:layout_constraintTop_toTopOf="@+id/tv_upload_date"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <TextView
-        android:id="@+id/tv_order_by"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/label_order_by"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_duration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/label_duration"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_order_by" />
-
-    <TextView
-        android:id="@+id/tv_upload_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/label_upload_date"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_duration" />
-
-    <TextView
-        android:id="@+id/tv_features"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
-        android:text="@string/label_features"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_upload_date" />
-
-
-    <com.google.android.material.chip.ChipGroup
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        style="@style/Widget.MaterialComponents.ChipGroup"
-        app:singleSelection="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_features">
-        <com.google.android.material.chip.Chip
-            android:id="@+id/feature_syndicated"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.Chip.Choice"
-            android:text="@string/label_syndicated"/>
-        <com.google.android.material.chip.Chip
-            android:id="@+id/feature_embeddable"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.Chip.Choice"
-            android:text="@string/label_embeddable"/>
-        <com.google.android.material.chip.Chip
-            android:id="@+id/feature_episode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.Chip.Choice"
-            android:text="@string/label_episode"/>
-        <com.google.android.material.chip.Chip
-            android:id="@+id/feature_movie"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.Chip.Choice"
-            android:text="@string/label_movie"/>
-    </com.google.android.material.chip.ChipGroup>
+        android:layout_height="match_parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Spinner
+            android:id="@+id/order_by"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_order_by"
+            app:layout_constraintEnd_toStartOf="@+id/horizontal_right_guideline"
+            app:layout_constraintStart_toEndOf="@+id/tv_order_by"
+            app:layout_constraintTop_toTopOf="@+id/tv_order_by" />
+
+        <Spinner
+            android:id="@+id/duration"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_duration"
+            app:layout_constraintEnd_toStartOf="@+id/horizontal_right_guideline"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/order_by"
+            app:layout_constraintTop_toTopOf="@+id/tv_duration"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <Spinner
+            android:id="@+id/upload_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_upload_date"
+            app:layout_constraintEnd_toStartOf="@+id/horizontal_right_guideline"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/duration"
+            app:layout_constraintTop_toTopOf="@+id/tv_upload_date"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/tv_order_by"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/label_order_by"
+            app:layout_constraintStart_toStartOf="@+id/horizontal_left_guideline"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/label_duration"
+            app:layout_constraintStart_toStartOf="@+id/horizontal_left_guideline"
+            app:layout_constraintTop_toBottomOf="@+id/tv_order_by" />
+
+        <TextView
+            android:id="@+id/tv_upload_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/label_upload_date"
+            app:layout_constraintStart_toStartOf="@+id/horizontal_left_guideline"
+            app:layout_constraintTop_toBottomOf="@+id/tv_duration" />
+
+        <TextView
+            android:id="@+id/tv_features"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/label_features"
+            app:layout_constraintStart_toStartOf="@+id/horizontal_left_guideline"
+            app:layout_constraintTop_toBottomOf="@+id/tv_upload_date" />
+
+
+        <com.google.android.material.chip.ChipGroup
+            style="@style/Widget.MaterialComponents.ChipGroup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/horizontal_right_guideline"
+            app:layout_constraintStart_toStartOf="@+id/horizontal_left_guideline"
+            app:layout_constraintTop_toBottomOf="@+id/tv_features"
+            app:singleSelection="false">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/feature_syndicated"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_syndicated" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/feature_embeddable"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_embeddable" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/feature_episode"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_episode" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/feature_movie"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_movie" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/horizontal_left_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="24dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/horizontal_right_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="24dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>
