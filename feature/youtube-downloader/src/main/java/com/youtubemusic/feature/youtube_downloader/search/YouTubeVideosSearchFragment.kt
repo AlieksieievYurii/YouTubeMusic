@@ -138,11 +138,6 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
         return true
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.load()
-    }
-
     private fun showDialogToSelectPlaylists(videoItem: VideoItem, playlists: List<MediaItemPlaylist>) {
         SelectPlaylistsDialog(requireContext(), playlists, emptyList()) { categories ->
             viewModel.download(videoItem, categories)

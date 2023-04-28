@@ -15,7 +15,6 @@ import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.data.SearchFilterData
-import com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -49,6 +48,17 @@ class YouTubeVideosSearchViewModel @Inject constructor(
     fun getItemStatus(videoItem: VideoItem) = downloadManager.getDownloadingJobState(videoItem.id)
 
     var searchFilter: SearchFilterData = SearchFilterData.DEFAULT
+
+    init {
+        viewModelScope.launch {
+            googleAccount.isAuthenticatedAndAuthorized.collectLatest { isAuthenticated ->
+                if (isAuthenticated)
+                    search("")
+                else
+                    event.value = Event.NavigateToLoginScreen
+            }
+        }
+    }
 
     fun download(item: VideoItem, playlists: List<MediaItemPlaylist> = emptyList()) {
         viewModelScope.launch {
@@ -88,14 +98,6 @@ class YouTubeVideosSearchViewModel @Inject constructor(
         }
     }
 
-
-    fun load() {
-        if (googleAccount.isAuthenticatedAndAuthorized.value)
-            search("")
-        else
-            event.value = Event.NavigateToLoginScreen
-    }
-
     fun search(query: String) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
@@ -109,6 +111,5 @@ class YouTubeVideosSearchViewModel @Inject constructor(
 
     fun logOut() {
         googleAccount.signOut()
-        event.value = Event.NavigateToLoginScreen
     }
 }
