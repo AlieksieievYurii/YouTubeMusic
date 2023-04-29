@@ -87,6 +87,7 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos), Menu
             launch { startHandlingEvents() }
             launch { viewModel.videoItemStatus.collectLatest { listAdapter.updateItem(it) } }
             launch { handleViewState() }
+            launch { viewModel.downloadAllState.collectLatest { headerAdapter.downloadAllButtonState = it } }
         }
 
         binding.apply {

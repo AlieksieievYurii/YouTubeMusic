@@ -35,6 +35,10 @@ internal class PlaylistVideosViewModel @Inject constructor(
         data class Error(val exception: Exception) : State()
     }
 
+    enum class DownloadAllState {
+        READY, PROCESSING, DISABLED, ERROR, DONE
+    }
+
     sealed class Event {
         data class ShowFailedVideoItem(val videoItem: VideoItem, val error: String?) : Event()
         data class OpenPlaylistSelector(val videoItem: VideoItem, val playlists: List<MediaItemPlaylist>) : Event()
@@ -55,6 +59,9 @@ internal class PlaylistVideosViewModel @Inject constructor(
     private val _viewState = MutableStateFlow<State>(State.Loading)
     val viewState = _viewState.asStateFlow()
 
+    private val _downloadAllState = MutableStateFlow(DownloadAllState.READY)
+    val downloadAllState = _downloadAllState.asStateFlow()
+
     val downloadingJobsNumber = downloadManager.getDownloadingJobs().map { it.size }
 
     init {
@@ -71,8 +78,14 @@ internal class PlaylistVideosViewModel @Inject constructor(
     }
 
     fun downloadAll() {
+        _downloadAllState.value = DownloadAllState.PROCESSING
         viewModelScope.launch {
-            downloadAllFromPlaylistUseCase.downloadAll(youTubePlaylistId, emptyList())
+            try {
+                downloadAllFromPlaylistUseCase.downloadAll(youTubePlaylistId, emptyList())
+                _downloadAllState.value = DownloadAllState.DONE
+            } catch (error: Exception) {
+                _downloadAllState.value = DownloadAllState.ERROR
+            }
         }
     }
 
@@ -122,10 +135,12 @@ internal class PlaylistVideosViewModel @Inject constructor(
 
     private fun loadPlaylistDetails() {
         viewModelScope.launch {
-            _viewState.value = try {
-                State.Ready(youTubeRepository.getPlaylistDetails(youTubePlaylistId))
+            try {
+                val result = youTubeRepository.getPlaylistDetails(youTubePlaylistId)
+                _downloadAllState.value = if (result.videosNumber == 0L) DownloadAllState.DISABLED else DownloadAllState.READY
+                _viewState.value = State.Ready(result)
             } catch (error: Exception) {
-                State.Error(error)
+                _viewState.value = State.Error(error)
             }
         }
     }

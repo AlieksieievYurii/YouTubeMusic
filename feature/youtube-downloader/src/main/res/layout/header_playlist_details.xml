@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <import type="com.youtubemusic.feature.youtube_downloader.utils.BindingUtilsKt" />
 
         <variable
@@ -64,13 +65,13 @@
             app:layout_constraintTop_toBottomOf="@+id/author"
             tools:text="30 videos" />
 
-        <Button
+        <include
             android:id="@+id/download_all"
+            layout="@layout/state_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/label_download_all"
+            android:layout_marginBottom="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/videos_count" />
