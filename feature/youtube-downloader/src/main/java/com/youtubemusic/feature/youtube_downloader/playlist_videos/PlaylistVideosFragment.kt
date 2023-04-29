@@ -81,11 +81,14 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos), Menu
             })
         }
 
+        viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+            launch { viewModel.videoItemStatus.collectLatest { listAdapter.updateItem(it) } }
+        }
+
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             launch { viewModel.videoItems.collectLatest { listAdapter.submitData(it) } }
             launch { startHandlingListLoadState() }
             launch { startHandlingEvents() }
-            launch { viewModel.videoItemStatus.collectLatest { listAdapter.updateItem(it) } }
             launch { handleViewState() }
             launch { viewModel.downloadAllState.collectLatest { headerAdapter.downloadAllButtonState = it } }
         }
