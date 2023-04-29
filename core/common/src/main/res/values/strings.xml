@@ -25,4 +25,7 @@
     <string name="label_playing_from">Playing from \‘%s\’</string>
     <string name="label_duration_progress">%1s / %2s</string>
     <string name="label_playlists">Playlists</string>
+    <string name="label_loading">Loading…</string>
+    <string name="label_failed">Failed</string>
+    <string name="label_done">Done</string>
 </resources>
