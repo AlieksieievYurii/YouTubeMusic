@@ -96,7 +96,10 @@ class DownloadManagerActivity : AppCompatActivity() {
             launch {
                 viewModel.downloadingJobs.combine(viewModel.youTubePlaylistSyncs) { jobs, playlistSyncs ->
                     playlistSyncs.map { AdapterData.PlaylistBind(it) } to jobs.map { AdapterData.Job(it) }
-                }.collectLatest { listAdapter.setDataSources(it.first, it.second) }
+                }.collectLatest {
+                    headerAdapter.isNoPlaylistSynchronization = it.first.isEmpty()
+                    listAdapter.setDataSources(it.first, it.second)
+                }
             }
             launch { viewModel.downloadingStatus.collectLatest { listAdapter.updateDownloadingJobStatus(it) } }
             launch { observeEvents() }
