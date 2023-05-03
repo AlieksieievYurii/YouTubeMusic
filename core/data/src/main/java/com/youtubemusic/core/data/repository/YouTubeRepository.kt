@@ -58,8 +58,8 @@ class YouTubeRepository @Inject constructor(
         return PlaylistsPagingSource(youTubeAPI)
     }
 
-    fun getYouTubeVideosPagingSource(query: String, searchFilter: SearchFilterData): YouTubeVideosPagingSource {
-        return YouTubeVideosPagingSource(youTubeAPI, query, searchFilter)
+    fun getYouTubeVideosPagingSource(query: String, searchFilter: SearchFilterData): YouTubeVideosPagingSource2 {
+        return YouTubeVideosPagingSource2(youTubeAPI, query, searchFilter)
     }
 
     fun getYouTubePlaylistVideosPagingSource(youTubePlaylistId: String): YouTubePlaylistVideosPagingSource {

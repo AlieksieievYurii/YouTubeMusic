@@ -79,3 +79,12 @@ fun Video.toVideoItem() = VideoItem(
     normalThumbnail = snippet.thumbnails.medium.url,
     publishDate = Date(snippet.publishedAt.value)
 )
+
+fun List<MediaItemEntity>.toMediaItemCores() = map { it.toMediaItemCore() }
+
+fun MediaItemEntity.toMediaItemCore() = MediaItemCore(
+    mediaItem = toMediaItem(),
+    position = position,
+    downloadingJobUUID = downloadingJobId,
+    thumbnailUrl = thumbnailUrl
+)
