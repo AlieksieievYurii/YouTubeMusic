@@ -70,8 +70,6 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos), Menu
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
-        (requireActivity() as ToolBarAccessor).getToolbar().
-            attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.downloadingJobsNumber)
 
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
@@ -103,6 +101,12 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos), Menu
                 viewModel.reloadPlaylistInformation()
             }
         }
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        super.onPrepareMenu(menu)
+        (requireActivity() as ToolBarAccessor).getToolbar()
+            .attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.downloadingJobsNumber)
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -160,6 +164,7 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos), Menu
                 playlistInfoState is PlaylistVideosViewModel.State.Error -> ViewState.Error(
                     playlistInfoState.exception.message ?: noErrorMessage
                 )
+
                 videosPagerState.refresh is LoadState.Error -> ViewState.Error(
                     (videosPagerState.refresh as LoadState.Error).error.message ?: noErrorMessage
                 )
@@ -188,6 +193,7 @@ class PlaylistVideosFragment : Fragment(R.layout.fragment_playlist_videos), Menu
                 binding.refresh.isRefreshing = false
                 binding.refresh.isEnabled = true
             }
+
             is LoadState.Error -> {
                 binding.refresh.isRefreshing = false
                 binding.refresh.isEnabled = (it.refresh as LoadState.Error).error is EmptyListException

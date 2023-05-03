@@ -28,8 +28,6 @@ class SavedMusicFragment : Fragment(R.layout.fragment_saved_music), MenuProvider
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
-        (requireActivity() as ToolBarAccessor).getToolbar()
-            .attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.numberOfDownloadingJobs)
 
         lifecycleScope.launchWhenCreated {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -43,6 +41,12 @@ class SavedMusicFragment : Fragment(R.layout.fragment_saved_music), MenuProvider
                 }
             }
         }
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        super.onPrepareMenu(menu)
+        (requireActivity() as ToolBarAccessor).getToolbar()
+            .attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.numberOfDownloadingJobs)
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

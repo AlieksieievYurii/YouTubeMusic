@@ -65,8 +65,6 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
         super.onViewCreated(view, savedInstanceState)
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
 
-        (requireActivity() as ToolBarAccessor).getToolbar()
-            .attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.numberOfDownloadingJobs)
         binding.videos.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = listAdapter.apply {
@@ -92,6 +90,12 @@ class YouTubeVideosSearchFragment : Fragment(R.layout.fragment_youtube_videos_se
                 is YouTubeVideosSearchViewModel.Event.ShowFailedVideoItem -> showFailedVideoItem(it.videoItem, it.errorMessage)
             }
         }
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        super.onPrepareMenu(menu)
+        (requireActivity() as ToolBarAccessor).getToolbar()
+            .attachNumberBadge(R.id.item_open_download_manager, viewLifecycleOwner, viewModel.numberOfDownloadingJobs)
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
