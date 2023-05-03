@@ -74,7 +74,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     private val mGestureClickListener = GestureDetectorCompat(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent) = true
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            invokeClickListenerCallBack()
+            onClickListener?.invoke(this@DownloadButton)
             return true
         }
 
@@ -90,11 +90,6 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
     init {
         setUpAttributes(attributeSet)
     }
-
-    private fun invokeClickListenerCallBack() {
-        onClickListener?.invoke(this)
-    }
-
 
     private val mProgressAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
         duration = 3000
@@ -115,7 +110,7 @@ class DownloadButton(context: Context, attributeSet: AttributeSet) : View(contex
         this.onLongClickDownloadListener = onLongClickDownloadListener
     }
 
-    private fun vibrationEffect() {
+    internal fun vibrationEffect() {
         val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= 26)
             vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))

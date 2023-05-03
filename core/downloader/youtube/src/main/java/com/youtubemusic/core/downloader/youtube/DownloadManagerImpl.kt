@@ -181,13 +181,12 @@ class DownloadManagerImpl @Inject constructor(
 
     private suspend fun setDownloadingStatus(itemId: String, downloadingJobId: UUID? = null) {
         val status = DownloadManager.Status(itemId, DownloadManager.State.Downloading(0, 0, 0))
-        setStatus(CacheItem(status, downloadingJobId), emit = true)
+        setStatus(CacheItem(status, downloadingJobId))
     }
 
-    private suspend fun setStatus(cacheItem: CacheItem, emit: Boolean = false) {
+    private suspend fun setStatus(cacheItem: CacheItem) {
         cache[cacheItem.status.videoId] = cacheItem
-        if (emit)
-            statusesFlow.emit(cacheItem.status)
+        statusesFlow.emit(cacheItem.status)
     }
 
     companion object {

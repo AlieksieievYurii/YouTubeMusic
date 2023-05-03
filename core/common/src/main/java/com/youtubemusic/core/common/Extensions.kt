@@ -66,21 +66,6 @@ fun File.parentMkdir() {
 fun File.walkFiles() = walk().filter { it.isFile }
 
 /**
- * Returns index of the item where the [filter] matches. Otherwise null
- */
-fun <T> List<T>.findIndex(filter: (T) -> Boolean): Int? {
-    forEachIndexed { index, item ->
-        if (filter.invoke(item))
-            return index
-    }
-    return null
-}
-
-fun <T> MutableList<T>.move(from: Int, to: Int) {
-    this.add(to, this.removeAt(from))
-}
-
-/**
  * Sets given [text] to the textview with fade in/out animation
  */
 fun TextView.setAnimatedText(text: String) {
@@ -188,7 +173,7 @@ fun Toolbar.attachNumberBadge(menuItemId: Int, lifecycleOwner: LifecycleOwner, t
 fun SearchView.setWhiteCursor() {
     val searchTextView: SearchView.SearchAutoComplete = findViewById(androidx.appcompat.R.id.search_src_text)
     if (SDK_INT >= Build.VERSION_CODES.Q) {
-        searchTextView.setTextCursorDrawable(R.drawable.cursor);
+        searchTextView.setTextCursorDrawable(R.drawable.cursor)
     } else {
         try {
             val field: Field = TextView::class.java.getDeclaredField("mCursorDrawableRes")

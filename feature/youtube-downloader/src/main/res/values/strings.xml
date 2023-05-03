@@ -3,10 +3,7 @@
     <string name="label_youtube_playlists">YouTube Playlists</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="label_sing_in">To download musics from your YouTube playlist, you need to sign in with Google</string>
-    <string name="label_select">Select</string>
     <string name="label_empty_playlist">This playlist does not have any videos. Please add first video to the playlist</string>
-    <string name="label_first_playlist">Great job! Now you should select your first playlist to download musics from videos</string>
-    <string name="select_playlist">Select playList</string>
     <string name="content_description_thumbnail_video">Thumbnail of video item</string>
     <string name="content_description_likes">Likes</string>
     <string name="dialog_confirm_deletion_music_title">Delete music</string>
