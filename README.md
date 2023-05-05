@@ -1,32 +1,44 @@
 # YouTube Music
-Simple Android application to download and listen music from YouTube. 
-The application consists of two main parts: 
-* [Saved Music](#saved_music)
-* [YouTube Music](#youtube_music_downloader)
+Simple Android application to download and listen media to files of YouTube videos.
 
-I also use this application to integrate new things I am learning in Android Development. 
+I also use this application to integrate new things I am learning in Android Development. :)
+
+<img src="https://user-images.githubusercontent.com/39415360/236561994-3c85cb27-deb6-4a8c-b98e-c6468652c06e.png" width=800>&nbsp;
+
+Features:
+* Find videos by search or user's playlists
+* Media player
+* Equalizer
+* App's playlists
+* Automatict downloading media files from user's YouTube playlists
+* Changing media items positions
+* Sharing URLs and downloaded media files
+
+The application consists of two main parts: 
+* [Saved](#saved_music)
+* [YouTube](#youtube_music_downloader)
 
 ## <a name="saved_music"></a> Saved Music
 This fragment is responsible for browsing downloaded media items and playing them. The fragment works along with [MediaBrowserService](https://developer.android.com/guide/topics/media-apps/audio-app/building-an-audio-app) so the app can also work with smartwatches and cars.
 
-<img src="https://user-images.githubusercontent.com/39415360/213927466-5bc29952-a2cf-426d-b53e-21092a3f9a15.jpg" width=200>
+<img src="https://user-images.githubusercontent.com/39415360/236562935-c4fa4af4-41be-480f-9843-1784318ae02b.gif" width=200>
 
-You can create local playlists and add media items to them.
+You can create app's playlists and add media items to them.
 
-<img src="https://user-images.githubusercontent.com/39415360/213928094-4bf7210e-e09e-4b48-8256-8cf1da89534a.gif" width=200>&nbsp;
+<img src="https://user-images.githubusercontent.com/39415360/236565257-5c61becf-9c16-44dd-9912-dad4069f5c3b.gif" width=200>&nbsp;
 
 You are also able to change media item possition in a visible playlist. (When new media item is downloaded, it is added at the latest position)
 
-<img src="https://user-images.githubusercontent.com/39415360/213927942-ec34a0cf-4704-4de3-9e7b-97e860e09254.gif" width=200>&nbsp;
+<img src="https://user-images.githubusercontent.com/39415360/236566406-1617f4f1-e69f-4ea6-aee0-a1e95dee14d2.gif" width=200>&nbsp;
 
 The app also contains simple Equalizer.
 
-<img src="https://user-images.githubusercontent.com/39415360/213929291-0022ed91-7f11-47fb-835b-caf4d6e68026.gif" width=200>&nbsp;
+<img src="https://user-images.githubusercontent.com/39415360/236566847-391d969a-d53c-4e69-92dc-1fdad791ecec.gif" width=200>&nbsp;
 
 ## <a name="youtube_music_downloader"></a> YouTube Music
 The fragment is responsible for downloading music from YouTube. The app just fetches audio track from the video.
 
-<img src="https://user-images.githubusercontent.com/39415360/214073349-3ea0f44c-cad2-451b-ac8d-eca1575f9e56.gif" width=200>&nbsp;
+<img src="https://user-images.githubusercontent.com/39415360/236569458-f6a23bd7-5a5e-4f5b-b0eb-50c337df934b.gif" width=200>&nbsp;
 
 **Downloading musics from YouTube is **not stable**, because Youtube often changes web structure of its pages.**
 
