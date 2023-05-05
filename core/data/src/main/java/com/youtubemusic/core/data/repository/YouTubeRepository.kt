@@ -8,11 +8,8 @@ import com.youtubemusic.core.data.*
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.model.YouTubePlaylist
 import com.youtubemusic.core.model.YouTubePlaylistDetails
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import java.lang.Exception
-import java.math.BigInteger
-import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -58,8 +55,8 @@ class YouTubeRepository @Inject constructor(
         return PlaylistsPagingSource(youTubeAPI)
     }
 
-    fun getYouTubeVideosPagingSource(query: String, searchFilter: SearchFilterData): YouTubeVideosPagingSource2 {
-        return YouTubeVideosPagingSource2(youTubeAPI, query, searchFilter)
+    fun getYouTubeVideosPagingSource(query: String, searchFilter: SearchFilterData): YouTubeVideosPagingSource {
+        return YouTubeVideosPagingSource(youTubeAPI, query, searchFilter)
     }
 
     fun getYouTubePlaylistVideosPagingSource(youTubePlaylistId: String): YouTubePlaylistVideosPagingSource {
@@ -145,76 +142,6 @@ class YouTubeVideosPagingSource(
         } catch (error: Exception) {
             Firebase.crashlytics.recordException(error)
             return LoadResult.Error(error)
-        }
-    }
-}
-
-class YouTubeVideosPagingSource2(
-    private val youTubeAPI: YouTubeAPI,
-    private val query: String,
-    private val searchFilter: SearchFilterData
-) : PagingSource<String, VideoItem>() {
-    override fun getRefreshKey(state: PagingState<String, VideoItem>): String? = null
-
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, VideoItem> {
-        try {
-//            val results = youTubeAPI.getVideos(query, pageToken = params.key)
-//
-//            if (results.items.isEmpty())
-//                return LoadResult.Error(EmptyListException())
-//
-//            val videos = youTubeAPI.getVideosDetails(ids = results.items.map { it.id.videoId })
-
-//            return LoadResult.Page(
-//                data = videos.items.map { it.toVideoItem() },
-//                prevKey = results.prevPageToken,
-//                nextKey = results.nextPageToken
-//            )
-            delay(3000)
-            if (query == "error")
-                return LoadResult.Error(Exception("ERROR"))
-
-            if (query.isEmpty())
-                return LoadResult.Page(
-                    data = (0..10).map {
-                        VideoItem(
-                            "id-$it",
-                            "title-$it",
-                            "author-$it",
-                            10L,
-                            "description-$it",
-                            BigInteger.valueOf(1L),
-                            BigInteger.valueOf(1L),
-                            "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
-                            "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
-                            Calendar.getInstance().time
-                        )
-                    },
-                    prevKey = null,
-                    nextKey = null
-                )
-            else
-                return LoadResult.Page(
-                    data = (0..10).map {
-                        VideoItem(
-                            "dddddddd$it",
-                            "ddddddd$it",
-                            "d3r2345$it",
-                            10L,
-                            "$it",
-                            BigInteger.valueOf(14L),
-                            BigInteger.valueOf(132L),
-                            "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
-                            "https://media.sproutsocial.com/uploads/2017/02/10x-featured-social-media-image-size.png",
-                            Calendar.getInstance().time
-                        )
-                    },
-                    prevKey = null,
-                    nextKey = null
-                )
-
-        } catch (e: Exception) {
-            return LoadResult.Error(e)
         }
     }
 }
