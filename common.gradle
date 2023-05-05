@@ -1,6 +1,7 @@
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.dagger.hilt.android'
+apply plugin: 'androidx.navigation.safeargs.kotlin'
 
 android {
     compileSdk 33
@@ -42,6 +43,10 @@ dependencies {
     implementation androidx.appcompat
     implementation dagger_hilt.android
     implementation tools.timber
+
+    implementation platform(tools.firebase_boom)
+    implementation tools.firebase_crush_analytics
+    implementation tools.firebase_analytics
 
     kapt dagger_hilt.compiler
 

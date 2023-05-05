@@ -15,4 +15,6 @@ dependencies {
     implementation androidx.paging
     implementation androidx.swiperefreshlayout
     implementation utils.play_services_auth
+    implementation androidx.navigation.fragment
+    implementation androidx.navigation.ui
 }

@@ -37,7 +37,8 @@ buildscript {
                 datastore               : "1.0.0",
                 google_api_client_android: "1.22.0",
                 google_api_services_youtube: "v3-rev183-1.22.0",
-                firebase_boom_version: "31.3.0"
+                firebase_boom_version: "31.3.0",
+                navigation: "2.5.3"
 
         ]
 
@@ -49,7 +50,11 @@ buildscript {
                 media             : "androidx.media:media:${versions.media}",
                 paging            : "androidx.paging:paging-runtime-ktx:${versions.paging}",
                 swiperefreshlayout: "androidx.swiperefreshlayout:swiperefreshlayout:${versions.swiperefreshlayout}",
-                datastore         : "androidx.datastore:datastore-preferences:${versions.datastore}"
+                datastore         : "androidx.datastore:datastore-preferences:${versions.datastore}",
+                navigation: [
+                        fragment: "androidx.navigation:navigation-fragment-ktx:${versions.navigation}",
+                        ui: "androidx.navigation:navigation-ui-ktx:${versions.navigation}"
+                ]
         ]
 
         ui = [
@@ -119,6 +124,7 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
     id 'com.google.gms.google-services' version '4.3.15' apply false
     id 'com.google.firebase.crashlytics' version '2.9.4' apply false
+    id 'androidx.navigation.safeargs' version "2.5.3" apply false
 }
 
 apply plugin: FileEncryption

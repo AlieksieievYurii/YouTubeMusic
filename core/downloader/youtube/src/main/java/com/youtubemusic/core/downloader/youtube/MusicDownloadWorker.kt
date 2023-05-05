@@ -16,6 +16,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.BufferedInputStream
@@ -36,7 +37,7 @@ class MusicDownloadWorker @AssistedInject constructor(
         val videoId = inputData.getString(ARG_VIDEO_ID) ?: throw IllegalStateException("Worker requires <string> ARG_VIDEO_ID argument")
         val thumbnailUrl = inputData.getString(ARG_VIDEO_THUMBNAIL_URL)
             ?: throw IllegalStateException("Worker requires <string> ARG_VIDEO_THUMBNAIL_URL argument")
-       Timber.i("Start downloading music from YouTube video ID: $videoId")
+        Timber.i("Start downloading music from YouTube video ID: $videoId")
 
         return try {
             val mediaFileSize = download(videoId, thumbnailUrl)
@@ -49,13 +50,24 @@ class MusicDownloadWorker @AssistedInject constructor(
     }
 
     private suspend fun download(videoId: String, thumbnailUrl: String): Long {
-        val video = tryToParseVideo(videoId)
-        checkIfVideoIsLive(video)
+        var attempt = 0
+        while (true) {
+            try {
+                val video = youtubeDownloader.getVideo(videoId)
+                checkIfVideoIsLive(video)
+                val mediaFileSize = download(video)
+                downloadAndSaveThumbnail(thumbnailUrl, videoId)
 
-        val mediaFileSize = download(video)
-        downloadAndSaveThumbnail(thumbnailUrl, videoId)
-
-        return mediaFileSize
+                return mediaFileSize
+            } catch (error: Exception) {
+                if (attempt >= ATTEMPT_COUNT)
+                    throw error
+                else {
+                    attempt += 1
+                    delay(2000)
+                }
+            }
+        }
     }
 
     private suspend fun downloadAndSaveThumbnail(thumbnailUrl: String, videoId: String) {
@@ -74,20 +86,6 @@ class MusicDownloadWorker @AssistedInject constructor(
         mediaStorage.setMockAsDownloaded(video.details().videoId())
 
         return totalSize
-    }
-
-    @Throws(YoutubeException::class)
-    private fun tryToParseVideo(videoId: String): YoutubeVideo {
-        var attempt = 1
-        while (true)
-            try {
-                return youtubeDownloader.getVideo(videoId)
-            } catch (error: YoutubeException) {
-                if (attempt == 3)
-                    throw error
-                else
-                    attempt++
-            }
     }
 
     private fun checkIfVideoIsLive(video: YoutubeVideo) {
@@ -138,6 +136,9 @@ class MusicDownloadWorker @AssistedInject constructor(
     }
 
     companion object {
+
+        private const val ATTEMPT_COUNT = 3
+
         const val ARG_VIDEO_ID = "ARG_VIDEO_ID"
         const val ARG_VIDEO_THUMBNAIL_URL = "ARG_VIDEO_THUMBNAIL_URL"
         const val PROGRESS = "progress"

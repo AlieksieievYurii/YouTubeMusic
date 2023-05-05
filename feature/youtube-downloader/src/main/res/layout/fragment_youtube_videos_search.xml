@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewState"
+            type="com.youtubemusic.feature.youtube_downloader.search.YouTubeVideosSearchFragment.ViewState" />
+
+        <import type="com.youtubemusic.feature.youtube_downloader.search.YouTubeVideosSearchFragment.ViewState" />
+    </data>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/videos"
+                isVisible="@{(viewState instanceof ViewState.Loaded)}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
+                tools:listitem="@layout/item_video"
+                tools:visibility="visible" />
+
+
+            <ProgressBar
+                android:id="@+id/loading"
+                isVisible="@{(viewState instanceof ViewState.Loading)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/error_layout"
+                isVisible="@{(viewState instanceof ViewState.Error)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/error"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@{(viewState instanceof ViewState.Error) ? ((ViewState.Error)viewState).error : @string/label_no_error_message}"
+                    android:textAlignment="center"
+                    android:textIsSelectable="false"
+                    app:drawableTopCompat="@drawable/il_broken_robot" />
+
+                <Button
+                    android:id="@+id/btn_try_again"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/label_retry" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_empty_result"
+                isVisible="@{(viewState instanceof ViewState.EmptyResult)}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_empty_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/label_no_results_found"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    android:textIsSelectable="false"
+                    app:drawableTopCompat="@drawable/il_missing_items" />
+
+                <TextView
+                    android:id="@+id/tv_empty_result_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/label_no_results_hint"
+                    android:textAlignment="center"
+                    android:textIsSelectable="false" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</layout>

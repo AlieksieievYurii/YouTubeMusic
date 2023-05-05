@@ -3,20 +3,19 @@ package com.youtubemusic.feature.download_manager
 import android.os.Bundle
 import android.view.View
 import android.viewbinding.library.activity.viewBinding
-import android.widget.CompoundButton
 import android.widget.PopupMenu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.youtubemusic.core.common.ui.ErrorDialog
 import com.youtubemusic.core.common.ui.SelectPlaylistsDialog
 import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.feature.download_manager.databinding.ActivityDownloadManagerBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -66,8 +65,16 @@ class DownloadManagerActivity : AppCompatActivity() {
         })
     }
 
-    private val onEnablePlaylistSync = CompoundButton.OnCheckedChangeListener { _, enabled ->
-        viewModel.enableAutomationYouTubeSynchronization(enabled)
+    private val headerAdapter: HeaderSyncConfigAdapter by lazy {
+        HeaderSyncConfigAdapter(object : HeaderSyncConfigAdapter.Callback {
+            override fun onSyncChange(isEnabled: Boolean) {
+                viewModel.enableAutomationYouTubeSynchronization(isEnabled)
+            }
+
+            override fun onAddPlaylistSynchronization() {
+                AddYouTubePlaylistSynchronizationDialog.show(supportFragmentManager)
+            }
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,23 +86,25 @@ class DownloadManagerActivity : AppCompatActivity() {
         }
 
         binding.playlistsBinds.apply {
-            adapter = listAdapter
+            adapter = ConcatAdapter(headerAdapter, listAdapter)
             setHasFixedSize(false)
-            layoutManager = LinearLayoutManager(this@DownloadManagerActivity)
+            layoutManager = LinearLayoutManager(context)
+            addItemDecoration(PlaylistBindsAndJobsListAdapter.ItemSeparator(context))
         }
 
-        binding.addPlaylistSynchronization.setOnClickListener { AddYouTubePlaylistSynchronizationDialog.show(supportFragmentManager) }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { viewModel.downloadingJobs.collect { listAdapter.submitDownloadingJobs(it) } }
-                launch { viewModel.downloadingStatus.collect { listAdapter.updateDownloadingJobStatus(it) } }
-                launch { observeEvents() }
-                launch { observeYouTubePlaylistsSyncs() }
-                launch { observeAutoSyncState() }
+        lifecycleScope.launchWhenStarted {
+            launch {
+                viewModel.downloadingJobs.combine(viewModel.youTubePlaylistSyncs) { jobs, playlistSyncs ->
+                    playlistSyncs.map { AdapterData.PlaylistBind(it) } to jobs.map { AdapterData.Job(it) }
+                }.collectLatest {
+                    headerAdapter.isNoPlaylistSynchronization = it.first.isEmpty()
+                    listAdapter.setDataSources(it.first, it.second)
+                }
             }
+            launch { viewModel.downloadingStatus.collectLatest { listAdapter.updateDownloadingJobStatus(it) } }
+            launch { observeEvents() }
+            launch { observeAutoSyncState() }
         }
-
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -115,21 +124,9 @@ class DownloadManagerActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun observeYouTubePlaylistsSyncs() {
-        viewModel.youTubePlaylistSyncs.collect {
-            binding.layoutNoPlaylistsSynchronization.isVisible = it.isEmpty()
-            listAdapter.submitPlaylistBinds(it)
-        }
-    }
-
     private suspend fun observeAutoSyncState() {
         viewModel.synchronizerState.collect {
-            if (it != null)
-                binding.enableAutoSync.apply {
-                    setOnCheckedChangeListener(null)
-                    isChecked = it
-                    setOnCheckedChangeListener(onEnablePlaylistSync)
-                }
+            it?.let { headerAdapter.isSyncOn = it }
         }
     }
 

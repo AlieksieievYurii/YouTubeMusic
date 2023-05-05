@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.youtubemusic.feature.youtube_downloader.YouTubeMusicFragment">
+
+    <data>
+        <import type="com.youtubemusic.feature.youtube_downloader.playlist_videos.PlaylistVideosFragment.ViewState" />
+
+        <variable
+            name="viewState"
+            type="ViewState" />
+    </data>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <LinearLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:gravity="center"
+            isVisible="@{!(viewState instanceof ViewState.Error)}"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:id="@+id/loading"
+                isVisible="@{viewState instanceof ViewState.Loading}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/videos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fitsSystemWindows="true"
+                android:layout_weight="0"
+                isVisible="@{viewState instanceof ViewState.Ready}"
+                tools:listitem="@layout/item_video"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/label_empty_playlist"
+                style="@style/DescriptionText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_empty_playlist"
+                android:textAlignment="center"
+                android:visibility="gone"
+                app:drawableTopCompat="@drawable/ic_empty_playlist"
+                tools:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/error_layout"
+            isVisible="@{viewState instanceof ViewState.Error}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@{(viewState instanceof ViewState.Error) ? ((ViewState.Error)viewState).error : @string/label_no_error_message}"
+                android:textAlignment="center"
+                android:textIsSelectable="false"
+                app:drawableTopCompat="@drawable/il_broken_robot" />
+
+            <Button
+                android:id="@+id/btn_try_again"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="@string/label_retry" />
+        </LinearLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+</layout>

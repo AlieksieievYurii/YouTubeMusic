@@ -2,14 +2,13 @@ package com.youtubemusic.core.data.repository
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.google.api.services.youtube.model.Playlist
-import com.google.api.services.youtube.model.Video
-import com.youtubemusic.core.data.AllYouTubePlaylistsSynchronized
-import com.youtubemusic.core.data.EmptyListException
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
+import com.youtubemusic.core.data.*
 import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.core.model.YouTubePlaylist
+import com.youtubemusic.core.model.YouTubePlaylistDetails
 import kotlinx.coroutines.flow.first
-import org.threeten.bp.Duration
 import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -48,12 +47,20 @@ class YouTubeRepository @Inject constructor(
         return videoItems
     }
 
+    suspend fun getPlaylistDetails(playlistId: String): YouTubePlaylistDetails {
+        return youTubeAPI.getPlaylistDetails(playlistId).toYouTubePlaylistDetails()
+    }
+
     fun getYouTubePlaylistsPagingSource(): PlaylistsPagingSource {
         return PlaylistsPagingSource(youTubeAPI)
     }
 
-    fun getYouTubeVideosPagingSource(playlist: YouTubePlaylist): YouTubeVideosPagingSource {
-        return YouTubeVideosPagingSource(youTubeAPI, playlist.id)
+    fun getYouTubeVideosPagingSource(query: String, searchFilter: SearchFilterData): YouTubeVideosPagingSource {
+        return YouTubeVideosPagingSource(youTubeAPI, query, searchFilter)
+    }
+
+    fun getYouTubePlaylistVideosPagingSource(youTubePlaylistId: String): YouTubePlaylistVideosPagingSource {
+        return YouTubePlaylistVideosPagingSource(youTubeAPI, youTubePlaylistId)
     }
 
     fun getExcludingAlreadySyncPlaylistPagingSource(): ExcludingAlreadySyncPlaylistPagingSource {
@@ -77,6 +84,7 @@ open class PlaylistsPagingSource(private val youTubeAPI: YouTubeAPI) : PagingSou
                 prevKey = playlists.prevPageToken
             )
         } catch (error: Exception) {
+            Firebase.crashlytics.recordException(error)
             return LoadResult.Error(error)
         }
     }
@@ -110,7 +118,36 @@ class ExcludingAlreadySyncPlaylistPagingSource(
     }
 }
 
-class YouTubeVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val playlistId: String) : PagingSource<String, VideoItem>() {
+class YouTubeVideosPagingSource(
+    private val youTubeAPI: YouTubeAPI, private val query: String,
+    private val searchFilter: SearchFilterData
+) : PagingSource<String, VideoItem>() {
+    override fun getRefreshKey(state: PagingState<String, VideoItem>): String? = null
+
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, VideoItem> {
+        try {
+            val results = youTubeAPI.getVideos(query, searchFilter, pageToken = params.key)
+
+            if (results.items.isEmpty())
+                return LoadResult.Error(EmptyListException())
+
+            val videos = youTubeAPI.getVideosDetails(ids = results.items.map { it.id.videoId })
+
+            return LoadResult.Page(
+                data = videos.items.map { it.toVideoItem() },
+                prevKey = results.prevPageToken,
+                nextKey = results.nextPageToken
+            )
+
+        } catch (error: Exception) {
+            Firebase.crashlytics.recordException(error)
+            return LoadResult.Error(error)
+        }
+    }
+}
+
+class YouTubePlaylistVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val playlistId: String) :
+    PagingSource<String, VideoItem>() {
     override fun getRefreshKey(state: PagingState<String, VideoItem>): String? = null
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, VideoItem> {
@@ -128,27 +165,10 @@ class YouTubeVideosPagingSource(private val youTubeAPI: YouTubeAPI, private val 
                 nextKey = results.nextPageToken
             )
 
-        } catch (e: Exception) {
-            return LoadResult.Error(e)
+        } catch (error: Exception) {
+            Firebase.crashlytics.recordException(error)
+            return LoadResult.Error(error)
         }
     }
 }
 
-fun Playlist.toYouTubePlaylist() = YouTubePlaylist(
-    this.id,
-    this.snippet.title,
-    this.snippet.thumbnails.default.url,
-    this.contentDetails.itemCount
-)
-
-fun Video.toVideoItem() = VideoItem(
-    id = id,
-    title = snippet.title,
-    author = snippet.channelTitle,
-    durationInMillis = Duration.parse(contentDetails.duration).toMillis(),
-    description = snippet.description,
-    viewCount = statistics.viewCount,
-    likeCount = statistics.likeCount,
-    thumbnail = snippet.thumbnails.default.url,
-    normalThumbnail = snippet.thumbnails.medium.url
-)

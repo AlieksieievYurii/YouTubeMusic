@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/fragment_saved_music">
+
+    <fragment
+        android:id="@+id/fragment_saved_music"
+        android:name="com.youtubemusic.feature.saved_music.SavedMusicFragment"
+        android:label="@string/label_saved_musics"
+        tools:layout="@layout/fragment_saved_music" />
+
+    <fragment
+        android:id="@+id/fragment_youtube_music"
+        android:name="com.youtubemusic.feature.youtube_downloader.YouTubeMusicFragment"
+        android:label="@string/label_youtube_musics"
+        tools:layout="@layout/fragment_youtube_music" />
+</navigation>

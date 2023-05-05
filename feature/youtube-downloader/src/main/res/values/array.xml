@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="order_by">
+        <item>Relevance</item>
+        <item>Upload date</item>
+        <item>By title</item>
+        <item>View count</item>
+        <item>Rating</item>
+    </string-array>
+    <string-array name="duration">
+        <item>Any</item>
+        <item>Under 4 minutes</item>
+        <item>4–20 minutes</item>
+        <item>Over 20 minutes</item>
+    </string-array>
+    <string-array name="upload_date">
+        <item>Anytime</item>
+        <item>Last hour</item>
+        <item>Today</item>
+        <item>This week</item>
+        <item>This month</item>
+        <item>This Year</item>
+    </string-array>
+</resources>

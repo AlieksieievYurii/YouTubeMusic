@@ -1,11 +1,14 @@
 package com.youtubemusic.core.data.repository
 
 import com.youtubemusic.core.data.toMediaItem
+import com.youtubemusic.core.data.toMediaItemCore
+import com.youtubemusic.core.data.toMediaItemCores
 import com.youtubemusic.core.data.toMediaItems
 import com.youtubemusic.core.database.dao.MediaItemDao
 import com.youtubemusic.core.database.models.MediaItemEntity
 import com.youtubemusic.core.model.Item
 import com.youtubemusic.core.model.MediaItem
+import com.youtubemusic.core.model.MediaItemCore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

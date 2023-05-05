@@ -20,6 +20,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
+        app:cardCornerRadius="0dp"
         android:foreground="?android:attr/selectableItemBackground"
         app:cardBackgroundColor="@android:color/white">
 
@@ -31,14 +32,14 @@
             <FrameLayout
                 android:id="@+id/thumbnail_layout"
                 android:layout_width="84dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_centerVertical="true">
 
                 <ImageView
                     android:id="@+id/thumbnail"
                     imageSrc="@{musicItem.thumbnail}"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:adjustViewBounds="true"
                     app:shapeAppearanceOverlay="@style/roundedImageView"
                     tools:ignore="ContentDescription"

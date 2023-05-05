@@ -3,6 +3,7 @@ package com.youtubemusic.feature.saved_music
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.youtubemusic.core.data.repository.PlaylistRepository
+import com.youtubemusic.core.downloader.youtube.DownloadManager
 import com.youtubemusic.core.model.MediaItemPlaylist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -11,7 +12,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class SavedMusicViewModel @Inject constructor(
-    private val playlistRepository: PlaylistRepository
+    private val playlistRepository: PlaylistRepository,
+    downloadManager: DownloadManager
 ) : ViewModel() {
     sealed class State {
         object Loading : State()
@@ -20,6 +22,8 @@ internal class SavedMusicViewModel @Inject constructor(
 
     private val _musicCategories: MutableStateFlow<State> = MutableStateFlow(State.Loading)
     val musicCategories = _musicCategories.asStateFlow()
+
+    val numberOfDownloadingJobs = downloadManager.getDownloadingJobs().map { it.size }
 
     init {
         viewModelScope.launch {

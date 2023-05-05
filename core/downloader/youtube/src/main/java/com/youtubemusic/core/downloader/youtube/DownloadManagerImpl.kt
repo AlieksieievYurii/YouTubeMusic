@@ -9,6 +9,7 @@ import com.youtubemusic.core.downloader.youtube.di.MainScope
 import com.youtubemusic.core.model.MediaItemPlaylist
 import com.youtubemusic.core.model.VideoItem
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -29,7 +30,8 @@ class DownloadManagerImpl @Inject constructor(
 
     private val cache = ConcurrentHashMap<String, CacheItem>()
 
-    private val statusesFlow = MutableSharedFlow<DownloadManager.Status>()
+    private val statusesFlow =
+        MutableSharedFlow<DownloadManager.Status>(extraBufferCapacity = 10, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     init {
         coroutineScope.launch { synchronize() }
@@ -144,12 +146,15 @@ class DownloadManagerImpl @Inject constructor(
                     currentSize = downloadingJobWorkInfo.progress.getLong(MusicDownloadWorker.PROGRESS_DOWNLOADED_SIZE, 0),
                     size = downloadingJobWorkInfo.progress.getLong(MusicDownloadWorker.PROGRESS_TOTAL_SIZE, 0)
                 )
+
                 WorkInfo.State.SUCCEEDED -> DownloadManager.State.Downloaded(
                     downloadingJobWorkInfo.outputData.getLong(MusicDownloadWorker.MEDIA_SIZE, 0)
                 )
+
                 WorkInfo.State.FAILED -> DownloadManager.State.Failed(
                     downloadingJobWorkInfo.outputData.getString(MusicDownloadWorker.ERROR_MESSAGE)
                 )
+
                 WorkInfo.State.BLOCKED -> TODO("Unhandled")
                 WorkInfo.State.CANCELLED -> DownloadManager.State.Download
             }
@@ -176,13 +181,12 @@ class DownloadManagerImpl @Inject constructor(
 
     private suspend fun setDownloadingStatus(itemId: String, downloadingJobId: UUID? = null) {
         val status = DownloadManager.Status(itemId, DownloadManager.State.Downloading(0, 0, 0))
-        setStatus(CacheItem(status, downloadingJobId), emit = true)
+        setStatus(CacheItem(status, downloadingJobId))
     }
 
-    private suspend fun setStatus(cacheItem: CacheItem, emit: Boolean = false) {
+    private suspend fun setStatus(cacheItem: CacheItem) {
         cache[cacheItem.status.videoId] = cacheItem
-        if (emit)
-            statusesFlow.emit(cacheItem.status)
+        statusesFlow.emit(cacheItem.status)
     }
 
     companion object {

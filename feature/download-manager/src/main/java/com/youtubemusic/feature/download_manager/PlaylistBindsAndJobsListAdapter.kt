@@ -1,5 +1,9 @@
 package com.youtubemusic.feature.download_manager
 
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,10 +36,6 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         fun cancelDownloading(itemId: String)
         fun getDownloadingJobState(id: String): DownloadManager.State
     }
-
-    private val cashedPlaylistBinds = mutableListOf<AdapterData.PlaylistBind>()
-    private val cashedDownloadingJobs = mutableListOf<AdapterData.Job>()
-
     private lateinit var recyclerView: RecyclerView
 
     private object Comparator : DiffUtil.ItemCallback<AdapterData>() {
@@ -46,19 +46,6 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
             oldItem == newItem
     }
 
-    fun submitPlaylistBinds(list: List<YouTubePlaylistSync>) = synchronized(this) {
-        setDataSources(cashedPlaylistBinds.apply {
-            clear()
-            cashedPlaylistBinds.addAll(list.map { AdapterData.PlaylistBind(it) })
-        }, cashedDownloadingJobs)
-    }
-
-    fun submitDownloadingJobs(list: List<DownloadingVideoItemJob>) = synchronized(this) {
-        setDataSources(cashedPlaylistBinds, cashedDownloadingJobs.apply {
-            clear()
-            addAll(list.map { AdapterData.Job(it) })
-        })
-    }
 
     fun updateDownloadingJobStatus(status: DownloadManager.Status) {
         findVisibleJobViewHolder(status.videoId)?.updateState(status.videoId, status.state)
@@ -100,7 +87,7 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         is AdapterData.Headline -> (holder as HeadlineViewHolder).bind(data)
     }
 
-    private fun setDataSources(playlistBinds: List<AdapterData.PlaylistBind>, downloadingJobs: List<AdapterData.Job>) {
+    fun setDataSources(playlistBinds: List<AdapterData.PlaylistBind>, downloadingJobs: List<AdapterData.Job>) {
         val result = mutableListOf<AdapterData>()
         if (playlistBinds.isNotEmpty()) {
             result.add(
@@ -125,14 +112,9 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
         (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
             if (it != -1) {
-                val item = try {
-                    getItem(it) as? AdapterData.Job
-                } catch (_: IndexOutOfBoundsException) {
-                    null
-                }
-
-                if (item != null && item.data.videoItemId == videoId)
-                    return recyclerView.findViewHolderForLayoutPosition(it) as JobViewHolder
+                val viewHolder = recyclerView.findViewHolderForLayoutPosition(it) as? JobViewHolder
+                if (viewHolder?.data?.videoItemId == videoId)
+                    return viewHolder
             }
         }
         return null
@@ -147,7 +129,11 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
     }
 
     private inner class JobViewHolder(private val binding: ItemJobBinding) : ViewHolder(binding.root) {
+        var data: DownloadingVideoItemJob? = null
+            private set
+
         fun bind(downloadingJob: DownloadingVideoItemJob) {
+            data = downloadingJob
             binding.data = downloadingJob
             updateState(downloadingJob.videoItemId, callback.getDownloadingJobState(downloadingJob.videoItemId))
         }
@@ -188,6 +174,46 @@ class PlaylistBindsAndJobsListAdapter(private val callback: Callback) : ListAdap
             binding.title.text = resources.getText(headline.titleId)
             binding.action.setOnClickListener { headline.onAction() }
             binding.action.text = resources.getText(headline.actionTextId)
+        }
+    }
+
+    internal class ItemSeparator(private val context: Context) : RecyclerView.ItemDecoration() {
+        private val divider: Drawable by lazy {
+            val attrs = context.obtainStyledAttributes(arrayOf(android.R.attr.listDivider).toIntArray())
+            val d = attrs.getDrawable(0)
+            attrs.recycle()
+            d!!
+        }
+
+        override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+            val left = parent.paddingLeft
+            val right = parent.width - parent.paddingRight
+
+            (0 until parent.childCount).forEach {
+
+                val view = parent.getChildAt(it)
+                val view2 = parent.getChildAt(it + 1)
+                val viewHolder = parent.getChildViewHolder(view)
+                val nextViewHolder = if (view2 != null) parent.getChildViewHolder(view2) else null
+
+                if (
+                    (viewHolder is JobViewHolder && nextViewHolder != null) ||
+                    (viewHolder is PlaylistBindViewHolder && nextViewHolder !is HeadlineViewHolder)
+                ) {
+                    val rP = view.layoutParams as RecyclerView.LayoutParams
+                    val top = view.bottom + rP.bottomMargin
+                    val bottom = top + divider.intrinsicHeight
+
+                    divider.setBounds(left, top, right, bottom)
+                    divider.draw(c)
+                }
+            }
+
+        }
+
+        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+            super.getItemOffsets(outRect, view, parent, state)
+            outRect.set(0, 0, 0, divider.intrinsicHeight)
         }
     }
 

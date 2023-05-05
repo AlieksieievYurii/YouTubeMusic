@@ -2,6 +2,4 @@
     <string name="app_name">YouTubeMusic</string>
     <string name="label_saved_musics">Saved</string>
     <string name="label_youtube_musics">YouTube</string>
-    <string name="label_fragment_title_youtube_musics">YouTube Music</string>
-    <string name="label_fragment_title_saved_music">Saved Music</string>
 </resources>

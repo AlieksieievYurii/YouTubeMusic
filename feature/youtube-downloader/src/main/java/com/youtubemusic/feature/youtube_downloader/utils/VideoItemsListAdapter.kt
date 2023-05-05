@@ -1,4 +1,4 @@
-package com.youtubemusic.feature.youtube_downloader
+package com.youtubemusic.feature.youtube_downloader.utils
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -16,7 +16,7 @@ import com.youtubemusic.core.model.VideoItem
 import com.youtubemusic.feature.youtube_downloader.databinding.ItemVideoBinding
 
 internal class VideoItemsListAdapter(private val callback: Callback) :
-    PagingDataAdapter<VideoItem, VideoItemsListAdapter.MyViewHolder>(Comparator) {
+    PagingDataAdapter<VideoItem, VideoItemsListAdapter.VideoItemViewHolder>(Comparator) {
     interface Callback {
         fun getDownloadingJobState(videoItem: VideoItem): DownloadManager.State
         fun onDownload(videoItem: VideoItem)
@@ -33,11 +33,14 @@ internal class VideoItemsListAdapter(private val callback: Callback) :
         findVisibleViewHolder(videoItemStatus.videoId)?.updateStatus(videoItemStatus.state)
     }
 
-    private fun findVisibleViewHolder(videoId: String): MyViewHolder? {
+    private fun findVisibleViewHolder(videoId: String): VideoItemViewHolder? {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
         (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
-            if (it != -1 && getItem(it)?.id == videoId) {
-                return recyclerView.findViewHolderForLayoutPosition(it) as MyViewHolder
+            if (it != -1) {
+                val viewHolder = recyclerView.findViewHolderForLayoutPosition(it) as? VideoItemViewHolder
+                if (viewHolder?.currentData?.id == videoId)
+                    return viewHolder
             }
         }
         return null
@@ -56,8 +59,12 @@ internal class VideoItemsListAdapter(private val callback: Callback) :
         this.recyclerView = recyclerView
     }
 
-    inner class MyViewHolder(private val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class VideoItemViewHolder(private val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
+        var currentData: VideoItem? = null
+            private set
+
         fun bind(videoItem: VideoItem) {
+            currentData = videoItem
             binding.videoItem = videoItem
             updateStatus(callback.getDownloadingJobState(videoItem))
             expandItem(this, expandedItem == videoItem, animate = false)
@@ -103,14 +110,16 @@ internal class VideoItemsListAdapter(private val callback: Callback) :
         private fun collapseExpandedItem() {
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
             (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).forEach {
-                if (getItem(it) == expandedItem) {
-                    val expandedVisibleViewHolder = recyclerView.findViewHolderForLayoutPosition(it) as MyViewHolder
-                    expandItem(expandedVisibleViewHolder, expand = false, animate = true)
+                if (it != -1) {
+                    val viewHolder = recyclerView.findViewHolderForLayoutPosition(it)
+                    if (viewHolder is VideoItemViewHolder && viewHolder.currentData == expandedItem) {
+                        expandItem(viewHolder, expand = false, animate = true)
+                    }
                 }
             }
         }
 
-        private fun expandItem(view: MyViewHolder, expand: Boolean, animate: Boolean) {
+        private fun expandItem(view: VideoItemViewHolder, expand: Boolean, animate: Boolean) {
             view.binding.expandableLayout.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             val expandedItemHeight: Int = view.binding.expandableLayout.measuredHeight
 
@@ -127,18 +136,18 @@ internal class VideoItemsListAdapter(private val callback: Callback) :
             } else setExpandedProgress(view, expandedItemHeight, if (expand) 1f else 0f)
         }
 
-        private fun setExpandedProgress(view: MyViewHolder, expandedHeight: Int, progress: Float) {
+        private fun setExpandedProgress(view: VideoItemViewHolder, expandedHeight: Int, progress: Float) {
             view.binding.expandableLayout.layoutParams.height =
                 if (progress == 1f) ViewGroup.LayoutParams.WRAP_CONTENT else (expandedHeight * progress).toInt()
             view.binding.expandableLayout.requestLayout()
         }
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: VideoItemViewHolder, position: Int) {
         getItem(position)?.let { holder.bind(it) }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        return MyViewHolder(ItemVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoItemViewHolder {
+        return VideoItemViewHolder(ItemVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 }
